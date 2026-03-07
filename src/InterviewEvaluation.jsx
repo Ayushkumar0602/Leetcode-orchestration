@@ -61,7 +61,7 @@ export default function InterviewEvaluation() {
     useEffect(() => {
         if (!interviewId) return;
         setLoading(true);
-        fetch(`http://localhost:3001/api/interviews/detail/${interviewId}`)
+        fetch(`https://leetcode-orchestration-api.onrender.com/api/interviews/detail/${interviewId}`)
             .then(r => r.json())
             .then(data => {
                 if (data.error) setError(data.error);
