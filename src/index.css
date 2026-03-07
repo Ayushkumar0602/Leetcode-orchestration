@@ -1248,6 +1248,12 @@ body {
   }
 }
 
+/* ─── Female Video Speaking Bar Animation ───────── */
+@keyframes speakBar {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.6; }
+  50% { transform: scaleY(1.2); opacity: 1; }
+}
+
 /* ─── AI Interview Responsiveness ──────────────────── */
 @media (max-width: 900px) {
   .setup-container {

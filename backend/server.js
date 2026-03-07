@@ -761,71 +761,61 @@ app.post('/api/interview/evaluate', async (req, res) => {
 });
 
 
-// --- ElevenLabs TTS Proxy (with fallback key rotation) ---
-const ELEVENLABS_API_KEYS = [
-    'sk_a81c2067650eaac5c6941b49d898dd92cf92a0847f993f43', // primary
-    'sk_a26008b0b6cb47c5accfbba23c99d9c1a404280907f9c3b9', // fallback 1
-    'sk_b71753e3015e104d6e085d0f4284e1366c0b4479b941837a', // fallback 2
-    'sk_3472258d1839fbbfc9a3c3f92a94b4d6de6eb620a2b10d1d', // fallback 3
-];
 
-app.post('/api/elevenlabs/tts', async (req, res) => {
-    const { text, voiceId } = req.body;
-    if (!text || !voiceId) {
-        return res.status(400).json({ error: 'text and voiceId are required.' });
-    }
+// --- Sarvam AI TTS Proxy (streaming) ---
+const SARVAM_API_KEY = 'sk_sljbpqmg_mfdef03Ainw1oY6ePZYVaZ68';
 
-    let lastError = null;
-    for (let i = 0; i < ELEVENLABS_API_KEYS.length; i++) {
-        const apiKey = ELEVENLABS_API_KEYS[i];
-        try {
-            const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-                method: 'POST',
-                headers: {
-                    'xi-api-key': apiKey,
-                    'Content-Type': 'application/json',
-                    'Accept': 'audio/mpeg'
-                },
-                body: JSON.stringify({
-                    text,
-                    model_id: 'eleven_turbo_v2',
-                    voice_settings: {
-                        stability: 0.5,
-                        similarity_boost: 0.75,
-                        style: 0.3,
-                        use_speaker_boost: true
-                    }
-                })
-            });
+app.post('/api/sarvam/tts', async (req, res) => {
+    const { text, speaker } = req.body;  // speaker: 'manan' | 'ratan' | 'rohan' | 'shreya' | 'roopa'
+    if (!text || !speaker) return res.status(400).json({ error: 'text and speaker are required.' });
 
-            // On rate-limit or auth error, try the next key
-            if (response.status === 429 || response.status === 401) {
-                const errBody = await response.text();
-                console.warn(`ElevenLabs key #${i + 1} failed (${response.status}), trying next...`);
-                lastError = `Key #${i + 1} error ${response.status}: ${errBody}`;
-                continue;
-            }
+    const validSpeakers = ['manan', 'ratan', 'rohan', 'shreya', 'roopa'];
+    const safeSpeaker = validSpeakers.includes(speaker) ? speaker : 'manan';
 
-            if (!response.ok) {
-                const err = await response.text();
-                console.error('ElevenLabs error:', err);
-                return res.status(response.status).json({ error: 'ElevenLabs API error: ' + err });
-            }
+    try {
+        const response = await fetch('https://api.sarvam.ai/text-to-speech/stream', {
+            method: 'POST',
+            headers: {
+                'api-subscription-key': SARVAM_API_KEY,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text,
+                target_language_code: 'en-IN',
+                speaker: safeSpeaker,
+                model: 'bulbul:v3',
+                pace: 1.1,
+                speech_sample_rate: 22050,
+                output_audio_codec: 'mp3',
+                enable_preprocessing: true
+            })
+        });
 
-            res.setHeader('Content-Type', 'audio/mpeg');
-            res.setHeader('Cache-Control', 'no-cache');
-            const arrayBuffer = await response.arrayBuffer();
-            return res.send(Buffer.from(arrayBuffer));
-
-        } catch (err) {
-            console.warn(`ElevenLabs key #${i + 1} threw error:`, err.message);
-            lastError = err.message;
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('Sarvam TTS error:', response.status, errText);
+            return res.status(response.status).json({ error: 'Sarvam TTS failed: ' + errText });
         }
-    }
 
-    console.error('All ElevenLabs API keys exhausted:', lastError);
-    return res.status(503).json({ error: 'All ElevenLabs API keys are currently unavailable.' });
+        // Stream MP3 chunks directly to client
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        const { Readable } = require('stream');
+        const nodeStream = Readable.from(response.body);
+        nodeStream.pipe(res);
+        nodeStream.on('error', (err) => {
+            console.error('Sarvam stream error:', err.message);
+            res.end();
+        });
+
+    } catch (err) {
+        console.error('Sarvam TTS exception:', err.message);
+        return res.status(500).json({ error: 'Sarvam TTS request failed: ' + err.message });
+    }
 });
+
 
 
 const PORT = process.env.PORT || 3001;

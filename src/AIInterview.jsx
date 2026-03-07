@@ -40,16 +40,23 @@ const SKILL_LABELS = {
     algorithmicThinking: 'Algorithmic Thinking'
 };
 
-// ─── ElevenLabs Voice Templates ──────────────────────────────────────────────
+// ─── Sarvam AI Voice Templates ───────────────────────────────────────────────
 const VOICE_TEMPLATES = [
-    { id: 'will', voiceId: 'bIHbv24MWmeRgasZH58o', name: 'Will', gender: 'Male', accent: 'American', tag: 'Authoritative', emoji: '🎙️' },
-    { id: 'sarah', voiceId: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', gender: 'Female', accent: 'American', tag: 'Warm', emoji: '🎤' },
-    { id: 'eric', voiceId: 'cjVigY5qzO86Huf0OWal', name: 'Eric', gender: 'Male', accent: 'American', tag: 'Calm', emoji: '🔊' },
-    { id: 'jessica', voiceId: 'cgSgspJ2msm6clMCkdW9', name: 'Jessica', gender: 'Female', accent: 'American', tag: 'Articulate', emoji: '✨' },
-    { id: 'alice', voiceId: 'Xb7hH8MSUJpSbSDYk0k2', name: 'Alice', gender: 'Female', accent: 'British', tag: 'Professional', emoji: '🇬🇧' },
-    { id: 'daniel', voiceId: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', gender: 'Male', accent: 'British', tag: 'Deep', emoji: '🎧' },
+    { id: 'manan', speaker: 'manan', name: 'Manan', gender: 'Male', accent: 'Indian', tag: 'Authoritative', emoji: '🎙️' },
+    { id: 'ratan', speaker: 'ratan', name: 'Ratan', gender: 'Male', accent: 'Indian', tag: 'Calm', emoji: '🔊' },
+    { id: 'rohan', speaker: 'rohan', name: 'Rohan', gender: 'Male', accent: 'Indian', tag: 'Deep', emoji: '🎧' },
+    { id: 'jessica', speaker: 'shreya', name: 'Jessica', gender: 'Female', accent: 'Indian', tag: 'Articulate', emoji: '✨' },
+    { id: 'shreya', speaker: 'shreya', name: 'Shreya', gender: 'Female', accent: 'Indian', tag: 'Warm', emoji: '🎤' },
+    { id: 'roopa', speaker: 'roopa', name: 'Roopa', gender: 'Female', accent: 'Indian', tag: 'Professional', emoji: '🎙️' },
 ];
 const PREVIEW_TEXT = "Hello! I'm your AI interviewer today. I'm excited to work through this problem with you. Let's get started!";
+
+// ─── Male speaker video map (one video per male voice) ─────────────────────
+const MALE_VIDEO_MAP = {
+    manan: '/male_manan.mp4',
+    ratan: '/male_ratan.mp4',
+    rohan: '/male_rohan.mp4',
+};
 
 const LANGUAGE_WRAPPERS = {
     python: '\nif __name__ == "__main__":\n    solution = Solution()\n    solution.solve()',
@@ -146,8 +153,13 @@ export default function AIInterview() {
     const recognitionRef = useRef(null);
     const chatEndRef = useRef(null);
     const transcriptRef = useRef([]);
-    const audioRef = useRef(null); // ElevenLabs current audio element
-    const interviewStartTimeRef = useRef(null); // track interview duration
+    const audioRef = useRef(null);        // ElevenLabs current audio element
+    const interviewStartTimeRef = useRef(null);
+    const femaleVideoRef = useRef(null);   // female_speak1 video element
+    const maleVideoRef = useRef(null);   // male_speak1 video element
+    const audioCtxRef = useRef(null);    // Web Audio context
+    const analyserRef = useRef(null);    // AnalyserNode for amplitude reading
+    const rafRef = useRef(null);    // requestAnimationFrame id
 
     // ── Interview history (for setup screen) ──
     const [pastInterviews, setPastInterviews] = useState([]);
@@ -190,42 +202,252 @@ export default function AIInterview() {
             .finally(() => setHistoryLoading(false));
     }, [currentUser]);
 
-    // ─── ElevenLabs TTS ──────────────────────────────────────────────────────
+    // ─── Sarvam AI TTS ──────────────────────────────────────────────────────
+
+    /** Stop running RAF loop + close AudioContext + pause audio */
     const stopCurrentSpeech = () => {
+        // Cancel amplitude-sync loop
+        if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+
+        // Close Web Audio pipeline
+        if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch (_) { } analyserRef.current = null; }
+        if (audioCtxRef.current) { try { audioCtxRef.current.close(); } catch (_) { } audioCtxRef.current = null; }
+
+        // Stop the audio element
         if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.src = '';
             audioRef.current = null;
         }
+
+        // Reset both video refs to idle
+        [femaleVideoRef, maleVideoRef].forEach(ref => {
+            if (ref.current) {
+                ref.current.pause();
+                ref.current.playbackRate = 1;
+                ref.current.currentTime = 0;
+            }
+        });
+
         setIsSpeaking(false);
     };
 
-    const speakWithElevenLabs = async (text, voiceOverride) => {
+    /**
+     * Starts a requestAnimationFrame loop that reads the RMS amplitude of the
+     * ElevenLabs audio and maps it to femaleVideoRef.current.playbackRate.
+     *
+     * Rate mapping (smoothed):
+     *   silence  (rms ≈ 0)   → 0.4×  (slow crawl between words)
+     *   normal speech         → ~1.0×
+     *   loud / emphasis       → up to 2.0×
+     */
+    const startVideoSync = (audio, videoRef) => {
+        const video = (videoRef || femaleVideoRef).current;
+        if (!video) return;
+
+        // ── Build Web Audio pipeline ──────────────────────────
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtxRef.current = ctx;
+
+        const source = ctx.createMediaElementSource(audio);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;                    // small = fast update
+        analyser.smoothingTimeConstant = 0;        // we do own smoothing
+        analyserRef.current = analyser;
+
+        source.connect(analyser);
+        analyser.connect(ctx.destination);         // still hear audio
+
+        const bufLen = analyser.frequencyBinCount; // 128 bins
+        const dataArr = new Uint8Array(bufLen);
+
+        let smoothedRate = 1.0;                    // exponential smoother
+        const ALPHA = 0.15;                        // lower = more smoothing
+
+        const loop = () => {
+            if (!analyserRef.current) return;      // stopped
+
+            analyser.getByteTimeDomainData(dataArr);
+
+            // RMS of the waveform (0–128 centred around 128)
+            let sumSq = 0;
+            for (let i = 0; i < bufLen; i++) {
+                const v = (dataArr[i] - 128) / 128; // normalise to [-1, 1]
+                sumSq += v * v;
+            }
+            const rms = Math.sqrt(sumSq / bufLen);  // 0 … 1
+
+            // Map rms → target playback rate
+            //   0.00 → 0.40  (complete silence / pause between words)
+            //   0.05 → ~0.7  (very soft)
+            //   0.20 → 1.0   (normal conversational volume)
+            //   0.50 → ~1.6
+            //   1.00 → 2.00  (clamp ceiling)
+            const targetRate = Math.min(2.0, 0.4 + rms * 3.2);
+
+            // Smooth to avoid jarring jumps
+            smoothedRate = smoothedRate + ALPHA * (targetRate - smoothedRate);
+
+            if (video && !video.paused) {
+                video.playbackRate = smoothedRate;
+            }
+
+            rafRef.current = requestAnimationFrame(loop);
+        };
+
+        rafRef.current = requestAnimationFrame(loop);
+    };
+
+    /**
+     * PRIMARY TTS — Sarvam AI (streaming).
+     * Uses speaker mapped from selectedVoice.speaker (manan/ratan/rohan/shreya/roopa).
+     * Streams MP3 via MediaSource API so audio starts immediately as chunks arrive.
+     * Falls back to raw speechSynthesis if Sarvam fails.
+     */
+    const speakWithSarvam = async (text) => {
         if (!ttsEnabled || !text?.trim()) return;
         stopCurrentSpeech();
         setIsSpeaking(true);
         setIsListening(false);
         if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (_) { } }
-        const voiceId = voiceOverride || selectedVoice.voiceId;
+
+        const speaker = selectedVoice.speaker || 'manan';
+        const gender = selectedVoice.gender || 'Male';
+
+        const onDone = () => {
+            setIsSpeaking(false);
+            [femaleVideoRef, maleVideoRef].forEach(ref => {
+                if (ref.current) {
+                    ref.current.pause();
+                    ref.current.playbackRate = 1;
+                    ref.current.currentTime = 0;
+                }
+            });
+        };
+
         try {
-            const res = await fetch('http://localhost:3001/api/elevenlabs/tts', {
+            const res = await fetch('http://localhost:3001/api/sarvam/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text.trim(), voiceId })
+                body: JSON.stringify({ text: text.trim(), speaker })
             });
-            if (!res.ok) throw new Error('TTS failed');
-            const blob = await res.blob();
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            audioRef.current = audio;
-            audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); audioRef.current = null; };
-            audio.onerror = () => { setIsSpeaking(false); audioRef.current = null; };
-            await audio.play();
+
+            if (!res.ok) throw new Error(`Sarvam TTS ${res.status}`);
+
+            let audio;
+
+            // ── Option 1: MediaSource streaming (audio plays as chunks arrive) ──
+            if (window.MediaSource && MediaSource.isTypeSupported('audio/mpeg')) {
+                audio = new Audio();
+                const mediaSource = new MediaSource();
+                audio.src = URL.createObjectURL(mediaSource);
+                audioRef.current = audio;
+
+                await new Promise((resolve, reject) => {
+                    mediaSource.addEventListener('sourceopen', async () => {
+                        try {
+                            const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+                            const reader = res.body.getReader();
+
+                            // Start playing as soon as we have the first chunk
+                            let playStarted = false;
+
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                if (done) { mediaSource.endOfStream(); break; }
+
+                                // Wait for buffer to be ready
+                                if (sourceBuffer.updating) {
+                                    await new Promise(r => sourceBuffer.addEventListener('updateend', r, { once: true }));
+                                }
+                                sourceBuffer.appendBuffer(value);
+
+                                if (!playStarted) {
+                                    playStarted = true;
+                                    audio.play().then(() => {
+                                        // Video + amplitude sync — jessica uses female, rohan uses male
+                                        if (selectedVoice.id === 'jessica' && femaleVideoRef.current) {
+                                            femaleVideoRef.current.play().catch(() => { });
+                                            startVideoSync(audio, femaleVideoRef);
+                                        } else if (selectedVoice.gender === 'Male' && maleVideoRef.current) {
+                                            maleVideoRef.current.play().catch(() => { });
+                                            startVideoSync(audio, maleVideoRef);
+                                        }
+                                    }).catch(reject);
+                                }
+                            }
+                            resolve();
+                        } catch (e) { reject(e); }
+                    }, { once: true });
+                });
+
+                audio.onended = () => {
+                    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+                    if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch (_) { } analyserRef.current = null; }
+                    if (audioCtxRef.current) { try { audioCtxRef.current.close(); } catch (_) { } audioCtxRef.current = null; }
+                    audioRef.current = null;
+                    onDone();
+                };
+
+            } else {
+                // ── Option 2: Collect all chunks then play ──
+                const chunks = [];
+                const reader = res.body.getReader();
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                }
+                const blob = new Blob(chunks, { type: 'audio/mpeg' });
+                const url = URL.createObjectURL(blob);
+                audio = new Audio(url);
+                audioRef.current = audio;
+
+                const cleanup = () => {
+                    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+                    if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch (_) { } analyserRef.current = null; }
+                    if (audioCtxRef.current) { try { audioCtxRef.current.close(); } catch (_) { } audioCtxRef.current = null; }
+                    URL.revokeObjectURL(url);
+                    audioRef.current = null;
+                    onDone();
+                };
+                audio.onended = cleanup;
+                audio.onerror = cleanup;
+
+                await audio.play();
+
+                if (selectedVoice.id === 'jessica' && femaleVideoRef.current) {
+                    femaleVideoRef.current.play().catch(() => { });
+                    startVideoSync(audio, femaleVideoRef);
+                } else if (selectedVoice.gender === 'Male' && maleVideoRef.current) {
+                    maleVideoRef.current.play().catch(() => { });
+                    startVideoSync(audio, maleVideoRef);
+                }
+            }
+
+            return; // Sarvam handled it
+
         } catch (err) {
-            console.error('ElevenLabs TTS error:', err);
-            setIsSpeaking(false);
+            console.warn('Sarvam TTS failed, using browser speechSynthesis:', err.message);
         }
+
+        // ── Last resort: browser speechSynthesis ─────────────────────
+        if (!window.speechSynthesis) { onDone(); return; }
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 1.0;
+        utter.pitch = gender === 'Female' ? 1.1 : 0.9;
+        utter.volume = 1;
+        const voices = window.speechSynthesis.getVoices();
+        const picked = gender === 'Female'
+            ? voices.find(v => v.lang.startsWith('en') && /female|samantha|zira|karen|victoria/i.test(v.name))
+            : voices.find(v => v.lang.startsWith('en') && /male|david|alex/i.test(v.name));
+        if (picked) utter.voice = picked || voices.find(v => v.lang.startsWith('en'));
+        utter.onend = onDone;
+        utter.onerror = onDone;
+        window.speechSynthesis.speak(utter);
     };
+
 
     // Scroll chat to bottom
 
@@ -477,9 +699,9 @@ export default function AIInterview() {
             const newTranscript = [...currentTranscript, aiMsg];
             setTranscript(newTranscript);
             transcriptRef.current = newTranscript;
-            // Real-time TTS: speak AI response via ElevenLabs
+            // Real-time TTS: speak AI response via Sarvam AI
             if (data.text?.trim()) {
-                speakWithElevenLabs(data.text.trim());
+                speakWithSarvam(data.text.trim());
             }
         } catch (err) {
             const errMsg = { role: 'ai', text: 'I had trouble responding. Please try again.', timestamp: Date.now() };
@@ -763,7 +985,7 @@ export default function AIInterview() {
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
                                     {VOICE_TEMPLATES.map(voice => {
                                         const isSelected = selectedVoice.id === voice.id;
-                                        const isPreviewing = previewLoading === voice.voiceId;
+                                        const isPreviewing = previewLoading === voice.id;
                                         return (
                                             <div
                                                 key={voice.id}
@@ -793,22 +1015,48 @@ export default function AIInterview() {
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
                                                         if (isPreviewing) return;
-                                                        setPreviewLoading(voice.voiceId);
+                                                        setPreviewLoading(voice.id);
                                                         try {
-                                                            const res = await fetch('http://localhost:3001/api/elevenlabs/tts', {
+                                                            const res = await fetch('http://localhost:3001/api/sarvam/tts', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
-                                                                body: JSON.stringify({ text: PREVIEW_TEXT, voiceId: voice.voiceId })
+                                                                body: JSON.stringify({ text: PREVIEW_TEXT, speaker: voice.speaker })
                                                             });
                                                             if (!res.ok) throw new Error('TTS failed');
-                                                            const blob = await res.blob();
-                                                            const url = URL.createObjectURL(blob);
-                                                            const audio = new Audio(url);
-                                                            audio.onended = () => URL.revokeObjectURL(url);
-                                                            await audio.play();
+                                                            // Stream the preview using MediaSource if available
+                                                            if (window.MediaSource && MediaSource.isTypeSupported('audio/mpeg')) {
+                                                                const audio = new Audio();
+                                                                const ms = new MediaSource();
+                                                                audio.src = URL.createObjectURL(ms);
+                                                                ms.addEventListener('sourceopen', async () => {
+                                                                    const sb = ms.addSourceBuffer('audio/mpeg');
+                                                                    const reader = res.body.getReader();
+                                                                    let started = false;
+                                                                    while (true) {
+                                                                        const { done, value } = await reader.read();
+                                                                        if (done) { ms.endOfStream(); break; }
+                                                                        if (sb.updating) await new Promise(r => sb.addEventListener('updateend', r, { once: true }));
+                                                                        sb.appendBuffer(value);
+                                                                        if (!started) { started = true; audio.play(); }
+                                                                    }
+                                                                }, { once: true });
+                                                                audio.onended = () => setPreviewLoading(null);
+                                                            } else {
+                                                                const chunks = [];
+                                                                const reader = res.body.getReader();
+                                                                while (true) {
+                                                                    const { done, value } = await reader.read();
+                                                                    if (done) break;
+                                                                    chunks.push(value);
+                                                                }
+                                                                const blob = new Blob(chunks, { type: 'audio/mpeg' });
+                                                                const url = URL.createObjectURL(blob);
+                                                                const audio = new Audio(url);
+                                                                audio.onended = () => { URL.revokeObjectURL(url); setPreviewLoading(null); };
+                                                                await audio.play();
+                                                            }
                                                         } catch (err) {
                                                             console.error('Preview failed:', err);
-                                                        } finally {
                                                             setPreviewLoading(null);
                                                         }
                                                     }}
@@ -1414,25 +1662,186 @@ export default function AIInterview() {
 
                 {/* RIGHT: AI Avatar + Chat */}
                 <div className="ai-right-panel" style={{ width: rightWidth, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0, background: '#0a0c10', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
-                    {/* Header: AI Avatar */}
-                    <div style={{ padding: '1.25rem 1rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                        <div className={`ai-avatar-frame ${isSpeaking ? 'ai-avatar-speaking' : ''}`} style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(168,85,247,0.1)', border: '2px solid rgba(168,85,247,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: isSpeaking ? '0 0 20px rgba(168,85,247,0.4)' : 'none', transition: 'all 0.3s' }}>
-                            <Brain size={32} color="#a855f7" />
-                            {isSpeaking && (
-                                <div style={{ position: 'absolute', right: '-4px', bottom: '-4px', background: '#a855f7', borderRadius: '50%', padding: '4px', border: '2px solid #0a0c10' }}>
-                                    <Volume2 size={10} color="#fff" />
+
+                    {/* Header: AI Avatar — switches to video card for jessica/rohan */}
+                    {selectedVoice.id === 'jessica' ? (
+                        /* ── Jessica: full-width female video header ── */
+                        <div style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            flexShrink: 0
+                        }}>
+                            {/* 16:9 full-width video */}
+                            <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000' }}>
+                                <video
+                                    ref={femaleVideoRef}
+                                    src="/female_speak1.mp4"
+                                    loop
+                                    muted
+                                    playsInline
+                                    style={{
+                                        position: 'absolute', inset: 0,
+                                        width: '100%', height: '100%',
+                                        objectFit: 'cover', display: 'block'
+                                    }}
+                                />
+                                {/* Gradient overlay at bottom */}
+                                <div style={{
+                                    position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px',
+                                    background: 'linear-gradient(to top, rgba(10,12,16,0.95) 0%, transparent 100%)'
+                                }} />
+                                {/* Speaking pulse bars */}
+                                {isSpeaking && (
+                                    <div style={{
+                                        position: 'absolute', bottom: '8px', left: '12px',
+                                        display: 'flex', gap: '3px', alignItems: 'flex-end', height: '16px'
+                                    }}>
+                                        {[0, 0.12, 0.24, 0.36, 0.48].map((delay, idx) => (
+                                            <div key={idx} style={{
+                                                width: '3px', borderRadius: '2px',
+                                                background: '#a855f7',
+                                                animation: 'speakBar 0.65s ease-in-out infinite',
+                                                animationDelay: `${delay}s`,
+                                                height: '100%',
+                                                transformOrigin: 'bottom'
+                                            }} />
+                                        ))}
+                                    </div>
+                                )}
+                                {/* Name + status badge bottom-right */}
+                                <div style={{
+                                    position: 'absolute', bottom: '8px', right: '10px',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px'
+                                }}>
+                                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e8e8e8', letterSpacing: '0.01em', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                                        Jessica · AI Interviewer
+                                    </span>
+                                    <span style={{
+                                        fontSize: '0.65rem', fontWeight: 600, padding: '2px 8px', borderRadius: '99px',
+                                        background: isSpeaking ? 'rgba(168,85,247,0.25)' : isAiThinking ? 'rgba(255,161,22,0.2)' : 'rgba(0,184,163,0.2)',
+                                        color: isSpeaking ? '#a855f7' : isAiThinking ? '#ffa116' : '#00b8a3',
+                                        border: `1px solid ${isSpeaking ? 'rgba(168,85,247,0.4)' : isAiThinking ? 'rgba(255,161,22,0.3)' : 'rgba(0,184,163,0.3)'}`,
+                                        display: 'flex', alignItems: 'center', gap: '4px',
+                                        backdropFilter: 'blur(8px)'
+                                    }}>
+                                        {isSpeaking && <><Volume2 size={9} />Speaking...</>}
+                                        {!isSpeaking && isAiThinking && <><Loader2 size={9} className="spin" />Analyzing...</>}
+                                        {!isSpeaking && !isAiThinking && <><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#00b8a3', display: 'inline-block' }} />Listening</>}
+                                    </span>
                                 </div>
-                            )}
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e8e8e8', letterSpacing: '0.01em' }}>Senior Engineer AI</div>
-                            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: isSpeaking ? '#a855f7' : isAiThinking ? '#ffa116' : '#888', transition: 'color 0.3s', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '2px' }}>
-                                {isSpeaking && <><Volume2 size={11} /><span>Speaking...</span></>}
-                                {!isSpeaking && isAiThinking && <><Loader2 size={11} className="spin" /><span>Analyzing...</span></>}
-                                {!isSpeaking && !isAiThinking && <><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00b8a3' }} /><span>Listening</span></>}
+                                {/* Purple glow border when speaking */}
+                                {isSpeaking && (
+                                    <div style={{
+                                        position: 'absolute', inset: 0,
+                                        boxShadow: 'inset 0 0 0 2px rgba(168,85,247,0.6)',
+                                        borderRadius: 0,
+                                        pointerEvents: 'none',
+                                        animation: 'avatar-pulse 1.8s ease-in-out infinite'
+                                    }} />
+                                )}
                             </div>
                         </div>
-                    </div>
+                    ) : selectedVoice.gender === 'Male' ? (
+                        /* ── Rohan: full-width male video header ── */
+                        <div style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            flexShrink: 0
+                        }}>
+                            <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000' }}>
+                                <video
+                                    ref={maleVideoRef}
+                                    src={MALE_VIDEO_MAP[selectedVoice.id] || '/male_manan.mp4'}
+                                    loop
+                                    muted
+                                    playsInline
+                                    style={{
+                                        position: 'absolute', inset: 0,
+                                        width: '100%', height: '100%',
+                                        objectFit: 'cover', display: 'block'
+                                    }}
+                                />
+                                {/* Gradient overlay at bottom */}
+                                <div style={{
+                                    position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px',
+                                    background: 'linear-gradient(to top, rgba(10,12,16,0.95) 0%, transparent 100%)'
+                                }} />
+                                {/* Speaking pulse bars */}
+                                {isSpeaking && (
+                                    <div style={{
+                                        position: 'absolute', bottom: '8px', left: '12px',
+                                        display: 'flex', gap: '3px', alignItems: 'flex-end', height: '16px'
+                                    }}>
+                                        {[0, 0.12, 0.24, 0.36, 0.48].map((delay, idx) => (
+                                            <div key={idx} style={{
+                                                width: '3px', borderRadius: '2px',
+                                                background: '#3b82f6',
+                                                animation: 'speakBar 0.65s ease-in-out infinite',
+                                                animationDelay: `${delay}s`,
+                                                height: '100%',
+                                                transformOrigin: 'bottom'
+                                            }} />
+                                        ))}
+                                    </div>
+                                )}
+                                {/* Name + status */}
+                                <div style={{
+                                    position: 'absolute', bottom: '8px', right: '10px',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px'
+                                }}>
+                                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e8e8e8', letterSpacing: '0.01em', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                                        {selectedVoice.name} · AI Interviewer
+                                    </span>
+                                    <span style={{
+                                        fontSize: '0.65rem', fontWeight: 600, padding: '2px 8px', borderRadius: '99px',
+                                        background: isSpeaking ? 'rgba(59,130,246,0.25)' : isAiThinking ? 'rgba(255,161,22,0.2)' : 'rgba(0,184,163,0.2)',
+                                        color: isSpeaking ? '#3b82f6' : isAiThinking ? '#ffa116' : '#00b8a3',
+                                        border: `1px solid ${isSpeaking ? 'rgba(59,130,246,0.4)' : isAiThinking ? 'rgba(255,161,22,0.3)' : 'rgba(0,184,163,0.3)'}`,
+                                        display: 'flex', alignItems: 'center', gap: '4px',
+                                        backdropFilter: 'blur(8px)'
+                                    }}>
+                                        {isSpeaking && <><Volume2 size={9} />Speaking...</>}
+                                        {!isSpeaking && isAiThinking && <><Loader2 size={9} className="spin" />Analyzing...</>}
+                                        {!isSpeaking && !isAiThinking && <><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#00b8a3', display: 'inline-block' }} />Listening</>}
+                                    </span>
+                                </div>
+                                {/* Blue glow border when speaking */}
+                                {isSpeaking && (
+                                    <div style={{
+                                        position: 'absolute', inset: 0,
+                                        boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.6)',
+                                        borderRadius: 0,
+                                        pointerEvents: 'none',
+                                        animation: 'avatar-pulse 1.8s ease-in-out infinite'
+                                    }} />
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        /* ── Other voices: original Brain avatar header ── */
+                        <div style={{ padding: '1.25rem 1rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <div className={`ai-avatar-frame ${isSpeaking ? 'ai-avatar-speaking' : ''}`} style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(168,85,247,0.1)', border: '2px solid rgba(168,85,247,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: isSpeaking ? '0 0 20px rgba(168,85,247,0.4)' : 'none', transition: 'all 0.3s' }}>
+                                <Brain size={32} color="#a855f7" />
+                                {isSpeaking && (
+                                    <div style={{ position: 'absolute', right: '-4px', bottom: '-4px', background: '#a855f7', borderRadius: '50%', padding: '4px', border: '2px solid #0a0c10' }}>
+                                        <Volume2 size={10} color="#fff" />
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e8e8e8', letterSpacing: '0.01em' }}>Senior Engineer AI</div>
+                                <div style={{ fontSize: '0.72rem', fontWeight: 600, color: isSpeaking ? '#a855f7' : isAiThinking ? '#ffa116' : '#888', transition: 'color 0.3s', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', marginTop: '2px' }}>
+                                    {isSpeaking && <><Volume2 size={11} /><span>Speaking...</span></>}
+                                    {!isSpeaking && isAiThinking && <><Loader2 size={11} className="spin" /><span>Analyzing...</span></>}
+                                    {!isSpeaking && !isAiThinking && <><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00b8a3' }} /><span>Listening</span></>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Chat log */}
                     <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '1rem', scrollBehavior: 'smooth' }}>
