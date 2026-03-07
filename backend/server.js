@@ -763,7 +763,7 @@ app.post('/api/interview/evaluate', async (req, res) => {
 
 
 // --- Sarvam AI TTS Proxy (streaming) ---
-const SARVAM_API_KEY = 'sk_sljbpqmg_mfdef03Ainw1oY6ePZYVaZ68';
+const SARVAM_API_KEY = process.env.SARVAM_API_KEY;
 
 app.post('/api/sarvam/tts', async (req, res) => {
     const { text, speaker } = req.body;  // speaker: 'manan' | 'ratan' | 'rohan' | 'shreya' | 'roopa'

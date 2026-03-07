@@ -6,47 +6,64 @@ const util = require('util');
 
 const execPromise = util.promisify(exec);
 
-// Map language to docker image and execution command
+// Map language to native execution command (no Docker — runs natively on Render)
 const languageConfig = {
     python: {
-        image: 'python:3.11-alpine',
         extension: '.py',
-        getCommand: (filename) => `python ${filename}`
+        getCommand: (filepath, inputPath) =>
+            inputPath ? `python3 ${filepath} < ${inputPath}` : `python3 ${filepath}`
     },
     javascript: {
-        image: 'node:20-alpine',
         extension: '.js',
-        getCommand: (filename) => `node ${filename}`
+        getCommand: (filepath, inputPath) =>
+            inputPath ? `node ${filepath} < ${inputPath}` : `node ${filepath}`
     },
     cpp: {
-        image: 'gcc:13',
         extension: '.cpp',
-        getCommand: (filename) => `g++ -O2 ${filename} -o /tmp/a.out && /tmp/a.out`
+        getCommand: (filepath, inputPath) => {
+            const outPath = filepath.replace('.cpp', '.out');
+            const run = inputPath ? `${outPath} < ${inputPath}` : outPath;
+            return `g++ -O2 ${filepath} -o ${outPath} && ${run}`;
+        }
     },
     c: {
-        image: 'gcc:13',
         extension: '.c',
-        getCommand: (filename) => `gcc -O2 ${filename} -o /tmp/a.out && /tmp/a.out`
+        getCommand: (filepath, inputPath) => {
+            const outPath = filepath.replace('.c', '.out');
+            const run = inputPath ? `${outPath} < ${inputPath}` : outPath;
+            return `gcc -O2 ${filepath} -o ${outPath} && ${run}`;
+        }
     },
     java: {
-        image: 'eclipse-temurin:21-alpine',
         extension: '.java',
-        getCommand: (filename) => `javac -d /tmp ${filename} && cd /tmp && java Main`
+        getCommand: (filepath, inputPath) => {
+            const dir = path.dirname(filepath);
+            const run = inputPath
+                ? `javac -d ${dir} ${filepath} && java -cp ${dir} Main < ${inputPath}`
+                : `javac -d ${dir} ${filepath} && java -cp ${dir} Main`;
+            return run;
+        }
     },
     go: {
-        image: 'golang:alpine',
         extension: '.go',
-        getCommand: (filename) => `CGO_ENABLED=0 GO111MODULE=off GOCACHE=/tmp GOMODCACHE=/tmp go build -o /tmp/a.out ${filename} && /tmp/a.out`
+        getCommand: (filepath, inputPath) => {
+            const outPath = filepath.replace('.go', '.out');
+            const run = inputPath ? `${outPath} < ${inputPath}` : outPath;
+            return `go build -o ${outPath} ${filepath} && ${run}`;
+        }
     },
     rust: {
-        image: 'rust:alpine',
         extension: '.rs',
-        getCommand: (filename) => `TMPDIR=/tmp rustc ${filename} -o /tmp/a.out && /tmp/a.out`
+        getCommand: (filepath, inputPath) => {
+            const outPath = filepath.replace('.rs', '.out');
+            const run = inputPath ? `${outPath} < ${inputPath}` : outPath;
+            return `rustc ${filepath} -o ${outPath} && ${run}`;
+        }
     }
 };
 
 /**
- * Executes a piece of code in a secure Docker container
+ * Executes a piece of code natively (without Docker) — suitable for Render deployment.
  */
 async function executeCode(code, language, input, expectedOutput) {
     if (!languageConfig[language]) {
@@ -56,7 +73,7 @@ async function executeCode(code, language, input, expectedOutput) {
     const sessionId = uuidv4();
     const tempDir = path.join('/tmp', `code-exec-${sessionId}`);
     const config = languageConfig[language];
-    const sourceFilename = (language === 'java') ? 'Main.java' : `main${config.extension}`;
+    const sourceFilename = language === 'java' ? 'Main.java' : `main${config.extension}`;
     const sourceFilePath = path.join(tempDir, sourceFilename);
     const inputFilePath = path.join(tempDir, 'input.txt');
 
@@ -74,52 +91,15 @@ async function executeCode(code, language, input, expectedOutput) {
             hasInput = true;
         }
 
-        // 4. Construct execution script that redirects input
-        let runCommand = config.getCommand(sourceFilename);
-        const scriptContent = hasInput
-            ? `#!/bin/sh\n${runCommand} < input.txt`
-            : `#!/bin/sh\n${runCommand}`;
+        // 4. Build the native execution command
+        const cmd = config.getCommand(sourceFilePath, hasInput ? inputFilePath : null);
 
-        const scriptPath = path.join(tempDir, 'run.sh');
-        await fs.writeFile(scriptPath, scriptContent);
-        await fs.chmod(scriptPath, '755');
-
-        // 5. Construct secure Docker command
-        // Flags:
-        // --rm: remove container after exit
-        // --read-only: mount container root fs as read only
-        // --network=none: disable networking
-        // --memory=100m: limit memory usage
-        // --cpus=0.5: limit CPU usage
-        // --pids-limit=64: limit number of processes (mitigate fork bombs)
-        // --security-opt=no-new-privileges: prevent privilege escalation
-        // -v: mount our temp dir as a volume read-only, except making it writable if really needed, but since we use read-only root, standard tmp is used.
-        // Actually we only need read access to the source code, but language runtimes might need /tmp.
-        // We mount tempDir to /code (read-only base)
-
-        // We mount tempDir as read-only. We add an anonymous tmpfs for /tmp where runtimes write cache
-        const dockerCmd = `
-      docker run --rm \\
-        --name code-exec-${sessionId} \\
-        --read-only \\
-        --network=none \\
-        --memory=400m \\
-        --cpus=1.0 \\
-        --pids-limit=64 \\
-        --security-opt=no-new-privileges \\
-        --mount type=bind,source=${tempDir},target=/code,readonly \\
-        --tmpfs /tmp:exec,mode=1777,size=200m \\
-        -w /code \\
-        ${config.image} \\
-        ./run.sh
-    `;
-
-        // 6. Execute docker command with a rigid timeout on the host side
+        // 5. Execute with a 15-second timeout
         let stdout, stderr;
         let executionError = null;
 
         try {
-            const result = await execPromise(dockerCmd, { timeout: 15000, killSignal: 'SIGKILL' });
+            const result = await execPromise(cmd, { timeout: 15000, killSignal: 'SIGKILL' });
             stdout = result.stdout;
             stderr = result.stderr;
         } catch (err) {
@@ -128,19 +108,19 @@ async function executeCode(code, language, input, expectedOutput) {
             stderr = err.stderr;
 
             if (err.killed) {
-                stderr = (stderr ? stderr + '\\n' : '') + 'Error: Execution Timed Out (Exceeded 15s)';
+                stderr = (stderr ? stderr + '\n' : '') + 'Error: Execution Timed Out (Exceeded 15s)';
             }
         }
 
-        // 7. Process output and compare
+        // 6. Process output and compare
         const actualOutput = (stdout || '').trim();
         const expected = (expectedOutput || '').trim();
 
         let isSuccess = false;
         if (!executionError && expectedOutput !== undefined) {
-            isSuccess = (actualOutput === expected);
+            isSuccess = actualOutput === expected;
         } else if (!executionError && !expectedOutput) {
-            isSuccess = true; // No expectation, just ran
+            isSuccess = true; // No expectation — just ran successfully
         }
 
         return {
@@ -150,11 +130,7 @@ async function executeCode(code, language, input, expectedOutput) {
         };
 
     } finally {
-        // 8. Cleanup temp directory and force kill the container if it's still running
-        try {
-            await execPromise(`docker kill code-exec-${sessionId}`).catch(() => { /* Ignore errors if already dead */ });
-        } catch (e) { }
-
+        // 7. Cleanup temp directory
         try {
             await fs.rm(tempDir, { recursive: true, force: true });
         } catch (cleanupErr) {
