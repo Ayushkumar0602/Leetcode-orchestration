@@ -9,8 +9,8 @@ let metadata = {
 };
 let isLoaded = false;
 
-// We look for the CSV up one level in the project root
-const CSV_PATH = path.join(__dirname, '..', 'leetcode_dataset - lc.csv');
+// We look for the CSV in the same directory as this file (backend/)
+const CSV_PATH = path.join(__dirname, 'leetcode_dataset - lc.csv');
 
 function loadDataset() {
     return new Promise((resolve, reject) => {
