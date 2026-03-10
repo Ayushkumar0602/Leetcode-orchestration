@@ -237,9 +237,22 @@ async function generateCodeAndTests(problemStatement, language, problemId) {
     try {
       console.log(`[AI] Attempting generation with API key ${i + 1}/${keys.length}...`);
       const genAI = new GoogleGenerativeAI(currentKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+      let model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
-      const result = await model.generateContent(prompt);
+      let result;
+      try {
+        result = await model.generateContent(prompt);
+      } catch (innerError) {
+        if (innerError.message?.includes('503') || innerError.message?.includes('429')) {
+          console.warn(`[AI] 503/429 error on key ${i + 1}. Falling back to gemini-3.1-flash-lite-preview...`);
+          model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
+          result = await model.generateContent(prompt);
+          console.log(`[AI] Fallback generation successful on key ${i + 1}.`);
+        } else {
+          throw innerError;
+        }
+      }
+
       const text = result.response.text().trim();
 
       const cleaned = text

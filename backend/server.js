@@ -5,8 +5,9 @@ const { executeCode } = require('./executor');
 const { generateCodeAndTests } = require('./ai');
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
-const { db } = require('./firebase');
+const { db, rtdb } = require('./firebase');
 const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where } = require('firebase/firestore');
+const { ref: rtdbRef, push } = require('firebase/database');
 
 const app = express();
 app.use(cors());
@@ -163,25 +164,39 @@ app.post('/api/submit', async (req, res) => {
 
 // --- Interview History Routes ---
 
-// Save a completed interview session
+// Save or Update a completed/ongoing interview session
 app.post('/api/interviews/save', async (req, res) => {
-    const { userId, role, company, language, problemId, problemTitle, problemDifficulty,
-        finalCode, transcript, scoreReport, submissionCount, durationMinutes } = req.body;
+    const { id, userId, role, company, language, problemId, problemTitle, problemDifficulty,
+        finalCode, transcript, scoreReport, submissionCount, durationMinutes, problemData } = req.body;
     if (!userId) return res.status(400).json({ error: 'userId required' });
     try {
         const now = new Date().toISOString();
-        const docRef = await addDoc(collection(db, 'interviews'), {
+        const interviewData = {
             userId: String(userId), role: role || '', company: company || '',
             language: language || 'python', problemId: String(problemId || ''),
             problemTitle: problemTitle || '', problemDifficulty: problemDifficulty || '',
+            problemData: problemData || null,
             finalCode: finalCode || '', transcript: transcript || [],
             scoreReport: scoreReport || null,
             submissionCount: submissionCount || 0,
             durationMinutes: durationMinutes || 0,
             overallScore: scoreReport?.overallScore ?? null,
-            createdAt: now
-        });
-        res.json({ id: docRef.id });
+            status: scoreReport ? 'completed' : 'in-progress',
+            lastUpdatedAt: now
+        };
+
+        let targetId = id;
+        if (targetId) {
+            // Update existing interview
+            await setDoc(doc(db, 'interviews', targetId), interviewData, { merge: true });
+        } else {
+            // Create new interview
+            interviewData.createdAt = now;
+            const docRef = await addDoc(collection(db, 'interviews'), interviewData);
+            targetId = docRef.id;
+        }
+
+        res.json({ id: targetId });
     } catch (err) {
         console.error('Failed to save interview:', err);
         res.status(500).json({ error: 'Failed to save interview' });
@@ -197,6 +212,17 @@ app.get('/api/interviews/detail/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch interview:', err);
         res.status(500).json({ error: 'Failed to fetch interview' });
+    }
+});
+
+// Delete an interview by document ID
+app.delete('/api/interviews/:id', async (req, res) => {
+    try {
+        await deleteDoc(doc(db, 'interviews', req.params.id));
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Failed to delete interview:', err);
+        res.status(500).json({ error: 'Failed to delete interview' });
     }
 });
 
@@ -711,7 +737,7 @@ Return ONLY a valid JSON object (no markdown, no extra text) exactly like this:
 
 // Send a message to the AI interviewer
 app.post('/api/interview/chat', async (req, res) => {
-    const { problem, role, company, interviewPhase, transcript, currentCode, language } = req.body;
+    const { problem, role, company, interviewPhase, transcript, currentCode, language, sessionId } = req.body;
     if (!problem || !role || !company) {
         return res.status(400).json({ error: 'problem, role, and company are required.' });
     }
@@ -720,6 +746,25 @@ app.post('/api/interview/chat', async (req, res) => {
             problem, role, company, interviewPhase || 'opening',
             transcript || [], currentCode || '', language || 'python'
         );
+
+        // Write uiActions to Realtime Database if any exist and we have a sessionId
+        if (sessionId) {
+            try {
+                const cleanedResponse = response.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+                const parsed = JSON.parse(cleanedResponse);
+                if (parsed && Array.isArray(parsed.uiActions) && parsed.uiActions.length > 0) {
+                    const actionsRef = rtdbRef(rtdb, `sessions/${sessionId}/actions`);
+                    // Push a new record with the timestamp and actions
+                    push(actionsRef, {
+                        timestamp: Date.now(),
+                        actions: parsed.uiActions
+                    }).catch(err => console.error('Failed to write RTDB actions (async):', err));
+                }
+            } catch (e) {
+                // Ignore parse errors here; frontend handles fallback
+            }
+        }
+
         res.json({ text: response });
     } catch (error) {
         console.error('Interview Chat Error:', error.message);

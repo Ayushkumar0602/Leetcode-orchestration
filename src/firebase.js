@@ -1,6 +1,7 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB9QzTprZANW1xR_9opdxsDczmy8QdVoCc",
@@ -9,12 +10,14 @@ const firebaseConfig = {
     storageBucket: "aiinterview-20512.firebasestorage.app",
     messagingSenderId: "519073264832",
     appId: "1:519073264832:web:9b1c3085a4cf325697e925",
-    measurementId: "G-BTHYBXR7Q1"
+    measurementId: "G-BTHYBXR7Q1",
+    databaseURL: "https://aiinterview-20512-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
+const rtdb = getDatabase(app);
 
 // Initialize analytics only if in browser
 let analytics;
@@ -22,4 +25,4 @@ if (typeof window !== 'undefined') {
     analytics = getAnalytics(app);
 }
 
-export { auth, googleProvider };
+export { auth, googleProvider, rtdb };

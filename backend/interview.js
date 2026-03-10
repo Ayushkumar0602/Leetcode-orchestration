@@ -20,10 +20,23 @@ async function callGemini(prompt, jsonMode = false) {
         try {
             console.log(`[Interview AI] Attempting generation with API key ${i + 1}/${keys.length}...`);
             const genAI = new GoogleGenerativeAI(keys[i]);
-            const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
-            const result = await model.generateContent(prompt);
-            console.log(`[Interview AI] Generation successful on key ${i + 1}.`);
-            return result.response.text().trim();
+            let model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+
+            try {
+                const result = await model.generateContent(prompt);
+                console.log(`[Interview AI] Generation successful on key ${i + 1}.`);
+                return result.response.text().trim();
+            } catch (innerError) {
+                // If 503 (Service Unavailable) or 429 (Too Many Requests), try the fallback model immediately with the same key
+                if (innerError.message?.includes('503') || innerError.message?.includes('429')) {
+                    console.warn(`[Interview AI] 503/429 error on key ${i + 1}. Falling back to gemini-3.1-flash-lite-preview...`);
+                    model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
+                    const fallbackResult = await model.generateContent(prompt);
+                    console.log(`[Interview AI] Fallback generation successful on key ${i + 1}.`);
+                    return fallbackResult.response.text().trim();
+                }
+                throw innerError; // Rethrow other errors to be caught by the outer block
+            }
         } catch (error) {
             lastError = error;
             console.error(`[Interview AI] Error with key ${i + 1}:`, error.message || error);
@@ -43,54 +56,92 @@ async function callGemini(prompt, jsonMode = false) {
 
 // ─── Chat prompt ────────────────────────────────────────────────────────────
 function buildChatPrompt(problem, role, company, interviewPhase, transcript, currentCode, language) {
-    const transcriptText = transcript.length > 0
-        ? transcript.map(m => `${m.role === 'ai' ? 'INTERVIEWER' : 'CANDIDATE'}: ${m.text}`).join('\n')
+    // Trim to last 12 messages to reduce token usage while keeping recent context
+    const recent = transcript.slice(-12);
+    const transcriptText = recent.length > 0
+        ? recent.map(m => `${m.role === 'ai' ? 'I' : 'C'}: ${m.text}`).join('\n')
         : '(Interview just started)';
 
+    const PHASES = ['opening', 'brute-force', 'optimization', 'coding', 'wrap-up'];
+
     const phaseInstructions = {
-        opening: 'Greet the candidate warmly but professionally. Briefly introduce yourself as a senior engineer at the company. Ask them to read the problem statement and share their initial thoughts. Do not give any hints yet.',
-        'brute-force': 'The candidate should now propose a naive or brute-force approach. Encourage them to think out loud. Ask them about the time and space complexity of their approach. If they jump straight to the optimal, ask them to first walk through a simpler approach.',
-        optimization: 'Challenge the candidate to improve on their initial approach. Ask probing questions about bottlenecks. If stuck, use graduated hints: Level 1 vague (can we preprocess something?), Level 2 medium (which data structure gives O(1) lookup?), Level 3 specific (have you considered using a hash map?). Never reveal the optimal solution.',
-        coding: 'The candidate is now writing code. Stay mostly quiet and let them code. Occasionally ask about edge cases (empty arrays, negative numbers, overflow). If they make a clear logical error, ask a question that guides them to notice it without pointing it out directly.',
-        'wrap-up': 'The candidate has finished coding. Ask about their testing strategy, what edge cases they considered, and how they would handle this problem at scale (10^8 inputs, distributed system, etc.). Probe the depth of their understanding.',
+        opening: 'Greet warmly, introduce yourself as a senior engineer. Ask candidate to read the problem and share initial thoughts. No hints yet.',
+        'brute-force': 'Ask candidate to propose a naive/brute-force approach. Encourage thinking out loud. Ask about time/space complexity.',
+        optimization: 'Challenge candidate to improve their approach. Ask probing questions about bottlenecks. Use graduated hints only if stuck. Never reveal the solution.',
+        coding: 'Candidate is coding. Stay quiet, let them code. Occasionally probe edge cases. If logical error, ask leading questions — never point it out directly.',
+        'wrap-up': 'Candidate finished coding. Ask about testing strategy, edge cases considered, and scalability (10^8 inputs, distributed system).',
     };
 
-    return `You are a senior software engineer conducting a technical interview at ${company} for the ${role} position.
+    const phaseTransitionRules = {
+        opening: 'Advance to "brute-force" once candidate has acknowledged the problem and shared at least one initial observation or question about it.',
+        'brute-force': 'Advance to "optimization" once candidate has clearly described a working naive/brute-force approach AND stated its time/space complexity.',
+        optimization: 'Advance to "coding" once candidate has articulated a concrete optimized approach and is ready to implement it.',
+        coding: 'Advance to "wrap-up" once the candidate explicitly states they are done coding, or if a code submission result was reported in the conversation.',
+        'wrap-up': 'Do NOT advance. This is the final phase.',
+    };
+
+    const currentPhaseIndex = PHASES.indexOf(interviewPhase);
+    const nextPhase = currentPhaseIndex < PHASES.length - 1 ? PHASES[currentPhaseIndex + 1] : null;
+
+    return `You are a senior engineer interviewing a candidate at ${company} for ${role}.
 
 PROBLEM: ${problem.title} (${problem.difficulty})
-DESCRIPTION: ${problem.description}
+${problem.description}
 CONSTRAINTS: ${(problem.constraints || []).join(' | ')}
 
-CURRENT INTERVIEW PHASE: ${interviewPhase}
-PHASE GUIDANCE: ${phaseInstructions[interviewPhase] || 'Continue the interview naturally based on the conversation.'}
+PHASE: ${interviewPhase}
+GUIDANCE: ${phaseInstructions[interviewPhase]}
 
-CONVERSATION HISTORY:
+TRANSCRIPT (I=Interviewer, C=Candidate):
 ${transcriptText}
 
-CANDIDATE'S CURRENT CODE (${language}):
-${currentCode ? currentCode : '(No code written yet)'}
+CANDIDATE CODE (${language}): ${currentCode || '(none yet)'}
+${currentCode ? `(${currentCode.split('\n').length} lines)` : ''}
 
-STRICT BEHAVIORAL RULES:
-1. You are NEUTRAL — never confirm or deny if an approach is correct through your tone.
-2. Ask ONLY ONE focused question per response. Keep it conversational.
-3. Maximum 3-4 short sentences. Sound human, not robotic.
-4. Never write code or pseudocode for the candidate.
-5. Never use markdown, bullet points, or formatting symbols.
-6. Evaluate reasoning PROCESS, not just the final answer.
-7. If the candidate asks a yes/no question, redirect: "What do you think?" or "Walk me through your reasoning."
+RULES:
+1. Be neutral — never confirm/deny correctness through tone.
+2. Ask exactly ONE focused question per response. Sound human, not robotic.
+3. Max 3-4 short sentences. No markdown, bullets, or code snippets.
+4. Evaluate reasoning process, not just the answer.
+5. If candidate asks yes/no, redirect: "What do you think?" or "Walk me through it."
 
-Respond as the interviewer, speaking naturally as if in a real video call:`;
+PHASE TRANSITION:
+- Next phase available: ${nextPhase || 'none (already in final phase)'}
+- Transition rule: ${phaseTransitionRules[interviewPhase]}
+- Set nextPhase to "${nextPhase}" ONLY if the transition rule is clearly satisfied. Otherwise null.
+- STRICT RULE: If the transcript says "(Interview just started)", you MUST set nextPhase to null. Only greet the candidate. Do not advance.
+- Never skip phases. Never go backwards.
+
+UI ACTIONS (optional, only include when candidate has written code and it adds real value):
+You may include a "uiActions" array to interact with the candidate's editor in real time.
+Each action has a "type" field. Supported types:
+- highlight: {"type":"highlight","startLine":<1-based>,"endLine":<1-based>,"color":"warning"|"error"|"info"|"success","message":"<short label>"}
+- cursor: {"type":"cursor","line":<1-based>,"message":"<short tooltip>"}
+- comment: {"type":"comment","line":<1-based>,"text":"<concise inline note, max 10 words>"}
+- banner: {"type":"banner","text":"<hint or instruction, max 15 words>","level":"hint"|"warning"|"success"}
+- codeUpdate: {"type":"codeUpdate","code":"<the exact string of code to insert or replace with>","startLine":<line to start replacement, or null to append>}
+Rules:
+- Include at most 2 actions per response — be surgical, not spammy.
+- Only reference lines that plausibly exist (use line count above as a bound).
+- Omit "uiActions" entirely (or set to []) if no code is written or no action is relevant.
+- Never reveal the full solution through actions.
+
+RESPONSE FORMAT — respond ONLY with this JSON, nothing else:
+{"text":"<your natural spoken response>","nextPhase":"<phase or null>","uiActions":[]}
+
+Replace nextPhase with the target phase name string (not quoted null) if advancing, else use null (no quotes).
+Replace uiActions with an array of action objects, or [] if none.`;
 }
 
 // ─── Code analysis prompt ────────────────────────────────────────────────────
 function buildCodeAnalysisPrompt(code, language, problem) {
     return `You are an expert code reviewer analyzing a candidate's in-progress interview code.
 
-PROBLEM: ${problem.title}
-LANGUAGE: ${language}
+    PROBLEM: ${problem.title}
+    LANGUAGE: ${language}
 
 CURRENT CODE:
-\`\`\`${language}
+    \`\`\`${language}
 ${code}
 \`\`\`
 

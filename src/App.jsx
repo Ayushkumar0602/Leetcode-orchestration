@@ -7,6 +7,7 @@ import Login from './Login';
 import MySubmissions from './MySubmissions';
 import InterviewEvaluation from './InterviewEvaluation';
 import ScraperPage from './ScraperPage';
+import LandingPage from './LandingPage';
 
 // System Design Features
 import SystemDesign from './SystemDesign';
@@ -25,7 +26,7 @@ function App() {
             <Route path="/dsaquestion" element={<Navigate to="/dsaquestion/1" replace />} />
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />
-            <Route path="/aiinterview" element={<AIInterview />} />
+            <Route path="/aiinterview/:id?" element={<AIInterview />} />
             <Route path="/submissions" element={<MySubmissions />} />
             <Route path="/scraper" element={<ScraperPage />} />
             <Route path="/evaluation/:interviewId" element={<InterviewEvaluation />} />
@@ -37,7 +38,7 @@ function App() {
             <Route path="/aisystemdesigninterview/:id" element={<AISystemDesignInterview />} />
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
 
-            <Route path="/" element={<Navigate to="/dsaquestion/1" replace />} />
+            <Route path="/" element={<LandingPage />} />
           </Routes>
         </div>
       </AuthProvider>

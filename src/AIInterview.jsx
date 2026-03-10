@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import {
     Play, Mic, MicOff, PhoneOff, Brain, ChevronRight, Search,
     X, Loader2, CheckCircle2, XCircle, Star, TrendingUp, MessageSquare,
     Code2, Shield, Lightbulb, BarChart3, ArrowLeft, Sparkles, Volume2, VolumeX,
-    Send, Terminal, ChevronDown, ChevronUp, LogOut, Clock, History, User, Building
+    Send, Terminal, ChevronDown, ChevronUp, LogOut, Clock, History, User, Building,
+    MessageCircle, AlertCircle, Info, Navigation, Trash2, RefreshCcw
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
+import { v4 as uuidv4 } from 'uuid';
+import { useInterviewSession } from './useInterviewSession';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
@@ -95,6 +98,7 @@ function ScoreBadge({ score }) {
 export default function AIInterview() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { id: urlId } = useParams();
     const { currentUser, logout } = useAuth();
 
     // ── App phase ──
@@ -119,6 +123,8 @@ export default function AIInterview() {
     const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
     // ── Interview state ──
+    const [sessionId, setSessionId] = useState(null);
+    const { aiActions } = useInterviewSession(sessionId);
     const [interviewPhase, setInterviewPhase] = useState('opening');
     const [phaseIndex, setPhaseIndex] = useState(0);
     const [transcript, setTranscript] = useState([]);
@@ -129,6 +135,110 @@ export default function AIInterview() {
     const [userInput, setUserInput] = useState('');
     const [liveAnalysis, setLiveAnalysis] = useState(null);
     const [analysisTimer, setAnalysisTimer] = useState(null);
+
+    // ─── AI Real-Time UI Interactions ───────────────────────────────────────
+
+    // Manage Monaco decorations for highlights
+    const decorationsRef = useRef([]);
+
+    useEffect(() => {
+        if (!editorRef.current || !aiActions) return;
+        const editor = editorRef.current;
+        const monaco = window.monaco;
+        if (!monaco) return;
+
+        // Isolate highlight actions
+        const highlights = aiActions.filter(a => a.type === 'highlight');
+
+        const newDecorations = highlights.map(action => {
+            const colorMapping = {
+                warning: 'rgba(255, 161, 22, 0.2)',
+                error: 'rgba(239, 71, 67, 0.2)',
+                success: 'rgba(0, 184, 163, 0.2)',
+                info: 'rgba(59, 130, 246, 0.2)'
+            };
+            const color = colorMapping[action.color] || colorMapping.info;
+
+            return {
+                range: new monaco.Range(action.startLine, 1, action.endLine, 100),
+                options: {
+                    isWholeLine: true,
+                    className: `ai-highlight-line ${action.color || 'info'}`,
+                    hoverMessage: { value: `**AI Note:** ${action.message}` },
+                    overviewRuler: {
+                        color: color,
+                        position: monaco.editor.OverviewRulerLane.Right
+                    }
+                }
+            };
+        });
+
+        const css = `
+            .ai-highlight-line { background: rgba(59, 130, 246, 0.15) !important; border-left: 3px solid #3b82f6; }
+            .ai-highlight-line.warning { background: rgba(255, 161, 22, 0.15) !important; border-left: 3px solid #ffa116; }
+            .ai-highlight-line.error { background: rgba(239, 71, 67, 0.15) !important; border-left: 3px solid #ef4743; }
+        `;
+        let styleNode = document.getElementById('ai-highlight-styles');
+        if (!styleNode) {
+            styleNode = document.createElement('style');
+            styleNode.id = 'ai-highlight-styles';
+            document.head.appendChild(styleNode);
+        }
+        styleNode.innerText = css;
+
+        decorationsRef.current = editor.deltaDecorations(decorationsRef.current, newDecorations);
+
+    }, [aiActions]);
+
+    // Derived overlay datasets
+    const cursorActions = aiActions.filter(a => a.type === 'cursor');
+    const commentActions = aiActions.filter(a => a.type === 'comment');
+    const lastBanner = [...aiActions].reverse().find(a => a.type === 'banner');
+
+    // Code Update tracking (execute only once per action using its unique timestamp/id if possible, or just the latest one)
+    const [lastProcessedCodeUpdate, setLastProcessedCodeUpdate] = useState(null);
+
+    const [activeBanner, setActiveBanner] = useState(null);
+    useEffect(() => {
+        if (lastBanner) {
+            setActiveBanner(lastBanner);
+            const timer = setTimeout(() => setActiveBanner(null), 8000); // auto dismiss after 8s
+            return () => clearTimeout(timer);
+        }
+    }, [lastBanner]);
+
+    // Handle codeUpdate action
+    useEffect(() => {
+        const lastCodeUpdate = [...aiActions].reverse().find(a => a.type === 'codeUpdate');
+
+        if (lastCodeUpdate && editorRef.current && lastProcessedCodeUpdate !== lastCodeUpdate) {
+            const editor = editorRef.current;
+            const model = editor.getModel();
+            if (!model) return;
+
+            let range;
+            if (lastCodeUpdate.startLine) {
+                // Insert at specific line
+                range = new window.monaco.Range(lastCodeUpdate.startLine, 1, lastCodeUpdate.startLine, 1);
+            } else {
+                // Append to end
+                const lineCount = model.getLineCount();
+                const lastLineLen = model.getLineMaxColumn(lineCount);
+                range = new window.monaco.Range(lineCount, lastLineLen, lineCount, lastLineLen);
+                lastCodeUpdate.code = '\n' + lastCodeUpdate.code;
+            }
+
+            editor.executeEdits('ai-update', [{
+                range: range,
+                text: lastCodeUpdate.code,
+                forceMoveMarkers: true
+            }]);
+
+            // Push the updated code to React state so it stays synced
+            setCode(model.getValue());
+            setLastProcessedCodeUpdate(lastCodeUpdate);
+        }
+    }, [aiActions, lastProcessedCodeUpdate]);
 
     // ── Code Execution & Results ──
     const [runResults, setRunResults] = useState(null);
@@ -177,6 +287,56 @@ export default function AIInterview() {
             .finally(() => setProblemsLoading(false));
     }, []);
 
+    // ─── Resume Existing Interview Initialization ──────────────────────────
+    useEffect(() => {
+        if (urlId && currentUser && appPhase === 'setup') {
+            fetch(`http://localhost:3001/api/interviews/detail/${urlId}`)
+                .then(r => r.json())
+                .then(iv => {
+                    if (iv.error) return;
+
+                    // Populate state from saved interview
+                    setRole(iv.role);
+                    setCompany(iv.company);
+                    setLanguage(iv.language);
+                    setCode(iv.finalCode || '');
+                    setTranscript(iv.transcript || []);
+                    setSessionId(urlId); // Reconnect RTDB
+
+                    if (iv.problemId) {
+                        setSelectedProblem({ id: iv.problemId, title: iv.problemTitle, difficulty: iv.problemDifficulty });
+                    }
+                    if (iv.problemData) {
+                        setProblemData(iv.problemData);
+                    } else if (iv.problemId) {
+                        fetch('http://localhost:3001/api/generate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ problemStatement: iv.problemTitle, language: iv.language || 'python', problemId: iv.problemId })
+                        })
+                            .then(r => r.json())
+                            .then(data => { if (!data.error) setProblemData(data); })
+                            .catch(err => console.error("Fallback problem fetch failed:", err));
+                    }
+
+                    // Deduce phase from transcript or default
+                    const lastMsg = (iv.transcript || []).find(m => m.phase);
+                    if (lastMsg) setInterviewPhase(lastMsg.phase);
+
+                    // If it was already completed, jump to score
+                    if (iv.status === 'completed' && iv.scoreReport) {
+                        setScoreReport(iv.scoreReport);
+                        setAppPhase('score');
+                    } else {
+                        // Otherwise, drop them right back into the interview
+                        setAppPhase('interview');
+                        interviewStartTimeRef.current = Date.now() - ((iv.durationMinutes || 0) * 60000);
+                    }
+                })
+                .catch(console.error);
+        }
+    }, [urlId, currentUser, appPhase]);
+
     // Refetch when search changes
     useEffect(() => {
         const t = setTimeout(() => {
@@ -201,6 +361,36 @@ export default function AIInterview() {
             .catch(console.error)
             .finally(() => setHistoryLoading(false));
     }, [currentUser]);
+
+    // ─── Auto-Save Ongoing Interview ────────────────────────────────────────
+    useEffect(() => {
+        // Only auto-save if we are actively in an interview, have a valid urlId (from navigation), and aren't evaluating yet
+        if (appPhase !== 'interview' || !urlId || !currentUser) return;
+
+        const timer = setTimeout(() => {
+            fetch('http://localhost:3001/api/interviews/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: urlId, // Passing ID triggers an upsert in the backend
+                    userId: currentUser.uid,
+                    role, company, language,
+                    problemId: selectedProblem?.id,
+                    problemTitle: selectedProblem?.title || problemData?.problem?.title,
+                    problemDifficulty: selectedProblem?.difficulty || problemData?.problem?.difficulty,
+                    problemData: problemData,
+                    finalCode: code,
+                    transcript: transcriptRef.current,
+                    submissionCount,
+                    durationMinutes: interviewStartTimeRef.current
+                        ? Math.round((Date.now() - interviewStartTimeRef.current) / 60000)
+                        : 0
+                })
+            }).catch(err => console.error("Auto-save failed:", err));
+        }, 2000); // 2 second debounce
+
+        return () => clearTimeout(timer);
+    }, [urlId, currentUser, appPhase, transcript, code, interviewPhase, submissionCount, problemData]);
 
     // ─── Sarvam AI TTS ──────────────────────────────────────────────────────
 
@@ -657,6 +847,29 @@ export default function AIInterview() {
             setAiCode(boilerplate);
             setCode(boilerplate);
             setTranscript([]);
+
+            // Immediately create the Firestore document to reserve an ID
+            const initRes = await fetch('http://localhost:3001/api/interviews/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: currentUser.uid,
+                    role, company, language,
+                    problemId: selectedProblem.id,
+                    problemTitle: selectedProblem.title,
+                    problemDifficulty: selectedProblem.difficulty,
+                    problemData: data,
+                    finalCode: boilerplate,
+                    transcript: []
+                })
+            });
+            const initData = await initRes.json();
+            const initSessionId = initData.id || uuidv4(); // fallback just in case
+
+            // Set up Realtime DB sync session and update URL seamlessly
+            setSessionId(initSessionId);
+            navigate(`/aiinterview/${initSessionId}`, { replace: true });
+
             setInterviewPhase('opening');
             setPhaseIndex(0);
             setLiveAnalysis(null);
@@ -682,7 +895,8 @@ export default function AIInterview() {
                 problem: problemData?.problem || { title: selectedProblem?.title, description: selectedProblem?.description, difficulty: selectedProblem?.difficulty, constraints: [] },
                 role, company, interviewPhase: phase,
                 transcript: currentTranscript,
-                currentCode: currentCode || code, language
+                currentCode: currentCode || code, language,
+                sessionId
             };
             if (systemPromptOverride) {
                 bodyPayload.systemPromptOverride = systemPromptOverride;
@@ -695,13 +909,48 @@ export default function AIInterview() {
             });
             const data = await res.json();
             if (data.error) throw new Error(data.error);
-            const aiMsg = { role: 'ai', text: data.text, timestamp: Date.now() };
+
+            // ── Parse JSON envelope {text, nextPhase} from AI ──
+            let speakableText = data.text;
+            let aiNextPhase = null;
+            try {
+                // AI returns a JSON string; strip markdown blocks then try to parse it
+                const cleanedResponse = data.text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+                const parsed = JSON.parse(cleanedResponse);
+                if (parsed && typeof parsed.text === 'string') {
+                    speakableText = parsed.text;
+                    if (parsed.nextPhase && typeof parsed.nextPhase === 'string'
+                        && INTERVIEW_PHASES.includes(parsed.nextPhase)) {
+                        aiNextPhase = parsed.nextPhase;
+                    }
+                }
+            } catch {
+                // AI returned plain text (fallback) — use as-is
+            }
+
+            // Absolutely completely forbid phase advance if the candidate hasn't said a single word yet
+            if (currentTranscript.length === 0) {
+                aiNextPhase = null;
+            }
+
+            const aiMsg = { role: 'ai', text: speakableText, timestamp: Date.now() };
             const newTranscript = [...currentTranscript, aiMsg];
             setTranscript(newTranscript);
             transcriptRef.current = newTranscript;
-            // Real-time TTS: speak AI response via Sarvam AI
-            if (data.text?.trim()) {
-                speakWithSarvam(data.text.trim());
+
+            // ── AI-controlled phase transition ──
+            if (aiNextPhase) {
+                const nextIdx = INTERVIEW_PHASES.indexOf(aiNextPhase);
+                const currentIdx = INTERVIEW_PHASES.indexOf(phase);
+                if (nextIdx > currentIdx) {
+                    setPhaseIndex(nextIdx);
+                    setInterviewPhase(aiNextPhase);
+                }
+            }
+
+            // Speak the natural-language part only
+            if (speakableText?.trim()) {
+                speakWithSarvam(speakableText.trim());
             }
         } catch (err) {
             const errMsg = { role: 'ai', text: 'I had trouble responding. Please try again.', timestamp: Date.now() };
@@ -742,15 +991,7 @@ export default function AIInterview() {
         await handleUserSpeech(text);
     };
 
-    // ─── Advance interview phase ─────────────────────────────────────────────
-    const advancePhase = () => {
-        const next = phaseIndex + 1;
-        if (next >= INTERVIEW_PHASES.length) return;
-        const newPhase = INTERVIEW_PHASES[next];
-        setPhaseIndex(next);
-        setInterviewPhase(newPhase);
-        sendAiMessage(newPhase, transcriptRef.current, code);
-    };
+    // advancePhase is now AI-controlled — no user button
 
     // ─── End interview → evaluate ────────────────────────────────────────────
     const handleEndInterview = async () => {
@@ -786,6 +1027,7 @@ export default function AIInterview() {
                         problemId: selectedProblem?.id,
                         problemTitle: selectedProblem?.title || problemData?.problem?.title,
                         problemDifficulty: selectedProblem?.difficulty || problemData?.problem?.difficulty,
+                        problemData: problemData,
                         finalCode: code,
                         transcript: transcriptRef.current,
                         scoreReport: report,
@@ -811,6 +1053,31 @@ export default function AIInterview() {
         p.title?.toLowerCase().includes(problemSearch.toLowerCase()) ||
         p.related_topics?.toLowerCase().includes(problemSearch.toLowerCase())
     );
+
+    // ─── Delete & Restart ───────────────────────────────────────────────────
+    const handleDeleteInterview = async (id, e) => {
+        e.stopPropagation();
+        if (!window.confirm("Are you sure you want to delete this interview history?")) return;
+        try {
+            await fetch(`http://localhost:3001/api/interviews/${id}`, { method: 'DELETE' });
+            setPastInterviews(prev => prev.filter(iv => iv.id !== id));
+        } catch (err) {
+            alert("Failed to delete interview.");
+        }
+    };
+
+    const handleRestartInterview = (iv, e) => {
+        e.stopPropagation();
+        if (!window.confirm("Restart this interview? This will prep the setup page with the same role and problem.")) return;
+        setRole(iv.role || '');
+        setCompany(iv.company || '');
+        setLanguage(iv.language || 'python');
+        if (iv.problemId) {
+            setSelectedProblem({ id: iv.problemId, title: iv.problemTitle, difficulty: iv.problemDifficulty });
+        }
+        setAppPhase('setup');
+        navigate('/aiinterview', { replace: true });
+    };
 
     // ─── Render: SETUP ────────────────────────────────────────────────────────
     if (appPhase === 'setup') {
@@ -870,36 +1137,56 @@ export default function AIInterview() {
                                         const date = iv.createdAt ? new Date(iv.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
                                         const diffColor = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' }[iv.problemDifficulty] || 'var(--txt3)';
                                         return (
-                                            <div key={iv.id} onClick={() => navigate('/evaluation/' + iv.id)} style={{
+                                            <div key={iv.id} onClick={() => navigate(iv.status === 'in-progress' ? `/aiinterview/${iv.id}` : `/evaluation/${iv.id}`)} style={{
                                                 background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem',
                                                 display: 'flex', flexDirection: 'column', gap: '8px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                                             }}
                                                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ai)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                                                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none' }}
                                             >
-                                                <div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                                        <User size={13} color="var(--ai)" />
-                                                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{iv.role || 'Unknown Role'}</span>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                    <div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                                            <User size={13} color="var(--ai)" />
+                                                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{iv.role || 'Unknown Role'}</span>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <Building size={12} color="var(--txt3)" />
+                                                            <span style={{ fontSize: '0.78rem', color: 'var(--txt2)' }}>{iv.company || '-'}</span>
+                                                        </div>
                                                     </div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                        <Building size={12} color="var(--txt3)" />
-                                                        <span style={{ fontSize: '0.78rem', color: 'var(--txt2)' }}>{iv.company || '-'}</span>
+                                                    <div style={{ display: 'flex', gap: '4px', opacity: 0.7 }}>
+                                                        <button onClick={(e) => handleRestartInterview(iv, e)} title="Restart Interview" style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                            <RefreshCcw size={14} />
+                                                        </button>
+                                                        <button onClick={(e) => handleDeleteInterview(iv.id, e)} title="Delete Interview" style={{ background: 'transparent', border: 'none', color: 'var(--fail)', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 71, 67, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                            <Trash2 size={14} />
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div style={{ fontSize: '0.78rem', color: 'var(--txt2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'var(--surface2)', padding: '6px 8px', borderRadius: '6px' }} title={iv.problemTitle}>
+                                                <div style={{ fontSize: '0.78rem', color: 'var(--txt2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'var(--surface2)', padding: '6px 8px', borderRadius: '6px', marginBottom: '4px' }} title={iv.problemTitle}>
                                                     {iv.problemTitle || 'Unknown'}
                                                     {iv.problemDifficulty && <span style={{ marginLeft: '6px', color: diffColor, fontWeight: 600 }}>{iv.problemDifficulty}</span>}
                                                 </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-                                                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: scoreColor, lineHeight: 1 }}>
-                                                        {score != null ? score : '-'}
-                                                        <span style={{ fontSize: '0.7rem', color: 'var(--txt3)', fontWeight: 500, marginLeft: '2px' }}>/100</span>
+
+                                                {iv.status === 'in-progress' ? (
+                                                    <div style={{ marginTop: '4px', padding: '6px 0', borderTop: '1px dashed var(--border)' }}>
+                                                        <button style={{ width: '100%', background: 'var(--ai)', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 0', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                            <Play size={12} fill="currentColor" /> Resume
+                                                        </button>
                                                     </div>
-                                                    <span style={{ fontSize: '0.72rem', fontWeight: 700, background: hireColor + '22', color: hireColor, padding: '3px 10px', borderRadius: '99px' }}>
-                                                        {hireShort}
-                                                    </span>
-                                                </div>
+                                                ) : (
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
+                                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: scoreColor, lineHeight: 1 }}>
+                                                            {score != null ? score : '-'}
+                                                            <span style={{ fontSize: '0.7rem', color: 'var(--txt3)', fontWeight: 500, marginLeft: '2px' }}>/100</span>
+                                                        </div>
+                                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, background: hireColor + '22', color: hireColor, padding: '3px 10px', borderRadius: '99px' }}>
+                                                            {hireShort}
+                                                        </span>
+                                                    </div>
+                                                )}
+
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--txt3)', marginTop: '2px' }}>
                                                     <span>{date}</span>
                                                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -1399,12 +1686,7 @@ export default function AIInterview() {
                             </button>
                         </div>
                     )}
-                    {phaseIndex < INTERVIEW_PHASES.length - 1 && (
-                        <button onClick={advancePhase} disabled={isAiThinking}
-                            style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', fontWeight: 600, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--txt)', borderRadius: '8px', cursor: 'pointer', transition: 'background 0.2s' }}>
-                            Next Phase
-                        </button>
-                    )}
+                    {/* Phase transitions are controlled by the AI */}
                     <button onClick={handleEndInterview}
                         style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', fontWeight: 600, background: 'linear-gradient(135deg, #ef4743, #d93834)', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 10px rgba(239,71,67,0.3)' }}>
                         <PhoneOff size={13} /> End Interview
@@ -1525,15 +1807,79 @@ export default function AIInterview() {
                         </div>
                     </div>
 
-                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                    {/* AI Banner Overlay */}
+                    {activeBanner && (
+                        <div style={{
+                            position: 'absolute', top: 48, left: 0, right: 0, zIndex: 20,
+                            background: activeBanner.level === 'warning' ? 'rgba(255, 161, 22, 0.95)' :
+                                activeBanner.level === 'success' ? 'rgba(0, 184, 163, 0.95)' : 'rgba(59, 130, 246, 0.95)',
+                            color: '#fff', padding: '8px 16px', fontSize: '0.8rem', fontWeight: 600,
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                            animation: 'slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                        }}>
+                            {activeBanner.level === 'warning' ? <AlertCircle size={16} /> :
+                                activeBanner.level === 'success' ? <CheckCircle2 size={16} /> : <Info size={16} />}
+                            {activeBanner.text}
+                            <button onClick={() => setActiveBanner(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer' }}>
+                                <X size={14} />
+                            </button>
+                        </div>
+                    )}
+
+                    <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
                         <Editor
                             language={language === 'cpp' ? 'cpp' : language === 'c' ? 'c' : language}
                             value={code}
                             theme="vs-dark"
                             onChange={(val) => { setCode(val || ''); scheduleAnalysis(val || ''); }}
-                            onMount={(editor) => { editorRef.current = editor; }}
+                            onMount={(editor, monaco) => {
+                                editorRef.current = editor;
+                                window.monaco = monaco;
+                            }}
                             options={{ fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false, fontFamily: 'JetBrains Mono, monospace', padding: { top: 12 }, wordWrap: 'on' }}
                         />
+
+                        {/* AI Inline Comment Layer */}
+                        {editorRef.current && commentActions.map((c, i) => (
+                            <div key={`comment-${i}`} style={{
+                                position: 'absolute',
+                                top: Math.max(0, editorRef.current.getTopForLineNumber(c.line) - editorRef.current.getScrollTop() + 12),
+                                right: '24px',
+                                background: 'var(--surface2)',
+                                border: '1px solid rgba(168,85,247,0.4)',
+                                padding: '4px 10px',
+                                borderRadius: '12px 12px 0 12px',
+                                fontSize: '0.7rem', color: '#e8e8e8',
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                                zIndex: 5,
+                                pointerEvents: 'none'
+                            }}>
+                                <MessageCircle size={12} color="#a855f7" /> {c.text}
+                            </div>
+                        ))}
+
+                        {/* AI Cursor Badges */}
+                        {editorRef.current && cursorActions.map((c, i) => (
+                            <div key={`cursor-${i}`} style={{
+                                position: 'absolute',
+                                top: Math.max(0, editorRef.current.getTopForLineNumber(c.line) - editorRef.current.getScrollTop() + 12),
+                                left: '4px',
+                                background: '#a855f7',
+                                color: '#fff',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontSize: '0.65rem', fontWeight: 800,
+                                display: 'flex', alignItems: 'center', gap: '4px',
+                                boxShadow: '0 0 10px rgba(168,85,247,0.6)',
+                                zIndex: 5,
+                                pointerEvents: 'none',
+                                animation: 'pulse 2s infinite'
+                            }}>
+                                <Navigation size={10} style={{ transform: 'rotate(90deg)' }} /> AI
+                            </div>
+                        ))}
                     </div>
 
                     {/* Console/Results Panel */}
