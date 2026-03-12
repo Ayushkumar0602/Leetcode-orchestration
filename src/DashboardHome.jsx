@@ -196,9 +196,9 @@ export default function DashboardHome() {
         setStatsLoading(true);
 
         Promise.all([
-            fetch(`http://localhost:3001/api/stats/user/${currentUser.uid}`).then(r => r.json()),
-            fetch(`http://localhost:3001/api/interviews/${currentUser.uid}`).then(r => r.json()),
-            fetch(`http://localhost:3001/api/profile/${currentUser.uid}`).then(r => r.json())
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/stats/user/${currentUser.uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/${currentUser.uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${currentUser.uid}`).then(r => r.json())
         ])
             .then(([statsData, interviewsData, profileData]) => {
                 if (!statsData.error) {

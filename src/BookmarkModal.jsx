@@ -20,7 +20,7 @@ export default function BookmarkModal({ problemId, userId, onClose }) {
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
-        fetch(`http://localhost:3001/api/lists/${userId}`)
+        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/lists/${userId}`)
             .then(r => r.json())
             .then(data => setLists(data.lists || []))
             .catch(console.error)
@@ -34,10 +34,10 @@ export default function BookmarkModal({ problemId, userId, onClose }) {
         const inList = isInList(list);
         try {
             if (inList) {
-                await fetch(`http://localhost:3001/api/lists/${list.id}/problems/${problemId}`, { method: 'DELETE' });
+                await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/lists/${list.id}/problems/${problemId}`, { method: 'DELETE' });
                 setLists(prev => prev.map(l => l.id === list.id ? { ...l, problemIds: l.problemIds.filter(id => id !== String(problemId)) } : l));
             } else {
-                await fetch(`http://localhost:3001/api/lists/${list.id}/add`, {
+                await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/lists/${list.id}/add`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ problemId })
@@ -52,7 +52,7 @@ export default function BookmarkModal({ problemId, userId, onClose }) {
         if (!newListName.trim()) return;
         setCreating(true);
         try {
-            const res = await fetch('http://localhost:3001/api/lists', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/lists', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, name: newListName.trim() })

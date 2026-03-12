@@ -332,7 +332,7 @@ export default function AIInterview() {
     // ─── Load problems ──────────────────────────────────────────────────────
     useEffect(() => {
         setProblemsLoading(true);
-        fetch('http://localhost:3001/api/problems?page=1&limit=50')
+        fetch('https://leetcode-orchestration-55z3.onrender.com/api/problems?page=1&limit=50')
             .then(r => r.json())
             .then(d => { if (d.data) setProblems(d.data); })
             .catch(console.error)
@@ -342,7 +342,7 @@ export default function AIInterview() {
     // ─── Resume Existing Interview Initialization ──────────────────────────
     useEffect(() => {
         if (urlId && currentUser && appPhase === 'setup') {
-            fetch(`http://localhost:3001/api/interviews/detail/${urlId}`)
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/detail/${urlId}`)
                 .then(r => r.json())
                 .then(iv => {
                     if (iv.error) return;
@@ -361,7 +361,7 @@ export default function AIInterview() {
                     if (iv.problemData) {
                         setProblemData(iv.problemData);
                     } else if (iv.problemId) {
-                        fetch('http://localhost:3001/api/generate', {
+                        fetch('https://leetcode-orchestration-55z3.onrender.com/api/generate', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ problemStatement: iv.problemTitle, language: iv.language || 'python', problemId: iv.problemId })
@@ -392,7 +392,7 @@ export default function AIInterview() {
     // Refetch when search changes
     useEffect(() => {
         const t = setTimeout(() => {
-            fetch(`http://localhost:3001/api/problems?page=1&limit=50&search=${encodeURIComponent(problemSearch)}`)
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/problems?page=1&limit=50&search=${encodeURIComponent(problemSearch)}`)
                 .then(r => r.json())
                 .then(d => { if (d.data) setProblems(d.data); })
                 .catch(console.error);
@@ -407,7 +407,7 @@ export default function AIInterview() {
     useEffect(() => {
         if (!currentUser) return;
         setHistoryLoading(true);
-        fetch(`http://localhost:3001/api/interviews/${currentUser.uid}`)
+        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/${currentUser.uid}`)
             .then(r => r.json())
             .then(d => setPastInterviews(d.interviews || []))
             .catch(console.error)
@@ -420,7 +420,7 @@ export default function AIInterview() {
         if (appPhase !== 'interview' || !urlId || !currentUser) return;
 
         const timer = setTimeout(() => {
-            fetch('http://localhost:3001/api/interviews/save', {
+            fetch('https://leetcode-orchestration-55z3.onrender.com/api/interviews/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -568,7 +568,7 @@ export default function AIInterview() {
         };
 
         try {
-            const res = await fetch('http://localhost:3001/api/sarvam/tts', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/sarvam/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: text.trim(), speaker })
@@ -757,7 +757,7 @@ export default function AIInterview() {
         if (!problemData || !currentCode || currentCode.length < 20 || appPhase !== 'interview') return;
         const timer = setTimeout(async () => {
             try {
-                const res = await fetch('http://localhost:3001/api/interview/analyze', {
+                const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/interview/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code: currentCode, language, problem: problemData.problem })
@@ -786,7 +786,7 @@ export default function AIInterview() {
         setConsoleOpen(true);
         try {
             const fullCode = code + '\n' + getWrapper();
-            const res = await fetch('http://localhost:3001/api/execute', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/execute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: fullCode, language, testCases: primaryCases })
@@ -818,7 +818,7 @@ export default function AIInterview() {
         setConsoleOpen(true);
         try {
             const fullCode = code + '\n' + getWrapper();
-            const res = await fetch('http://localhost:3001/api/submit', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: fullCode, language, testCases: allCases })
@@ -882,7 +882,7 @@ export default function AIInterview() {
 
         try {
             // Load AI boilerplate + test cases for the problem
-            const res = await fetch('http://localhost:3001/api/generate', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -901,7 +901,7 @@ export default function AIInterview() {
             setTranscript([]);
 
             // Immediately create the Firestore document to reserve an ID
-            const initRes = await fetch('http://localhost:3001/api/interviews/save', {
+            const initRes = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/interviews/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -954,7 +954,7 @@ export default function AIInterview() {
                 bodyPayload.systemPromptOverride = systemPromptOverride;
             }
 
-            const res = await fetch('http://localhost:3001/api/interview/chat', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/interview/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bodyPayload)
@@ -1076,7 +1076,7 @@ export default function AIInterview() {
         setIsListening(false);
         setAppPhase('evaluating');
         try {
-            const res = await fetch('http://localhost:3001/api/interview/evaluate', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/interview/evaluate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1094,7 +1094,7 @@ export default function AIInterview() {
                 ? Math.round((Date.now() - interviewStartTimeRef.current) / 60000)
                 : 0;
             if (currentUser) {
-                fetch('http://localhost:3001/api/interviews/save', {
+                fetch('https://leetcode-orchestration-55z3.onrender.com/api/interviews/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1112,7 +1112,7 @@ export default function AIInterview() {
                     })
                 }).then(r => r.json()).then(saved => {
                     // refresh history
-                    fetch(`http://localhost:3001/api/interviews/${currentUser.uid}`)
+                    fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/${currentUser.uid}`)
                         .then(r2 => r2.json()).then(d => setPastInterviews(d.interviews || []));
                 }).catch(console.error);
             }
@@ -1135,7 +1135,7 @@ export default function AIInterview() {
         e.stopPropagation();
         if (!window.confirm("Are you sure you want to delete this interview history?")) return;
         try {
-            await fetch(`http://localhost:3001/api/interviews/${id}`, { method: 'DELETE' });
+            await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/${id}`, { method: 'DELETE' });
             setPastInterviews(prev => prev.filter(iv => iv.id !== id));
         } catch (err) {
             alert("Failed to delete interview.");
@@ -1380,7 +1380,7 @@ export default function AIInterview() {
                                                         if (isPreviewing) return;
                                                         setPreviewLoading(voice.id);
                                                         try {
-                                                            const res = await fetch('http://localhost:3001/api/sarvam/tts', {
+                                                            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/sarvam/tts', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ text: PREVIEW_TEXT, speaker: voice.speaker })

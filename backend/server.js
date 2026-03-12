@@ -11,7 +11,24 @@ const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orde
 const { ref: rtdbRef, push } = require('firebase/database');
 
 const app = express();
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:5173', // Vite default local
+    'http://localhost:3000', // Alternative local
+    'https://aiinterview-20512.web.app', // Firebase hosted app
+    'https://aiinterview-20512.firebaseapp.com'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 
 const Razorpay = require('razorpay');

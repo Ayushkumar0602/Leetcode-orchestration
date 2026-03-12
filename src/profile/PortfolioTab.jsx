@@ -221,7 +221,7 @@ export default function PortfolioTab({ uid, profile, onSave }) {
             const rdr = new FileReader();
             rdr.onload = async () => {
                 const b64 = rdr.result.split(',')[1];
-                const res = await fetch('http://localhost:3001/api/resume/parse', {
+                const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/resume/parse', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ base64Data: b64, mimeType: file.type })
                 });

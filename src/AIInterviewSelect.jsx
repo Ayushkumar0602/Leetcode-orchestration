@@ -61,7 +61,7 @@ export default function AIInterviewSelect() {
 
     // Fetch Metadata for companies
     useEffect(() => {
-        fetch('http://localhost:3001/api/metadata')
+        fetch('https://leetcode-orchestration-55z3.onrender.com/api/metadata')
             .then(r => r.json())
             .then(d => {
                 if (d.companies) setMetadataCompanies(d.companies);
@@ -73,7 +73,7 @@ export default function AIInterviewSelect() {
     useEffect(() => {
         if (isDsaModalOpen && problemMode === 'manual') {
             setProblemsLoading(true);
-            fetch('http://localhost:3001/api/problems?page=1&limit=50')
+            fetch('https://leetcode-orchestration-55z3.onrender.com/api/problems?page=1&limit=50')
                 .then(r => r.json())
                 .then(d => { if (d.data) setProblems(d.data); })
                 .catch(console.error)
@@ -85,7 +85,7 @@ export default function AIInterviewSelect() {
     useEffect(() => {
         if (isDsaModalOpen && problemMode === 'manual') {
             const t = setTimeout(() => {
-                fetch(`http://localhost:3001/api/problems?page=1&limit=50&search=${encodeURIComponent(problemSearch)}`)
+                fetch(`https://leetcode-orchestration-55z3.onrender.com/api/problems?page=1&limit=50&search=${encodeURIComponent(problemSearch)}`)
                     .then(r => r.json())
                     .then(d => { if (d.data) setProblems(d.data); })
                     .catch(console.error);
@@ -121,7 +121,7 @@ export default function AIInterviewSelect() {
             // Random mode - fetch from API
             try {
                 setIsStarting(true);
-                const res = await fetch(`http://localhost:3001/api/problems/random?company=${encodeURIComponent(company)}`);
+                const res = await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/problems/random?company=${encodeURIComponent(company)}`);
                 const data = await res.json();
 
                 if (data.error) {

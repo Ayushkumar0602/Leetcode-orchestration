@@ -57,7 +57,7 @@ export default function ProblemList() {
 
     // --- Data fetching ---
     useEffect(() => {
-        fetch('http://localhost:3001/api/metadata')
+        fetch('https://leetcode-orchestration-55z3.onrender.com/api/metadata')
             .then(r => r.json())
             .then(data => {
                 if (!data.error) setMetadata({
@@ -70,7 +70,7 @@ export default function ProblemList() {
     useEffect(() => {
         if (!currentUser) { setStatsLoading(false); return; }
         setStatsLoading(true);
-        fetch(`http://localhost:3001/api/stats/user/${currentUser.uid}`)
+        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/stats/user/${currentUser.uid}`)
             .then(r => r.json())
             .then(data => { if (!data.error) { setUserStats(data.userStats); setTotalCounts(data.totalCounts); } })
             .catch(console.error).finally(() => setStatsLoading(false));
@@ -78,7 +78,7 @@ export default function ProblemList() {
 
     useEffect(() => {
         if (!currentUser) return;
-        fetch(`http://localhost:3001/api/lists/${currentUser.uid}`)
+        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/lists/${currentUser.uid}`)
             .then(r => r.json())
             .then(data => setUserLists(data.lists || []))
             .catch(console.error);
@@ -90,7 +90,7 @@ export default function ProblemList() {
             const topicQuery = selectedTopics.map(t => t.value).join(',');
             const companyQuery = selectedCompanies.map(c => c.value).join(',');
             const params = new URLSearchParams({ page, limit: 20, search, topics: topicQuery, companies: companyQuery });
-            fetch(`http://localhost:3001/api/problems?${params}`)
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/problems?${params}`)
                 .then(r => r.json())
                 .then(data => { if (data.data) { setProblems(data.data); setTotalPages(data.totalPages); } })
                 .catch(console.error).finally(() => setLoading(false));
@@ -121,7 +121,7 @@ export default function ProblemList() {
         if (!newListName.trim() || !currentUser) return;
         setCreatingList(true);
         try {
-            const res = await fetch('http://localhost:3001/api/lists', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/lists', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: currentUser.uid, name: newListName.trim() })
@@ -477,7 +477,7 @@ export default function ProblemList() {
                     onClose={() => {
                         setBookmarkModal(null);
                         // Refresh lists to update bookmark indicators
-                        fetch(`http://localhost:3001/api/lists/${currentUser.uid}`)
+                        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/lists/${currentUser.uid}`)
                             .then(r => r.json()).then(d => setUserLists(d.lists || [])).catch(console.error);
                     }}
                 />

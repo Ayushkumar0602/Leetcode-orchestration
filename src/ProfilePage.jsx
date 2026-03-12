@@ -214,9 +214,9 @@ export default function ProfilePage() {
     useEffect(() => {
         if (!currentUser) { setLoading(false); return; }
         Promise.all([
-            fetch(`http://localhost:3001/api/stats/user/${currentUser.uid}`).then(r => r.json()),
-            fetch(`http://localhost:3001/api/interviews/${currentUser.uid}`).then(r => r.json()),
-            fetch(`http://localhost:3001/api/profile/${currentUser.uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/stats/user/${currentUser.uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/${currentUser.uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${currentUser.uid}`).then(r => r.json()),
         ]).then(([s, inv, prof]) => {
             if (!s.error) { setUserStats(s.userStats); setTotalCounts(s.totalCounts); }
             if (!inv.error && inv.interviews) { setAllInterviews(inv.interviews); setInterviews(inv.interviews.slice(0, 8)); }
@@ -226,7 +226,7 @@ export default function ProfilePage() {
 
             // Auto-sync Auth data to Firestore Profile doc so PublicProfile has access to it
             if (currentUser.displayName && (p.displayName !== currentUser.displayName || p.photoURL !== currentUser.photoURL || p.email !== currentUser.email)) {
-                fetch(`http://localhost:3001/api/profile/${currentUser.uid}`, {
+                fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${currentUser.uid}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ displayName: currentUser.displayName, email: currentUser.email, photoURL: currentUser.photoURL })
@@ -238,7 +238,7 @@ export default function ProfilePage() {
     const saveProfile = async (data) => {
         if (!currentUser) return;
         try {
-            await fetch(`http://localhost:3001/api/profile/${currentUser.uid}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${currentUser.uid}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             setProfile(p => ({ ...p, ...data }));
         } catch (e) { console.error(e); }
     };

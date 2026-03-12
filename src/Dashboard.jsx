@@ -233,7 +233,7 @@ export default function Dashboard() {
         setAiError(null);
         setAiPanelOpen(true);
         try {
-            const res = await fetch('http://localhost:3001/api/generate', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ problemStatement: textToUse, language: langToUse, problemId: overrideId })
@@ -290,7 +290,7 @@ export default function Dashboard() {
 
                 // Fetch live stats in background
                 if (params.id) {
-                    fetch(`http://localhost:3001/api/problems/${params.id}`)
+                    fetch(`https://leetcode-orchestration-55z3.onrender.com/api/problems/${params.id}`)
                         .then(r => r.json())
                         .then(d => {
                             if (d.acceptance_rate || d.live_submissions !== undefined) {
@@ -316,7 +316,7 @@ export default function Dashboard() {
                 setIsRouted(true);
                 try {
                     // Fetch the problem description from the backend dataset
-                    const res = await fetch(`http://localhost:3001/api/problems/${routeId}`);
+                    const res = await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/problems/${routeId}`);
                     if (!res.ok) throw new Error("Problem not found");
 
                     const problem = await res.json();
@@ -359,7 +359,7 @@ export default function Dashboard() {
         setConsoleOpen(true);
         try {
             const fullCode = code + '\n' + getWrapper();
-            const res = await fetch('http://localhost:3001/api/execute', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/execute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: fullCode, language, testCases: primaryCases })
@@ -373,7 +373,7 @@ export default function Dashboard() {
                 const diff = difficulty || location.state?.problemParams?.difficulty;
                 if (activeProblemId) {
                     const allPassed = (data.results || []).every(r => r.success);
-                    fetch('http://localhost:3001/api/submissions/save', {
+                    fetch('https://leetcode-orchestration-55z3.onrender.com/api/submissions/save', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -411,7 +411,7 @@ export default function Dashboard() {
         try {
             const fullCode = code + '\n' + getWrapper();
             const allCases = [...primaryCases, ...submitCases];
-            const res = await fetch('http://localhost:3001/api/submit', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: fullCode, language, testCases: allCases })
@@ -453,7 +453,7 @@ export default function Dashboard() {
                             const activeProblemId = routeId || location.state?.problemParams?.id;
                             const d = difficulty || location.state?.problemParams?.difficulty;
                             if (activeProblemId) {
-                                fetch('http://localhost:3001/api/stats/submit', {
+                                fetch('https://leetcode-orchestration-55z3.onrender.com/api/stats/submit', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ problemId: activeProblemId, isAccepted: data.accepted })
@@ -477,7 +477,7 @@ export default function Dashboard() {
                                                 ? 'Runtime Error'
                                                 : 'Wrong Answer';
 
-                                    fetch('http://localhost:3001/api/submissions/save', {
+                                    fetch('https://leetcode-orchestration-55z3.onrender.com/api/submissions/save', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
@@ -518,7 +518,7 @@ export default function Dashboard() {
         if (!activeProblemId) return;
         setHistoryLoading(true);
         try {
-            const res = await fetch(`http://localhost:3001/api/submissions/${currentUser.uid}/${activeProblemId}`);
+            const res = await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/submissions/${currentUser.uid}/${activeProblemId}`);
             const data = await res.json();
             setSubmissionHistory(data.submissions || []);
         } catch (err) {

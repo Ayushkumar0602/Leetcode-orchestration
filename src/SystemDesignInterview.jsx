@@ -150,7 +150,7 @@ export default function SystemDesignInterview() {
         stopSpeech();
         setIsSpeaking(true);
         try {
-            const res = await fetch('http://localhost:3001/api/elevenlabs/tts', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/elevenlabs/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: text.trim(), voiceId: selectedVoice.voiceId })
@@ -218,7 +218,7 @@ export default function SystemDesignInterview() {
         setIsAiThinking(true);
         try {
             const wbText = whiteboardText || 'Whiteboard is empty';
-            const res = await fetch('http://localhost:3001/api/systemdesign/chat', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/systemdesign/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -264,7 +264,7 @@ export default function SystemDesignInterview() {
         setTerminalOutput('Running...');
         setTerminalOpen(true);
         try {
-            const res = await fetch('http://localhost:3001/api/execute', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/execute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, language, input: '' })
@@ -552,7 +552,7 @@ export default function SystemDesignInterview() {
         stopSpeech();
         setAppPhase('evaluating');
         try {
-            const res = await fetch('http://localhost:3001/api/systemdesign/evaluate', {
+            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/systemdesign/evaluate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ topic, role, company, transcript: transcriptRef.current, finalCode: code, whiteboardText })
@@ -560,7 +560,7 @@ export default function SystemDesignInterview() {
             const report = await res.json();
             setScoreReport(report);
             // Save to Firestore
-            await fetch('http://localhost:3001/api/systemdesign/save', {
+            await fetch('https://leetcode-orchestration-55z3.onrender.com/api/systemdesign/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
