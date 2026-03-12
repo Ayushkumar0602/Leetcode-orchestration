@@ -8,7 +8,8 @@ const { runScraperInDocker } = require('./scraper');
 const { parseResumeWithAI } = require('./resumeParser');
 const { db, rtdb } = require('./firebase');
 const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where } = require('firebase/firestore');
-const { ref: rtdbRef, push } = require('firebase/database');
+const { ref: rtdbRef, push, set, remove, get } = require('firebase/database');
+const UAParser = require('ua-parser-js');
 
 const app = express();
 const allowedOrigins = [
@@ -38,6 +39,81 @@ const razorpayParams = {
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 };
 const razorpay = new Razorpay(razorpayParams);
+
+// --- Auth & Session Routes ---
+app.post('/api/auth/session', async (req, res) => {
+    const { uid } = req.body;
+    if (!uid) return res.status(400).json({ error: 'uid required' });
+
+    try {
+        const parser = new UAParser(req.headers['user-agent']);
+        const result = parser.getResult();
+        
+        let deviceType = 'Computer';
+        if (result.device.type === 'mobile') deviceType = 'Smartphone';
+        else if (result.device.type === 'tablet') deviceType = 'Tablet';
+        
+        const os = result.os.name || 'Unknown OS';
+        const browser = result.browser.name || 'Unknown Browser';
+        const deviceStr = `${browser} · ${os}`; // e.g. "Chrome · macOS"
+        
+        const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'Unknown IP';
+        const time = new Date().toISOString();
+
+        const sessionData = {
+            deviceStr,
+            deviceType,
+            ip,
+            time,
+            lastActive: time
+        };
+
+        const sessionsRef = rtdbRef(rtdb, `users/${uid}/sessions`);
+        const newSessionRef = push(sessionsRef);
+        await set(newSessionRef, sessionData);
+
+        res.json({ success: true, sessionId: newSessionRef.key, sessionData });
+    } catch (err) {
+        console.error("Session creation failed", err);
+        res.status(500).json({ success: false, error: "Session creation failed" });
+    }
+});
+
+app.delete('/api/auth/session/:uid/:sessionId', async (req, res) => {
+    const { uid, sessionId } = req.params;
+    try {
+        const sessionRef = rtdbRef(rtdb, `users/${uid}/sessions/${sessionId}`);
+        await remove(sessionRef);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: "Failed to remove session" });
+    }
+});
+
+app.delete('/api/auth/sessions/other/:uid/:currentSessionId', async (req, res) => {
+    const { uid, currentSessionId } = req.params;
+    try {
+        const sessionsRef = rtdbRef(rtdb, `users/${uid}/sessions`);
+        const snapshot = await get(sessionsRef);
+        
+        if (snapshot.exists()) {
+            const sessions = snapshot.val();
+            const promises = [];
+            
+            for (const [key, _] of Object.entries(sessions)) {
+                if (key !== currentSessionId) {
+                    const sessionRef = rtdbRef(rtdb, `users/${uid}/sessions/${key}`);
+                    promises.push(remove(sessionRef));
+                }
+            }
+            
+            await Promise.all(promises);
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: "Failed to remove other sessions" });
+    }
+});
 
 // --- Payment Routes ---
 app.post('/api/create-order', async (req, res) => {

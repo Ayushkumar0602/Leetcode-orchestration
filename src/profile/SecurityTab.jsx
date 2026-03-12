@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import { Shield, Lock, Clock, Monitor, Smartphone, Key, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Shield, Lock, Clock, Monitor, Smartphone, Tablet, Key, AlertTriangle } from 'lucide-react';
+import { ref, onValue } from 'firebase/database';
+import { rtdb } from '../firebase';
 
 const glass = { background: 'rgba(20,22,30,0.65)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '1.5rem' };
 
+// eslint-disable-next-line no-unused-vars
 const Row = ({ icon: Icon, color, label, sub, children }) => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -16,14 +19,51 @@ const Row = ({ icon: Icon, color, label, sub, children }) => (
 export default function SecurityTab({ currentUser }) {
     const [twoFA, setTwoFA] = useState(false);
     const [sessionWipe, setSessionWipe] = useState(false);
+    const [sessions, setSessions] = useState([]);
 
     const isGoogle = currentUser?.providerData?.[0]?.providerId === 'google.com';
 
-    const loginHistory = [
-        { device: 'Chrome · macOS', time: 'Today, ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }), icon: Monitor },
-        { device: 'Chrome · macOS', time: 'Yesterday', icon: Monitor },
-        { device: 'Safari · iOS', time: '2 days ago', icon: Smartphone },
-    ];
+    useEffect(() => {
+        if (!currentUser?.uid) return;
+        const sessionsRef = ref(rtdb, `users/${currentUser.uid}/sessions`);
+        const unsubscribe = onValue(sessionsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const sessionList = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                })).sort((a, b) => new Date(b.time) - new Date(a.time));
+                setSessions(sessionList);
+            } else {
+                setSessions([]);
+            }
+        });
+        return () => unsubscribe();
+    }, [currentUser]);
+
+    const handleSignOutOtherSessions = async () => {
+        const currentSessionId = localStorage.getItem('currentSessionId');
+        if (!currentSessionId || !currentUser?.uid) return;
+        
+        try {
+            await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/auth/sessions/other/${currentUser.uid}/${currentSessionId}`, {
+                method: 'DELETE'
+            });
+            setSessionWipe(true);
+            setTimeout(() => setSessionWipe(false), 3000);
+        } catch (err) {
+            console.error("Failed to wipe sessions", err);
+        }
+    };
+
+    const getIcon = (type) => {
+        if (type === 'Smartphone') return Smartphone;
+        if (type === 'Tablet') return Tablet;
+        return Monitor;
+    };
+
+    const activeSession = sessions.find(s => s.id === localStorage.getItem('currentSessionId')) || sessions[0] || {};
+    const otherSessionsCount = sessions.filter(s => s.id !== localStorage.getItem('currentSessionId')).length;
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -64,12 +104,14 @@ export default function SecurityTab({ currentUser }) {
                     <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Monitor size={16} color="#f59e0b" /> Active Sessions
                     </div>
-                    <Row icon={Monitor} color="#10b981" label="Current Session" sub="Chrome · macOS · India">
+                    <Row icon={getIcon(activeSession.deviceType)} color="#10b981" label="Current Session" sub={`${activeSession.deviceStr || 'Unknown Browser'} · ${activeSession.ip || 'Unknown IP'}`}>
                         <span style={{ fontSize: '0.7rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', borderRadius: '6px', padding: '3px 8px' }}>Active</span>
                     </Row>
-                    <button onClick={() => setSessionWipe(true)} style={{ width: '100%', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', padding: '10px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}>
-                        Sign Out All Other Sessions
-                    </button>
+                    {otherSessionsCount > 0 && (
+                        <button onClick={handleSignOutOtherSessions} style={{ width: '100%', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', padding: '10px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}>
+                            Sign Out All Other Sessions ({otherSessionsCount})
+                        </button>
+                    )}
                     {sessionWipe && <p style={{ fontSize: '0.72rem', color: '#10b981', marginTop: '8px', textAlign: 'center' }}>✓ All other sessions have been revoked.</p>}
                 </div>
             </div>
@@ -80,16 +122,25 @@ export default function SecurityTab({ currentUser }) {
                     <Clock size={16} color="#3b82f6" /> Login History
                 </div>
                 <p style={{ fontSize: '0.78rem', color: 'var(--txt3)', marginBottom: '1rem' }}>Recent sign-in activity</p>
-                {loginHistory.map((entry, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', background: i === 0 ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${i === 0 ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)'}`, marginBottom: '8px' }}>
-                        <entry.icon size={14} color={i === 0 ? '#10b981' : 'var(--txt3)'} />
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>{entry.device}</div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--txt3)' }}>{entry.time}</div>
+                {sessions.map((session) => {
+                    const currentSessionId = localStorage.getItem('currentSessionId');
+                    const isCurrent = session.id === currentSessionId;
+                    const IconComp = getIcon(session.deviceType);
+                    const formattedTime = new Date(session.time).toLocaleString('en-US', {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    return (
+                        <div key={session.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', background: isCurrent ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${isCurrent ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)'}`, marginBottom: '8px' }}>
+                            <IconComp size={14} color={isCurrent ? '#10b981' : 'var(--txt3)'} />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>{session.deviceStr}</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--txt3)' }}>{formattedTime} · IP: {session.ip}</div>
+                            </div>
+                            {isCurrent && <span style={{ fontSize: '0.65rem', color: '#10b981', background: 'rgba(16,185,129,0.12)', borderRadius: '6px', padding: '2px 8px', fontWeight: 700 }}>Current</span>}
                         </div>
-                        {i === 0 && <span style={{ fontSize: '0.65rem', color: '#10b981', background: 'rgba(16,185,129,0.12)', borderRadius: '6px', padding: '2px 8px', fontWeight: 700 }}>Current</span>}
-                    </div>
-                ))}
+                    );
+                })}
 
                 {/* Security tips */}
                 <div style={{ marginTop: '1.5rem', background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', padding: '14px' }}>
