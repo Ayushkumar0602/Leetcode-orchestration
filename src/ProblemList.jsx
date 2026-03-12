@@ -9,6 +9,7 @@ import Select from 'react-select';
 import { useAuth } from './contexts/AuthContext';
 import ActivityCalendar from './ActivityCalendar';
 import BookmarkModal from './BookmarkModal';
+import NavProfile from './NavProfile';
 
 const LANG_OPTIONS = {
     'python': 'Python 3', 'javascript': 'JavaScript',
@@ -165,21 +166,7 @@ export default function ProblemList() {
                     <select className="lc-lang-select-sm" value={selectedLanguage} onChange={e => handleLanguageSelect(e.target.value)}>
                         {Object.entries(LANG_OPTIONS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
-                    {currentUser ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>
-                                {(currentUser.displayName?.[0] || 'U').toUpperCase()}
-                            </div>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--txt)', fontWeight: 500 }}>{currentUser.displayName?.split(' ')[0] || 'User'}</span>
-                            <button onClick={logout} title="Log out" style={{ background: 'transparent', border: 'none', color: 'var(--txt3)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                                <LogOut size={15} />
-                            </button>
-                        </div>
-                    ) : (
-                        <button onClick={() => navigate('/login?redirect=/dsaquestion')} style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}>
-                            Sign In
-                        </button>
-                    )}
+                    <NavProfile />
                 </div>
             </nav>
 

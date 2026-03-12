@@ -6,6 +6,7 @@ import {
     ChevronDown, ChevronUp, Shuffle
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
+import NavProfile from './NavProfile';
 
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
 const DIFFICULTY_COLOR = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' };
@@ -167,6 +168,7 @@ export default function AIInterviewSelect() {
                         <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--txt2)' }}>Back to Dashboard</span>
                     </div>
                 </div>
+                <NavProfile />
             </nav>
 
             {/* Main Selection Area */}

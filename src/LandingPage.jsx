@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { buildLoginUrl } from './utils/analytics';
 import Editor from '@monaco-editor/react';
+import NavProfile from './NavProfile';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
     Brain, Code2, Server, Zap, Shield, MessageSquare, Terminal,
@@ -235,15 +236,13 @@ export default function LandingPage() {
                         <a href="#architecture">How it works</a>
                         <a href="#problems">Practice</a>
                     </div>
-                    <div className="lp-nav-actions">
+                    <div className="lp-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {currentUser ? (
                             <button className="lp-btn-outline" onClick={() => navigate('/dashboard')}>Dashboard →</button>
                         ) : (
-                            <>
-                                <button className="lp-btn-ghost" onClick={() => navigate(buildLoginUrl({ ref: 'navbar' }))}>Sign in</button>
-                                <button className="lp-btn-primary" onClick={() => navigate(buildLoginUrl({ ref: 'navbar_cta' }))}>Get started</button>
-                            </>
+                            <button className="lp-btn-primary" onClick={() => navigate(buildLoginUrl({ ref: 'navbar_cta' }))}>Get started</button>
                         )}
+                        <NavProfile />
                     </div>
                 </div>
             </nav>

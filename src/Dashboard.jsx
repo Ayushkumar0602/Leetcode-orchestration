@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import BookmarkModal from './BookmarkModal';
+import NavProfile from './NavProfile';
 
 const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600);
@@ -583,9 +584,7 @@ export default function Dashboard() {
                             <button onClick={() => navigate('/submissions')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500, padding: '4px 8px', borderRadius: '4px' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                 My Submissions
                             </button>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--txt)', fontWeight: 500, marginLeft: '8px' }}>
-                                {currentUser.displayName?.split(' ')[0] || 'User'}
-                            </span>
+                            <NavProfile />
                             <button onClick={logout} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }} title="Log out">
                                 <LogOut size={15} />
                             </button>

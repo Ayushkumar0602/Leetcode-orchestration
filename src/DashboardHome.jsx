@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import {
     Brain, Code2, Layers, TrendingUp,
-    Award, Target, ArrowRight, User
+    Award, Target, ArrowRight, User, ExternalLink
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
+import NavProfile from './NavProfile';
 
 const DashboardCard = ({ title, value, subtitle, icon: Icon, color, delay }) => (
     <div style={{
@@ -241,51 +242,24 @@ export default function DashboardHome() {
                 background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)',
                 position: 'sticky', top: 0, zIndex: 100
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flex: '1 1 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/')}>
                         <img src="/logo.jpeg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
                         <span className="nav-logo-text" style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.5px' }}>CodeArena</span>
                     </div>
-
-                    <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
-                            DSA Practice
-                        </button>
-                        <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
-                            AI Interview
-                        </button>
-                    </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {/* User Badge → click to go to profile */}
-                    <div
-                        onClick={() => navigate('/profile')}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            background: 'rgba(255,255,255,0.05)', padding: '5px 14px 5px 5px',
-                            borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)',
-                            cursor: 'pointer', transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
-                        title="View Profile"
-                    >
-                        {currentUser?.photoURL ? (
-                            <img src={currentUser.photoURL} alt="User" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
-                        ) : (
-                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(168,85,247,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Award size={14} color="#a855f7" />
-                            </div>
-                        )}
-                        <span className="nav-profile-label" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#e8e8e8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {currentUser?.displayName?.split(' ')[0] || 'Dev'}
-                            {profile?.plan === 'Blaze' ?
-                                <span style={{ fontSize: '0.65rem', background: 'linear-gradient(135deg, #a855f7, #3b82f6)', color: '#fff', padding: '2px 6px', borderRadius: '6px', fontWeight: 800 }}>PRO</span> :
-                                <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.1)', color: 'var(--txt2)', padding: '2px 6px', borderRadius: '6px', fontWeight: 800 }}>FREE</span>
-                            }
-                        </span>
-                    </div>
+                <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: '1 1 0', justifyContent: 'center' }}>
+                    <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
+                        DSA Practice
+                    </button>
+                    <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
+                        AI Interview
+                    </button>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 0', justifyContent: 'flex-end' }}>
+                    <NavProfile />
                 </div>
             </nav>
 
@@ -415,7 +389,7 @@ export default function DashboardHome() {
                             desc="Full technical interview covering DSA, algorithms, and a final scoring report."
                             icon={Brain} color="#a855f7"
                             cta="Start Interview"
-                            onClick={() => navigate('/aiinterview')}
+                            onClick={() => navigate('/aiinterviewselect')}
                         />
                         <QuickActionCard
                             title="System Design"
@@ -429,11 +403,70 @@ export default function DashboardHome() {
                             desc="Solve LeetCode-style questions with a live Monaco editor and instant evaluation."
                             icon={Code2} color="#00b8a3"
                             cta="View Problem List"
-                            onClick={() => navigate('/dsaquestion/1')}
+                            onClick={() => navigate('/dsaquestion')}
                         />
                     </div>
                 </div>
 
+                {/* Featured Interview Section */}
+                <div style={{ marginTop: '3rem', animation: 'cardAppear 0.5s ease-out 0.8s both' }}>
+                    <h2 style={{ fontSize: '1.3rem', fontWeight: 700, margin: '0 0 1.5rem 0' }}>Practice Like a Pro</h2>
+                    <div
+                        onClick={() => navigate('/aiinterview')}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.borderColor = 'rgba(168,85,247,0.4)';
+                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(168,85,247,0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2)';
+                        }}
+                        style={{
+                            background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(59,130,246,0.1))',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '24px',
+                            padding: '2rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '2rem',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        {/* Background glow effects */}
+                        <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '300px', height: '300px', background: 'rgba(168,85,247,0.2)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
+                        <div style={{ position: 'absolute', bottom: '-50%', left: '-10%', width: '300px', height: '300px', background: 'rgba(59,130,246,0.15)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
+
+                        <div style={{
+                            width: '64px', height: '64px', borderRadius: '16px',
+                            background: 'linear-gradient(135deg, #a855f7, #3b82f6)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#fff', flexShrink: 0, boxShadow: '0 8px 20px rgba(168,85,247,0.3)'
+                        }}>
+                            <Brain size={32} />
+                        </div>
+
+                        <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
+                            <h3 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 700, margin: '0 0 8px 0' }}>Practice DSA in Interview Format</h3>
+                            <p style={{ color: 'var(--txt2)', fontSize: '1rem', lineHeight: 1.6, margin: 0, maxWidth: '600px' }}>
+                                Experience a realistic technical interview environment with our AI Staff Engineer. Get real-time feedback, behavioral analysis, and a comprehensive performance report.
+                            </p>
+                        </div>
+
+                        <div style={{
+                            padding: '12px 24px', borderRadius: '12px', background: '#fff', color: '#000',
+                            fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px',
+                            transition: 'all 0.2s', flexShrink: 0, zIndex: 1
+                        }}>
+                            Go to Interview <ArrowRight size={16} />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

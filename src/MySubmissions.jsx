@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { ArrowLeft, CheckCircle2, Clock, Loader2, Trophy, Terminal } from 'lucide-react';
+import NavProfile from './NavProfile';
 
 const DIFFICULTY_COLOR = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' };
 
@@ -62,11 +63,9 @@ export default function MySubmissions() {
                 <div className="lc-nav-center">
                     <h1 style={{ fontSize: '1rem', color: 'var(--txt)', margin: 0, fontWeight: 500 }}>My Submissions</h1>
                 </div>
-                <div className="lc-nav-right">
-                    <span style={{ color: 'var(--txt2)', fontSize: '0.85rem' }}>
-                        {currentUser.displayName?.split(' ')[0] || 'User'}
-                    </span>
-                    <button onClick={logout} className="lc-toolbar-btn" style={{ marginLeft: '12px' }}>Log out</button>
+                <div className="lc-nav-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <NavProfile />
+                    <button onClick={logout} className="lc-toolbar-btn">Log out</button>
                 </div>
             </nav>
 

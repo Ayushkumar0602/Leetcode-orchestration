@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Server, Cpu, LogOut, ArrowRight, Layers, Layout, Zap, Database, GitBranch } from 'lucide-react';
+import NavProfile from './NavProfile';
 
 export default function SystemDesign() {
     const { currentUser, logout } = useAuth();
@@ -31,24 +32,7 @@ export default function SystemDesign() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {currentUser ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>
-                                {(currentUser.displayName?.[0] || 'U').toUpperCase()}
-                            </div>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--txt)', fontWeight: 500 }}>{currentUser.displayName?.split(' ')[0] || 'User'}</span>
-                            <button onClick={logout} title="Log out" style={{ background: 'transparent', border: 'none', color: 'var(--txt3)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                                <LogOut size={15} />
-                            </button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={() => navigate('/login?redirect=/systemdesign')}
-                            style={{ background: 'var(--accent)', border: 'none', color: '#fff', padding: '6px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
-                        >
-                            Sign In
-                        </button>
-                    )}
+                    <NavProfile />
                 </div>
             </nav>
 

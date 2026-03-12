@@ -12,6 +12,7 @@ import CustomizationTab from './profile/CustomizationTab';
 import SecurityTab from './profile/SecurityTab';
 import DataTab from './profile/DataTab';
 import UpgradeModal from './components/UpgradeModal';
+import NavProfile from './NavProfile';
 
 // ── Styles ──────────────────────────────────────────────────────
 const S = `
@@ -270,6 +271,7 @@ export default function ProfilePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/')}><img src="/logo.jpeg" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} /><span style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.4px' }}>CodeArena</span></div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <NavProfile />
                     <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', padding: '6px 14px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}><LogOut size={14} /> Sign Out</button>
                 </div>
             </nav>

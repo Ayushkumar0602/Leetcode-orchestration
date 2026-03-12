@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import NavProfile from './NavProfile';
 import {
     User, Github, Linkedin, Globe, Code2, Brain, Award, TrendingUp, Star, Flame, Zap, Trophy,
     Briefcase, GraduationCap, Calendar, FileText, ExternalLink, CheckCircle, ChevronRight, MapPin, Mail
@@ -187,8 +188,9 @@ export default function PublicProfile() {
                     <img src="/logo.jpeg" alt="CodeArena" style={{ width: '26px', height: '26px', borderRadius: '7px' }} />
                     <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.3px', color: 'var(--txt1)' }}>CodeArena</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--txt3)', background: 'var(--pill-bg)', padding: '4px 10px', borderRadius: '999px', border: '1px solid var(--pill-border)', fontWeight: 600 }}>Public Portfolio</span>
+                    <NavProfile />
                 </div>
             </nav>
 

@@ -13,6 +13,7 @@ import { useAuth } from './contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import { useInterviewSession } from './useInterviewSession';
 import SystemDesignBoard from './components/SystemDesignBoard';
+import NavProfile from './NavProfile';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
@@ -1177,6 +1178,7 @@ export default function AIInterview() {
                             CodeArena AI Interview
                         </span>
                     </div>
+                    <NavProfile />
                 </nav>
 
                 <div className="setup-container" style={{ flex: 1, display: 'flex' }}>
@@ -1749,19 +1751,7 @@ export default function AIInterview() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    {currentUser && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '12px' }}>
-                            <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(168,85,247,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: 'var(--ai)', border: '1px solid rgba(168,85,247,0.3)' }}>
-                                {(currentUser.displayName || 'U')[0].toUpperCase()}
-                            </div>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--txt)', fontWeight: 500 }}>
-                                {currentUser.displayName?.split(' ')[0] || 'User'}
-                            </span>
-                            <button onClick={logout} style={{ background: 'transparent', border: 'none', color: 'var(--txt3)', cursor: 'pointer', display: 'flex', alignItems: 'center', marginLeft: '4px' }} title="Log out">
-                                <LogOut size={14} />
-                            </button>
-                        </div>
-                    )}
+                    {/* Profile hidden during interview as requested */}
 
                     {/* Timer */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,161,22,0.15)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(255,161,22,0.3)', color: '#ffa116', fontWeight: 600, fontSize: '0.8rem', marginRight: '8px' }}>

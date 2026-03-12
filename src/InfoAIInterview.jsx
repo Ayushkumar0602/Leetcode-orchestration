@@ -5,6 +5,7 @@ import {
     Brain, Layers, Clock, Calendar, CheckCircle,
     ChevronLeft, ChevronRight, ArrowRight, XCircle, AlertCircle, FileText
 } from 'lucide-react';
+import NavProfile from './NavProfile';
 
 const styles = `
 @keyframes slideUpFade {
@@ -101,6 +102,8 @@ export default function InfoAIInterview() {
                     </button>
                     <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--txt3)' }}>|</span>
                     <span style={{ fontSize: '1rem', fontWeight: 600, letterSpacing: '-0.3px', color: 'var(--txt)' }}>Interview Hub</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--txt3)' }}>|</span>
+                    <NavProfile />
                 </div>
             </nav>
 

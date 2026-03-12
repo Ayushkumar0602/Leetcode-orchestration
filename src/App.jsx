@@ -34,7 +34,7 @@ function App() {
             <Route path="/signup" element={<Login />} />
             <Route path="/dashboard" element={<DashboardHome />} />
             <Route path="/infoaiinterview" element={<InfoAIInterview />} />
-            <Route path="/dsaquestion" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dsaquestion" element={<ProblemList />} />
             <Route path="/aiinterviewselect" element={<AIInterviewSelect />} />
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />
