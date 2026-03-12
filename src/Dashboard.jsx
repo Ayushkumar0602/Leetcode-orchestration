@@ -530,9 +530,18 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="lc-root">
+        <div className="lc-root" style={{
+            background: '#050505',
+            backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+            minHeight: '100vh',
+            color: '#fff'
+        }}>
             {/* ── Top Nav ───────────────────────────────────────────── */}
-            <nav className="lc-nav">
+            <nav className="lc-nav" style={{
+                background: 'rgba(5,5,5,0.85)',
+                backdropFilter: 'blur(16px)',
+                borderBottom: '1px solid rgba(255,255,255,0.08)'
+            }}>
                 <div className="lc-nav-left">
                     <button
                         onClick={() => navigate('/dsaquestion')}
@@ -541,7 +550,7 @@ export default function Dashboard() {
                     >
                         <ArrowLeft size={18} />
                     </button>
-                    <div className="lc-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="lc-logo" onClick={() => navigate('/dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                         <img src="/logo.jpeg" alt="CodeArena Logo" style={{ height: '24px', width: '24px', borderRadius: '4px', objectFit: 'contain' }} />
                         <span className="lc-logo-text">CodeArena</span>
                     </div>

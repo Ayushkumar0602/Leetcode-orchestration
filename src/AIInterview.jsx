@@ -1159,25 +1159,38 @@ export default function AIInterview() {
     // ─── Render: SETUP ────────────────────────────────────────────────────────
     if (appPhase === 'setup') {
         return (
-            <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{
+                minHeight: '100vh',
+                background: '#050505',
+                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
                 {/* ── Top Nav ──────────── */}
                 <nav style={{
                     height: '56px',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '0 1.25rem',
-                    background: 'rgba(21, 23, 31, 0.8)',
+                    background: 'rgba(5, 5, 5, 0.8)',
                     backdropFilter: 'blur(16px)',
                     WebkitBackdropFilter: 'blur(16px)',
                     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                     zIndex: 40,
                     color: 'var(--txt)'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="CodeArena" style={{ height: '24px', width: '24px', borderRadius: '6px', objectFit: 'contain' }} />
                         <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                             CodeArena AI Interview
                         </span>
                     </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>Problems</button>
+                        <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>AI Interview</button>
+                        <button onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>System Design</button>
+                    </div>
+
                     <NavProfile />
                 </nav>
 
@@ -1510,7 +1523,16 @@ export default function AIInterview() {
     // ─── Render: EVALUATING// ─── Render: EVALUATING ───────────────────────────────────────────────────
     if (appPhase === 'evaluating') {
         return (
-            <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', gap: '1.5rem' }}>
+            <div style={{
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#050505',
+                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+                gap: '1.5rem'
+            }}>
                 <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--ai-dim)', border: '2px solid var(--ai)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Loader2 size={36} color="var(--ai)" className="spin" />
                 </div>
@@ -1529,9 +1551,15 @@ export default function AIInterview() {
             : 0;
         const aiQuestions = (transcriptRef.current || []).filter(m => m.role === 'ai').length;
         return (
-            <div style={{ minHeight: '100vh', background: '#080b14', overflowY: 'auto', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{
+                minHeight: '100vh',
+                background: '#050505',
+                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+                overflowY: 'auto',
+                fontFamily: "'Inter', sans-serif"
+            }}>
                 {/* ── Header bar ── */}
-                <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'rgba(8,11,20,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '0 2rem', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'rgba(5,5,5,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '0 2rem', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <button onClick={() => { setAppPhase('setup'); setScoreReport(null); setTranscriptOpen(false); }}
                         style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--txt2)', borderRadius: '8px', padding: '0.4rem 0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem' }}>
                         <ArrowLeft size={14} /> New Interview
@@ -1711,7 +1739,7 @@ export default function AIInterview() {
                 height: '56px',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '0 1.25rem',
-                background: 'rgba(21, 23, 31, 0.8)',
+                background: 'rgba(5, 5, 5, 0.8)',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
@@ -1720,7 +1748,7 @@ export default function AIInterview() {
                 fontFamily: "\'Inter\', sans-serif"
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="CodeArena" style={{ height: '24px', width: '24px', borderRadius: '6px', objectFit: 'contain' }} />
                         <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                             CodeArena AI

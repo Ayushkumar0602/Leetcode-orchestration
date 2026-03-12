@@ -594,7 +594,16 @@ export default function SystemDesignInterview() {
     // ────────────────────────── SETUP PHASE ─────────────────────────────────
     if (appPhase === 'setup') {
         return (
-            <div style={{ minHeight: '100vh', background: '#080b14', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif", padding: '2rem' }}>
+            <div style={{
+                minHeight: '100vh',
+                background: '#050505',
+                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: "'Inter', sans-serif",
+                padding: '2rem'
+            }}>
                 <div style={{ width: '100%', maxWidth: '540px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
@@ -680,7 +689,16 @@ export default function SystemDesignInterview() {
         const verdict = scoreReport.verdict || 'Maybe';
         const verdictColor = verdict === 'Hire' ? '#00b8a3' : verdict === 'No Hire' ? '#ef4743' : '#ffa116';
         return (
-            <div style={{ minHeight: '100vh', background: '#080b14', fontFamily: "'Inter', sans-serif", padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{
+                minHeight: '100vh',
+                background: '#050505',
+                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+                fontFamily: "'Inter', sans-serif",
+                padding: '2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+            }}>
                 <div style={{ width: '100%', maxWidth: '760px', marginTop: '2rem' }}>
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                         <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'white', margin: 0 }}>Interview Complete!</h1>
@@ -768,7 +786,15 @@ export default function SystemDesignInterview() {
     // ────────────────────────── EVALUATING PHASE ─────────────────────────────
     if (appPhase === 'evaluating') {
         return (
-            <div style={{ minHeight: '100vh', background: '#080b14', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{
+                minHeight: '100vh',
+                background: '#050505',
+                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: "'Inter', sans-serif"
+            }}>
                 <div style={{ textAlign: 'center', padding: '2rem' }}>
                     <Loader2 size={48} color="#6366f1" style={{ animation: 'spin 1s linear infinite', marginBottom: '1.5rem' }} />
                     <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Evaluating your interview...</h2>
@@ -780,10 +806,18 @@ export default function SystemDesignInterview() {
 
     // ────────────────────────── INTERVIEW PHASE ───────────────────────────────
     return (
-        <div style={{ height: '100vh', background: '#080b14', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif", overflow: 'hidden' }}>
+        <div style={{
+            height: '100vh',
+            background: '#050505',
+            backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            fontFamily: "'Inter', sans-serif",
+            overflow: 'hidden'
+        }}>
 
             {/* ── Navbar ──────────────────────────────────────────────────── */}
-            <nav style={{ height: '52px', background: 'rgba(8,11,20,0.95)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, zIndex: 100 }}>
+            <nav style={{ height: '52px', background: 'rgba(5,5,5,0.95)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, zIndex: 100 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: '8px', padding: '4px 12px' }}>
                         <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4743', animation: 'pulse 1s infinite' }} />

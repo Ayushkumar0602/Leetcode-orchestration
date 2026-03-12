@@ -19,14 +19,22 @@ export default function AISystemDesignInterview() {
     if (!currentUser) return null;
 
     return (
-        <div style={{ minHeight: '100vh', background: '#080b14', color: 'var(--txt)', fontFamily: "'Inter', sans-serif", display: 'flex', flexDirection: 'column' }}>
+        <div style={{
+            minHeight: '100vh',
+            background: '#050505',
+            backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+            color: 'var(--txt)',
+            fontFamily: "'Inter', sans-serif",
+            display: 'flex',
+            flexDirection: 'column'
+        }}>
             {/* ── Navbar ─────────────────────────────────── */}
-            <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,11,20,0.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 2rem', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 2rem', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                         <ArrowLeft size={18} />
                     </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/')}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="Logo" style={{ height: '24px', width: '24px', borderRadius: '4px', objectFit: 'contain' }} />
                         <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--txt)' }}>CodeArena</span>
                     </div>

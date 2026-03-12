@@ -184,10 +184,17 @@ export default function PublicProfile() {
 
             {/* ── Top nav ── */}
             <nav style={{ height: '56px', borderBottom: '1px solid var(--divide)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', background: 'var(--nav-bg)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                     <img src="/logo.jpeg" alt="CodeArena" style={{ width: '26px', height: '26px', borderRadius: '7px' }} />
                     <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.3px', color: 'var(--txt1)' }}>CodeArena</span>
                 </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>Problems</button>
+                    <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>AI Interview</button>
+                    <button onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>System Design</button>
+                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--txt3)', background: 'var(--pill-bg)', padding: '4px 10px', borderRadius: '999px', border: '1px solid var(--pill-border)', fontWeight: 600 }}>Public Portfolio</span>
                     <NavProfile />

@@ -63,7 +63,7 @@ export default function InfoAIInterview() {
         <div style={{
             minHeight: '100vh',
             background: '#050505',
-            backgroundImage: 'radial-gradient(circle at 15% 50%, rgba(168,85,247,0.06) 0%, transparent 40%), radial-gradient(circle at 85% 30%, rgba(59,130,246,0.06) 0%, transparent 40%)',
+            backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
             color: '#fff',
             fontFamily: "'Inter', sans-serif"
         }}>
@@ -75,7 +75,7 @@ export default function InfoAIInterview() {
                 borderBottom: '1px solid rgba(255,255,255,0.08)',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '0 2rem',
-                background: 'rgba(5,5,5,0.8)', backdropFilter: 'blur(12px)',
+                background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(12px)',
                 position: 'sticky', top: 0, zIndex: 100
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>

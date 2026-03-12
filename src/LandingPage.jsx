@@ -226,7 +226,7 @@ export default function LandingPage() {
             {/* ── NAV ─────────────────────────────────────────────────────────── */}
             <nav className={`lp-nav ${scrolled ? 'lp-nav-scrolled' : ''}`}>
                 <div className="lp-nav-inner">
-                    <div className="lp-brand" onClick={() => navigate('/')}>
+                    <div className="lp-brand" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
                         <img src="/logo.jpeg" alt="CodeArena" className="lp-logo" />
                         <span className="lp-brand-name">CodeArena AI</span>
                     </div>

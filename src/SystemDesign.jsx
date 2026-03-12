@@ -9,10 +9,16 @@ export default function SystemDesign() {
     const navigate = useNavigate();
 
     return (
-        <div style={{ minHeight: '100vh', background: '#080b14', color: 'var(--txt)', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{
+            minHeight: '100vh',
+            background: '#050505',
+            backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
+            color: 'var(--txt)',
+            fontFamily: "'Inter', sans-serif"
+        }}>
             {/* ── Navbar ─────────────────────────────────── */}
-            <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,11,20,0.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 2rem', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/')}>
+            <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 2rem', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                     <img src="/logo.jpeg" alt="Logo" style={{ height: '28px', width: '28px', borderRadius: '6px', objectFit: 'contain' }} />
                     <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)', letterSpacing: '-0.3px' }}>CodeArena</span>
                 </div>
