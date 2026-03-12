@@ -295,10 +295,12 @@ app.post('/api/execute', async (req, res) => {
 
     try {
         if (testCases && Array.isArray(testCases)) {
-            // Execute all test cases concurrently in separate Docker containers
-            const results = await Promise.all(
-                testCases.map((tc) => executeCode(code, language, tc.input, tc.expectedOutput))
-            );
+            // Execute all test cases sequentially
+            const results = [];
+            for (const tc of testCases) {
+                const result = await executeCode(code, language, tc.input, tc.expectedOutput);
+                results.push(result);
+            }
             return res.json({ results });
         } else {
             // Fallback for single execution
