@@ -16,10 +16,9 @@ app.use(express.json({ limit: '10mb' }));
 
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-
 const razorpayParams = {
-    key_id: "rzp_test_SQI1qSlFfr3w0o",
-    key_secret: process.env.RAZORPAY_KEY_SECRET || "rn2cEpTNZD9AvknEXdmgCi7g",
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
 };
 const razorpay = new Razorpay(razorpayParams);
 
@@ -1030,15 +1029,6 @@ app.post('/api/sarvam/tts', async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
-// Load dataset first, then start listening
-loadDataset().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Code Execution Server listening on port ${PORT}`);
-    });
-}).catch(err => {
-    console.error("Failed to load dataset, starting server anyway...", err);
-    // Even if dataset fails to load, start the server so execution still works
-    app.listen(PORT, () => {
-        console.log(`Code Execution Server listening on port ${PORT} (Dataset Unavailable)`);
-    });
+app.listen(PORT, () => {
+    console.log(`Server running on ${PORT}`);
 });

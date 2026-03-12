@@ -9,43 +9,67 @@ let metadata = {
 };
 let isLoaded = false;
 
-// We look for the CSV in the same directory as this file (backend/)
+// Prefer pre-converted JSON for instant startup (~10x faster).
+// Fall back to CSV parsing if JSON not yet generated.
+const JSON_PATH = path.join(__dirname, 'data', 'leetcode.json');
 const CSV_PATH = path.join(__dirname, 'leetcode_dataset - lc.csv');
 
-function loadDataset() {
+// ── Helper: extract metadata from a single row ──────────────────────────────
+function extractMetadata(data) {
+    if (data.related_topics) {
+        data.related_topics.split(',').forEach(t => {
+            const topic = t.trim();
+            if (topic) metadata.topics.add(topic);
+        });
+    }
+    if (data.companies) {
+        data.companies.split(',').forEach(c => {
+            const comp = c.trim();
+            if (comp) metadata.companies.add(comp);
+        });
+    }
+}
+
+// ── Load from JSON (preferred) ───────────────────────────────────────────────
+function loadFromJSON() {
+    return new Promise((resolve, reject) => {
+        try {
+            console.log('[Dataset] Loading from JSON cache...');
+            const raw = fs.readFileSync(JSON_PATH, 'utf-8');
+            const data = JSON.parse(raw);
+            data.forEach(row => extractMetadata(row));
+            problemsData = data;
+            isLoaded = true;
+            console.log(`[Dataset] ✅ Loaded ${problemsData.length} problems from JSON.`);
+            resolve();
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
+// ── Load from CSV (fallback) ─────────────────────────────────────────────────
+function loadFromCSV() {
     return new Promise((resolve, reject) => {
         if (!fs.existsSync(CSV_PATH)) {
             console.error(`ERROR: Dataset not found at ${CSV_PATH}`);
-            isLoaded = true; // Mark loaded to prevent infinite hangs, but empty
+            isLoaded = true; // Prevent infinite hangs; data will be empty
             return resolve();
         }
 
+        console.log('[Dataset] JSON cache not found — parsing CSV (first run). Run `node convert-to-json.js` to speed up future starts.');
         const results = [];
+
         fs.createReadStream(CSV_PATH)
             .pipe(csv())
             .on('data', (data) => {
                 results.push(data);
-
-                // Extract unique topics
-                if (data.related_topics) {
-                    data.related_topics.split(',').forEach(t => {
-                        const topic = t.trim();
-                        if (topic) metadata.topics.add(topic);
-                    });
-                }
-
-                // Extract unique companies
-                if (data.companies) {
-                    data.companies.split(',').forEach(c => {
-                        const comp = c.trim();
-                        if (comp) metadata.companies.add(comp);
-                    });
-                }
+                extractMetadata(data);
             })
             .on('end', () => {
                 problemsData = results;
                 isLoaded = true;
-                console.log(`[Dataset] Successfully loaded ${problemsData.length} problems into memory.`);
+                console.log(`[Dataset] ✅ Loaded ${problemsData.length} problems from CSV.`);
                 resolve();
             })
             .on('error', (err) => {
@@ -53,6 +77,14 @@ function loadDataset() {
                 reject(err);
             });
     });
+}
+
+// ── Public loader ────────────────────────────────────────────────────────────
+function loadDataset() {
+    if (fs.existsSync(JSON_PATH)) {
+        return loadFromJSON();
+    }
+    return loadFromCSV();
 }
 
 function getProblems(page = 1, limit = 20, search = '', filterTopics = [], filterCompanies = []) {
@@ -67,7 +99,7 @@ function getProblems(page = 1, limit = 20, search = '', filterTopics = [], filte
         });
     }
 
-    // Company Filtering (case-insensitive, applied on already-topic-filtered results for AND logic)
+    // Company Filtering (case-insensitive, AND logic with topics)
     if (filterCompanies.length > 0) {
         const lowerFilterCompanies = filterCompanies.map(c => c.toLowerCase());
         filtered = filtered.filter(p => {
