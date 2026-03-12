@@ -170,47 +170,15 @@ function ListEditor({ label, icon: Icon, color, items, onAdd, onRemove, fields }
 
 function ProjectAddForm({ onAdd }) {
     const [pf, setPf] = useState({});
-    const [parsing, setParsing] = useState(false);
-
-    const handleAdd = async () => {
-        if (!pf.name) return;
-        
-        // If it's a github link, try to parse it first
-        let projectData = { ...pf };
-        if (pf.link && pf.link.toLowerCase().includes('github.com')) {
-            setParsing(true);
-            try {
-                const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/github/parse', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ githubUrl: pf.link })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.extendedData) {
-                        projectData.extendedData = data.extendedData;
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to parse GitHub link:", err);
-            } finally {
-                setParsing(false);
-            }
-        }
-        
-        onAdd(projectData);
-        setPf({});
-    };
-
     return (
         <div className="pf-add-zone">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                <input className="pf-input" value={pf.name || ''} onChange={e => setPf(p => ({ ...p, name: e.target.value }))} placeholder="Project Name *" disabled={parsing} />
-                <input className="pf-input" value={pf.link || ''} onChange={e => setPf(p => ({ ...p, link: e.target.value }))} placeholder="GitHub / Live URL" disabled={parsing} />
+                <input className="pf-input" value={pf.name || ''} onChange={e => setPf(p => ({ ...p, name: e.target.value }))} placeholder="Project Name *" />
+                <input className="pf-input" value={pf.link || ''} onChange={e => setPf(p => ({ ...p, link: e.target.value }))} placeholder="GitHub / Live URL" />
             </div>
-            <input className="pf-input" value={pf.desc || ''} onChange={e => setPf(p => ({ ...p, desc: e.target.value }))} placeholder="Short description" style={{ marginBottom: '8px' }} disabled={parsing} />
-            <button onClick={handleAdd} disabled={!pf.name || parsing} style={{ width: '100%', background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)', borderRadius: '8px', padding: '8px', color: '#22d3ee', cursor: parsing ? 'wait' : 'pointer', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', opacity: (!pf.name || parsing) ? 0.6 : 1 }}>
-                {parsing ? <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Parsing Repository...</> : <><Plus size={12} /> Add Project</>}
+            <input className="pf-input" value={pf.desc || ''} onChange={e => setPf(p => ({ ...p, desc: e.target.value }))} placeholder="Short description" style={{ marginBottom: '8px' }} />
+            <button onClick={() => { if (pf.name) { onAdd({ ...pf }); setPf({}); } }} style={{ width: '100%', background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)', borderRadius: '8px', padding: '8px', color: '#22d3ee', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                <Plus size={12} /> Add Project
             </button>
         </div>
     );
