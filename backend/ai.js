@@ -332,7 +332,11 @@ STRUCTURED JSON FORMAT (Return exactly this):
   "usage": "Brief usage instructions",
   "screenshots": [],
   "demoUrl": "link if found",
-  "highlights": ["Notable accomplishment or complexity solved"]
+  "highlights": ["Notable accomplishment or complexity solved"],
+  "projectStructure": [
+    { "name": "src", "type": "folder", "children": [ { "name": "App.js", "type": "file" } ] },
+    { "name": "package.json", "type": "file" }
+  ]
 }
 
 Rules:
