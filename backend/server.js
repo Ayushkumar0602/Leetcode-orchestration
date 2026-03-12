@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { executeCode } = require('./executor');
-const { generateCodeAndTests } = require('./ai');
+const { generateCodeAndTests, extractProjectDetails } = require('./ai');
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
 const { parseResumeWithAI } = require('./resumeParser');
@@ -861,7 +861,6 @@ app.post('/api/generate', async (req, res) => {
 
 // --- AI Interview Routes ---
 const { getInterviewerResponse, analyzeCode: analyzeInterviewCode, evaluateInterview, callGemini } = require('./interview');
-const { generateCodeAndTests, extractProjectDetails } = require('./ai');
 
 // --- Project AI Extraction Route ---
 app.post('/api/project/extract-readme', async (req, res) => {
