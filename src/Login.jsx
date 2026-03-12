@@ -12,7 +12,7 @@ export default function Login() {
 
     // Where did the user come from? (e.g., /solvingpage/123 or /aiinterview)
     const params = new URLSearchParams(location.search);
-    const redirectUrl = params.get('redirect') || '/dsaquestion';
+    const redirectUrl = params.get('redirect') || '/dashboard';
 
     // If already logged in, redirect them back aggressively
     if (currentUser) {

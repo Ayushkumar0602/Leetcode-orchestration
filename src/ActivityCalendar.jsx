@@ -3,7 +3,10 @@ import { Flame, Trophy, Calendar, BarChart3, Zap, Code2, ChevronRight, Target } 
 
 /* ── helpers ─────────────────────────────────────────────────── */
 function toDateStr(date) {
-    return date.toISOString().slice(0, 10);
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 }
 
 function buildWeeks(dailyCounts) {
@@ -264,7 +267,9 @@ function StatsTab({ activityData, userStats, totalCounts }) {
     const now = new Date();
     const months = Array.from({ length: 12 }, (_, i) => {
         const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
-        const key = d.toISOString().slice(0, 7);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const key = `${y}-${m}`;
         return { label: MONTH_LABELS[d.getMonth()], count: monthly[key] || 0 };
     });
     const maxBar = Math.max(...months.map(m => m.count), 1);
@@ -318,7 +323,7 @@ function StatsTab({ activityData, userStats, totalCounts }) {
 }
 
 /* ── main component ──────────────────────────────────────────── */
-export default function ActivityCalendar({ uid, userStats, totalCounts }) {
+export default function ActivityCalendar({ uid, userStats, totalCounts, containerStyle }) {
     const [activityData, setActivityData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('heatmap');
@@ -341,7 +346,7 @@ export default function ActivityCalendar({ uid, userStats, totalCounts }) {
     ];
 
     return (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '14px', ...containerStyle }}>
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Calendar size={18} color="var(--accent)" />

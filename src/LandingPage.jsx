@@ -236,7 +236,7 @@ export default function LandingPage() {
                     </div>
                     <div className="lp-nav-actions">
                         {currentUser ? (
-                            <button className="lp-btn-outline" onClick={() => navigate('/dsaquestion/1')}>Dashboard →</button>
+                            <button className="lp-btn-outline" onClick={() => navigate('/dashboard')}>Dashboard →</button>
                         ) : (
                             <>
                                 <button className="lp-btn-ghost" onClick={() => navigate('/login')}>Sign in</button>

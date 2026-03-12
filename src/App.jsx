@@ -1,13 +1,18 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Dashboard from './Dashboard';
+import DashboardHome from './DashboardHome';
 import ProblemList from './ProblemList';
 import AIInterview from './AIInterview';
+import AIInterviewSelect from './AIInterviewSelect';
+import InfoAIInterview from './InfoAIInterview';
 import Login from './Login';
 import MySubmissions from './MySubmissions';
 import InterviewEvaluation from './InterviewEvaluation';
 import ScraperPage from './ScraperPage';
 import LandingPage from './LandingPage';
+import ProfilePage from './ProfilePage';
+import PublicProfile from './PublicProfile';
 
 // System Design Features
 import SystemDesign from './SystemDesign';
@@ -23,7 +28,10 @@ function App() {
         <div className="app-root">
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/dsaquestion" element={<Navigate to="/dsaquestion/1" replace />} />
+            <Route path="/dashboard" element={<DashboardHome />} />
+            <Route path="/infoaiinterview" element={<InfoAIInterview />} />
+            <Route path="/dsaquestion" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/aiinterviewselect" element={<AIInterviewSelect />} />
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />
             <Route path="/aiinterview/:id?" element={<AIInterview />} />
@@ -38,6 +46,8 @@ function App() {
             <Route path="/aisystemdesigninterview/:id" element={<AISystemDesignInterview />} />
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
 
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/public/:uid" element={<PublicProfile />} />
             <Route path="/" element={<LandingPage />} />
           </Routes>
         </div>

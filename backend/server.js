@@ -5,13 +5,70 @@ const { executeCode } = require('./executor');
 const { generateCodeAndTests } = require('./ai');
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
+const { parseResumeWithAI } = require('./resumeParser');
 const { db, rtdb } = require('./firebase');
 const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where } = require('firebase/firestore');
 const { ref: rtdbRef, push } = require('firebase/database');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+const razorpayParams = {
+    key_id: "rzp_test_SQI1qSlFfr3w0o",
+    key_secret: process.env.RAZORPAY_KEY_SECRET || "rn2cEpTNZD9AvknEXdmgCi7g",
+};
+const razorpay = new Razorpay(razorpayParams);
+
+// --- Payment Routes ---
+app.post('/api/create-order', async (req, res) => {
+    try {
+        const options = {
+            amount: 30 * 100, // ₹30
+            currency: "INR",
+            receipt: "receipt_" + Math.random().toString(36).substring(7),
+        };
+        const order = await razorpay.orders.create(options);
+        res.status(200).json({
+            success: true,
+            order,
+            key_id: razorpayParams.key_id
+        });
+    } catch (err) {
+        console.error("Order creation failed", err);
+        res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+});
+
+app.post('/api/verify-payment', async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, uid } = req.body;
+        const sign = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSign = crypto.createHmac("sha256", razorpayParams.key_secret)
+            .update(sign.toString())
+            .digest("hex");
+
+        if (razorpay_signature === expectedSign) {
+            // Payment verified - update Firestore
+            const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            await setDoc(doc(db, "userProfiles", uid), {
+                plan: "Blaze",
+                planExpiresAt: expiryDate
+            }, { merge: true });
+
+            res.status(200).json({ success: true, message: "Payment verified successfully" });
+        } else {
+            res.status(400).json({ success: false, message: "Invalid signature" });
+        }
+    } catch (err) {
+        console.error("Payment verification failed", err);
+        res.status(500).json({ success: false, message: "Verification failed" });
+    }
+});
+
 
 // --- Dataset & Stats Routes ---
 app.get('/api/metadata', (req, res) => {
@@ -57,6 +114,51 @@ app.get('/api/problems', async (req, res) => {
     }
 
     res.json(result);
+});
+
+app.get('/api/problems/random', async (req, res) => {
+    if (!isDataLoaded()) {
+        return res.status(503).json({ error: 'Dataset is still loading or unavailable.' });
+    }
+    const { company } = req.query;
+
+    const result = getProblems(1, 5000, '', [], company ? [String(company).trim()] : []);
+    let matchingProblems = result.data;
+    let usedFallback = false;
+
+    // If no problems matched the company, fall back to the full dataset
+    if (!matchingProblems || matchingProblems.length === 0) {
+        const fallbackResult = getProblems(1, 5000, '', [], []);
+        matchingProblems = fallbackResult.data;
+        usedFallback = true;
+    }
+
+    if (!matchingProblems || matchingProblems.length === 0) {
+        return res.status(503).json({ error: 'Dataset is empty.' });
+    }
+
+    const randomIndex = Math.floor(Math.random() * matchingProblems.length);
+    let problem = matchingProblems[randomIndex];
+    problem = { ...problem, fallback: usedFallback }; // avoid mutating dataset
+
+    try {
+        const snap = await getDoc(doc(db, "stats", String(problem.id)));
+        if (snap.exists()) {
+            const data = snap.data();
+            const total = data.submissions || 0;
+            const accepted = data.accepted || 0;
+            problem.acceptance_rate = total > 0 ? ((accepted / total) * 100).toFixed(1) : "0.0";
+            problem.live_submissions = total;
+            problem.live_accepted = accepted;
+        } else {
+            problem.live_submissions = 0;
+            problem.live_accepted = 0;
+        }
+    } catch (err) {
+        console.error("Failed to fetch live stats", err);
+    }
+
+    res.json(problem);
 });
 
 app.get('/api/problems/:id', async (req, res) => {
@@ -301,6 +403,58 @@ app.delete('/api/lists/:listId/problems/:problemId', async (req, res) => {
     } catch (err) { res.status(500).json({ error: 'Failed to remove from list' }); }
 });
 
+// --- Resume Parse Route ---
+app.post('/api/resume/parse', async (req, res) => {
+    try {
+        const { base64Data, mimeType } = req.body;
+        if (!base64Data || !mimeType) {
+            return res.status(400).json({ error: 'base64Data and mimeType are required' });
+        }
+        const parsedProfile = await parseResumeWithAI(base64Data, mimeType);
+        res.json({ profile: parsedProfile });
+    } catch (err) {
+        console.error('Failed to parse resume:', err);
+        res.status(500).json({ error: 'Failed to extract data from resume: ' + err.message });
+    }
+});
+
+// --- User Profile Routes ---
+app.get('/api/profile/:uid', async (req, res) => {
+    try {
+        const profileRef = doc(db, 'userProfiles', req.params.uid);
+        const snap = await getDoc(profileRef);
+        if (!snap.exists()) return res.json({ profile: {} });
+
+        let profileData = snap.data();
+
+        // Auto-downgrade logic if plan is expired
+        if (profileData.plan === 'Blaze' && profileData.planExpiresAt) {
+            const now = new Date();
+            const expires = new Date(profileData.planExpiresAt);
+            if (now > expires) {
+                profileData = { ...profileData, plan: 'Spark' };
+                await setDoc(profileRef, { plan: 'Spark' }, { merge: true }); // Downgrade in Firestore
+            }
+        }
+
+        res.json({ profile: profileData });
+    } catch (err) {
+        console.error('Failed to fetch profile:', err);
+        res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+});
+
+app.post('/api/profile/:uid', async (req, res) => {
+    try {
+        const profileRef = doc(db, 'userProfiles', req.params.uid);
+        await setDoc(profileRef, { ...req.body, updatedAt: new Date().toISOString() }, { merge: true });
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Failed to save profile:', err);
+        res.status(500).json({ error: 'Failed to save profile' });
+    }
+});
+
 // --- Activity Calendar Route ---
 app.get('/api/activity/:uid', async (req, res) => {
     try {
@@ -320,20 +474,30 @@ app.get('/api/activity/:uid', async (req, res) => {
             const date = new Date(data.submittedAt);
             if (isNaN(date.getTime())) return;
 
-            const dayKey = date.toISOString().slice(0, 10); // "YYYY-MM-DD"
-            const monthKey = date.toISOString().slice(0, 7); // "YYYY-MM"
+            // Extract Local Date keys
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const dStr = String(date.getDate()).padStart(2, '0');
+
+            const dayKey = `${y}-${m}-${dStr}`;
+            const monthKey = `${y}-${m}`;
 
             dailyCounts[dayKey] = (dailyCounts[dayKey] || 0) + 1;
             monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
         });
 
-        // Calculate streaks
+        // Calculate streaks based on local boundaries
         const sortedDays = Object.keys(dailyCounts).sort();
         let currentStreak = 0, longestStreak = 0, tempStreak = 0;
-        const todayStr = new Date().toISOString().slice(0, 10);
-        const yesterdayStr = (() => {
-            const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10);
-        })();
+
+        const today = new Date();
+        const yT = today.getFullYear(), mT = String(today.getMonth() + 1).padStart(2, '0'), dT = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yT}-${mT}-${dT}`;
+
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yY = yesterday.getFullYear(), mY = String(yesterday.getMonth() + 1).padStart(2, '0'), dY = String(yesterday.getDate()).padStart(2, '0');
+        const yesterdayStr = `${yY}-${mY}-${dY}`;
 
         // Longest streak calculation
         let prevDay = null;
@@ -355,7 +519,8 @@ app.get('/api/activity/:uid', async (req, res) => {
         if (startDay) {
             let checkDate = new Date(startDay);
             while (true) {
-                const key = checkDate.toISOString().slice(0, 10);
+                const cy = checkDate.getFullYear(), cm = String(checkDate.getMonth() + 1).padStart(2, '0'), cd = String(checkDate.getDate()).padStart(2, '0');
+                const key = `${cy}-${cm}-${cd}`;
                 if (!dailyCounts[key]) break;
                 currentStreak++;
                 checkDate.setDate(checkDate.getDate() - 1);

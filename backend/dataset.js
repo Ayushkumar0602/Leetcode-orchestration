@@ -67,12 +67,13 @@ function getProblems(page = 1, limit = 20, search = '', filterTopics = [], filte
         });
     }
 
-    // Company Filtering (applied on already-topic-filtered results for AND logic)
+    // Company Filtering (case-insensitive, applied on already-topic-filtered results for AND logic)
     if (filterCompanies.length > 0) {
+        const lowerFilterCompanies = filterCompanies.map(c => c.toLowerCase());
         filtered = filtered.filter(p => {
             if (!p.companies) return false;
-            const pComps = p.companies.split(',').map(c => c.trim());
-            return filterCompanies.some(c => pComps.includes(c));
+            const pComps = p.companies.split(',').map(c => c.trim().toLowerCase());
+            return lowerFilterCompanies.some(c => pComps.includes(c));
         });
     }
 

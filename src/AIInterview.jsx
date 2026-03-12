@@ -128,6 +128,29 @@ export default function AIInterview() {
     const [sessionId, setSessionId] = useState(null);
     const { aiActions } = useInterviewSession(sessionId);
     const [interviewPhase, setInterviewPhase] = useState('opening');
+    const [autoStart, setAutoStart] = useState(false);
+
+    // Auto-start from AIInterviewSelect passing config parameters via location.state
+    useEffect(() => {
+        if (location.state?.setupParams && appPhase === 'setup') {
+            const p = location.state.setupParams;
+            setRole(p.role);
+            setCompany(p.company);
+            setLanguage(p.language);
+            setSelectedProblem(p.selectedProblem);
+            setSelectedVoice(p.selectedVoice);
+            setAutoStart(true);
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state, appPhase]);
+
+    useEffect(() => {
+        if (autoStart && role && company && selectedProblem) {
+            setAutoStart(false);
+            handleStartInterview();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoStart, role, company, selectedProblem]);
     const [phaseIndex, setPhaseIndex] = useState(0);
     const [transcript, setTranscript] = useState([]);
     const [isSpeaking, setIsSpeaking] = useState(false);
