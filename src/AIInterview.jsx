@@ -6,11 +6,13 @@ import {
     X, Loader2, CheckCircle2, XCircle, Star, TrendingUp, MessageSquare,
     Code2, Shield, Lightbulb, BarChart3, ArrowLeft, Sparkles, Volume2, VolumeX,
     Send, Terminal, ChevronDown, ChevronUp, LogOut, Clock, History, User, Building,
-    MessageCircle, AlertCircle, Info, Navigation, Trash2, RefreshCcw
+    MessageCircle, AlertCircle, Info, Navigation, Trash2, RefreshCcw, LayoutTemplate,
+    Maximize2, Minimize2
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import { useInterviewSession } from './useInterviewSession';
+import SystemDesignBoard from './components/SystemDesignBoard';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
@@ -135,6 +137,33 @@ export default function AIInterview() {
     const [userInput, setUserInput] = useState('');
     const [liveAnalysis, setLiveAnalysis] = useState(null);
     const [analysisTimer, setAnalysisTimer] = useState(null);
+
+    // ── Timer state ──
+    const [interviewSeconds, setInterviewSeconds] = useState(0);
+
+    // ── Whiteboard state ──
+    const [whiteboardOpen, setWhiteboardOpen] = useState(false);
+    const [whiteboardFullscreen, setWhiteboardFullscreen] = useState(false);
+
+    // ── Timer Effect ──
+    useEffect(() => {
+        let interval;
+        if (appPhase === 'interview') {
+            interval = setInterval(() => {
+                setInterviewSeconds(Math.floor((Date.now() - (interviewStartTimeRef.current || Date.now())) / 1000));
+            }, 1000);
+        } else {
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [appPhase]);
+
+    // Formatter
+    const formatTime = (totalSeconds) => {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
 
     // ─── AI Real-Time UI Interactions ───────────────────────────────────────
 
@@ -280,7 +309,7 @@ export default function AIInterview() {
     // ─── Load problems ──────────────────────────────────────────────────────
     useEffect(() => {
         setProblemsLoading(true);
-        fetch('https://leetcode-orchestration-api.onrender.com/api/problems?page=1&limit=50')
+        fetch('http://localhost:3001/api/problems?page=1&limit=50')
             .then(r => r.json())
             .then(d => { if (d.data) setProblems(d.data); })
             .catch(console.error)
@@ -340,7 +369,7 @@ export default function AIInterview() {
     // Refetch when search changes
     useEffect(() => {
         const t = setTimeout(() => {
-            fetch(`https://leetcode-orchestration-api.onrender.com/api/problems?page=1&limit=50&search=${encodeURIComponent(problemSearch)}`)
+            fetch(`http://localhost:3001/api/problems?page=1&limit=50&search=${encodeURIComponent(problemSearch)}`)
                 .then(r => r.json())
                 .then(d => { if (d.data) setProblems(d.data); })
                 .catch(console.error);
@@ -355,7 +384,7 @@ export default function AIInterview() {
     useEffect(() => {
         if (!currentUser) return;
         setHistoryLoading(true);
-        fetch(`https://leetcode-orchestration-api.onrender.com/api/interviews/${currentUser.uid}`)
+        fetch(`http://localhost:3001/api/interviews/${currentUser.uid}`)
             .then(r => r.json())
             .then(d => setPastInterviews(d.interviews || []))
             .catch(console.error)
@@ -516,7 +545,7 @@ export default function AIInterview() {
         };
 
         try {
-            const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/sarvam/tts', {
+            const res = await fetch('http://localhost:3001/api/sarvam/tts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: text.trim(), speaker })
@@ -705,7 +734,7 @@ export default function AIInterview() {
         if (!problemData || !currentCode || currentCode.length < 20 || appPhase !== 'interview') return;
         const timer = setTimeout(async () => {
             try {
-                const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/interview/analyze', {
+                const res = await fetch('http://localhost:3001/api/interview/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code: currentCode, language, problem: problemData.problem })
@@ -734,7 +763,7 @@ export default function AIInterview() {
         setConsoleOpen(true);
         try {
             const fullCode = code + '\n' + getWrapper();
-            const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/execute', {
+            const res = await fetch('http://localhost:3001/api/execute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: fullCode, language, testCases: primaryCases })
@@ -766,7 +795,7 @@ export default function AIInterview() {
         setConsoleOpen(true);
         try {
             const fullCode = code + '\n' + getWrapper();
-            const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/submit', {
+            const res = await fetch('http://localhost:3001/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: fullCode, language, testCases: allCases })
@@ -830,7 +859,7 @@ export default function AIInterview() {
 
         try {
             // Load AI boilerplate + test cases for the problem
-            const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/generate', {
+            const res = await fetch('http://localhost:3001/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -902,7 +931,7 @@ export default function AIInterview() {
                 bodyPayload.systemPromptOverride = systemPromptOverride;
             }
 
-            const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/interview/chat', {
+            const res = await fetch('http://localhost:3001/api/interview/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bodyPayload)
@@ -910,7 +939,7 @@ export default function AIInterview() {
             const data = await res.json();
             if (data.error) throw new Error(data.error);
 
-            // ── Parse JSON envelope {text, nextPhase} from AI ──
+            // Parse JSON envelope {text, nextPhase} from AI
             let speakableText = data.text;
             let aiNextPhase = null;
             try {
@@ -933,30 +962,42 @@ export default function AIInterview() {
                 aiNextPhase = null;
             }
 
-            const aiMsg = { role: 'ai', text: speakableText, timestamp: Date.now() };
-            const newTranscript = [...currentTranscript, aiMsg];
-            setTranscript(newTranscript);
-            transcriptRef.current = newTranscript;
+            // Artificial 'thinking' delay based on text length (min 1.5s, max 4s)
+            const thinkingDelayMs = Math.min(4000, Math.max(1500, (speakableText?.length || 50) * 15));
 
-            // ── AI-controlled phase transition ──
-            if (aiNextPhase) {
-                const nextIdx = INTERVIEW_PHASES.indexOf(aiNextPhase);
-                const currentIdx = INTERVIEW_PHASES.indexOf(phase);
-                if (nextIdx > currentIdx) {
-                    setPhaseIndex(nextIdx);
-                    setInterviewPhase(aiNextPhase);
+            setTimeout(() => {
+                const aiMsg = { role: 'ai', text: speakableText, timestamp: Date.now() };
+                const newTranscript = [...currentTranscript, aiMsg];
+                setTranscript(newTranscript);
+                transcriptRef.current = newTranscript;
+
+                // AI-controlled phase transition
+                if (aiNextPhase) {
+                    if (aiNextPhase === 'end') {
+                        // Automatically trigger end interview eval when AI hits 'end' phase
+                        setInterviewPhase('end');
+                        setTimeout(() => handleEndInterview(), 3000); // 3 second delay to let the goodbye message finish playing
+                    } else {
+                        const nextIdx = INTERVIEW_PHASES.indexOf(aiNextPhase);
+                        const currentIdx = INTERVIEW_PHASES.indexOf(phase);
+                        if (nextIdx > currentIdx) {
+                            setPhaseIndex(nextIdx);
+                            setInterviewPhase(aiNextPhase);
+                        }
+                    }
                 }
-            }
 
-            // Speak the natural-language part only
-            if (speakableText?.trim()) {
-                speakWithSarvam(speakableText.trim());
-            }
+                // Speak the natural-language part only
+                setIsAiThinking(false);
+                if (speakableText?.trim()) {
+                    speakWithSarvam(speakableText.trim());
+                }
+            }, thinkingDelayMs);
+
         } catch (err) {
+            setIsAiThinking(false);
             const errMsg = { role: 'ai', text: 'I had trouble responding. Please try again.', timestamp: Date.now() };
             setTranscript(prev => [...prev, errMsg]);
-        } finally {
-            setIsAiThinking(false);
         }
     };
 
@@ -991,6 +1032,18 @@ export default function AIInterview() {
         await handleUserSpeech(text);
     };
 
+    // ─── Interrupt AI ────────────────────────────────────────────────────────
+    const handleInterruptAI = () => {
+        if (!isSpeaking) return;
+        stopCurrentSpeech();
+        const interruptMsg = { role: 'user', text: '(Candidate interrupted the interviewer)', timestamp: Date.now(), isSystem: true };
+        const newTranscript = [...transcriptRef.current, interruptMsg];
+        setTranscript(newTranscript);
+        transcriptRef.current = newTranscript;
+        // Do not immediately send to AI; let the user actually speak their thought now
+        toggleMic();
+    };
+
     // advancePhase is now AI-controlled — no user button
 
     // ─── End interview → evaluate ────────────────────────────────────────────
@@ -1000,7 +1053,7 @@ export default function AIInterview() {
         setIsListening(false);
         setAppPhase('evaluating');
         try {
-            const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/interview/evaluate', {
+            const res = await fetch('http://localhost:3001/api/interview/evaluate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1018,7 +1071,7 @@ export default function AIInterview() {
                 ? Math.round((Date.now() - interviewStartTimeRef.current) / 60000)
                 : 0;
             if (currentUser) {
-                fetch('https://leetcode-orchestration-api.onrender.com/api/interviews/save', {
+                fetch('http://localhost:3001/api/interviews/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1036,7 +1089,7 @@ export default function AIInterview() {
                     })
                 }).then(r => r.json()).then(saved => {
                     // refresh history
-                    fetch(`https://leetcode-orchestration-api.onrender.com/api/interviews/${currentUser.uid}`)
+                    fetch(`http://localhost:3001/api/interviews/${currentUser.uid}`)
                         .then(r2 => r2.json()).then(d => setPastInterviews(d.interviews || []));
                 }).catch(console.error);
             }
@@ -1304,7 +1357,7 @@ export default function AIInterview() {
                                                         if (isPreviewing) return;
                                                         setPreviewLoading(voice.id);
                                                         try {
-                                                            const res = await fetch('https://leetcode-orchestration-api.onrender.com/api/sarvam/tts', {
+                                                            const res = await fetch('http://localhost:3001/api/sarvam/tts', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ text: PREVIEW_TEXT, speaker: voice.speaker })
@@ -1686,6 +1739,18 @@ export default function AIInterview() {
                             </button>
                         </div>
                     )}
+
+                    {/* Timer */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,161,22,0.15)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(255,161,22,0.3)', color: '#ffa116', fontWeight: 600, fontSize: '0.8rem', marginRight: '8px' }}>
+                        <Clock size={13} /> {formatTime(interviewSeconds)}
+                    </div>
+
+                    {/* Whiteboard Toggle */}
+                    <button onClick={() => setWhiteboardOpen(!whiteboardOpen)}
+                        style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', fontWeight: 600, background: whiteboardOpen ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.08)', border: `1px solid ${whiteboardOpen ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.15)'}`, color: whiteboardOpen ? '#60a5fa' : '#e8e8e8', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginRight: '8px', transition: 'all 0.2s' }}>
+                        <LayoutTemplate size={14} /> Whiteboard
+                    </button>
+
                     {/* Phase transitions are controlled by the AI */}
                     <button onClick={handleEndInterview}
                         style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', fontWeight: 600, background: 'linear-gradient(135deg, #ef4743, #d93834)', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 10px rgba(239,71,67,0.3)' }}>
@@ -2256,13 +2321,65 @@ export default function AIInterview() {
                                     }}>
                                     {ttsEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
                                 </button>
-                                <button onClick={toggleMic} disabled={isAiThinking || isSpeaking}
-                                    style={{ opacity: (isAiThinking || isSpeaking) ? 0.5 : 1, cursor: (isAiThinking || isSpeaking) ? 'not-allowed' : 'pointer', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isListening ? '#00b8a3' : 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '12px', color: '#fff', transition: 'all 0.2s', boxShadow: isListening ? '0 4px 12px rgba(0,184,163,0.4)' : 'none' }}>
-                                    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-                                </button>
+
+                                {isSpeaking ? (
+                                    <button onClick={handleInterruptAI}
+                                        style={{ width: 'auto', padding: '0 12px', height: '42px', display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,71,67,0.15)', border: '1px solid rgba(239,71,67,0.4)', borderRadius: '12px', color: '#ef4743', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                        <XCircle size={16} /> Interrupt
+                                    </button>
+                                ) : (
+                                    <button onClick={toggleMic} disabled={isAiThinking}
+                                        style={{ opacity: isAiThinking ? 0.5 : 1, cursor: isAiThinking ? 'not-allowed' : 'pointer', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isListening ? '#00b8a3' : 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '12px', color: '#fff', transition: 'all 0.2s', boxShadow: isListening ? '0 4px 12px rgba(0,184,163,0.4)' : 'none' }}>
+                                        {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* ── System Design Whiteboard Overlay ── */}
+            <div style={{
+                position: 'fixed',
+                top: '56px',
+                left: whiteboardFullscreen ? 0 : leftWidth, // fullscreen hides question panel; normal keeps it
+                right: rightWidth, // AI chat always stays visible on the right
+                bottom: 0,
+                background: '#0a0c10',
+                zIndex: 35,
+                transform: whiteboardOpen ? 'translateY(0)' : 'translateY(100%)',
+                opacity: whiteboardOpen ? 1 : 0,
+                transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, left 0.3s ease',
+                pointerEvents: whiteboardOpen ? 'auto' : 'none',
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+                <div style={{ height: '40px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e8e8e8', fontSize: '0.85rem', fontWeight: 600 }}>
+                        <LayoutTemplate size={16} color="#3b82f6" /> System Architecture Board
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                            onClick={() => setWhiteboardFullscreen(f => !f)}
+                            title={whiteboardFullscreen ? 'Exit fullscreen' : 'Fullscreen (keeps AI panel visible)'}
+                            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--txt3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', borderRadius: '6px', padding: '3px 8px', transition: 'all 0.2s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#e8e8e8'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--txt3)'; }}
+                        >
+                            {whiteboardFullscreen
+                                ? <><Minimize2 size={13} /> Restore</>
+                                : <><Maximize2 size={13} /> Fullscreen</>}
+                        </button>
+                        <button onClick={() => { setWhiteboardOpen(false); setWhiteboardFullscreen(false); }} style={{ background: 'transparent', border: 'none', color: 'var(--txt3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
+                            <ChevronDown size={14} /> Close
+                        </button>
+                    </div>
+                </div>
+                <div style={{ flex: 1, position: 'relative' }}>
+                    <SystemDesignBoard />
                 </div>
             </div>
         </div>

@@ -20,23 +20,11 @@ async function callGemini(prompt, jsonMode = false) {
         try {
             console.log(`[Interview AI] Attempting generation with API key ${i + 1}/${keys.length}...`);
             const genAI = new GoogleGenerativeAI(keys[i]);
-            let model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+            let model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
 
-            try {
-                const result = await model.generateContent(prompt);
-                console.log(`[Interview AI] Generation successful on key ${i + 1}.`);
-                return result.response.text().trim();
-            } catch (innerError) {
-                // If 503 (Service Unavailable) or 429 (Too Many Requests), try the fallback model immediately with the same key
-                if (innerError.message?.includes('503') || innerError.message?.includes('429')) {
-                    console.warn(`[Interview AI] 503/429 error on key ${i + 1}. Falling back to gemini-3.1-flash-lite-preview...`);
-                    model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
-                    const fallbackResult = await model.generateContent(prompt);
-                    console.log(`[Interview AI] Fallback generation successful on key ${i + 1}.`);
-                    return fallbackResult.response.text().trim();
-                }
-                throw innerError; // Rethrow other errors to be caught by the outer block
-            }
+            const result = await model.generateContent(prompt);
+            console.log(`[Interview AI] Generation successful on key ${i + 1}.`);
+            return result.response.text().trim();
         } catch (error) {
             lastError = error;
             console.error(`[Interview AI] Error with key ${i + 1}:`, error.message || error);
@@ -62,14 +50,15 @@ function buildChatPrompt(problem, role, company, interviewPhase, transcript, cur
         ? recent.map(m => `${m.role === 'ai' ? 'I' : 'C'}: ${m.text}`).join('\n')
         : '(Interview just started)';
 
-    const PHASES = ['opening', 'brute-force', 'optimization', 'coding', 'wrap-up'];
+    const PHASES = ['opening', 'brute-force', 'optimization', 'coding', 'wrap-up', 'end'];
 
     const phaseInstructions = {
         opening: 'Greet warmly, introduce yourself as a senior engineer. Ask candidate to read the problem and share initial thoughts. No hints yet.',
         'brute-force': 'Ask candidate to propose a naive/brute-force approach. Encourage thinking out loud. Ask about time/space complexity.',
         optimization: 'Challenge candidate to improve their approach. Ask probing questions about bottlenecks. Use graduated hints only if stuck. Never reveal the solution.',
         coding: 'Candidate is coding. Stay quiet, let them code. Occasionally probe edge cases. If logical error, ask leading questions — never point it out directly.',
-        'wrap-up': 'Candidate finished coding. Ask about testing strategy, edge cases considered, and scalability (10^8 inputs, distributed system).',
+        'wrap-up': 'Candidate finished coding. Ask a MAXIMUM of 1-2 quick wrap-up questions (e.g. edge cases, scalability). Keep it very brief.',
+        'end': 'The interview is now over. Give a short, encouraging sign-off message. Do not ask any more questions. End the interview.',
     };
 
     const phaseTransitionRules = {
@@ -77,7 +66,8 @@ function buildChatPrompt(problem, role, company, interviewPhase, transcript, cur
         'brute-force': 'Advance to "optimization" once candidate has clearly described a working naive/brute-force approach AND stated its time/space complexity.',
         optimization: 'Advance to "coding" once candidate has articulated a concrete optimized approach and is ready to implement it.',
         coding: 'Advance to "wrap-up" once the candidate explicitly states they are done coding, or if a code submission result was reported in the conversation.',
-        'wrap-up': 'Do NOT advance. This is the final phase.',
+        'wrap-up': 'Advance to "end" after you have asked 1 or 2 wrap-up questions and the candidate has responded.',
+        'end': 'Do NOT advance. This is the final phase.',
     };
 
     const currentPhaseIndex = PHASES.indexOf(interviewPhase);
@@ -98,12 +88,17 @@ ${transcriptText}
 CANDIDATE CODE (${language}): ${currentCode || '(none yet)'}
 ${currentCode ? `(${currentCode.split('\n').length} lines)` : ''}
 
-RULES:
-1. Be neutral — never confirm/deny correctness through tone.
-2. Ask exactly ONE focused question per response. Sound human, not robotic.
-3. Max 3-4 short sentences. No markdown, bullets, or code snippets.
-4. Evaluate reasoning process, not just the answer.
-5. If candidate asks yes/no, redirect: "What do you think?" or "Walk me through it."
+RULES FOR REALISM & SENSITIVITY:
+1. Act human: Speak conversationally. Periodically use filler words/hesitations like "Um," "Hmm," "Let's see," or "Right, so...". Do NOT sound like a perfectly formal AI.
+2. Validate first: Acknowledge the candidate's previous statement briefly before asking your next question (e.g., "Ah, I see what you mean. So...").
+3. Keep it brief: Max 3-4 short sentences per response. Sometimes fragments are okay (e.g., "Wait, what if the array is empty?"). No markdown, bullets, or code snippets in the text.
+4. Socratic hints: If they are stuck, NEVER give a direct answer. Be "confused" or ask a leading negative question (e.g., "I like that approach, but wouldn't line 14 cause an issue if x is negative?").
+5. Only ask ONE focused question per response.
+6. Be neutral on correctness: Do not reveal whether their answer is completely right or wrong prematurely.
+
+TRANSCRIPT HANDLING:
+Please note the user's side of the transcript is generated by speech-to-text. It often lacks punctuation (no question marks, no full stops), might have run-on sentences, and might contain slight transcription errors or garbled words. 
+Do your best to infer their meaning from the context of the problem and code, and don't penalize them for grammar or weird text formatting.
 
 PHASE TRANSITION:
 - Next phase available: ${nextPhase || 'none (already in final phase)'}
