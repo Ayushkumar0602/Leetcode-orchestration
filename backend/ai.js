@@ -305,4 +305,58 @@ async function generateCodeAndTests(problemStatement, language, problemId) {
   throw new Error(`AI generation failed after trying all ${keys.length} API keys. Last error: ${lastError?.message || lastError}`);
 }
 
-module.exports = { generateCodeAndTests };
+/**
+ * Extracts structured project details from a GitHub README using Gemini.
+ */
+async function extractProjectDetails(readmeText) {
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys found");
+
+  const prompt = `
+You are a technical project analyzer. Analyze the provided GitHub README content and extract structured data for a professional portfolio.
+Respond ONLY with a valid JSON object. Do not include markdown blocks or any other text.
+
+README CONTENT:
+"""
+${readmeText.slice(0, 15000)}
+"""
+
+STRUCTURED JSON FORMAT (Return exactly this):
+{
+  "name": "Project Name",
+  "tagline": "A one-sentence catchy tagline",
+  "overview": "Detailed 2-3 paragraph overview of the project",
+  "features": ["Feature 1", "Feature 2", "Feature 3"],
+  "techStack": ["Tech 1", "Tech 2"],
+  "installation": ["Step 1", "Step 2"],
+  "usage": "Brief usage instructions",
+  "screenshots": [],
+  "demoUrl": "link if found",
+  "highlights": ["Notable accomplishment or complexity solved"]
+}
+
+Rules:
+1. If content is missing for a field, provide a reasonable summary or leave empty array/null.
+2. Keep the overview professional and engaging.
+3. TechStack should be the main languages/frameworks.
+`.trim();
+
+  let lastError;
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      const genAI = new GoogleGenerativeAI(keys[i]);
+      const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' }); // Use flash for speed/cost
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().trim();
+      const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+      return JSON.parse(cleaned);
+    } catch (error) {
+      lastError = error;
+      console.warn(`[AI Project] Key ${i + 1} failed:`, error.message);
+      continue;
+    }
+  }
+  throw new Error(`AI Project Extraction failed: ${lastError?.message}`);
+}
+
+module.exports = { generateCodeAndTests, extractProjectDetails };

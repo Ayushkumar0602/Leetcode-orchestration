@@ -168,6 +168,44 @@ function ListEditor({ label, icon: Icon, color, items, onAdd, onRemove, fields }
     );
 }
 
+function ProjectItem({ project, onRemove, onEnhance, enhancing }) {
+    return (
+        <div className="pf-entry-card" style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{project.name}</div>
+                    {project.link && project.link.includes('github.com') && (
+                        <button 
+                            onClick={() => onEnhance(project)} 
+                            disabled={enhancing}
+                            style={{ 
+                                background: 'rgba(168,85,247,0.15)', 
+                                border: '1px solid rgba(168,85,247,0.3)', 
+                                borderRadius: '6px', 
+                                padding: '2px 8px', 
+                                color: '#c084fc', 
+                                fontSize: '0.65rem', 
+                                fontWeight: 700, 
+                                cursor: enhancing ? 'wait' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}
+                        >
+                            {enhancing ? <Loader2 size={10} className="animate-spin" /> : '✨ AI Enhance'}
+                        </button>
+                    )}
+                </div>
+                {project.tagline && <div style={{ fontSize: '0.75rem', color: '#a855f7', fontWeight: 600, marginBottom: '4px' }}>{project.tagline}</div>}
+                {project.desc && <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginBottom: '4px' }}>{project.desc}</div>}
+                {project.link && <a href={project.link.startsWith('http') ? project.link : `https://${project.link}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', color: '#60a5fa', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}><ExternalLink size={9} />View project</a>}
+                {project.detailedData && <div style={{ fontSize: '0.65rem', color: '#10b981', marginTop: '4px', fontWeight: 700 }}>✓ AI Enhanced Content Ready</div>}
+            </div>
+            <button onClick={onRemove} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(239,68,68,0.5)', flexShrink: 0 }}><X size={13} /></button>
+        </div>
+    );
+}
+
 function ProjectAddForm({ onAdd }) {
     const [pf, setPf] = useState({});
     return (
@@ -338,14 +376,42 @@ export default function PortfolioTab({ uid, profile, onSave }) {
                             <ExternalLink size={16} color="#06b6d4" /> Projects
                         </h3>
                         {(form.projects || []).map((p, i) => (
-                            <div key={i} className="pf-entry-card" style={{ display: 'flex', gap: '10px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', marginBottom: '2px' }}>{p.name}</div>
-                                    {p.desc && <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginBottom: '4px' }}>{p.desc}</div>}
-                                    {p.link && <a href={p.link.startsWith('http') ? p.link : `https://${p.link}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', color: '#60a5fa', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}><ExternalLink size={9} />View project</a>}
-                                </div>
-                                <button onClick={() => rmItem('projects', i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(239,68,68,0.5)', flexShrink: 0 }}><X size={13} /></button>
-                            </div>
+                            <ProjectItem 
+                                key={i} 
+                                project={p} 
+                                enhancing={parsingTarget === `proj-${i}`}
+                                onRemove={() => rmItem('projects', i)} 
+                                onEnhance={async () => {
+                                    if (!p.link || !p.link.includes('github.com')) return;
+                                    setParsingTarget(`proj-${i}`);
+                                    try {
+                                        const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/project/extract-readme', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ githubUrl: p.link })
+                                        });
+                                        const data = await res.json();
+                                        if (data.projectData) {
+                                            const updatedProjs = [...form.projects];
+                                            updatedProjs[i] = { 
+                                                ...updatedProjs[i], 
+                                                name: data.projectData.name || updatedProjs[i].name,
+                                                desc: data.projectData.overview ? data.projectData.overview.slice(0, 150) + '...' : updatedProjs[i].desc,
+                                                tagline: data.projectData.tagline,
+                                                detailedData: data.projectData 
+                                            };
+                                            upd('projects', updatedProjs);
+                                        } else if (data.error) {
+                                            alert(data.error);
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        alert("Failed to extract project details. Please try again.");
+                                    } finally {
+                                        setParsingTarget(false);
+                                    }
+                                }}
+                            />
                         ))}
                         <ProjectAddForm onAdd={v => addItem('projects', v)} />
                     </div>

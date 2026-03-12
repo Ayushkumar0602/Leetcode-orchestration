@@ -357,24 +357,35 @@ export default function PublicProfile() {
                                 <SectionHead icon={ExternalLink} color="#06b6d4" title="Projects" count={profile.projects.length} />
                                 <div className="pub-projs" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '12px' }}>
                                     {profile.projects.map((p, i) => (
-                                        <div key={i} className="proj-card">
+                                        <div key={i} className="proj-card" onClick={() => p.detailedData && navigate(`/public/${uid}/project/${i}`)} style={{ cursor: p.detailedData ? 'pointer' : 'default' }}>
                                             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
                                                 <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                                     <Code2 size={16} color={isDark ? '#22d3ee' : '#0891b2'} />
                                                 </div>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    {p.detailedData && <span style={{ fontSize: '0.6rem', background: 'rgba(168,85,247,0.2)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.3)', padding: '2px 6px', borderRadius: '6px', fontWeight: 800 }}>AI DETAILS</span>}
+                                                    {p.link && (
+                                                        <a href={p.link.startsWith('http') ? p.link : `https://${p.link}`} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ color: 'var(--txt3)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = 'var(--accent)'} onMouseLeave={e => e.target.style.color = 'var(--txt3)'}>
+                                                            <ExternalLink size={14} />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--txt1)', marginBottom: '4px', lineHeight: 1.3 }}>{p.name}</div>
+                                            {p.tagline && <div style={{ fontSize: '0.75rem', color: '#a855f7', fontWeight: 600, marginBottom: '6px' }}>{p.tagline}</div>}
+                                            {p.desc && <div style={{ fontSize: '0.78rem', color: 'var(--txt2)', lineHeight: 1.6, marginBottom: '10px' }}>{p.desc.length > 100 ? p.desc.slice(0, 100) + '...' : p.desc}</div>}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                 {p.link && (
-                                                    <a href={p.link.startsWith('http') ? p.link : `https://${p.link}`} target="_blank" rel="noreferrer" style={{ color: 'var(--txt3)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = 'var(--accent)'} onMouseLeave={e => e.target.style.color = 'var(--txt3)'}>
-                                                        <ExternalLink size={14} />
+                                                    <a href={p.link.startsWith('http') ? p.link : `https://${p.link}`} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: isDark ? '#22d3ee' : '#0891b2', fontWeight: 700, textDecoration: 'none' }}>
+                                                        <Github size={11} /> GitHub
                                                     </a>
                                                 )}
+                                                {p.detailedData && (
+                                                    <span style={{ fontSize: '0.72rem', color: '#a855f7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        View Details <ChevronRight size={10} />
+                                                    </span>
+                                                )}
                                             </div>
-                                            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--txt1)', marginBottom: '6px', lineHeight: 1.3 }}>{p.name}</div>
-                                            {p.desc && <div style={{ fontSize: '0.78rem', color: 'var(--txt2)', lineHeight: 1.6, marginBottom: '10px' }}>{p.desc}</div>}
-                                            {p.link && (
-                                                <a href={p.link.startsWith('http') ? p.link : `https://${p.link}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: isDark ? '#22d3ee' : '#0891b2', fontWeight: 700, textDecoration: 'none' }}>
-                                                    <Github size={11} /> View Project <ChevronRight size={10} />
-                                                </a>
-                                            )}
                                         </div>
                                     ))}
                                 </div>

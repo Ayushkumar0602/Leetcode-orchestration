@@ -14,6 +14,7 @@ import ScraperPage from './ScraperPage';
 import LandingPage from './LandingPage';
 import ProfilePage from './ProfilePage';
 import PublicProfile from './PublicProfile';
+import ProjectDetails from './ProjectDetails';
 
 // System Design Features
 import SystemDesign from './SystemDesign';
@@ -52,6 +53,7 @@ function App() {
 
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/public/:uid" element={<PublicProfile />} />
+            <Route path="/public/:uid/project/:projId" element={<ProjectDetails />} />
             <Route path="/" element={<LandingPage />} />
           </Routes>
         </div>
