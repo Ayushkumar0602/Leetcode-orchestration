@@ -1027,6 +1027,9 @@ app.post('/api/sarvam/tts', async (req, res) => {
 
 
 
+// Start loading the dataset
+loadDataset();
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
