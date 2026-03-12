@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { buildLoginUrl } from './utils/analytics';
 import Editor from '@monaco-editor/react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
@@ -239,8 +240,8 @@ export default function LandingPage() {
                             <button className="lp-btn-outline" onClick={() => navigate('/dashboard')}>Dashboard →</button>
                         ) : (
                             <>
-                                <button className="lp-btn-ghost" onClick={() => navigate('/login')}>Sign in</button>
-                                <button className="lp-btn-primary" onClick={() => navigate('/login')}>Get started</button>
+                                <button className="lp-btn-ghost" onClick={() => navigate(buildLoginUrl({ ref: 'navbar' }))}>Sign in</button>
+                                <button className="lp-btn-primary" onClick={() => navigate(buildLoginUrl({ ref: 'navbar_cta' }))}>Get started</button>
                             </>
                         )}
                     </div>
@@ -511,7 +512,7 @@ export default function LandingPage() {
                         <button onClick={() => navigate('/dsaquestion/1')}>Problems</button>
                         <button onClick={() => navigate('/aiinterview')}>AI Interview</button>
                         <button onClick={() => navigate('/systemdesign')}>System Design</button>
-                        <button onClick={() => navigate('/login')}>Sign In</button>
+                        <button onClick={() => navigate(buildLoginUrl({ ref: 'footer' }))}>Sign In</button>
                     </div>
                     <div className="lp-footer-copy">© {new Date().getFullYear()} CodeArena AI · Built for engineers, by engineers.</div>
                 </div>

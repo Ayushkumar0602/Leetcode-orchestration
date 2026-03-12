@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import RouteTracker from './RouteTracker';
 import Dashboard from './Dashboard';
 import DashboardHome from './DashboardHome';
 import ProblemList from './ProblemList';
@@ -25,6 +26,8 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        {/* Global route-change tracker — renders nothing, fires analytics on every navigation */}
+        <RouteTracker />
         <div className="app-root">
           <Routes>
             <Route path="/login" element={<Login />} />

@@ -1120,6 +1120,115 @@ app.post('/api/sarvam/tts', async (req, res) => {
 
 
 
+// --- Analytics Routes -------------------------------------------------------
+// These endpoints accept tracking data from the frontend and store it in Firestore.
+// They always return 204 immediately to be non-blocking.
+
+/**
+ * POST /api/analytics/pageview
+ * Body: { event, timestamp, session_id, user_id, page, query_params, utm, referrer, browser }
+ */
+app.post('/api/analytics/pageview', async (req, res) => {
+    // Respond immediately — analytics must never slow down the user.
+    res.status(204).end();
+
+    try {
+        const { session_id, user_id, page, query_params, utm, referrer, browser, timestamp } = req.body;
+
+        // Strip any sensitive query params before storage
+        const safeQueryParams = { ...query_params };
+        ['password', 'token', 'secret', 'key'].forEach(k => delete safeQueryParams[k]);
+
+        const analyticsRef = collection(db, 'analytics_pageviews');
+        await addDoc(analyticsRef, {
+            session_id:   session_id || null,
+            user_id:      user_id || null,
+            path:         page?.path || '/',
+            url:          page?.url || '',
+            title:        page?.title || '',
+            query_params: safeQueryParams || {},
+            utm:          utm || null,
+            referrer:     referrer || null,
+            browser:      browser || null,
+            server_ip:    req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null,
+            timestamp:    timestamp || new Date().toISOString(),
+        });
+    } catch (err) {
+        console.error('[Analytics] Failed to save pageview:', err.message);
+    }
+});
+
+/**
+ * POST /api/analytics/event
+ * Body: { event, timestamp, session_id, user_id, page, utm, referrer, ...eventProps }
+ */
+app.post('/api/analytics/event', async (req, res) => {
+    res.status(204).end();
+
+    try {
+        const { event, session_id, user_id, page, utm, referrer, timestamp, ...props } = req.body;
+        if (!event) return;
+
+        const analyticsRef = collection(db, 'analytics_events');
+        await addDoc(analyticsRef, {
+            event:      event,
+            session_id: session_id || null,
+            user_id:    user_id || null,
+            path:       page?.path || '/',
+            utm:        utm || null,
+            referrer:   referrer || null,
+            props:      props || {},
+            timestamp:  timestamp || new Date().toISOString(),
+        });
+    } catch (err) {
+        console.error('[Analytics] Failed to save event:', err.message);
+    }
+});
+
+/**
+ * GET /api/analytics/summary (optional — for internal dashboards)
+ * Returns a lightweight summary of recent traffic.
+ */
+app.get('/api/analytics/summary', async (req, res) => {
+    try {
+        const [pvSnap, evSnap] = await Promise.all([
+            getDocs(collection(db, 'analytics_pageviews')),
+            getDocs(collection(db, 'analytics_events')),
+        ]);
+
+        const pageviews = [];
+        pvSnap.forEach(d => pageviews.push(d.data()));
+
+        // Tally by path
+        const pathCounts = {};
+        const referrerCounts = {};
+        const utmSources = {};
+
+        pageviews.forEach(pv => {
+            const path = pv.path || '/';
+            pathCounts[path] = (pathCounts[path] || 0) + 1;
+            const src = pv.referrer?.source || 'direct';
+            referrerCounts[src] = (referrerCounts[src] || 0) + 1;
+            if (pv.utm?.utm_source) {
+                utmSources[pv.utm.utm_source] = (utmSources[pv.utm.utm_source] || 0) + 1;
+            }
+        });
+
+        res.json({
+            total_pageviews: pvSnap.size,
+            total_events:    evSnap.size,
+            top_pages:       Object.entries(pathCounts).sort((a,b) => b[1]-a[1]).slice(0, 10).map(([p,c]) => ({ path: p, count: c })),
+            traffic_sources: Object.entries(referrerCounts).sort((a,b) => b[1]-a[1]).map(([s,c]) => ({ source: s, count: c })),
+            utm_sources:     Object.entries(utmSources).sort((a,b) => b[1]-a[1]).map(([s,c]) => ({ source: s, count: c })),
+        });
+    } catch (err) {
+        console.error('[Analytics] Summary failed:', err);
+        res.status(500).json({ error: 'Failed to fetch analytics summary' });
+    }
+});
+// ---------------------------------------------------------------------------
+
+
 // Start loading the dataset
 loadDataset();
 
@@ -1128,3 +1237,4 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);
 });
+
