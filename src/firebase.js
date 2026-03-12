@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
 
@@ -17,6 +17,7 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 const rtdb = getDatabase(app);
 
 // Initialize analytics only if in browser
@@ -25,4 +26,4 @@ if (typeof window !== 'undefined') {
     analytics = getAnalytics(app);
 }
 
-export { auth, googleProvider, rtdb };
+export { auth, googleProvider, githubProvider, rtdb };

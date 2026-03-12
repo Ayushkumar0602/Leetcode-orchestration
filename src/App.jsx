@@ -28,6 +28,7 @@ function App() {
         <div className="app-root">
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Login />} />
             <Route path="/dashboard" element={<DashboardHome />} />
             <Route path="/infoaiinterview" element={<InfoAIInterview />} />
             <Route path="/dsaquestion" element={<Navigate to="/dashboard" replace />} />
