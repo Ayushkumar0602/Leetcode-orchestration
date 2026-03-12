@@ -291,6 +291,20 @@ export default function InfoAIInterview() {
                     )}
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .info-ai-content { padding: 2rem 1rem !important; }
+                    .info-ai-header h1 { font-size: 1.8rem !important; }
+                    .info-ai-header p { font-size: 0.95rem !important; }
+                    .info-ai-cards { grid-template-columns: 1fr !important; }
+                    .info-ai-past-item { flex-direction: column !important; align-items: flex-start !important; gap: 0.75rem !important; }
+                }
+                @media (max-width: 480px) {
+                    .info-ai-content { padding: 1.25rem 0.75rem !important; }
+                    .info-ai-header h1 { font-size: 1.4rem !important; }
+                    .info-ai-meta { flex-direction: column !important; gap: 4px !important; }
+                }
+            `}</style>
         </div>
     );
 }

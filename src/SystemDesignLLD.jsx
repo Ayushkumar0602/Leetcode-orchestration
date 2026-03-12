@@ -220,6 +220,18 @@ export default function SystemDesignLLD() {
                     ))}
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .sd-lld-nav-links { display: none !important; }
+                    .sd-lld-content { padding: 1.5rem 1rem !important; }
+                    .sd-lld-header h1 { font-size: 1.8rem !important; }
+                    .sd-lld-section-grid { grid-template-columns: 1fr !important; }
+                }
+                @media (max-width: 480px) {
+                    .sd-lld-header h1 { font-size: 1.4rem !important; }
+                    .sd-lld-content { padding: 1rem 0.75rem !important; }
+                }
+            `}</style>
         </div>
     );
 }

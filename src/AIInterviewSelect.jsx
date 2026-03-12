@@ -433,6 +433,28 @@ export default function AIInterviewSelect() {
                     from { opacity: 0; }
                     to { opacity: 1; }
                 }
+
+                /* ── Responsive ── */
+                @media (max-width: 1024px) {
+                    .ais-main-area { padding: 3rem 1.5rem !important; }
+                }
+                @media (max-width: 768px) {
+                    .ais-main-area { padding: 2.5rem 1rem !important; }
+                    .ais-title { font-size: 1.8rem !important; }
+                    .ais-cards-grid { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
+                    /* DSA Config Modal full-screen on mobile */
+                    .ais-modal-box { max-width: 100% !important; border-radius: 16px 16px 0 0 !important; position: fixed !important; bottom: 0 !important; top: auto !important; margin: 0 !important; max-height: 92vh !important; }
+                    .ais-role-row { grid-template-columns: 1fr !important; }
+                    .ais-voice-lang-row { grid-template-columns: 1fr !important; }
+                    .ais-problem-mode-row { flex-direction: column !important; }
+                    .ais-nav-back-label { display: none !important; }
+                }
+                @media (max-width: 480px) {
+                    .ais-main-area { padding: 1.75rem 0.75rem !important; }
+                    .ais-title { font-size: 1.4rem !important; }
+                    .ais-subtitle { font-size: 0.9rem !important; }
+                    .ais-voices-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                }
                 `}</style>
         </div>
     );

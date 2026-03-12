@@ -175,6 +175,14 @@ const styles = `
     .nav-logo-text { display: none; }
     .nav-profile-label { display: none; }
     .actions-grid { gap: 1rem; }
+    .dash-nav-links { display: none !important; }
+    .dash-featured-inner { flex-direction: column !important; align-items: flex-start !important; }
+}
+/* Extra small */
+@media (max-width: 360px) {
+    .dash-header h1 { font-size: 1.2rem !important; }
+    .metrics-grid { grid-template-columns: 1fr !important; }
+    .problems-card { grid-column: span 1 !important; }
 }
 `;
 

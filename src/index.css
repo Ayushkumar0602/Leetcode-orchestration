@@ -1320,3 +1320,15 @@ body {
     width: 100% !important;
   }
 }
+
+/* ─── Additional Small Screen Fixes ──────────────────── */
+@media (max-width: 400px) {
+  .lc-run-btn,
+  .lc-submit-btn {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .lc-nav .lc-nav-right {
+    gap: 0.25rem;
+  }
+}

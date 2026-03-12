@@ -96,7 +96,23 @@ export default function InterviewEvaluation() {
     const userMessages = (r.transcript || []).filter(m => m.role === 'user');
 
     return (
-        <div style={{ minHeight: '100vh', background: '#080b14', color: '#e8e8e8', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ minHeight: '100vh', background: '#050505', backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)', color: '#e8e8e8', fontFamily: "'Inter', sans-serif" }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .eval-stat-cards { grid-template-columns: repeat(3, 1fr) !important; }
+                    .eval-score-row { flex-direction: column !important; }
+                    .eval-score-ring { min-width: unset !important; width: 100% !important; flex-direction: row !important; align-items: center !important; gap: 1.5rem !important; }
+                    .eval-skills-grid { grid-template-columns: 1fr !important; }
+                    .eval-str-imp-grid { grid-template-columns: 1fr !important; }
+                    .eval-header { padding: 0 1rem !important; }
+                    .eval-header-meta { display: none !important; }
+                    .eval-content { padding: 1.5rem 1rem 3rem !important; }
+                }
+                @media (max-width: 480px) {
+                    .eval-stat-cards { grid-template-columns: repeat(2, 1fr) !important; }
+                    .eval-content { padding: 1rem 0.75rem 2rem !important; }
+                }
+            `}</style>
             {/* ── Sticky header ── */}
             <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(8,11,20,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 2rem', height: '58px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <button onClick={() => navigate('/aiinterview')}

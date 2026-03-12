@@ -1109,6 +1109,22 @@ export default function Dashboard() {
                     onClose={() => setBookmarkOpen(false)}
                 />
             )}
+            <style>{`
+                @media (max-width: 900px) {
+                    .lc-problem-title { max-width: 140px !important; }
+                }
+                @media (max-width: 680px) {
+                    .lc-nav-center { display: none !important; }
+                    .lc-problem-desc { padding: 1.25rem !important; }
+                    .lc-prob-stats { flex-wrap: wrap; gap: 0.5rem; }
+                    .lc-io-section { flex-direction: column; }
+                }
+                @media (max-width: 480px) {
+                    .lc-logo-text { display: none !important; }
+                    .lc-run-btn, .lc-submit-btn { padding: 0.4rem 0.5rem !important; font-size: 0.75rem !important; }
+                    .lc-timer { display: none !important; }
+                }
+            `}</style>
         </div>
     );
 }

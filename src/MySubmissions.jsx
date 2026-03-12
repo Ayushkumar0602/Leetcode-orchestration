@@ -167,6 +167,20 @@ export default function MySubmissions() {
                 </div>
 
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .subs-table-col-attempts { display: none; }
+                    .subs-table-col-date { display: none; }
+                    .subs-content { padding: 1rem !important; }
+                    .subs-header-box { flex-direction: column !important; align-items: flex-start !important; }
+                    .subs-stats-row { gap: 1rem !important; }
+                }
+                @media (max-width: 480px) {
+                    .subs-content { padding: 0.75rem !important; }
+                    .subs-header-title { font-size: 1.1rem !important; }
+                    .subs-table-col-difficulty { display: none; }
+                }
+            `}</style>
         </div>
     );
 }

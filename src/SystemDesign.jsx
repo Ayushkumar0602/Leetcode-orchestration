@@ -130,6 +130,19 @@ export default function SystemDesign() {
                     </div>
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .sd-nav-links { display: none !important; }
+                    .sd-page-content { padding: 2rem 1rem !important; }
+                    .sd-hero h1 { font-size: 2rem !important; }
+                    .sd-hero p { font-size: 0.95rem !important; }
+                    .sd-cards-grid { grid-template-columns: 1fr !important; }
+                }
+                @media (max-width: 480px) {
+                    .sd-page-content { padding: 1.5rem 0.75rem !important; }
+                    .sd-hero h1 { font-size: 1.6rem !important; }
+                }
+            `}</style>
         </div>
     );
 }

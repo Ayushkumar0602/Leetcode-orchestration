@@ -248,6 +248,18 @@ export default function SystemDesignHLD() {
                     ))}
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .sd-hld-nav-links { display: none !important; }
+                    .sd-hld-content { padding: 1.5rem 1rem !important; }
+                    .sd-hld-header h1 { font-size: 1.8rem !important; }
+                    .sd-hld-section-grid { grid-template-columns: 1fr !important; }
+                }
+                @media (max-width: 480px) {
+                    .sd-hld-header h1 { font-size: 1.4rem !important; }
+                    .sd-hld-content { padding: 1rem 0.75rem !important; }
+                }
+            `}</style>
         </div>
     );
 }

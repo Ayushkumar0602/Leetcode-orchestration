@@ -5,7 +5,7 @@ const { executeCode } = require('./executor');
 const { generateCodeAndTests } = require('./ai');
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
-const { parseResumeWithAI } = require('./resumeParser');
+const { parseResumeWithAI, parseGithubReadme } = require('./resumeParser');
 const { db, rtdb } = require('./firebase');
 const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where } = require('firebase/firestore');
 const { ref: rtdbRef, push, set, remove, get } = require('firebase/database');
@@ -509,6 +509,26 @@ app.post('/api/resume/parse', async (req, res) => {
     } catch (err) {
         console.error('Failed to parse resume:', err);
         res.status(500).json({ error: 'Failed to extract data from resume: ' + err.message });
+    }
+});
+
+// --- GitHub Parse Route ---
+app.post('/api/github/parse', async (req, res) => {
+    try {
+        const { githubUrl } = req.body;
+        if (!githubUrl) {
+            return res.status(400).json({ error: 'githubUrl is required' });
+        }
+        
+        const extendedData = await parseGithubReadme(githubUrl);
+        if (!extendedData) {
+            return res.status(404).json({ error: 'Failed to extract data. Ensure the repository is public and has a README.' });
+        }
+        
+        res.json({ extendedData });
+    } catch (err) {
+        console.error('Failed to parse GitHub repository:', err);
+        res.status(500).json({ error: 'Failed to parse GitHub repository: ' + err.message });
     }
 });
 

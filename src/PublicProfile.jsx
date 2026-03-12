@@ -370,11 +370,15 @@ export default function PublicProfile() {
                                             </div>
                                             <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--txt1)', marginBottom: '6px', lineHeight: 1.3 }}>{p.name}</div>
                                             {p.desc && <div style={{ fontSize: '0.78rem', color: 'var(--txt2)', lineHeight: 1.6, marginBottom: '10px' }}>{p.desc}</div>}
-                                            {p.link && (
+                                            {p.extendedData ? (
+                                                <button onClick={() => navigate(`/public/${uid}/project/${i}`)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: isDark ? '#22d3ee' : '#0891b2', fontWeight: 700, padding: 0 }}>
+                                                    <Brain size={11} /> View Deep Dive <ChevronRight size={10} />
+                                                </button>
+                                            ) : p.link ? (
                                                 <a href={p.link.startsWith('http') ? p.link : `https://${p.link}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: isDark ? '#22d3ee' : '#0891b2', fontWeight: 700, textDecoration: 'none' }}>
                                                     <Github size={11} /> View Project <ChevronRight size={10} />
                                                 </a>
-                                            )}
+                                            ) : null}
                                         </div>
                                     ))}
                                 </div>
