@@ -8,6 +8,7 @@ import {
 import NavProfile from './NavProfile';
 import { useQuery } from '@tanstack/react-query';
 import { fetchInterviews, queryKeys } from './lib/api';
+import { useSEO } from './hooks/useSEO';
 
 const styles = `
 @keyframes slideUpFade {
@@ -32,6 +33,12 @@ const styles = `
 export default function InfoAIInterview() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
+
+    useSEO({
+        title: 'AI Mock Interview Practice – Voice AI Interviewer for Coding Rounds | CodeArena',
+        description: 'Start a 45-minute AI-powered DSA coding interview or system design session on CodeArena. Voice-based AI interviewer, real-time code review, Docker sandbox, and hire/no-hire score report.',
+        canonical: '/infoaiinterview',
+    });
 
     const { data: interviewsData, isLoading: loading } = useQuery({
         queryKey: queryKeys.interviews(currentUser?.uid),

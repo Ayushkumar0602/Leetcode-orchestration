@@ -3,10 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Server, Cpu, LogOut, ArrowRight, Layers, Layout, Zap, Database, GitBranch } from 'lucide-react';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 export default function SystemDesign() {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
+
+    useSEO({
+        title: 'Interactive System Design Interview Practice with AI Staff Engineer | CodeArena',
+        description: 'Practice HLD and LLD system design interviews with an AI Staff Engineer on CodeArena. Cover scalability, microservices, databases, design patterns, and capacity estimation — free for engineers.',
+        canonical: '/systemdesign',
+        jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'Course',
+            name: 'AI System Design Interview Preparation',
+            description: 'Interactive system design interview practice with AI Staff Engineer. HLD and LLD sessions covering scalability, databases, and design patterns.',
+            provider: { '@type': 'Organization', name: 'CodeArena AI', url: 'https://codearena.in' },
+            url: 'https://codearena.in/systemdesign',
+            educationalLevel: 'Advanced',
+            hasCourseInstance: [
+                { '@type': 'CourseInstance', name: 'High-Level Design (HLD)', url: 'https://codearena.in/systemdesign/hld' },
+                { '@type': 'CourseInstance', name: 'Low-Level Design (LLD)', url: 'https://codearena.in/systemdesign/lld' },
+            ],
+        },
+    });
 
     return (
         <div style={{

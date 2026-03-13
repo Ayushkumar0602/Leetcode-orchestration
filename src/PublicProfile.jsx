@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
+import { useSEO } from './hooks/useSEO';
 
 // ── Devicon ──────────────────────────────────────────────────────
 const DEVICON_MAP = { react: 'react', javascript: 'javascript', typescript: 'typescript', python: 'python', nodejs: 'nodejs', 'node.js': 'nodejs', java: 'java', cpp: 'cplusplus', 'c++': 'cplusplus', c: 'c', go: 'go', rust: 'rust', swift: 'swift', kotlin: 'kotlin', dart: 'dart', flutter: 'flutter', html: 'html5', css: 'css3', sass: 'sass', tailwind: 'tailwindcss', mongodb: 'mongodb', postgres: 'postgresql', postgresql: 'postgresql', mysql: 'mysql', redis: 'redis', firebase: 'firebase', docker: 'docker', kubernetes: 'kubernetes', git: 'git', github: 'github', linux: 'linux', aws: 'amazonwebservices', gcp: 'googlecloud', azure: 'azure', graphql: 'graphql', nextjs: 'nextjs', 'next.js': 'nextjs', vuejs: 'vuejs', 'vue.js': 'vuejs', angular: 'angularjs', django: 'django', flask: 'flask', express: 'express', figma: 'figma', redux: 'redux', vite: 'vite' };
@@ -100,6 +101,29 @@ export default function PublicProfile() {
     const avg         = scored.length ? Math.round(scored.reduce((s, i) => s + i.overallScore, 0) / scored.length) : 0;
     const recentInv   = validInv.slice(0, 5);
     const validInvCount = validInv.length;
+
+    // ── Dynamic SEO ── (fired when profile data lands)
+    const profileName = profile.displayName || profile.name || 'Developer';
+    const profileBio  = profile.bio || `${profileName} is a software developer. View their projects, skills, and interview performance on CodeArena.`;
+    useSEO({
+        title: `${profileName}'s Portfolio – CodeArena`,
+        description: profileBio.slice(0, 155),
+        canonical: `/public/${uid}`,
+        jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            name: profileName,
+            url: `https://codearena.in/public/${uid}`,
+            description: profileBio,
+            jobTitle: profile.currentRole || profile.role || 'Software Developer',
+            knowsAbout: (profile.skills || []).slice(0, 10),
+            sameAs: [
+                profile.github ? `https://github.com/${profile.github}` : null,
+                profile.linkedin ? `https://linkedin.com/in/${profile.linkedin}` : null,
+            ].filter(Boolean),
+        },
+    });
+
 
     if (loading) return (
         <div style={{ minHeight: '100vh', background: '#04050a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', fontFamily: 'Inter,sans-serif' }}>

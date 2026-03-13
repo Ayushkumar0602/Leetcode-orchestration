@@ -8,6 +8,7 @@ import {
     GitBranch, Package, Database, Server, Sparkles,
 } from 'lucide-react';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 // ─── Devicon map ────────────────────────────────────────────────
 const DI = { react: 'react', javascript: 'javascript', typescript: 'typescript', python: 'python', nodejs: 'nodejs', 'node.js': 'nodejs', java: 'java', cpp: 'cplusplus', 'c++': 'cplusplus', c: 'c', go: 'go', rust: 'rust', swift: 'swift', kotlin: 'kotlin', dart: 'dart', flutter: 'flutter', html: 'html5', css: 'css3', sass: 'sass', tailwind: 'tailwindcss', mongodb: 'mongodb', postgres: 'postgresql', postgresql: 'postgresql', mysql: 'mysql', redis: 'redis', firebase: 'firebase', docker: 'docker', kubernetes: 'kubernetes', git: 'git', github: 'github', linux: 'linux', aws: 'amazonwebservices', gcp: 'googlecloud', azure: 'azure', graphql: 'graphql', nextjs: 'nextjs', 'next.js': 'nextjs', vuejs: 'vuejs', 'vue.js': 'vuejs', angular: 'angularjs', django: 'django', flask: 'flask', express: 'express', figma: 'figma', redux: 'redux', vite: 'vite' };
@@ -494,6 +495,29 @@ export default function ProjectDetails() {
         { value: d.highlights.length, label: 'Highlights' },
         { value: d.installation.length, label: 'Setup Steps' },
     ];
+
+    // Dynamic SEO
+    const authorName = profile?.displayName || profile?.name || 'Developer';
+    useSEO({
+        title: `${d.name} – ${authorName}'s Portfolio`,
+        description: d.overview || d.tagline || `View the technical details, source code, and live demo of ${d.name} by ${authorName} on CodeArena.`,
+        canonical: `/public/${uid}/project/${projId}`,
+        image: profile?.photoURL || undefined,
+        jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: d.name,
+            applicationCategory: 'DeveloperApplication',
+            operatingSystem: 'Any',
+            description: d.overview || d.tagline,
+            author: {
+                '@type': 'Person',
+                name: authorName,
+                url: `https://codearena.in/public/${uid}`
+            },
+            url: `https://codearena.in/public/${uid}/project/${projId}`
+        }
+    });
 
     return (
         <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--bg)', overflowX: 'hidden' }}>

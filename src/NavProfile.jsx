@@ -19,32 +19,51 @@ export default function NavProfile() {
 
     if (!currentUser) {
         return (
-            <button 
-                onClick={() => navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)} 
-                style={{ 
-                    background: 'var(--accent, #6366f1)', 
-                    color: '#fff', 
-                    border: 'none', 
-                    padding: '6px 14px', 
-                    borderRadius: '8px', 
-                    fontSize: '0.85rem', 
-                    fontWeight: 600, 
-                    cursor: 'pointer', 
-                    transition: 'opacity 0.2s' 
-                }}
-                onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-            >
-                Sign In
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <span
+                    onClick={() => navigate('/blog')}
+                    style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s', textDecoration: 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#a855f7'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#fff'}
+                >
+                    Blog
+                </span>
+                <button 
+                    onClick={() => navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)} 
+                    style={{ 
+                        background: 'var(--accent, #6366f1)', 
+                        color: '#fff', 
+                        border: 'none', 
+                        padding: '6px 14px', 
+                        borderRadius: '8px', 
+                        fontSize: '0.85rem', 
+                        fontWeight: 600, 
+                        cursor: 'pointer', 
+                        transition: 'opacity 0.2s' 
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                >
+                    Sign In
+                </button>
+            </div>
         );
     }
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <span
+                onClick={() => navigate('/blog')}
+                style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s', textDecoration: 'none' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#a855f7'}
+                onMouseLeave={e => e.currentTarget.style.color = '#fff'}
+            >
+                Blog
+            </span>
+
             {/* Public Portfolio Link */}
             <button
-                onClick={() => navigate(`/public/${currentUser.uid}`)}
+                onClick={() => navigate('/portfolio')}
                 style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     background: 'rgba(59,130,246,0.1)',

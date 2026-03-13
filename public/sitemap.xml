@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage — highest priority -->
+  <url>
+    <loc>https://codearena.in/</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- DSA Problem List — highly crawlable public page -->
+  <url>
+    <loc>https://codearena.in/dsaquestion</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- AI Interview Hub -->
+  <url>
+    <loc>https://codearena.in/infoaiinterview</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- System Design -->
+  <url>
+    <loc>https://codearena.in/systemdesign</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- System Design HLD -->
+  <url>
+    <loc>https://codearena.in/systemdesign/hld</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- System Design LLD -->
+  <url>
+    <loc>https://codearena.in/systemdesign/lld</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Portfolio Landing -->
+  <url>
+    <loc>https://codearena.in/portfolio</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Index -->
+  <url>
+    <loc>https://codearena.in/blog</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Blog Post: AI Simulator -->
+  <url>
+    <loc>https://codearena.in/blog/ai-interview-simulator-for-engineers</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: Code Review -->
+  <url>
+    <loc>https://codearena.in/blog/real-time-ai-code-review-tool</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: Practice LeetCode -->
+  <url>
+    <loc>https://codearena.in/blog/practice-leetcode-style-problems-ai</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: System Design -->
+  <url>
+    <loc>https://codearena.in/blog/ai-system-design-interview-practice</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: Voice AI -->
+  <url>
+    <loc>https://codearena.in/blog/voice-based-ai-interviewer-faang</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: AI Mock Platform -->
+  <url>
+    <loc>https://codearena.in/blog/ai-mock-interview-platform</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: AI Interview Coach -->
+  <url>
+    <loc>https://codearena.in/blog/ai-interview-coach-software-engineers</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: Docker Sandbox -->
+  <url>
+    <loc>https://codearena.in/blog/docker-based-coding-interview-sandbox</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: Interview Prep Analytics -->
+  <url>
+    <loc>https://codearena.in/blog/software-engineer-interview-prep-with-analytics</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Post: Monaco Editor Platform -->
+  <url>
+    <loc>https://codearena.in/blog/monaco-editor-coding-interview-platform</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Login (for indexing brand/login page) -->
+  <url>
+    <loc>https://codearena.in/login</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>

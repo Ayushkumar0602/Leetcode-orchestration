@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
 const DIFFICULTY_COLOR = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' };
@@ -24,6 +25,13 @@ const PREVIEW_TEXT = "Hello! I'm your AI interviewer today. Let's get started!";
 export default function AIInterviewSelect() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
+
+    useSEO({
+        title: 'Start AI Interview – CodeArena',
+        description: 'Configure and start your AI mock technical interview on CodeArena. Choose your role, company, AI voice, and coding language.',
+        canonical: '/aiinterviewselect',
+        robots: 'noindex, nofollow',
+    });
 
     // Config state
     const [role, setRole] = useState('');

@@ -12,6 +12,7 @@ import {
     Bot, Cpu, Database, Globe, Lock, BarChart3, Layers, Award
 } from 'lucide-react';
 import './LandingPage.css';
+import { useSEO } from './hooks/useSEO';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -209,6 +210,22 @@ export default function LandingPage() {
     const [showHeroEditor, setShowHeroEditor] = useState(false);
     const [activeProblem, setActiveProblem] = useState(null);
 
+    useSEO({
+        title: 'AI Coding Interview Simulator for Engineers | CodeArena AI',
+        description: 'Practice AI-powered mock coding and system design interviews with real-time AI code review, voice conversations, and detailed hire/no-hire score reports. Free for software engineers preparing for FAANG.',
+        canonical: '/',
+        jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'CodeArena AI',
+            url: 'https://codearena.in',
+            applicationCategory: 'EducationalApplication',
+            operatingSystem: 'Web',
+            description: 'AI coding interview simulator for engineers. Practice DSA problems, mock interviews with voice AI, and system design with real-time code review.',
+            offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+        },
+    });
+
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 30);
         window.addEventListener('scroll', onScroll);
@@ -269,9 +286,9 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.1 }}
                     >
-                        Ace your engineering<br />
-                        interview with an{' '}
-                        <span className="lp-gradient-text">AI interviewer</span>
+                        AI‑powered interview simulator<br />
+                        for{' '}
+                        <span className="lp-gradient-text">software engineers</span>
                     </motion.h1>
 
                     <motion.p
@@ -280,8 +297,8 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2 }}
                     >
-                        Real-time voice conversations, live code review, AI cursor annotations,
-                        and a full six-skill performance report — all in one platform.
+                        Real-time AI code review with cursor annotations, live voice conversations, Docker-sandboxed execution,
+                        and a detailed hire/no-hire score report — all in one free platform.
                     </motion.p>
 
                     <motion.div
@@ -338,7 +355,7 @@ export default function LandingPage() {
                 <div className="lp-demo-split">
                     <FadeIn className="lp-demo-left">
                         <div className="lp-section-label">Live Demo</div>
-                        <h2 className="lp-section-title lp-section-title-left">Watch the AI review your code in real&nbsp;time</h2>
+                        <h2 className="lp-section-title lp-section-title-left">Real-time AI code review with cursor&nbsp;annotations</h2>
                         <p className="lp-section-sub lp-section-sub-left">
                             As you type, the AI interviewer moves its cursor through your code,
                             highlights specific lines, and drops contextual annotations —
@@ -375,7 +392,7 @@ export default function LandingPage() {
                 <FadeIn>
                     <div className="lp-section-label">Platform Capabilities</div>
                     <h2 className="lp-section-title">Everything you need to land the offer</h2>
-                    <p className="lp-section-sub">From live voice interviews to system design — one platform, end-to-end preparation.</p>
+                    <p className="lp-section-sub">AI interview coach for software engineers — from live voice coding rounds to system design practice, end-to-end.</p>
                 </FadeIn>
 
                 <div className="lp-features-grid">
@@ -411,8 +428,8 @@ export default function LandingPage() {
             <section className="lp-section lp-section-dark" id="problems">
                 <FadeIn>
                     <div className="lp-section-label">Practice Mode</div>
-                    <h2 className="lp-section-title">1,000+ LeetCode-style problems</h2>
-                    <p className="lp-section-sub">Solve real problems with a full coding environment, AI hints, and automated test cases.</p>
+                    <h2 className="lp-section-title">1,800+ LeetCode-style problems with AI hints</h2>
+                    <p className="lp-section-sub">Solve real DSA problems with a Monaco editor, AI-generated hints, and automated test cases in a Docker sandbox.</p>
                 </FadeIn>
 
                 <FadeIn delay={0.15}>
@@ -449,7 +466,7 @@ export default function LandingPage() {
                         <div className="lp-sysdesign-icon-bg">
                             <Server size={40} color="#3b82f6" />
                         </div>
-                        <h2 className="lp-sysdesign-title">System Design Interviews</h2>
+                        <h2 className="lp-sysdesign-title">System Design Interview Practice with AI</h2>
                         <p className="lp-sysdesign-sub">
                             Practice HLD and LLD interviews with an AI Staff Engineer. Discuss real architectures,
                             trade-offs, and scalability decisions the same way top companies evaluate senior candidates.

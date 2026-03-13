@@ -1,0 +1,329 @@
+/* ── Blog General Layout ── */
+.blog-container {
+    padding: 6rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+    color: var(--txt1, #fff);
+}
+
+.blog-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+.blog-subtitle {
+    font-size: 1.1rem;
+    color: var(--txt2, #aaa);
+    text-align: center;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-inline: auto;
+}
+
+/* ── Blog List Grid ── */
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.blog-card {
+    background: var(--surface, #111);
+    border: 1px solid var(--border, #333);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15);
+    border-color: #a855f7;
+}
+
+.blog-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.blog-card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.blog-card-meta {
+    font-size: 0.8rem;
+    color: var(--txt3, #888);
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.blog-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.blog-card-excerpt {
+    font-size: 0.95rem;
+    color: var(--txt2, #aaa);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    flex: 1;
+}
+
+.blog-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.blog-author-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.blog-author-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ── Blog Post Wrapper ── */
+.blog-post-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ── Blog Header ── */
+.post-header {
+    margin-bottom: 3rem;
+}
+
+.post-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--txt3, #888);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.post-meta-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+.post-featured-image {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+}
+
+/* ── Content Layout with TOC ── */
+.post-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .post-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.post-toc {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-left: 2px solid var(--border, #333);
+    padding-left: 1rem;
+}
+
+.post-toc-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--txt3, #888);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.post-toc-link {
+    font-size: 0.9rem;
+    color: var(--txt2, #aaa);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.post-toc-link:hover {
+    color: #a855f7;
+}
+
+/* ── Content Elements ── */
+.post-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--txt1, #ddd);
+}
+
+.post-content h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 3rem 0 1.5rem;
+    color: #fff;
+    scroll-margin-top: 100px;
+}
+
+.post-content h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem;
+    color: #fff;
+}
+
+.post-content p {
+    margin-bottom: 1.5rem;
+}
+
+.post-content a {
+    color: #3b82f6;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.4);
+    transition: all 0.2s;
+}
+
+.post-content a:hover {
+    color: #60a5fa;
+    border-bottom-color: #60a5fa;
+}
+
+.post-content-image {
+    width: 100%;
+    border-radius: 12px;
+    margin: 2rem 0;
+    border: 1px solid var(--border, #333);
+}
+
+.post-content-code {
+    background: #0d0d0d;
+    border: 1px solid var(--border, #333);
+    border-radius: 12px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin: 2rem 0;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    color: #a5b4fc;
+}
+
+/* ── FAQ Section ── */
+.post-faq {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border, #333);
+}
+
+.faq-item {
+    margin-bottom: 1.5rem;
+    background: rgba(255,255,255,0.03);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border, #333);
+}
+
+.faq-question {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.faq-answer {
+    font-size: 0.95rem;
+    color: var(--txt2, #aaa);
+}
+
+/* ── Author Bio ── */
+.post-author-bio {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--surface, #111);
+    border: 1px solid var(--border, #333);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-top: 4rem;
+}
+
+.bio-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.bio-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.bio-text {
+    font-size: 0.95rem;
+    color: var(--txt2, #aaa);
+    line-height: 1.5;
+}
+
+/* ── Comments Placeholder ── */
+.post-comments {
+    margin-top: 4rem;
+    padding: 3rem;
+    background: var(--surface, #111);
+    border: 1px solid var(--border, #333);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.comments-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.comments-subtitle {
+    color: var(--txt3, #888);
+}

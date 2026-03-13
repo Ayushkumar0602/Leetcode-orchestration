@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Allow: /public/
+Allow: /dsaquestion
+Allow: /infoaiinterview
+Allow: /systemdesign
+Allow: /login
+Allow: /signup
+
+# Keep private/auth pages out of index
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /submissions
+Disallow: /scraper
+Disallow: /aiinterview
+Disallow: /aiinterviewselect
+Disallow: /solvingpage
+Disallow: /evaluation
+Disallow: /aisystemdesigninterview
+Disallow: /systemdesigninterview
+
+Sitemap: https://codearena.in/sitemap.xml

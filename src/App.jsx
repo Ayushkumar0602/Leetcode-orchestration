@@ -23,6 +23,13 @@ import SystemDesignLLD from './SystemDesignLLD';
 import AISystemDesignInterview from './AISystemDesignInterview';
 import SystemDesignInterview from './SystemDesignInterview';
 
+// Blog Features
+import BlogList from './BlogList';
+import BlogPost from './BlogPost';
+
+// Portfolio Feature
+import PortfolioLanding from './PortfolioLanding';
+
 function App() {
   return (
     <BrowserRouter>
@@ -52,8 +59,14 @@ function App() {
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
 
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/portfolio" element={<PortfolioLanding />} />
             <Route path="/public/:uid" element={<PublicProfile />} />
             <Route path="/public/:uid/project/:projId" element={<ProjectDetails />} />
+            
+            {/* Blog Routes */}
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            
             <Route path="/" element={<LandingPage />} />
           </Routes>
         </div>

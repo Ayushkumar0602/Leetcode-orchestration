@@ -17,6 +17,7 @@ import UpgradeModal from './components/UpgradeModal';
 import NavProfile from './NavProfile';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
+import { useSEO } from './hooks/useSEO';
 
 // ── Styles ──────────────────────────────────────────────────────
 const S = `
@@ -407,6 +408,12 @@ export default function ProfilePage() {
     ];
 
     const handleLogout = async () => { try { await logout(); navigate('/'); } catch (e) { console.error(e); } };
+
+    useSEO({
+        title: 'My Profile & Portfolio – CodeArena',
+        description: 'Manage your developer profile, track your coding progress, and build your public portfolio on CodeArena.',
+        canonical: '/profile',
+    });
 
     return (
         <div className="profile-body" style={{ minHeight: '100vh', background: '#050505', backgroundImage: 'radial-gradient(circle at 20% 0%, rgba(168,85,247,0.1) 0%, transparent 60%), radial-gradient(circle at 80% 100%, rgba(59,130,246,0.07) 0%, transparent 50%)', color: '#fff' }}>

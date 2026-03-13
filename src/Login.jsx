@@ -8,6 +8,7 @@ import {
     Sparkles, Image, Code2, Terminal, Shield, Zap, ChevronRight
 } from 'lucide-react';
 import './Login.css';
+import { useSEO } from './hooks/useSEO';
 
 /* ─── Icons ────────────────────────────────────────────────────── */
 const GithubIcon = ({ size = 20 }) => (
@@ -136,6 +137,13 @@ export default function Login() {
     const navigate = useNavigate();
     const location = useLocation();
     const pollingRef = useRef(null);
+
+    useSEO({
+        title: 'Sign In – CodeArena',
+        description: 'Sign in or create a free CodeArena account to access AI mock interviews, 1800+ DSA problems, system design practice, and your developer portfolio.',
+        canonical: '/login',
+        robots: 'noindex, nofollow',
+    });
 
     const params = new URLSearchParams(location.search);
     const redirectUrl = params.get('redirect') || '/dashboard';

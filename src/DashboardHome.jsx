@@ -9,6 +9,7 @@ import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
+import { useSEO } from './hooks/useSEO';
 
 const DashboardCard = ({ title, value, subtitle, icon: Icon, color, delay }) => (
     <div style={{
@@ -242,6 +243,13 @@ export default function DashboardHome() {
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    useSEO({
+        title: 'Dashboard – CodeArena',
+        description: 'Your CodeArena coding dashboard. Track DSA progress, view interview history, and start AI mock interviews.',
+        canonical: '/dashboard',
+        robots: 'noindex, nofollow',
+    });
+
     const uid = currentUser?.uid;
 
     const { data: statsData, isLoading: statsLoading } = useQuery({
@@ -349,7 +357,7 @@ export default function DashboardHome() {
                     <button className="mobile-nav-link" onClick={() => { navigate('/systemdesign'); setIsMenuOpen(false); }}>System Design</button>
                     {currentUser && (
                         <>
-                            <button className="mobile-nav-link" onClick={() => { navigate(`/public/${currentUser.uid}`); setIsMenuOpen(false); }}>Public Portfolio</button>
+                            <button className="mobile-nav-link" onClick={() => { navigate('/portfolio'); setIsMenuOpen(false); }}>Public Portfolio</button>
                             <button className="mobile-nav-link" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}>My Profile</button>
                         </>
                     )}

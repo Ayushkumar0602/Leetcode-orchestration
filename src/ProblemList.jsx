@@ -13,6 +13,7 @@ import NavProfile from './NavProfile';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchMetadata, fetchStats, fetchLists, fetchProblems, createList as apiCreateList, queryKeys } from './lib/api';
 import { useDebounce } from './hooks/useDebounce';
+import { useSEO } from './hooks/useSEO';
 
 const LANG_OPTIONS = {
     'python': 'Python 3', 'javascript': 'JavaScript',
@@ -31,6 +32,19 @@ export default function ProblemList() {
     const page = parseInt(pageParam) || 1;
     const { currentUser, logout } = useAuth();
     const queryClient = useQueryClient();
+
+    useSEO({
+        title: 'Practice LeetCode-Style Problems with AI Hints | CodeArena DSA',
+        description: 'Browse 1800+ LeetCode-style DSA problems on CodeArena. Filter by difficulty, topic, and company. Solve in a Monaco editor with AI hints and automated test cases — free for engineers.',
+        canonical: '/dsaquestion',
+        jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            name: 'DSA Problem Set – CodeArena',
+            description: '1800+ coding problems for engineering interview preparation with AI hints',
+            url: 'https://codearena.in/dsaquestion',
+        },
+    });
 
     const [search, setSearch] = useState('');
     const [selectedTopics, setSelectedTopics] = useState([]);
