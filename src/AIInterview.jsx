@@ -1942,8 +1942,14 @@ export default function AIInterview() {
                             onMount={(editor, monaco) => {
                                 editorRef.current = editor;
                                 window.monaco = monaco;
+                                // Fix: Space key was being swallowed by the autocomplete suggestion widget.
+                                // Override Space to always insert a space and dismiss any open suggestion.
+                                editor.addCommand(monaco.KeyCode.Space, () => {
+                                    editor.trigger('keyboard', 'hideSuggestWidget', {});
+                                    editor.trigger('keyboard', 'type', { text: ' ' });
+                                });
                             }}
-                            options={{ fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false, fontFamily: 'JetBrains Mono, monospace', padding: { top: 12 }, wordWrap: 'on' }}
+                            options={{ fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false, fontFamily: 'JetBrains Mono, monospace', padding: { top: 12 }, wordWrap: 'on', quickSuggestions: false, acceptSuggestionOnCommitCharacter: false }}
                         />
 
                         {/* AI Inline Comment Layer */}
