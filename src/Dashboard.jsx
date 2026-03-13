@@ -53,7 +53,7 @@ export default function Dashboard() {
     const { currentUser, logout } = useAuth();
 
     const [language, setLanguage] = useState(
-        () => localStorage.getItem('codearena_lang') || 'python'
+        () => localStorage.getItem('whizan_lang') || 'python'
     );
     const [code, setCode] = useState(LANGUAGE_TEMPLATES.python);
     const [isRouted, setIsRouted] = useState(false);
@@ -207,7 +207,7 @@ export default function Dashboard() {
     // ─── Language Change ───────────────────────────────────────────
     const handleLanguageChange = (lang) => {
         setLanguage(lang);
-        localStorage.setItem('codearena_lang', lang);
+        localStorage.setItem('whizan_lang', lang);
         setRunResults(null);
         setSubmitResult(null);
 
@@ -282,7 +282,7 @@ export default function Dashboard() {
             // Case 1: Navigated from ProblemList (has state)
             if (location.state?.problemParams) {
                 const params = location.state.problemParams;
-                const savedLang = localStorage.getItem('codearena_lang') || 'python';
+                const savedLang = localStorage.getItem('whizan_lang') || 'python';
                 const langToUse = params.language || savedLang;
                 setProblemStatement(params.description || '');
                 setProblemTitle(params.title || 'Problem');
@@ -551,8 +551,8 @@ export default function Dashboard() {
                         <ArrowLeft size={18} />
                     </button>
                     <div className="lc-logo" onClick={() => navigate('/dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <img src="/logo.jpeg" alt="CodeArena Logo" style={{ height: '24px', width: '24px', borderRadius: '4px', objectFit: 'contain' }} />
-                        <span className="lc-logo-text">CodeArena</span>
+                        <img src="/logo.jpeg" alt="Whizan AI Logo" style={{ height: '24px', width: '24px', borderRadius: '4px', objectFit: 'contain' }} />
+                        <span className="lc-logo-text">Whizan AI</span>
                     </div>
                 </div>
                 <div className="lc-nav-center">

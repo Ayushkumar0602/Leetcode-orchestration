@@ -23,7 +23,7 @@ export default function UpgradeModal({ isOpen, onClose, user, onUpgradeSuccess }
                 key: data.key_id,
                 amount: data.order.amount,
                 currency: data.order.currency,
-                name: "CodeArena",
+                name: "Whizan AI",
                 description: "Upgrade to Blaze Plan",
                 image: "/logo.jpeg",
                 order_id: data.order.id,

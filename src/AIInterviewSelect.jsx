@@ -27,8 +27,8 @@ export default function AIInterviewSelect() {
     const { currentUser } = useAuth();
 
     useSEO({
-        title: 'Start AI Interview – CodeArena',
-        description: 'Configure and start your AI mock technical interview on CodeArena. Choose your role, company, AI voice, and coding language.',
+        title: 'Start AI Interview – Whizan AI',
+        description: 'Configure and start your AI mock technical interview on Whizan AI. Choose your role, company, AI voice, and coding language.',
         canonical: '/aiinterviewselect',
         robots: 'noindex, nofollow',
     });

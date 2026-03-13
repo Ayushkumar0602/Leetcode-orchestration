@@ -92,28 +92,28 @@ export default function PublicProfile() {
 
     const loading = statsLoading || invLoading || profileLoading;
 
-    const stats       = statsResult?.userStats   || {};
+    const stats = statsResult?.userStats || {};
     const totalCounts = statsResult?.totalCounts || {};
-    const profile     = profileData || {};
+    const profile = profileData || {};
 
-    const validInv    = (interviewsRaw || []).filter(i => i.overallScore || i.scoreReport);
-    const scored      = validInv.filter(i => i.overallScore > 0);
-    const avg         = scored.length ? Math.round(scored.reduce((s, i) => s + i.overallScore, 0) / scored.length) : 0;
-    const recentInv   = validInv.slice(0, 5);
+    const validInv = (interviewsRaw || []).filter(i => i.overallScore || i.scoreReport);
+    const scored = validInv.filter(i => i.overallScore > 0);
+    const avg = scored.length ? Math.round(scored.reduce((s, i) => s + i.overallScore, 0) / scored.length) : 0;
+    const recentInv = validInv.slice(0, 5);
     const validInvCount = validInv.length;
 
     // ── Dynamic SEO ── (fired when profile data lands)
     const profileName = profile.displayName || profile.name || 'Developer';
-    const profileBio  = profile.bio || `${profileName} is a software developer. View their projects, skills, and interview performance on CodeArena.`;
+    const profileBio = profile.bio || `${profileName} is a software developer. View their projects, skills, and interview performance on Whizan AI.`;
     useSEO({
-        title: `${profileName}'s Portfolio – CodeArena`,
+        title: `${profileName}'s Portfolio – Whizan AI`,
         description: profileBio.slice(0, 155),
         canonical: `/public/${uid}`,
         jsonLd: {
             '@context': 'https://schema.org',
             '@type': 'Person',
             name: profileName,
-            url: `https://codearena.in/public/${uid}`,
+            url: `https://whizan.xyz/public/${uid}`,
             description: profileBio,
             jobTitle: profile.currentRole || profile.role || 'Software Developer',
             knowsAbout: (profile.skills || []).slice(0, 10),
@@ -265,8 +265,8 @@ export default function PublicProfile() {
             {/* ── Top nav ── */}
             <nav className="pub-nav" style={{ height: '56px', borderBottom: '1px solid var(--divide)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', background: 'var(--nav-bg)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-                    <img src="/logo.jpeg" alt="CodeArena" style={{ width: '26px', height: '26px', borderRadius: '7px' }} />
-                    <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.3px', color: 'var(--txt1)' }}>CodeArena</span>
+                    <img src="/logo.jpeg" alt="Whizan AI" style={{ width: '26px', height: '26px', borderRadius: '7px' }} />
+                    <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.3px', color: 'var(--txt1)' }}>Whizan AI</span>
                 </div>
 
                 <div className="pub-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -325,7 +325,7 @@ export default function PublicProfile() {
 
                             {/* Quick meta */}
                             <div className="pub-hero-meta" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '0.8rem', color: 'var(--txt3)', fontWeight: 600 }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><CheckCircle size={13} color="#10b981" />Verified CodeArena Member</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><CheckCircle size={13} color="#10b981" />Verified Whizan AI Member</span>
                                 {prefs.showBadges && <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Trophy size={13} color="#eab308" />{unlockedBadges} Achievements Unlocked</span>}
                                 {prefs.showInterviews && validInvCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Brain size={13} color="var(--accent)" />{validInvCount} Mock Interviews</span>}
                             </div>
@@ -563,8 +563,8 @@ export default function PublicProfile() {
 
             {/* ── Footer ── */}
             <div style={{ borderTop: '1px solid var(--divide)', padding: '1.5rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '2rem' }}>
-                <img src="/logo.jpeg" alt="CodeArena" style={{ width: '18px', height: '18px', borderRadius: '4px', opacity: 0.5 }} />
-                <span style={{ fontSize: '0.75rem', color: 'var(--txt3)', fontWeight: 500 }}>Powered by <strong style={{ color: 'var(--txt2)' }}>CodeArena</strong> — Build your coding career</span>
+                <img src="/logo.jpeg" alt="Whizan AI" style={{ width: '18px', height: '18px', borderRadius: '4px', opacity: 0.5 }} />
+                <span style={{ fontSize: '0.75rem', color: 'var(--txt3)', fontWeight: 500 }}>Powered by <strong style={{ color: 'var(--txt2)' }}>Whizan AI</strong> — Build your coding career</span>
             </div>
         </div>
     );

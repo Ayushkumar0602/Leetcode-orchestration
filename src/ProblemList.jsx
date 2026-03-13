@@ -34,15 +34,15 @@ export default function ProblemList() {
     const queryClient = useQueryClient();
 
     useSEO({
-        title: 'Practice LeetCode-Style Problems with AI Hints | CodeArena DSA',
-        description: 'Browse 1800+ LeetCode-style DSA problems on CodeArena. Filter by difficulty, topic, and company. Solve in a Monaco editor with AI hints and automated test cases — free for engineers.',
+        title: 'Practice LeetCode-Style Problems with AI Hints | Whizan AI DSA',
+        description: 'Browse 1800+ LeetCode-style DSA problems on Whizan AI. Filter by difficulty, topic, and company. Solve in a Monaco editor with AI hints and automated test cases — free for engineers.',
         canonical: '/dsaquestion',
         jsonLd: {
             '@context': 'https://schema.org',
             '@type': 'ItemList',
-            name: 'DSA Problem Set – CodeArena',
+            name: 'DSA Problem Set – Whizan AI',
             description: '1800+ coding problems for engineering interview preparation with AI hints',
-            url: 'https://codearena.in/dsaquestion',
+            url: 'https://whizan.xyz/dsaquestion',
         },
     });
 
@@ -50,7 +50,7 @@ export default function ProblemList() {
     const [selectedTopics, setSelectedTopics] = useState([]);
     const [selectedCompanies, setSelectedCompanies] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState(
-        () => localStorage.getItem('codearena_lang') || 'python'
+        () => localStorage.getItem('whizan_lang') || 'python'
     );
 
     // Bookmark / List state
@@ -102,11 +102,11 @@ export default function ProblemList() {
     });
 
     // ── Derived state ────────────────────────────────────────────────────
-    const userStats   = statsResult?.userStats   ?? null;
+    const userStats = statsResult?.userStats ?? null;
     const totalCounts = statsResult?.totalCounts ?? null;
-    const userLists   = userListsData ?? [];
-    const problems    = problemsData?.problems ?? [];
-    const totalPages  = problemsData?.totalPages ?? 1;
+    const userLists = userListsData ?? [];
+    const problems = problemsData?.problems ?? [];
+    const totalPages = problemsData?.totalPages ?? 1;
 
     // ── Mutations ────────────────────────────────────────────────────────
     const createListMutation = useMutation({
@@ -130,7 +130,7 @@ export default function ProblemList() {
 
     const handleLanguageSelect = (lang) => {
         setSelectedLanguage(lang);
-        localStorage.setItem('codearena_lang', lang);
+        localStorage.setItem('whizan_lang', lang);
     };
 
     const handlePageChange = (n) => { if (n >= 1 && n <= totalPages) navigate(`/dsaquestion/${n}`); };
@@ -166,7 +166,7 @@ export default function ProblemList() {
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 0' }} onClick={() => navigate('/dashboard')}>
                     <img src="/logo.jpeg" alt="Logo" style={{ height: '32px', width: '32px', borderRadius: '8px', objectFit: 'cover' }} />
-                    <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.5px' }}>CodeArena</span>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.5px' }}>Whizan AI</span>
                 </div>
 
                 <div className="pl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>

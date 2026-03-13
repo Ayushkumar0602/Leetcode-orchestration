@@ -36,7 +36,7 @@ export default function AISystemDesignInterview() {
                     </button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="Logo" style={{ height: '24px', width: '24px', borderRadius: '4px', objectFit: 'contain' }} />
-                        <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--txt)' }}>CodeArena</span>
+                        <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--txt)' }}>Whizan AI</span>
                     </div>
                     <div style={{ height: '20px', width: '1px', background: 'rgba(255,255,255,0.1)', margin: '0 8px' }} />
                     <span style={{ fontSize: '0.9rem', color: 'var(--txt2)', fontWeight: 500 }}>System Design Interview</span>

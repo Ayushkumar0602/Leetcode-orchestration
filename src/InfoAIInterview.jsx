@@ -35,8 +35,8 @@ export default function InfoAIInterview() {
     const navigate = useNavigate();
 
     useSEO({
-        title: 'AI Mock Interview Practice – Voice AI Interviewer for Coding Rounds | CodeArena',
-        description: 'Start a 45-minute AI-powered DSA coding interview or system design session on CodeArena. Voice-based AI interviewer, real-time code review, Docker sandbox, and hire/no-hire score report.',
+        title: 'AI Mock Interview Practice – Voice AI Interviewer for Coding Rounds | Whizan AI',
+        description: 'Start a 45-minute AI-powered DSA coding interview or system design session on Whizan AI. Voice-based AI interviewer, real-time code review, Docker sandbox, and hire/no-hire score report.',
         canonical: '/infoaiinterview',
     });
 
@@ -78,7 +78,7 @@ export default function InfoAIInterview() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} />
-                        <span style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '-0.3px', color: '#fff' }}>CodeArena</span>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '-0.3px', color: '#fff' }}>Whizan AI</span>
                     </div>
                 </div>
 

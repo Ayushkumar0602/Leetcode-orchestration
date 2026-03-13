@@ -244,8 +244,8 @@ export default function DashboardHome() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useSEO({
-        title: 'Dashboard – CodeArena',
-        description: 'Your CodeArena coding dashboard. Track DSA progress, view interview history, and start AI mock interviews.',
+        title: 'Dashboard – Whizan AI',
+        description: 'Your Whizan AI coding dashboard. Track DSA progress, view interview history, and start AI mock interviews.',
         canonical: '/dashboard',
         robots: 'noindex, nofollow',
     });
@@ -273,7 +273,7 @@ export default function DashboardHome() {
         staleTime: 1000 * 60 * 5,
     });
 
-    const userStats   = statsData?.userStats   ?? null;
+    const userStats = statsData?.userStats ?? null;
     const totalCounts = statsData?.totalCounts ?? null;
 
     const allInterviews = interviewsData || [];
@@ -305,7 +305,7 @@ export default function DashboardHome() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flex: '1 1 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
-                        <span className="nav-logo-text" style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.5px' }}>CodeArena</span>
+                        <span className="nav-logo-text" style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Whizan AI</span>
                     </div>
                 </div>
 
@@ -325,14 +325,14 @@ export default function DashboardHome() {
                     <div className="desktop-nav-profile">
                         <NavProfile />
                     </div>
-                    <button 
+                    <button
                         className="mobile-nav-toggle"
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        style={{ 
-                            display: 'none', 
-                            background: 'transparent', 
-                            border: 'none', 
-                            color: '#fff', 
+                        style={{
+                            display: 'none',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#fff',
                             cursor: 'pointer',
                             padding: '8px',
                             zIndex: 110
@@ -343,7 +343,7 @@ export default function DashboardHome() {
                     {/* Only show NavProfile on mobile if logged out (Sign In button) */}
                     {!currentUser && (
                         <div className="mobile-nav-toggle" style={{ display: 'none' }}>
-                             <NavProfile />
+                            <NavProfile />
                         </div>
                     )}
                 </div>
@@ -401,7 +401,7 @@ export default function DashboardHome() {
                     />
 
                     {/* Dynamic Problems Solved Widget */}
-                    <div className="problems-card" 
+                    <div className="problems-card"
                         onClick={() => navigate('/dsaquestion')}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';

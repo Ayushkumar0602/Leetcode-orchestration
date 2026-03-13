@@ -20,7 +20,7 @@ export default function DataTab({ currentUser, userStats, interviews }) {
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'codearena_data.json'; a.click();
+        const a = document.createElement('a'); a.href = url; a.download = 'whizan_ai_data.json'; a.click();
         URL.revokeObjectURL(url);
     };
 
@@ -58,7 +58,7 @@ export default function DataTab({ currentUser, userStats, interviews }) {
                     <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Download size={16} color="#10b981" /> Data Export
                     </div>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--txt3)', marginBottom: '1rem' }}>Download a complete copy of your CodeArena data including submissions, stats, and interview history (GDPR compliant).</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--txt3)', marginBottom: '1rem' }}>Download a complete copy of your Whizan AI data including submissions, stats, and interview history (GDPR compliant).</p>
                     <button onClick={downloadData} style={{ width: '100%', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: '12px', padding: '12px', color: '#34d399', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}>
                         <Download size={16} /> Download My Data (JSON)
                     </button>

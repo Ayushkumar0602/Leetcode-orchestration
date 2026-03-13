@@ -6,7 +6,7 @@
 
   <!-- Homepage — highest priority -->
   <url>
-    <loc>https://codearena.in/</loc>
+    <loc>https://whizan.xyz/</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- DSA Problem List — highly crawlable public page -->
   <url>
-    <loc>https://codearena.in/dsaquestion</loc>
+    <loc>https://whizan.xyz/dsaquestion</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -22,7 +22,7 @@
 
   <!-- AI Interview Hub -->
   <url>
-    <loc>https://codearena.in/infoaiinterview</loc>
+    <loc>https://whizan.xyz/infoaiinterview</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -30,7 +30,7 @@
 
   <!-- System Design -->
   <url>
-    <loc>https://codearena.in/systemdesign</loc>
+    <loc>https://whizan.xyz/systemdesign</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -38,7 +38,7 @@
 
   <!-- System Design HLD -->
   <url>
-    <loc>https://codearena.in/systemdesign/hld</loc>
+    <loc>https://whizan.xyz/systemdesign/hld</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -46,7 +46,7 @@
 
   <!-- System Design LLD -->
   <url>
-    <loc>https://codearena.in/systemdesign/lld</loc>
+    <loc>https://whizan.xyz/systemdesign/lld</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -54,7 +54,7 @@
 
   <!-- Portfolio Landing -->
   <url>
-    <loc>https://codearena.in/portfolio</loc>
+    <loc>https://whizan.xyz/portfolio</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -62,7 +62,7 @@
 
   <!-- Blog Index -->
   <url>
-    <loc>https://codearena.in/blog</loc>
+    <loc>https://whizan.xyz/blog</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -70,7 +70,7 @@
 
   <!-- Blog Post: AI Simulator -->
   <url>
-    <loc>https://codearena.in/blog/ai-interview-simulator-for-engineers</loc>
+    <loc>https://whizan.xyz/blog/ai-interview-simulator-for-engineers</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -78,7 +78,7 @@
 
   <!-- Blog Post: Code Review -->
   <url>
-    <loc>https://codearena.in/blog/real-time-ai-code-review-tool</loc>
+    <loc>https://whizan.xyz/blog/real-time-ai-code-review-tool</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -86,7 +86,7 @@
 
   <!-- Blog Post: Practice LeetCode -->
   <url>
-    <loc>https://codearena.in/blog/practice-leetcode-style-problems-ai</loc>
+    <loc>https://whizan.xyz/blog/practice-leetcode-style-problems-ai</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -94,7 +94,7 @@
 
   <!-- Blog Post: System Design -->
   <url>
-    <loc>https://codearena.in/blog/ai-system-design-interview-practice</loc>
+    <loc>https://whizan.xyz/blog/ai-system-design-interview-practice</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -102,7 +102,7 @@
 
   <!-- Blog Post: Voice AI -->
   <url>
-    <loc>https://codearena.in/blog/voice-based-ai-interviewer-faang</loc>
+    <loc>https://whizan.xyz/blog/voice-based-ai-interviewer-faang</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -110,7 +110,7 @@
 
   <!-- Blog Post: AI Mock Platform -->
   <url>
-    <loc>https://codearena.in/blog/ai-mock-interview-platform</loc>
+    <loc>https://whizan.xyz/blog/ai-mock-interview-platform</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -118,7 +118,7 @@
 
   <!-- Blog Post: AI Interview Coach -->
   <url>
-    <loc>https://codearena.in/blog/ai-interview-coach-software-engineers</loc>
+    <loc>https://whizan.xyz/blog/ai-interview-coach-software-engineers</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -126,7 +126,7 @@
 
   <!-- Blog Post: Docker Sandbox -->
   <url>
-    <loc>https://codearena.in/blog/docker-based-coding-interview-sandbox</loc>
+    <loc>https://whizan.xyz/blog/docker-based-coding-interview-sandbox</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -134,7 +134,7 @@
 
   <!-- Blog Post: Interview Prep Analytics -->
   <url>
-    <loc>https://codearena.in/blog/software-engineer-interview-prep-with-analytics</loc>
+    <loc>https://whizan.xyz/blog/software-engineer-interview-prep-with-analytics</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -142,7 +142,7 @@
 
   <!-- Blog Post: Monaco Editor Platform -->
   <url>
-    <loc>https://codearena.in/blog/monaco-editor-coding-interview-platform</loc>
+    <loc>https://whizan.xyz/blog/monaco-editor-coding-interview-platform</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -150,7 +150,7 @@
 
   <!-- Login (for indexing brand/login page) -->
   <url>
-    <loc>https://codearena.in/login</loc>
+    <loc>https://whizan.xyz/login</loc>
     <lastmod>2026-03-14</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>

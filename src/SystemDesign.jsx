@@ -10,20 +10,20 @@ export default function SystemDesign() {
     const navigate = useNavigate();
 
     useSEO({
-        title: 'Interactive System Design Interview Practice with AI Staff Engineer | CodeArena',
-        description: 'Practice HLD and LLD system design interviews with an AI Staff Engineer on CodeArena. Cover scalability, microservices, databases, design patterns, and capacity estimation — free for engineers.',
+        title: 'Interactive System Design Interview Practice with AI Staff Engineer | Whizan AI',
+        description: 'Practice HLD and LLD system design interviews with an AI Staff Engineer on Whizan AI. Cover scalability, microservices, databases, design patterns, and capacity estimation — free for engineers.',
         canonical: '/systemdesign',
         jsonLd: {
             '@context': 'https://schema.org',
             '@type': 'Course',
             name: 'AI System Design Interview Preparation',
             description: 'Interactive system design interview practice with AI Staff Engineer. HLD and LLD sessions covering scalability, databases, and design patterns.',
-            provider: { '@type': 'Organization', name: 'CodeArena AI', url: 'https://codearena.in' },
-            url: 'https://codearena.in/systemdesign',
+            provider: { '@type': 'Organization', name: 'Whizan AI', url: 'https://whizan.xyz' },
+            url: 'https://whizan.xyz/systemdesign',
             educationalLevel: 'Advanced',
             hasCourseInstance: [
-                { '@type': 'CourseInstance', name: 'High-Level Design (HLD)', url: 'https://codearena.in/systemdesign/hld' },
-                { '@type': 'CourseInstance', name: 'Low-Level Design (LLD)', url: 'https://codearena.in/systemdesign/lld' },
+                { '@type': 'CourseInstance', name: 'High-Level Design (HLD)', url: 'https://whizan.xyz/systemdesign/hld' },
+                { '@type': 'CourseInstance', name: 'Low-Level Design (LLD)', url: 'https://whizan.xyz/systemdesign/lld' },
             ],
         },
     });
@@ -40,7 +40,7 @@ export default function SystemDesign() {
             <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 2rem', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                     <img src="/logo.jpeg" alt="Logo" style={{ height: '28px', width: '28px', borderRadius: '6px', objectFit: 'contain' }} />
-                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)', letterSpacing: '-0.3px' }}>CodeArena</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)', letterSpacing: '-0.3px' }}>Whizan AI</span>
                 </div>
 
                 <div className="sd-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>

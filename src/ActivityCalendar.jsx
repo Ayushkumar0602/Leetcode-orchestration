@@ -256,7 +256,7 @@ function ContestsTab() {
     const contests = buildContests();
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--txt3)', margin: 0 }}>Upcoming contests on CodeArena:</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--txt3)', margin: 0 }}>Upcoming contests on whizan:</p>
             {contests.map((c, i) => <ContestCard key={i} contest={c} />)}
         </div>
     );

@@ -96,17 +96,17 @@ const S = `
 export default function PortfolioLanding() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
-    
+
     // SEO Enhancement for generic non-logged-in public traffic
     useSEO({
-        title: 'Free Developer Portfolio Maker – CodeArena',
+        title: 'Free Developer Portfolio Maker – Whizan AI',
         description: 'Auto-generate a stunning, SEO-optimized software engineering portfolio. Showcase your LeetCode DSA stats, AI mock interview scores, and deployed projects.',
         canonical: '/portfolio',
         keywords: 'developer portfolio, free portfolio maker, software engineer portfolio, AI coding interview, DSA practice portfolio, github portfolio alternative',
         jsonLd: {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "CodeArena Portfolio Maker",
+            "name": "Whizan AI Portfolio Maker",
             "applicationCategory": "DeveloperApplication",
             "operatingSystem": "Web",
             "description": "A tool for software engineers to instantly generate a professional, data-driven portfolio using their technical interview practice metrics.",
@@ -119,22 +119,22 @@ export default function PortfolioLanding() {
     return (
         <main className="pl-main">
             <style>{S}</style>
-            
+
             {/* Ambient Background */}
             <div className="pl-bg-grid" />
 
             {/* Navigation Header */}
             <header className="pl-nav">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => navigate('/')}>
-                    <img src="/logo.jpeg" alt="CodeArena Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
-                    <span style={{ fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.4px', color: '#fff' }}>CodeArena</span>
+                    <img src="/logo.jpeg" alt="Whizan AI Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.4px', color: '#fff' }}>Whizan AI</span>
                 </div>
                 {currentUser ? (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <NavProfile />
                     </div>
                 ) : (
-                    <button onClick={() => navigate('/login?redirect=/portfolio')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '8px 20px', borderRadius: '10px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.15)'} onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.1)'}>
+                    <button onClick={() => navigate('/login?redirect=/portfolio')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '8px 20px', borderRadius: '10px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
                         Sign In
                     </button>
                 )}
@@ -147,20 +147,20 @@ export default function PortfolioLanding() {
                 <div style={{ position: 'absolute', top: '20%', right: '10%', width: '35vw', height: '35vw', background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 50%)', pointerEvents: 'none' }} />
 
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    
+
                     <div className="pl-badge">
                         <Sparkles size={14} /> The #1 Free Portfolio Setup for Engineers
                     </div>
-                    
+
                     <h1 className="pl-h1">
-                        Turn Your Practice into <br/>
+                        Turn Your Practice into <br />
                         <span className="pl-h1-gradient">A Proof of Excellence.</span>
                     </h1>
-                    
+
                     <p className="pl-p">
-                        Skip the templates. CodeArena auto-generates a premium, highly-SEO-optimized public portfolio that proves your verifiable <strong>LeetCode stats</strong>, <strong>System Design skills</strong>, and <strong>AI mock interview scores</strong>.
+                        Skip the templates. Whizan AI auto-generates a premium, highly-SEO-optimized public portfolio that proves your verifiable <strong>LeetCode stats</strong>, <strong>System Design skills</strong>, and <strong>AI mock interview scores</strong>.
                     </p>
-                    
+
                     <button onClick={handleCreateClick} className="pl-btn">
                         <Globe size={20} /> Claim Your Public Link
                     </button>
@@ -175,14 +175,14 @@ export default function PortfolioLanding() {
                             <div className="pl-dot" style={{ background: '#ff5f56' }} />
                             <div className="pl-dot" style={{ background: '#ffbd2e' }} />
                             <div className="pl-dot" style={{ background: '#27c93f' }} />
-                            <div className="pl-mockup-url">codearena.in/public/developer</div>
+                            <div className="pl-mockup-url">whizan.xyz/public/developer</div>
                             <div style={{ width: 44 }} /> {/* Fake flex balancer */}
                         </div>
                         {/* Insert Actual Portfolio Mockup Image */}
                         <div className="pl-image-wrapper">
-                            <img 
-                                src="/portfolio.png" 
-                                alt="High quality developer portfolio preview showing 3D DSA activity charts, recent AI mock interview evaluations, and technical system design case studies" 
+                            <img
+                                src="/portfolio.png"
+                                alt="High quality developer portfolio preview showing 3D DSA activity charts, recent AI mock interview evaluations, and technical system design case studies"
                                 className="pl-image"
                                 loading="lazy"
                             />
@@ -229,12 +229,12 @@ export default function PortfolioLanding() {
                         </div>
                         <h3 className="pl-card-h3">Live DSA Activity Sync</h3>
                         <p className="pl-card-p" style={{ fontSize: '1.1rem' }}>
-                            Every time you solve a Data Structures or Algorithms problem inside CodeArena, your custom portfolio updates instantly. Prove your consistency globally with an embedded activity heatmap and segmented difficulty breakdown.
+                             Every time you solve a Data Structures or Algorithms problem inside Whizan AI, your custom portfolio updates instantly. Prove your consistency globally with an embedded activity heatmap and segmented difficulty breakdown.
                         </p>
                     </motion.div>
                     <motion.div className="pl-value-visual" initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }} viewport={{ once: true, margin: "-100px" }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-                            {Array.from({length: 35}).map((_, i) => {
+                            {Array.from({ length: 35 }).map((_, i) => {
                                 const active = Math.random() > 0.5;
                                 const opacity = active ? Math.random() * 0.8 + 0.2 : 1;
                                 return (
@@ -249,9 +249,9 @@ export default function PortfolioLanding() {
             {/* Comprehensive SEO Feature Grid */}
             <section className="pl-section" style={{ background: 'rgba(255,255,255,0.015)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                 <h2 className="pl-section-title">Everything You Need to Stand Out</h2>
-                
+
                 <div className="pl-bento-grid" style={{ marginTop: '4rem' }}>
-                    
+
                     <motion.div className="pl-bento-card pl-span-8" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
                         <div style={{ position: 'absolute', top: 0, right: 0, width: '400px', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.08))', pointerEvents: 'none' }} />
                         <div className="pl-icon-box" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}><LayoutTemplate color="#c084fc" size={24} /></div>
@@ -287,7 +287,7 @@ export default function PortfolioLanding() {
                         Your next job is waiting.
                     </h2>
                     <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.7)', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3.5rem', lineHeight: 1.6 }}>
-                        Join thousands of software engineers leveraging CodeArena to prove their raw coding skills with immutable data, rather than just words.
+                        Join thousands of software engineers leveraging Whizan AI to prove their raw coding skills with immutable data, rather than just words.
                     </p>
                     <button onClick={handleCreateClick} className="pl-btn" style={{ padding: '20px 48px', fontSize: '1.25rem' }}>
                         Create Your URL <ArrowUpRight size={22} />
@@ -297,15 +297,15 @@ export default function PortfolioLanding() {
                     </div>
                 </motion.div>
             </section>
-            
+
             {/* Global Footer */}
             <footer style={{ padding: '2.5rem 5%', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>© 2026 CodeArena. All rights reserved.</div>
+                <div>© 2026 Whizan AI. All rights reserved.</div>
                 <nav style={{ display: 'flex', gap: '24px' }}>
-                    <a href="/" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color='#fff'} onMouseLeave={e => e.currentTarget.style.color='inherit'}>Home</a>
-                    <a href="/dsaquestion" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color='#fff'} onMouseLeave={e => e.currentTarget.style.color='inherit'}>DSA Practice</a>
-                    <a href="/infoaiinterview" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color='#fff'} onMouseLeave={e => e.currentTarget.style.color='inherit'}>Interviews</a>
-                    <a href="/blog" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color='#fff'} onMouseLeave={e => e.currentTarget.style.color='inherit'}>Blog</a>
+                    <a href="/" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Home</a>
+                    <a href="/dsaquestion" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>DSA Practice</a>
+                    <a href="/infoaiinterview" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Interviews</a>
+                    <a href="/blog" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Blog</a>
                 </nav>
             </footer>
         </main>

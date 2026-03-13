@@ -139,8 +139,8 @@ export default function Login() {
     const pollingRef = useRef(null);
 
     useSEO({
-        title: 'Sign In – CodeArena',
-        description: 'Sign in or create a free CodeArena account to access AI mock interviews, 1800+ DSA problems, system design practice, and your developer portfolio.',
+        title: 'Sign In – Whizan AI',
+        description: 'Sign in or create a free Whizan AI account to access AI mock interviews, 1800+ DSA problems, system design practice, and your developer portfolio.',
         canonical: '/login',
         robots: 'noindex, nofollow',
     });
@@ -209,7 +209,7 @@ export default function Login() {
                     clearInterval(pollingRef.current); pollingRef.current = null;
                     setView('onboarding');
                 }
-            } catch (_) {}
+            } catch (_) { }
         }, 3000);
     }
 
@@ -367,8 +367,8 @@ export default function Login() {
                         transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.45 }}
                     >
                         <motion.div className="mobile-brand" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                            <img src="/logo.jpeg" alt="CodeArena" onError={e => e.target.style.display='none'} />
-                            <span>CodeArena</span>
+                            <img src="/logo.jpeg" alt="Whizan AI" onError={e => e.target.style.display = 'none'} />
+                            <span>Whizan AI</span>
                         </motion.div>
 
                         <motion.div initial="hidden" animate="show" variants={stagger}>
@@ -474,9 +474,9 @@ function CinemaPanel() {
 
             <div className="cinema-content">
                 {/* Brand */}
-                <motion.div className="cinema-brand" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ ease: [0.16,1,0.3,1], duration: 0.7 }}>
-                    <img src="/logo.jpeg" alt="CodeArena" className="cinema-logo" onError={e => e.target.style.display='none'} />
-                    <span className="cinema-brand-name">CodeArena</span>
+                <motion.div className="cinema-brand" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.7 }}>
+                    <img src="/logo.jpeg" alt="Whizan AI" className="cinema-logo" onError={e => e.target.style.display = 'none'} />
+                    <span className="cinema-brand-name">Whizan AI</span>
                 </motion.div>
 
                 {/* Center content */}
@@ -486,7 +486,7 @@ function CinemaPanel() {
                         AI-Powered · Used by 5,000+ Engineers
                     </motion.div>
                     <motion.h1 variants={item} className="cinema-title">
-                        Master the<br/>coding interview<br/>with <span className="grad">AI</span>
+                        Master the<br />coding interview<br />with <span className="grad">AI</span>
                     </motion.h1>
                     <motion.p variants={item} className="cinema-subtitle">
                         Practice real interview scenarios with a voice-powered AI that adapts, challenges, and scores you like a real interviewer would.

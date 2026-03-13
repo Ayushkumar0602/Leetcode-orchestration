@@ -19,4 +19,4 @@ Disallow: /evaluation
 Disallow: /aisystemdesigninterview
 Disallow: /systemdesigninterview
 
-Sitemap: https://codearena.in/sitemap.xml
+Sitemap: https://whizan.xyz/sitemap.xml

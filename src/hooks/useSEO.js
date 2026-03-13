@@ -6,9 +6,9 @@
  */
 import { useEffect } from 'react';
 
-const BASE_URL = 'https://codearena.in';
+const BASE_URL = 'https://whizan.xyz';
 const DEFAULT_IMAGE = `${BASE_URL}/og-image.png`;
-const SITE_NAME = 'CodeArena';
+const SITE_NAME = 'Whizan AI';
 
 /**
  * @param {object} options

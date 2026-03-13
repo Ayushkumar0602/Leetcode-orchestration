@@ -8,15 +8,15 @@ import './Blog.css';
 
 export default function BlogList() {
     useSEO({
-        title: 'CodeArena Blog | Engineering Interview Prep & AI',
+        title: 'Whizan AI Blog | Engineering Interview Prep & AI',
         description: 'Read the latest articles on software engineering interviews, artificial intelligence, LeetCode-style problem solving, and system design.',
         canonical: '/blog',
         jsonLd: {
             '@context': 'https://schema.org',
             '@type': 'Blog',
-            name: 'CodeArena Engineering Blog',
+            name: 'Whizan AI Engineering Blog',
             description: 'Insights on technical interviews, system design, and AI coding assistants.',
-            url: 'https://codearena.in/blog',
+            url: 'https://whizan.xyz/blog',
         }
     });
 
@@ -39,7 +39,7 @@ export default function BlogList() {
                         <BookOpen size={32} color="#a855f7" />
                     </div>
                 </div>
-                <h1 className="blog-title">The CodeArena Blog</h1>
+                <h1 className="blog-title">The Whizan AI Blog</h1>
                 <p className="blog-subtitle">Deep dives into software engineering interviews, system design architectures, and building the future of AI-assisted education.</p>
 
                 {/* Feature Links Action Bar */}

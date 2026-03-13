@@ -15,7 +15,7 @@ export default function BlogPost() {
 
     // Dynamic SEO
     useSEO({
-        title: post ? post.metaTitle : 'Post Not Found | CodeArena',
+        title: post ? post.metaTitle : 'Post Not Found | Whizan AI',
         description: post ? post.metaDescription : '',
         canonical: `/blog/${slug}`,
         jsonLd: post ? {
@@ -28,8 +28,8 @@ export default function BlogPost() {
             description: post.metaDescription,
             publisher: {
                 '@type': 'Organization',
-                name: 'CodeArena',
-                logo: { '@type': 'ImageObject', url: 'https://codearena.in/logo.jpeg' } // Adjust real path
+                name: 'Whizan AI',
+                logo: { '@type': 'ImageObject', url: 'https://whizan.xyz/logo.jpeg' } // Adjust real path
             }
         } : null
     });
@@ -179,7 +179,7 @@ export default function BlogPost() {
                     </section>
                 </div>
             </article>
-            
+
             {/* Minimal Mobile TOC styling overrides */}
             <style>{`
                 @media (max-width: 900px) {

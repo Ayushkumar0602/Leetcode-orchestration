@@ -1179,9 +1179,9 @@ export default function AIInterview() {
                     color: 'var(--txt)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-                        <img src="/logo.jpeg" alt="CodeArena" style={{ height: '24px', width: '24px', borderRadius: '6px', objectFit: 'contain' }} />
+                        <img src="/logo.jpeg" alt="Whizan AI" style={{ height: '24px', width: '24px', borderRadius: '6px', objectFit: 'contain' }} />
                         <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            CodeArena AI Interview
+                            Whizan AI Interview
                         </span>
                     </div>
 
@@ -1749,9 +1749,9 @@ export default function AIInterview() {
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-                        <img src="/logo.jpeg" alt="CodeArena" style={{ height: '24px', width: '24px', borderRadius: '6px', objectFit: 'contain' }} />
+                        <img src="/logo.jpeg" alt="Whizan AI" style={{ height: '24px', width: '24px', borderRadius: '6px', objectFit: 'contain' }} />
                         <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            CodeArena AI
+                            Whizan AI
                         </span>
                     </div>
                     <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.1)' }} />

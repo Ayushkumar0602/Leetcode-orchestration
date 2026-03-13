@@ -500,7 +500,7 @@ export default function ProjectDetails() {
     const authorName = profile?.displayName || profile?.name || 'Developer';
     useSEO({
         title: `${d.name} – ${authorName}'s Portfolio`,
-        description: d.overview || d.tagline || `View the technical details, source code, and live demo of ${d.name} by ${authorName} on CodeArena.`,
+        description: d.overview || d.tagline || `View the technical details, source code, and live demo of ${d.name} by ${authorName} on Whizan AI.`,
         canonical: `/public/${uid}/project/${projId}`,
         image: profile?.photoURL || undefined,
         jsonLd: {
@@ -513,9 +513,9 @@ export default function ProjectDetails() {
             author: {
                 '@type': 'Person',
                 name: authorName,
-                url: `https://codearena.in/public/${uid}`
+                url: `https://whizan.xyz/public/${uid}`
             },
-            url: `https://codearena.in/public/${uid}/project/${projId}`
+            url: `https://whizan.xyz/public/${uid}/project/${projId}`
         }
     });
 
@@ -1047,7 +1047,7 @@ export default function ProjectDetails() {
                     </motion.div>
                     <div>
                         <p style={{ fontSize: '0.88rem', fontWeight: 700 }}>{d.name}</p>
-                        <p className="mono" style={{ fontSize: '0.62rem', color: 'var(--txt3)', marginTop: 3 }}>CodeArena · 2026</p>
+                        <p className="mono" style={{ fontSize: '0.62rem', color: 'var(--txt3)', marginTop: 3 }}>Whizan AI · 2026</p>
                     </div>
                 </div>
 

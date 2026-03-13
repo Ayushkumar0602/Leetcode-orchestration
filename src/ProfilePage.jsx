@@ -294,7 +294,7 @@ export default function ProfilePage() {
             const newPhotoUrl = await uploadProfilePicture(croppedFile, currentUser.uid);
             await updateUserProfile({ photoURL: newPhotoUrl });
             setProfile(p => ({ ...p, photoURL: newPhotoUrl }));
-            
+
             // Auto-sync the exact same logic currently found in useEffect
             await fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, {
                 method: 'POST',
@@ -312,7 +312,7 @@ export default function ProfilePage() {
 
     const handleDeletePicture = async () => {
         if (!window.confirm("Are you sure you want to remove your profile picture?")) return;
-        
+
         setIsUploading(true);
         setShowAvatarMenu(false);
         try {
@@ -320,13 +320,13 @@ export default function ProfilePage() {
                 await deleteProfilePicture(currentUser.photoURL);
             }
             await updateUserProfile({ photoURL: "" });
-            
+
             await fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ displayName: currentUser.displayName, email: currentUser.email, photoURL: "" })
             });
-            
+
             queryClient.invalidateQueries({ queryKey: queryKeys.profile(currentUser.uid) });
 
         } catch (error) {
@@ -410,8 +410,8 @@ export default function ProfilePage() {
     const handleLogout = async () => { try { await logout(); navigate('/'); } catch (e) { console.error(e); } };
 
     useSEO({
-        title: 'My Profile & Portfolio – CodeArena',
-        description: 'Manage your developer profile, track your coding progress, and build your public portfolio on CodeArena.',
+        title: 'My Profile & Portfolio – Whizan AI',
+        description: 'Manage your developer profile, track your coding progress, and build your public portfolio on Whizan AI.',
         canonical: '/profile',
     });
 
@@ -422,28 +422,28 @@ export default function ProfilePage() {
             {/* Nav */}
             <nav style={{ height: '64px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 100, boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button 
-                        onClick={() => navigate('/dashboard')} 
-                        style={{ 
-                            background: 'rgba(255,255,255,0.05)', 
-                            border: '1px solid rgba(255,255,255,0.1)', 
-                            borderRadius: '10px', 
-                            padding: '7px 14px', 
-                            display: window.innerWidth > 768 ? 'flex' : 'none', 
-                            alignItems: 'center', 
-                            gap: '6px', 
-                            color: 'var(--txt2)', 
-                            cursor: 'pointer', 
-                            fontSize: '0.85rem', 
-                            fontWeight: 600, 
-                            transition: 'all 0.2s' 
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '10px',
+                            padding: '7px 14px',
+                            display: window.innerWidth > 768 ? 'flex' : 'none',
+                            alignItems: 'center',
+                            gap: '6px',
+                            color: 'var(--txt2)',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s'
                         }}
                     >
                         <ArrowLeft size={15} /> Dashboard
                     </button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} />
-                        <span style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.4px', display: window.innerWidth > 480 ? 'inline' : 'none' }}>CodeArena</span>
+                        <span style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.4px', display: window.innerWidth > 480 ? 'inline' : 'none' }}>Whizan AI</span>
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -488,7 +488,7 @@ export default function ProfilePage() {
             <div style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18) 0%,rgba(59,130,246,0.12) 50%,rgba(16,185,129,0.08) 100%)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '2.5rem 2rem 2rem' }}>
                 <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', justifyContent: window.innerWidth <= 640 ? 'center' : 'flex-start', textAlign: window.innerWidth <= 640 ? 'center' : 'left' }}>
                     <div style={{ position: 'relative', flexShrink: 0, animation: 'scaleIn 0.5s ease-out' }} onMouseLeave={() => setShowAvatarMenu(false)}>
-                        <div 
+                        <div
                             style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #3b82f6)', padding: '3px', animation: 'pulseGlow 3s ease-in-out infinite', cursor: 'pointer', position: 'relative' }}
                             onClick={() => {
                                 if (currentUser?.photoURL) setShowAvatarMenu(!showAvatarMenu);
@@ -501,12 +501,12 @@ export default function ProfilePage() {
                                 {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isUploading ? 0.5 : 1 }} /> : <User size={40} color="rgba(168,85,247,0.6)" style={{ opacity: isUploading ? 0.5 : 1 }} />}
                                 {isUploading && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}><div style={{ width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /></div>}
                             </div>
-                            <input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                onChange={handleFileSelect} 
-                                accept="image/*" 
-                                style={{ display: 'none' }} 
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileSelect}
+                                accept="image/*"
+                                style={{ display: 'none' }}
                             />
                         </div>
                         {showAvatarMenu && currentUser?.photoURL && !isUploading && (

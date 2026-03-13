@@ -1,6 +1,6 @@
 {
-  "name": "CodeArena",
-  "short_name": "CodeArena",
+  "name": "Whizan AI",
+  "short_name": "Whizan AI",
   "description": "AI mock interviews, DSA practice, and developer portfolios — all in one platform.",
   "start_url": "/",
   "display": "standalone",
@@ -21,7 +21,11 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["education", "productivity", "developer tools"],
+  "categories": [
+    "education",
+    "productivity",
+    "developer tools"
+  ],
   "lang": "en-IN",
   "screenshots": []
 }

@@ -211,14 +211,14 @@ export default function LandingPage() {
     const [activeProblem, setActiveProblem] = useState(null);
 
     useSEO({
-        title: 'AI Coding Interview Simulator for Engineers | CodeArena AI',
+        title: 'AI Coding Interview Simulator for Engineers | Whizan AI',
         description: 'Practice AI-powered mock coding and system design interviews with real-time AI code review, voice conversations, and detailed hire/no-hire score reports. Free for software engineers preparing for FAANG.',
         canonical: '/',
         jsonLd: {
             '@context': 'https://schema.org',
             '@type': 'SoftwareApplication',
-            name: 'CodeArena AI',
-            url: 'https://codearena.in',
+            name: 'Whizan AI',
+            url: 'https://whizan.xyz',
             applicationCategory: 'EducationalApplication',
             operatingSystem: 'Web',
             description: 'AI coding interview simulator for engineers. Practice DSA problems, mock interviews with voice AI, and system design with real-time code review.',
@@ -244,8 +244,8 @@ export default function LandingPage() {
             <nav className={`lp-nav ${scrolled ? 'lp-nav-scrolled' : ''}`}>
                 <div className="lp-nav-inner">
                     <div className="lp-brand" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
-                        <img src="/logo.jpeg" alt="CodeArena" className="lp-logo" />
-                        <span className="lp-brand-name">CodeArena AI</span>
+                        <img src="/logo.jpeg" alt="Whizan AI" className="lp-logo" />
+                        <span className="lp-brand-name">Whizan AI</span>
                     </div>
                     <div className="lp-nav-links">
                         <a href="#features">Features</a>
@@ -521,8 +521,8 @@ export default function LandingPage() {
             <footer className="lp-footer">
                 <div className="lp-footer-inner">
                     <div className="lp-footer-brand">
-                        <img src="/logo.jpeg" alt="CodeArena" className="lp-logo" />
-                        <span className="lp-brand-name">CodeArena AI</span>
+                        <img src="/logo.jpeg" alt="Whizan AI" className="lp-logo" />
+                        <span className="lp-brand-name">Whizan AI</span>
                     </div>
                     <div className="lp-footer-links">
                         <button onClick={() => navigate('/dsaquestion/1')}>Problems</button>
@@ -530,7 +530,7 @@ export default function LandingPage() {
                         <button onClick={() => navigate('/systemdesign')}>System Design</button>
                         <button onClick={() => navigate(buildLoginUrl({ ref: 'footer' }))}>Sign In</button>
                     </div>
-                    <div className="lp-footer-copy">© {new Date().getFullYear()} CodeArena AI · Built for engineers, by engineers.</div>
+                    <div className="lp-footer-copy">© {new Date().getFullYear()} Whizan AI · Built for engineers, by engineers.</div>
                 </div>
             </footer>
         </div>

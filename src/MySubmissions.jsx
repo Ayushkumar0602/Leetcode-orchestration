@@ -62,8 +62,8 @@ export default function MySubmissions() {
                         <ArrowLeft size={18} />
                     </button>
                     <div className="lc-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginRight: '16px' }} onClick={() => navigate('/dashboard')}>
-                        <img src="/logo.jpeg" alt="CodeArena Logo" style={{ height: '24px', width: '24px', borderRadius: '4px', objectFit: 'contain' }} />
-                        <span className="lc-logo-text">CodeArena</span>
+                        <img src="/logo.jpeg" alt="Whizan AI Logo" style={{ height: '24px', width: '24px', borderRadius: '4px', objectFit: 'contain' }} />
+                        <span className="lc-logo-text">Whizan AI</span>
                     </div>
                     <button onClick={() => navigate('/systemdesign')} style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--txt)', border: 'none', borderRadius: '6px', padding: '4px 10px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500 }}>
                         System Design

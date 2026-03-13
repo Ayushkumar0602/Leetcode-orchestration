@@ -2,11 +2,11 @@ export const blogPosts = [
   {
     slug: 'ai-interview-simulator-for-engineers',
     title: 'AI Interview Simulator for Engineers: Master Your Coding Interviews',
-    metaTitle: 'AI Interview Simulator for Engineers | CodeArena',
+    metaTitle: 'AI Interview Simulator for Engineers | Whizan AI',
     metaDescription: 'Discover how an AI interview simulator for engineers can transform your prep. Practice live coding and system design with a voice-based AI interviewer.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'Software Engineer and Founder of CodeArena. Passionate about AI-driven education.',
+      bio: 'Software Engineer and Founder of Whizan AI. Passionate about AI-driven education.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 14, 2024',
@@ -123,7 +123,7 @@ export const blogPosts = [
     metaDescription: 'Level up your software engineer interview prep with analytics. Use our real-time AI code reviewer with cursor annotations for live coding interview practice.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'Software Engineer and CodeArena Founder. Building interactive AI practice tools for developers.',
+      bio: 'Software Engineer and Whizan AI Founder. Building interactive AI practice tools for developers.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 15, 2024',
@@ -231,11 +231,11 @@ export const blogPosts = [
   {
     slug: 'practice-leetcode-style-problems-ai',
     title: 'Practice LeetCode Style Problems with AI Hints',
-    metaTitle: 'Practice LeetCode Style Problems with AI Hints | CodeArena',
+    metaTitle: 'Practice LeetCode Style Problems with AI Hints | Whizan AI',
     metaDescription: 'Mock coding interviews for FAANG preparation have evolved. Practice LeetCode style problems with AI hints and generate a hire/no-hire interview feedback report.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'Software Engineer and Founder of CodeArena.',
+      bio: 'Software Engineer and Founder of Whizan AI.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 16, 2024',
@@ -310,7 +310,7 @@ export const blogPosts = [
       },
       {
         type: 'paragraph',
-        text: 'Practicing algorithm questions using AI hints rather than reading static solutions is proven to increase long-term technical retention. Utilize CodeArena\'s intelligent feedback loop to confidently clear technical screens.'
+        text: 'Practicing algorithm questions using AI hints rather than reading static solutions is proven to increase long-term technical retention. Utilize Whizan AI\'s intelligent feedback loop to confidently clear technical screens.'
       }
     ],
     faq: [
@@ -340,7 +340,7 @@ export const blogPosts = [
     metaDescription: 'Take your architecture skills to the next level with interactive system design interview practice. Collaborate with an AI Staff Engineer.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'CodeArena Founder and ex-FAANG Engineer.',
+      bio: 'Whizan AI Founder and ex-FAANG Engineer.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 17, 2024',
@@ -429,7 +429,7 @@ export const blogPosts = [
   {
     slug: 'voice-based-ai-interviewer-faang',
     title: 'Ace FAANG with a Voice-Based AI Interviewer for Coding Rounds',
-    metaTitle: 'Voice Based AI Interviewer for Coding Rounds | CodeArena',
+    metaTitle: 'Voice Based AI Interviewer for Coding Rounds | Whizan AI',
     metaDescription: 'Simulate the pressure of a real technical interview with an ai mock interview with voice conversations. Practice free ai mock interviews for software engineers.',
     author: {
       name: 'Ayush Jaiswal',
@@ -520,7 +520,7 @@ export const blogPosts = [
     metaDescription: 'Find out why an AI mock interview platform is essential for your engineering interview preparation. Master algorithms and system design effectively.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'Software Engineer and Founder of CodeArena.',
+      bio: 'Software Engineer and Founder of Whizan AI.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 18, 2024',
@@ -589,11 +589,11 @@ export const blogPosts = [
   {
     slug: 'ai-interview-coach-software-engineers',
     title: 'Level Up with an AI Interview Coach for Software Engineers',
-    metaTitle: 'AI Interview Coach for Software Engineers | CodeArena',
+    metaTitle: 'AI Interview Coach for Software Engineers | Whizan AI',
     metaDescription: 'An ai interview coach for software engineers helps pinpoint your weaknesses. Get a detailed hire no hire interview feedback generator report.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'Ex-FAANG Interviewer and CodeArena Founder.',
+      bio: 'Ex-FAANG Interviewer and Whizan AI Founder.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 19, 2024',
@@ -666,7 +666,7 @@ export const blogPosts = [
     metaDescription: 'Learn why our monaco editor coding interview platform runs on a custom docker based coding interview sandbox for perfect environment replication.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'CodeArena Platform Architect.',
+      bio: 'Whizan AI Platform Architect.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 20, 2024',
@@ -735,11 +735,11 @@ export const blogPosts = [
   {
     slug: 'software-engineer-interview-prep-with-analytics',
     title: 'Why You Need an Interview Score Report with Skill Matrix',
-    metaTitle: 'Software Engineer Interview Prep with Analytics | CodeArena',
+    metaTitle: 'Software Engineer Interview Prep with Analytics | Whizan AI',
     metaDescription: 'Maximize your ROI. Software engineer interview prep with analytics provides an interview score report with skill matrix to guide your studying.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'Software Engineer and Founder of CodeArena.',
+      bio: 'Software Engineer and Founder of Whizan AI.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 21, 2024',
@@ -812,7 +812,7 @@ export const blogPosts = [
     metaDescription: 'Practice on a cutting-edge monaco editor coding interview platform. Get started with a free ai mock interview for software engineers to test your skills.',
     author: {
       name: 'Ayush Jaiswal',
-      bio: 'Software Engineer and CodeArena Founder.',
+      bio: 'Software Engineer and Whizan AI Founder.',
       image: 'https://ui-avatars.com/api/?name=Ayush+Jaiswal&background=random'
     },
     date: 'March 22, 2024',
@@ -841,7 +841,7 @@ export const blogPosts = [
       },
       {
         type: 'paragraph',
-        text: 'CodeArena is a fully-fledged <strong>monaco editor coding interview platform</strong>. The Monaco engine provides intellisense, robust syntax highlighting, and rapid multi-cursor support. By training in the exact <a href="/blog/docker-based-coding-interview-sandbox">docker based coding interview sandbox</a> environment you code in daily, you prevent context-switching anxiety.'
+        text: 'Whizan AI is a fully-fledged <strong>monaco editor coding interview platform</strong>. The Monaco engine provides intellisense, robust syntax highlighting, and rapid multi-cursor support. By training in the exact <a href="/blog/docker-based-coding-interview-sandbox">docker based coding interview sandbox</a> environment you code in daily, you prevent context-switching anxiety.'
       },
       {
         type: 'code',
