@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { uploadProfilePicture } from './lib/s3';
+import { uploadProfilePicture, deleteProfilePicture } from './lib/s3';
+import ProfilePictureEditor from './components/ProfilePictureEditor';
 import { useAuth } from './contexts/AuthContext';
 import {
     ArrowLeft, User, Mail, Calendar, Shield, Star, Zap, Target,
     Code2, Brain, TrendingUp, Award, CheckCircle, Flame,
     Trophy, ChevronRight, BarChart3, Clock, FileText,
-    LayoutDashboard, Briefcase, Palette, Lock, Database, Edit3, LogOut, ExternalLink, Menu, X
+    LayoutDashboard, Briefcase, Palette, Lock, Database, Edit3, LogOut, ExternalLink, Menu, X, Camera, Trash2
 } from 'lucide-react';
 import PortfolioTab from './profile/PortfolioTab';
 import CustomizationTab from './profile/CustomizationTab';
@@ -270,25 +271,67 @@ export default function ProfilePage() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [isUploading, setIsUploading] = useState(false);
+    const [editorFile, setEditorFile] = useState(null);
+    const [showAvatarMenu, setShowAvatarMenu] = useState(false);
     const fileInputRef = useRef(null);
 
-    const handleImageUpload = async (e) => {
+    const handleFileSelect = (e) => {
         const file = e.target.files?.[0];
         if (!file || !currentUser) return;
-        
+        setEditorFile(file); // Show the modal instead of uploading right away
+        setShowAvatarMenu(false);
+    };
+
+    const handleSaveCroppedImage = async (blob) => {
         setIsUploading(true);
+        setEditorFile(null); // Close modal
         try {
-            const newPhotoUrl = await uploadProfilePicture(file, currentUser.uid);
+            // Need to convert blob to File object for upload logic
+            const croppedFile = new File([blob], "profile_edited.jpg", { type: "image/jpeg" });
+            const newPhotoUrl = await uploadProfilePicture(croppedFile, currentUser.uid);
             await updateUserProfile({ photoURL: newPhotoUrl });
             setProfile(p => ({ ...p, photoURL: newPhotoUrl }));
+            
+            // Auto-sync the exact same logic currently found in useEffect
+            await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${currentUser.uid}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ displayName: currentUser.displayName, email: currentUser.email, photoURL: newPhotoUrl })
+            }).catch(console.error);
         } catch (error) {
             console.error("Failed to upload image:", error);
             alert("Failed to upload image.");
         } finally {
             setIsUploading(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const handleDeletePicture = async () => {
+        if (!window.confirm("Are you sure you want to remove your profile picture?")) return;
+        
+        setIsUploading(true);
+        setShowAvatarMenu(false);
+        try {
+            if (currentUser.photoURL) {
+                await deleteProfilePicture(currentUser.photoURL);
             }
+            // Update auth state to effectively remove it
+            await updateUserProfile({ photoURL: "" });
+            setProfile(p => ({ ...p, photoURL: "" }));
+
+            // Update backend
+            await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${currentUser.uid}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ displayName: currentUser.displayName, email: currentUser.email, photoURL: "" })
+            }).catch(console.error);
+
+        } catch (error) {
+            console.error("Failed to delete image:", error);
+            alert("Failed to remove image.");
+        } finally {
+            setIsUploading(false);
         }
     };
     const [userStats, setUserStats] = useState(null);
@@ -408,14 +451,27 @@ export default function ProfilePage() {
                 </div>
             )}
 
+            {editorFile && (
+                <ProfilePictureEditor
+                    file={editorFile}
+                    onCancel={() => setEditorFile(null)}
+                    onSave={handleSaveCroppedImage}
+                    isSaving={isUploading}
+                />
+            )}
+
             {/* Hero Banner */}
             <div style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18) 0%,rgba(59,130,246,0.12) 50%,rgba(16,185,129,0.08) 100%)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '2.5rem 2rem 2rem' }}>
                 <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', justifyContent: window.innerWidth <= 640 ? 'center' : 'flex-start', textAlign: window.innerWidth <= 640 ? 'center' : 'left' }}>
-                    <div style={{ position: 'relative', flexShrink: 0, animation: 'scaleIn 0.5s ease-out' }}>
+                    <div style={{ position: 'relative', flexShrink: 0, animation: 'scaleIn 0.5s ease-out' }} onMouseLeave={() => setShowAvatarMenu(false)}>
                         <div 
                             style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #3b82f6)', padding: '3px', animation: 'pulseGlow 3s ease-in-out infinite', cursor: 'pointer', position: 'relative' }}
-                            onClick={() => fileInputRef.current?.click()}
-                            title="Change Profile Picture"
+                            onClick={() => {
+                                if (currentUser?.photoURL) setShowAvatarMenu(!showAvatarMenu);
+                                else fileInputRef.current?.click();
+                            }}
+                            title={currentUser?.photoURL ? "Manage Profile Picture" : "Upload Profile Picture"}
+                            onMouseEnter={() => { if (currentUser?.photoURL) setShowAvatarMenu(true); }}
                         >
                             <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                                 {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isUploading ? 0.5 : 1 }} /> : <User size={40} color="rgba(168,85,247,0.6)" style={{ opacity: isUploading ? 0.5 : 1 }} />}
@@ -424,11 +480,35 @@ export default function ProfilePage() {
                             <input 
                                 type="file" 
                                 ref={fileInputRef} 
-                                onChange={handleImageUpload} 
+                                onChange={handleFileSelect} 
                                 accept="image/*" 
                                 style={{ display: 'none' }} 
                             />
                         </div>
+                        {showAvatarMenu && currentUser?.photoURL && !isUploading && (
+                            <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', zIndex: 50, paddingTop: '10px' }}>
+                                <div style={{
+                                    background: '#121212', border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '12px', padding: '6px', display: 'flex', flexDirection: 'column', gap: '4px',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)', minWidth: '140px'
+                                }}>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'transparent', border: 'none', color: '#fff', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', borderRadius: '8px', textAlign: 'left', width: '100%' }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                        <Camera size={14} /> Change Picture
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDeletePicture(); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', borderRadius: '8px', textAlign: 'left', width: '100%' }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                        <Trash2 size={14} /> Remove Picture
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         <div style={{ position: 'absolute', bottom: '4px', right: '4px', width: '16px', height: '16px', borderRadius: '50%', background: '#10b981', border: '2px solid #050505', pointerEvents: 'none' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: '200px', animation: 'fadeUp 0.5s ease-out 0.1s both', display: 'flex', flexDirection: 'column', alignItems: window.innerWidth <= 640 ? 'center' : 'flex-start' }}>

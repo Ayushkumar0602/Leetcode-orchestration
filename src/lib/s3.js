@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 // Ensure keys from user prompt
 const ACCESS_ID = "b6aae57565cde6c3aa4574fca0f871f2";
@@ -43,6 +43,35 @@ export const uploadProfilePicture = async (file, userId) => {
     return publicUrl;
   } catch (error) {
     console.error("Error uploading to S3:", error);
+    throw error;
+  }
+};
+
+export const deleteProfilePicture = async (publicUrl) => {
+  try {
+    // Extract the key from the public URL
+    // URL format: https://[project_ref].supabase.co/storage/v1/object/public/[bucket]/[key]
+    const baseUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}/`;
+    
+    // Remove query parameters if any (e.g. ?t=123)
+    const urlWithoutQuery = publicUrl.split('?')[0];
+
+    if (!urlWithoutQuery.startsWith(baseUrl)) {
+      console.warn("URL does not match expected bucket format, skipping delete.");
+      return;
+    }
+    
+    // Decode URI component because S3 Keys are literal characters, but URLs are encoded
+    const key = decodeURIComponent(urlWithoutQuery.substring(baseUrl.length));
+    
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+
+    await s3Client.send(command);
+  } catch (error) {
+    console.error("Error deleting from S3:", error);
     throw error;
   }
 };
