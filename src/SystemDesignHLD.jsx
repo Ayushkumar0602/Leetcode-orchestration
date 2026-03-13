@@ -144,7 +144,7 @@ export default function SystemDesignHLD() {
                     <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)', letterSpacing: '-0.3px' }}>CodeArena</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
+                <div className="sd-hld-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
                     {[
                         { label: 'Problems', path: '/dsaquestion' },
                         { label: 'System Design', path: '/systemdesign' },
@@ -163,7 +163,7 @@ export default function SystemDesignHLD() {
                 </div>
             </nav>
 
-            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem 2rem 6rem' }}>
+            <div className="sd-hld-content" style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem 2rem 6rem' }}>
                 <button
                     onClick={() => navigate('/systemdesign')}
                     style={{ background: 'transparent', border: 'none', color: 'var(--txt3)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem', marginBottom: '2rem', padding: 0 }}
@@ -173,7 +173,7 @@ export default function SystemDesignHLD() {
 
                 <div style={{ marginBottom: '3rem' }}>
                     <div style={{ display: 'inline-block', background: 'rgba(99,102,241,0.15)', color: '#818cf8', padding: '6px 14px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '1rem' }}>ARCHITECTURE</div>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '1rem', letterSpacing: '-0.5px' }}>High-Level Design Syllabus</h1>
+                    <h1 className="sd-hld-page-title" style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '1rem', letterSpacing: '-0.5px' }}>High-Level Design Syllabus</h1>
                     <p style={{ fontSize: '1.05rem', color: 'var(--txt2)', lineHeight: 1.6 }}>
                         A comprehensive guide to mastering scalable system design. This syllabus outlines everything you need to know for senior backend engineering and HLD interview rounds.
                     </p>
@@ -182,7 +182,7 @@ export default function SystemDesignHLD() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {HLD_SYLLABUS.map((section, idx) => (
                         <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div className="sd-hld-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {section.icon}
@@ -191,6 +191,7 @@ export default function SystemDesignHLD() {
                                 </div>
                                 <button
                                     onClick={() => handlePracticeClick(section.title)}
+                                    className="sd-hld-practice-btn"
                                     style={{
                                         background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: '#818cf8', padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px'
                                     }}
@@ -227,7 +228,7 @@ export default function SystemDesignHLD() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                    <div className="sd-hld-section-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
                                         {section.items.map((item, itemIdx) => (
                                             <div key={itemIdx}>
                                                 <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--txt2)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{item.subtitle}</h3>
@@ -248,18 +249,6 @@ export default function SystemDesignHLD() {
                     ))}
                 </div>
             </div>
-            <style>{`
-                @media (max-width: 768px) {
-                    .sd-hld-nav-links { display: none !important; }
-                    .sd-hld-content { padding: 1.5rem 1rem !important; }
-                    .sd-hld-header h1 { font-size: 1.8rem !important; }
-                    .sd-hld-section-grid { grid-template-columns: 1fr !important; }
-                }
-                @media (max-width: 480px) {
-                    .sd-hld-header h1 { font-size: 1.4rem !important; }
-                    .sd-hld-content { padding: 1rem 0.75rem !important; }
-                }
-            `}</style>
         </div>
     );
 }

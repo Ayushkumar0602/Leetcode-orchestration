@@ -175,7 +175,48 @@ export default function PublicProfile() {
     
     /* Responsive */
     @media(max-width:1024px){.pub-main-grid{grid-template-columns:1fr !important;}}
-    @media(max-width:640px){.pub-stats{grid-template-columns:repeat(2,1fr) !important;} .pub-badges{grid-template-columns:repeat(2,1fr) !important;} .pub-projs{grid-template-columns:1fr !important;}}
+    @media(max-width:768px){
+        .pub-nav-links{display:none !important;}
+        .pub-nav{height:auto !important; padding:0.6rem 1rem !important; flex-wrap:wrap; gap:0.5rem;}
+        .pub-nav-badge{display:none !important;}
+        .pub-hero-content{padding:2.5rem 1rem 2rem !important; overflow:hidden !important;}
+        .pub-hero-inner{flex-direction:column !important; align-items:center !important; text-align:center !important; gap:1.5rem !important; flex-wrap:nowrap !important;}
+        .pub-hero-avatar-wrap{display:flex !important; flex-direction:column !important; align-items:center !important;}
+        .pub-hero-info{min-width:0 !important; width:100% !important; max-width:100% !important; display:flex !important; flex-direction:column !important; align-items:center !important;}
+        .pub-hero-name-row{justify-content:center !important;}
+        .pub-hero-email{justify-content:center !important;}
+        .pub-hero-avatar{width:90px !important; height:90px !important;}
+        .pub-hero-name{font-size:1.75rem !important; word-break:break-word !important; overflow-wrap:anywhere !important;}
+        .pub-hero-links{justify-content:center !important; flex-wrap:wrap !important;}
+        .pub-hero-meta{justify-content:center !important; flex-wrap:wrap !important; gap:10px !important;}
+        .pub-stats{grid-template-columns:repeat(2,1fr) !important;}
+        .pub-badges{grid-template-columns:repeat(2,1fr) !important;}
+        .pub-projs{grid-template-columns:1fr !important;}
+        .pub-main-grid{gap:1rem !important;}
+        .pub-section-pad{padding:1.25rem !important;}
+        .badge-card{padding:0.85rem 0.5rem !important;}
+        .pub-stats-wrap{padding:1.25rem 1rem 0 !important;}
+        .pub-content-wrap{padding:1rem !important;}
+    }
+    @media(max-width:480px){
+        .pub-hero-content{padding:2rem 0.75rem 1.5rem !important; box-sizing:border-box !important;}
+        .pub-hero-inner{gap:1.2rem !important;}
+        .pub-hero-avatar{width:78px !important; height:78px !important;}
+        .pub-hero-name{font-size:1.4rem !important; letter-spacing:-0.03em !important;}
+        .pub-hero-links .slink{font-size:0.75rem !important; padding:6px 10px !important;}
+        .pub-stats{grid-template-columns:repeat(2,1fr) !important; gap:8px !important;}
+        .pub-stats-wrap{padding:1rem 0.75rem 0 !important;}
+        .pub-content-wrap{padding:0.75rem !important;}
+        .stat-card{padding:0.85rem 0.75rem !important;}
+    }
+    @media(max-width:400px){
+        .pub-hero-name{font-size:1.2rem !important;}
+        .pub-hero-avatar{width:68px !important; height:68px !important;}
+        .pub-hero-meta{font-size:0.72rem !important;}
+        .pub-stats{grid-template-columns:1fr 1fr !important;}
+        .pub-badges{grid-template-columns:repeat(2,1fr) !important;}
+        .pub-hero-links .slink{padding:5px 8px !important; font-size:0.7rem !important;}
+    }
     `;
 
     const badges = [
@@ -198,20 +239,20 @@ export default function PublicProfile() {
             <style>{CSS}</style>
 
             {/* ── Top nav ── */}
-            <nav style={{ height: '56px', borderBottom: '1px solid var(--divide)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', background: 'var(--nav-bg)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
+            <nav className="pub-nav" style={{ height: '56px', borderBottom: '1px solid var(--divide)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', background: 'var(--nav-bg)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                     <img src="/logo.jpeg" alt="CodeArena" style={{ width: '26px', height: '26px', borderRadius: '7px' }} />
                     <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.3px', color: 'var(--txt1)' }}>CodeArena</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div className="pub-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>Problems</button>
                     <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>AI Interview</button>
                     <button onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>System Design</button>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--txt3)', background: 'var(--pill-bg)', padding: '4px 10px', borderRadius: '999px', border: '1px solid var(--pill-border)', fontWeight: 600 }}>Public Portfolio</span>
+                    <span className="pub-nav-badge" style={{ fontSize: '0.72rem', color: 'var(--txt3)', background: 'var(--pill-bg)', padding: '4px 10px', borderRadius: '999px', border: '1px solid var(--pill-border)', fontWeight: 600 }}>Public Portfolio</span>
                     <NavProfile />
                 </div>
             </nav>
@@ -224,34 +265,34 @@ export default function PublicProfile() {
                 <div style={{ position: 'absolute', top: '-80px', left: '10%', width: '500px', height: '500px', background: `radial-gradient(circle,rgba(var(--accent-rgb),0.15),transparent 70%)`, pointerEvents: 'none' }} />
                 <div style={{ position: 'absolute', bottom: '-100px', right: '10%', width: '400px', height: '400px', background: 'radial-gradient(circle,rgba(59,130,246,0.1),transparent 70%)', pointerEvents: 'none' }} />
 
-                <div style={{ maxWidth: maxW, margin: '0 auto', padding: '4rem 2rem 3rem', position: 'relative', zIndex: 1, transition: 'max-width 0.3s' }}>
-                    <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'flex-start', flexWrap: 'wrap', animation: 'fadeUp 0.5s ease-out' }}>
+                <div className="pub-hero-content" style={{ maxWidth: maxW, margin: '0 auto', padding: '4rem 2rem 3rem', position: 'relative', zIndex: 1, transition: 'max-width 0.3s' }}>
+                    <div className="pub-hero-inner" style={{ display: 'flex', gap: '2.5rem', alignItems: 'flex-start', flexWrap: 'wrap', animation: 'fadeUp 0.5s ease-out' }}>
                         {/* Avatar */}
-                        <div style={{ flexShrink: 0, animation: 'scaleIn 0.5s ease-out' }}>
-                            <div style={{ width: '110px', height: '110px', borderRadius: '50%', background: 'var(--hero-grad)', padding: '3px', animation: 'glow 3s ease-in-out infinite' }}>
+                        <div className="pub-hero-avatar-wrap" style={{ flexShrink: 0, animation: 'scaleIn 0.5s ease-out', position: 'relative', display: 'inline-block' }}>
+                            <div className="pub-hero-avatar" style={{ width: '110px', height: '110px', borderRadius: '50%', background: 'var(--hero-grad)', padding: '3px', animation: 'glow 3s ease-in-out infinite' }}>
                                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: isDark ? '#0a0b12' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                                     {profile.photoURL ? <img src={profile.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={50} color="var(--accent)" opacity={0.5} />}
                                 </div>
                             </div>
-                            {/* online dot */}
-                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#10b981', border: `3px solid var(--bg)`, position: 'relative', margin: '-20px 0 0 80px' }} />
+                            {/* online dot - absolutely positioned bottom-right of avatar */}
+                            <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#10b981', border: `3px solid var(--bg)`, position: 'absolute', bottom: '4px', right: '4px' }} />
                         </div>
 
                         {/* Info */}
-                        <div style={{ flex: 1, minWidth: '240px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                                <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1, background: isDark ? 'linear-gradient(135deg,#fff 60%,rgba(255,255,255,0.5))' : 'linear-gradient(135deg,#000 60%,rgba(0,0,0,0.5))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                        <div className="pub-hero-info" style={{ flex: 1, minWidth: '240px' }}>
+                            <div className="pub-hero-name-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                                <h1 className="pub-hero-name" style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1, background: isDark ? 'linear-gradient(135deg,#fff 60%,rgba(255,255,255,0.5))' : 'linear-gradient(135deg,#000 60%,rgba(0,0,0,0.5))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                                     {profile.displayName || 'Developer Portfolio'}
                                 </h1>
                                 <span style={{ background: 'var(--hero-grad)', borderRadius: '8px', padding: '4px 12px', fontSize: '0.7rem', fontWeight: 800, color: '#fff', letterSpacing: '0.05em' }}>PRO</span>
                             </div>
 
-                            {profile.email && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--txt3)', fontSize: '0.85rem', marginBottom: '12px', fontWeight: 600 }}><Mail size={14} />{profile.email}</div>}
+                            {profile.email && <div className="pub-hero-email" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--txt3)', fontSize: '0.85rem', marginBottom: '12px', fontWeight: 600 }}><Mail size={14} />{profile.email}</div>}
 
                             {profile.bio && <p style={{ fontSize: '1rem', color: 'var(--txt2)', margin: '0 0 1.2rem', lineHeight: 1.6, maxWidth: '600px', fontStyle: 'italic' }}>"{profile.bio}"</p>}
 
                             {/* Social links row */}
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '1.5rem' }}>
+                            <div className="pub-hero-links" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '1.5rem' }}>
                                 {profile.github && <a href={`https://${profile.github}`} target="_blank" rel="noreferrer" className="slink" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.1)'}`, color: 'var(--txt1)' }}><Github size={14} />{profile.github.replace(/^https?:\/\//, '')}</a>}
                                 {profile.linkedin && <a href={`https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="slink" style={{ background: 'rgba(10,102,194,0.12)', border: '1px solid rgba(10,102,194,0.28)', color: isDark ? '#60a5fa' : '#084c94' }}><Linkedin size={14} />LinkedIn</a>}
                                 {profile.portfolio && <a href={`https://${profile.portfolio}`} target="_blank" rel="noreferrer" className="slink" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: isDark ? '#34d399' : '#0d9467' }}><Globe size={14} />Portfolio</a>}
@@ -259,7 +300,7 @@ export default function PublicProfile() {
                             </div>
 
                             {/* Quick meta */}
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '0.8rem', color: 'var(--txt3)', fontWeight: 600 }}>
+                            <div className="pub-hero-meta" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '0.8rem', color: 'var(--txt3)', fontWeight: 600 }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><CheckCircle size={13} color="#10b981" />Verified CodeArena Member</span>
                                 {prefs.showBadges && <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Trophy size={13} color="#eab308" />{unlockedBadges} Achievements Unlocked</span>}
                                 {prefs.showInterviews && validInvCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Brain size={13} color="var(--accent)" />{validInvCount} Mock Interviews</span>}
@@ -271,7 +312,7 @@ export default function PublicProfile() {
 
             {/* ── Stats row ── */}
             {prefs.showStats && (
-                <div style={{ maxWidth: maxW, margin: '0 auto', padding: '2rem 2rem 0', transition: 'max-width 0.3s' }}>
+                <div className="pub-stats-wrap" style={{ maxWidth: maxW, margin: '0 auto', padding: '2rem 2rem 0', transition: 'max-width 0.3s' }}>
                     <div className="pub-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', animation: 'fadeUp 0.5s ease-out 0.1s both' }}>
                         {[
                             { label: 'Problems Solved', value: stats?.Total || 0, sub: `of ${totalCounts?.Total || 0}`, icon: Code2, color: T.accent, bg: `rgba(var(--accent-rgb),0.1)` },
@@ -293,7 +334,7 @@ export default function PublicProfile() {
             )}
 
             {/* ── Main content ── */}
-            <div style={{ maxWidth: maxW, margin: '0 auto', padding: '2rem', transition: 'max-width 0.3s' }}>
+            <div className="pub-content-wrap" style={{ maxWidth: maxW, margin: '0 auto', padding: '2rem', transition: 'max-width 0.3s' }}>
                 <div className="pub-main-grid" style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '1.5rem' }}>
 
                     {/* ── LEFT COLUMN ── */}
@@ -301,7 +342,7 @@ export default function PublicProfile() {
 
                         {/* Skills */}
                         {hasSkills && (
-                            <div className="glass" style={{ padding: '1.5rem', animation: 'fadeUp 0.5s ease-out 0.15s both' }}>
+                            <div className="glass pub-section-pad" style={{ padding: '1.5rem', animation: 'fadeUp 0.5s ease-out 0.15s both' }}>
                                 <SectionHead icon={Code2} color="#3b82f6" title="Tech Stack" count={profile.skills.length} />
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
                                     {profile.skills.map(s => {

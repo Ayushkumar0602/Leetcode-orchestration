@@ -1281,6 +1281,133 @@ body {
   }
 }
 
+/* ─── DSA Question Page (ProblemList) ──────────────────── */
+@media (max-width: 768px) {
+  /* Hide the middle nav pill links on mobile */
+  .pl-nav-links {
+    display: none !important;
+  }
+  .pl-nav-lang-select {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .pl-table-acceptance {
+    display: none !important;
+  }
+  .pl-problem-row,
+  .pl-table-header {
+    grid-template-columns: 48px 1fr 90px 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .pl-problem-row,
+  .pl-table-header {
+    grid-template-columns: 36px 1fr 80px 76px !important;
+    padding: 10px 10px !important;
+  }
+  .pl-hero-title {
+    font-size: 1.25rem !important;
+  }
+  .pl-hero-subtitle {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* ─── AI Interview Setup Nav Responsiveness ────────────── */
+@media (max-width: 768px) {
+  .ai-setup-nav-links {
+    display: none !important;
+  }
+  .ai-voice-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .ai-setup-page-title {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-voice-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .setup-main {
+    padding: 1rem !important;
+  }
+  .ai-setup-page-title {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* ─── System Design Page Responsiveness ────────────────── */
+@media (max-width: 768px) {
+  .sd-nav-links {
+    display: none !important;
+  }
+  .sd-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .sd-hero-title {
+    font-size: 2rem !important;
+  }
+  .sd-page-content {
+    padding: 2rem 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sd-hero-title {
+    font-size: 1.5rem !important;
+  }
+  .sd-page-content {
+    padding: 1.5rem 0.75rem !important;
+  }
+}
+
+/* ─── System Design HLD/LLD Page Responsiveness ──────────── */
+@media (max-width: 768px) {
+  .sd-hld-nav-links,
+  .sd-lld-nav-links {
+    display: none !important;
+  }
+  .sd-hld-section-header,
+  .sd-lld-section-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .sd-hld-practice-btn,
+  .sd-lld-practice-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  .sd-hld-section-grid,
+  .sd-lld-section-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .sd-hld-page-title,
+  .sd-lld-page-title {
+    font-size: 1.8rem !important;
+  }
+  .sd-hld-content,
+  .sd-lld-content {
+    padding: 1.5rem 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sd-hld-page-title,
+  .sd-lld-page-title {
+    font-size: 1.4rem !important;
+  }
+  .sd-hld-content,
+  .sd-lld-content {
+    padding: 1rem 0.75rem !important;
+  }
+}
+
 @media (max-width: 768px) {
   .ai-interview-main {
     flex-direction: column !important;
@@ -1318,6 +1445,20 @@ body {
 
   .problem-list-sidebar {
     width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack actions column and hide acceptance on small screens */
+  .problem-list-container {
+    padding: 0.75rem !important;
+    gap: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .problem-list-container {
+    padding: 0.5rem !important;
   }
 }
 

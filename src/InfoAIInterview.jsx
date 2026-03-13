@@ -60,7 +60,7 @@ export default function InfoAIInterview() {
             <style>{styles}</style>
 
             {/* ── Top Navigation ── */}
-            <nav style={{
+            <nav className="info-ai-nav" style={{
                 height: '70px',
                 borderBottom: '1px solid rgba(255,255,255,0.08)',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -75,7 +75,7 @@ export default function InfoAIInterview() {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="info-ai-nav-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <button
                         onClick={() => navigate('/dashboard')}
                         style={{
@@ -90,17 +90,17 @@ export default function InfoAIInterview() {
                     >
                         <ChevronLeft size={16} /> Back
                     </button>
-                    <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--txt3)' }}>|</span>
-                    <span style={{ fontSize: '1rem', fontWeight: 600, letterSpacing: '-0.3px', color: 'var(--txt)' }}>Interview Hub</span>
-                    <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--txt3)' }}>|</span>
+                    <span className="info-ai-nav-sep" style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--txt3)' }}>|</span>
+                    <span className="info-ai-nav-sep" style={{ fontSize: '1rem', fontWeight: 600, letterSpacing: '-0.3px', color: 'var(--txt)' }}>Interview Hub</span>
+                    <span className="info-ai-nav-sep" style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--txt3)' }}>|</span>
                     <NavProfile />
                 </div>
             </nav>
 
-            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '3rem 2rem' }}>
+            <div className="info-ai-content" style={{ maxWidth: '1000px', margin: '0 auto', padding: '3rem 2rem' }}>
 
                 {/* ── Header ── */}
-                <div style={{ marginBottom: '3rem', animation: 'slideUpFade 0.5s ease-out' }}>
+                <div className="info-ai-header" style={{ marginBottom: '3rem', animation: 'slideUpFade 0.5s ease-out' }}>
                     <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 12px 0', letterSpacing: '-0.03em' }}>
                         Ready for your next <span style={{ color: '#a855f7' }}>Mock Interview</span>?
                     </h1>
@@ -110,7 +110,7 @@ export default function InfoAIInterview() {
                 </div>
 
                 {/* ── Quick Actions ── */}
-                <div style={{
+                <div className="info-ai-cards" style={{
                     display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem',
                     marginBottom: '4rem', animation: 'slideUpFade 0.5s ease-out 0.1s both'
                 }}>
@@ -223,6 +223,7 @@ export default function InfoAIInterview() {
                                 <div
                                     key={inv.id}
                                     onClick={() => navigate(`/aiinterview/${inv.id}`)}
+                                    className="info-ai-past-item"
                                     style={{
                                         background: 'rgba(20, 22, 30, 0.6)', backdropFilter: 'blur(12px)',
                                         border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px',
@@ -237,7 +238,7 @@ export default function InfoAIInterview() {
                                         <h4 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#fff', margin: 0 }}>
                                             {inv.problemTitle || 'Mock Interview'}
                                         </h4>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.85rem', color: 'var(--txt3)' }}>
+                                        <div className="info-ai-meta" style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.85rem', color: 'var(--txt3)', flexWrap: 'wrap' }}>
                                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Calendar size={14} /> {formatDate(inv.createdAt)}</span>
                                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> {inv.durationMinutes ? `${inv.durationMinutes} min` : 'Unknown'}</span>
                                             {inv.difficulty && (
@@ -250,7 +251,7 @@ export default function InfoAIInterview() {
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                    <div className="info-ai-score-row" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexShrink: 0 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                             {/* Hire Status Badge */}
                                             {inv.scoreReport?.hire && (
@@ -283,16 +284,27 @@ export default function InfoAIInterview() {
             </div>
             <style>{`
                 @media (max-width: 768px) {
+                    .info-ai-nav { height: auto !important; padding: 0.6rem 1rem !important; }
+                    .info-ai-nav-sep { display: none !important; }
+                    .info-ai-nav-right { gap: 8px !important; }
                     .info-ai-content { padding: 2rem 1rem !important; }
+                    .info-ai-header { margin-bottom: 2rem !important; }
                     .info-ai-header h1 { font-size: 1.8rem !important; }
                     .info-ai-header p { font-size: 0.95rem !important; }
-                    .info-ai-cards { grid-template-columns: 1fr !important; }
+                    .info-ai-cards { grid-template-columns: 1fr !important; gap: 1rem !important; margin-bottom: 2.5rem !important; }
                     .info-ai-past-item { flex-direction: column !important; align-items: flex-start !important; gap: 0.75rem !important; }
+                    .info-ai-score-row { width: 100% !important; justify-content: flex-start !important; }
                 }
                 @media (max-width: 480px) {
                     .info-ai-content { padding: 1.25rem 0.75rem !important; }
-                    .info-ai-header h1 { font-size: 1.4rem !important; }
-                    .info-ai-meta { flex-direction: column !important; gap: 4px !important; }
+                    .info-ai-header h1 { font-size: 1.45rem !important; letter-spacing: -0.02em !important; }
+                    .info-ai-header p { font-size: 0.88rem !important; }
+                    .info-ai-meta { gap: 8px !important; }
+                    .info-ai-past-item { padding: 1rem !important; }
+                }
+                @media (max-width: 400px) {
+                    .info-ai-header h1 { font-size: 1.25rem !important; }
+                    .info-ai-cards > div { padding: 1.5rem !important; }
                 }
             `}</style>
         </div>

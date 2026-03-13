@@ -23,7 +23,7 @@ export default function SystemDesign() {
                     <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)', letterSpacing: '-0.3px' }}>CodeArena</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
+                <div className="sd-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
                     {[
                         { label: 'Problems', path: '/dsaquestion' },
                         { label: 'System Design', path: '/systemdesign' },
@@ -42,9 +42,9 @@ export default function SystemDesign() {
                 </div>
             </nav>
 
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem' }}>
+            <div className="sd-page-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                    <h1 style={{ fontSize: '2.8rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '1rem', letterSpacing: '-1px' }}>
+                    <h1 className="sd-hero-title" style={{ fontSize: '2.8rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '1rem', letterSpacing: '-1px' }}>
                         System Design <span style={{ color: 'var(--accent)' }}>Interviews</span>
                     </h1>
                     <p style={{ fontSize: '1.1rem', color: 'var(--txt2)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
@@ -52,7 +52,7 @@ export default function SystemDesign() {
                     </p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+                <div className="sd-cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
                     {/* HLD Card */}
                     <div
                         onClick={() => navigate('/systemdesign/hld')}
@@ -130,19 +130,6 @@ export default function SystemDesign() {
                     </div>
                 </div>
             </div>
-            <style>{`
-                @media (max-width: 768px) {
-                    .sd-nav-links { display: none !important; }
-                    .sd-page-content { padding: 2rem 1rem !important; }
-                    .sd-hero h1 { font-size: 2rem !important; }
-                    .sd-hero p { font-size: 0.95rem !important; }
-                    .sd-cards-grid { grid-template-columns: 1fr !important; }
-                }
-                @media (max-width: 480px) {
-                    .sd-page-content { padding: 1.5rem 0.75rem !important; }
-                    .sd-hero h1 { font-size: 1.6rem !important; }
-                }
-            `}</style>
         </div>
     );
 }

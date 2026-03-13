@@ -1185,7 +1185,7 @@ export default function AIInterview() {
                         </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div className="ai-setup-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                         <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>Problems</button>
                         <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>AI Interview</button>
                         <button onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>System Design</button>
@@ -1296,7 +1296,7 @@ export default function AIInterview() {
                     {/* MAIN CONTENT: Setup Form */}
                     <div className="setup-main" style={{ flex: 1, padding: '2.5rem', display: 'flex', flexDirection: 'column', width: '100%', overflowY: 'auto' }}>
                         <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-                            <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '0.5rem', textAlign: 'center', letterSpacing: '-0.02em' }}>AI Interview Setup</h1>
+                            <h1 className="ai-setup-page-title" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '0.5rem', textAlign: 'center', letterSpacing: '-0.02em' }}>AI Interview Setup</h1>
                             <p style={{ textAlign: 'center', color: 'var(--txt2)', fontSize: '0.95rem', marginBottom: '3rem' }}>Select a problem and tell us about your target role.</p>
 
                             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem', marginBottom: '2.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
@@ -1360,7 +1360,7 @@ export default function AIInterview() {
                                     <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)' }}>AI Interviewer Voice</span>
                                     <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--txt3)' }}>Click to select · Preview to listen</span>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
+                                <div className="ai-voice-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
                                     {VOICE_TEMPLATES.map(voice => {
                                         const isSelected = selectedVoice.id === voice.id;
                                         const isPreviewing = previewLoading === voice.id;

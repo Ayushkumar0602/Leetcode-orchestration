@@ -155,7 +155,7 @@ export default function ProblemList() {
                     <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.5px' }}>CodeArena</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
+                <div className="pl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
                     {[
                         { label: 'Problems', path: '/dsaquestion' },
                         { label: 'DSA Interview', path: '/aiinterview' },
@@ -170,7 +170,7 @@ export default function ProblemList() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <select className="lc-lang-select-sm" value={selectedLanguage} onChange={e => handleLanguageSelect(e.target.value)}>
+                    <select className="lc-lang-select-sm pl-nav-lang-select" value={selectedLanguage} onChange={e => handleLanguageSelect(e.target.value)}>
                         {Object.entries(LANG_OPTIONS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
                     <NavProfile />
@@ -322,10 +322,10 @@ export default function ProblemList() {
                     <div style={{ marginBottom: '1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                             <div>
-                                <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--txt)', margin: 0, letterSpacing: '-0.5px' }}>
+                                <h1 className="pl-hero-title" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--txt)', margin: 0, letterSpacing: '-0.5px' }}>
                                     {activeList ? `📌 ${activeList.name}` : 'Data Structure & Algorithm'}
                                 </h1>
-                                <p style={{ color: 'var(--txt3)', fontSize: '0.82rem', margin: '4px 0 0' }}>
+                                <p className="pl-hero-subtitle" style={{ color: 'var(--txt3)', fontSize: '0.82rem', margin: '4px 0 0' }}>
                                     {activeList ? `${activeList.problemIds?.length || 0} saved problems` : `${totalCounts?.Total || '–'} problems · Page ${page} of ${totalPages}`}
                                 </p>
                             </div>
@@ -359,11 +359,11 @@ export default function ProblemList() {
                     {/* Problem List */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden' }}>
                         {/* Table header */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 100px 90px 110px', padding: '10px 20px', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: '0.72rem', fontWeight: 600, color: 'var(--txt3)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                        <div className="pl-table-header" style={{ display: 'grid', gridTemplateColumns: '56px 1fr 100px 90px 110px', padding: '10px 20px', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: '0.72rem', fontWeight: 600, color: 'var(--txt3)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                             <span>#</span>
                             <span>Title</span>
                             <span>Difficulty</span>
-                            <span>Acceptance</span>
+                            <span className="pl-table-acceptance">Acceptance</span>
                             <span style={{ textAlign: 'right' }}>Actions</span>
                         </div>
 
@@ -383,6 +383,7 @@ export default function ProblemList() {
 
                             return (
                                 <div key={p.id} onClick={() => handleSolve(p)}
+                                    className="pl-problem-row"
                                     style={{ display: 'grid', gridTemplateColumns: '56px 1fr 100px 90px 110px', alignItems: 'center', padding: '14px 20px', borderBottom: idx < displayedProblems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', cursor: 'pointer', transition: 'background 0.15s' }}
                                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -406,7 +407,7 @@ export default function ProblemList() {
                                     </span>
 
                                     {/* Acceptance */}
-                                    <span style={{ fontSize: '0.82rem', color: 'var(--txt3)' }}>{p.acceptance_rate}%</span>
+                                    <span className="pl-table-acceptance" style={{ fontSize: '0.82rem', color: 'var(--txt3)' }}>{p.acceptance_rate}%</span>
 
                                     {/* Actions */}
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }} onClick={e => e.stopPropagation()}>
