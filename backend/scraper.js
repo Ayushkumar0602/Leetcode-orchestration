@@ -4,10 +4,14 @@
  * Falls back to direct Node execution if Docker is unavailable (e.g. dev).
  */
 
-const path = require('path');
-const fs = require('fs').promises;
-const { exec } = require('child_process');
-const util = require('util');
+import path from 'path';
+import fs from 'fs/promises';
+import { exec } from 'child_process';
+import util from 'util';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const execPromise = util.promisify(exec);
 
@@ -107,4 +111,4 @@ async function runScraperInDocker(username, options = {}) {
     }
 }
 
-module.exports = { runScraperInDocker };
+export { runScraperInDocker };

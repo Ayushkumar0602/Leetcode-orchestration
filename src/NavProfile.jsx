@@ -11,7 +11,7 @@ export default function NavProfile() {
 
     useEffect(() => {
         if (!currentUser) return;
-        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${currentUser.uid}`)
+        fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`)
             .then(r => r.json())
             .then(data => {
                 if (!data.error && data.profile) {

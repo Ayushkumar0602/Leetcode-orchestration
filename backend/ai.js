@@ -1,7 +1,7 @@
-require('dotenv').config();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { db } = require('./firebase');
-const { doc, getDoc, setDoc } = require('firebase/firestore');
+import 'dotenv/config';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { db } from './firebase.js';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // Get all API keys from environment variables
 const getApiKeys = () => {
@@ -363,4 +363,4 @@ Rules:
   throw new Error(`AI Project Extraction failed: ${lastError?.message}`);
 }
 
-module.exports = { generateCodeAndTests, extractProjectDetails };
+export { generateCodeAndTests, extractProjectDetails };

@@ -331,7 +331,7 @@ export default function ActivityCalendar({ uid, userStats, totalCounts, containe
     useEffect(() => {
         if (!uid) { setLoading(false); return; }
         setLoading(true);
-        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/activity/${uid}`)
+        fetch(`https://leetcode-orchestration.onrender.com/api/activity/${uid}`)
             .then(r => r.json())
             .then(data => { if (!data.error) setActivityData(data); })
             .catch(console.error)

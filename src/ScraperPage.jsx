@@ -47,7 +47,7 @@ export default function ScraperPage() {
             body.csrfToken = csrfToken.trim();
         }
 
-        fetch('https://leetcode-orchestration-55z3.onrender.com/api/scraper/run', {
+        fetch('https://leetcode-orchestration.onrender.com/api/scraper/run', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),

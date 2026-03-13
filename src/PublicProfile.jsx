@@ -72,9 +72,9 @@ export default function PublicProfile() {
     useEffect(() => {
         if (!uid) return;
         Promise.all([
-            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/stats/user/${uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/${uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration.onrender.com/api/stats/user/${uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${uid}`).then(r => r.json()),
+            fetch(`https://leetcode-orchestration.onrender.com/api/profile/${uid}`).then(r => r.json()),
         ]).then(([stats, inv, prof]) => {
             const validInv = (inv.interviews || []).filter(i => i.overallScore || i.scoreReport);
             const scored = validInv.filter(i => i.overallScore > 0);

@@ -263,7 +263,7 @@ export default function PortfolioTab({ uid, profile, onSave }) {
             const rdr = new FileReader();
             rdr.onload = async () => {
                 const b64 = rdr.result.split(',')[1];
-                const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/resume/parse', {
+                const res = await fetch('https://leetcode-orchestration.onrender.com/api/resume/parse', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ base64Data: b64, mimeType: file.type })
                 });
@@ -389,7 +389,7 @@ export default function PortfolioTab({ uid, profile, onSave }) {
                                     if (!p.link || !p.link.includes('github.com')) return;
                                     setParsingTarget(`proj-${i}`);
                                     try {
-                                        const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/project/extract-readme', {
+                                        const res = await fetch('https://leetcode-orchestration.onrender.com/api/project/extract-readme', {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify({ githubUrl: p.link })

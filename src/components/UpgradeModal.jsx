@@ -10,7 +10,7 @@ export default function UpgradeModal({ isOpen, onClose, user, onUpgradeSuccess }
         setLoading(true);
         try {
             // 1. Create order on backend
-            const res = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/create-order', {
+            const res = await fetch('https://leetcode-orchestration.onrender.com/api/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -29,7 +29,7 @@ export default function UpgradeModal({ isOpen, onClose, user, onUpgradeSuccess }
                 order_id: data.order.id,
                 handler: async function (response) {
                     // 3. Verify payment on backend
-                    const verifyRes = await fetch('https://leetcode-orchestration-55z3.onrender.com/api/verify-payment', {
+                    const verifyRes = await fetch('https://leetcode-orchestration.onrender.com/api/verify-payment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

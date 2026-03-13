@@ -6,8 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const directoryPath = path.join(__dirname, 'src');
-const oldUrlRegex = /http:\/\/localhost:3001/g;
-const newUrl = 'https://leetcode-orchestration-55z3.onrender.com';
+const oldUrlRegex = /https:\/\/leetcode-orchestration-55z3\.onrender\.com/g;
+const newUrl = 'https://leetcode-orchestration.onrender.com';
 
 function updateUrlsInDirectory(dirPath) {
     fs.readdir(dirPath, { withFileTypes: true }, (err, files) => {

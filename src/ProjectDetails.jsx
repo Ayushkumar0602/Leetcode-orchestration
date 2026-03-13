@@ -72,7 +72,7 @@ export default function ProjectDetails() {
 
     const load = () => {
         setLoading(true); setError(null);
-        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/profile/${uid}`)
+        fetch(`https://leetcode-orchestration.onrender.com/api/profile/${uid}`)
             .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
             .then(data => {
                 if (!data.profile) throw new Error('Profile not found');

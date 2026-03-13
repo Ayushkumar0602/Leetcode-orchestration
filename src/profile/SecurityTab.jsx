@@ -46,7 +46,7 @@ export default function SecurityTab({ currentUser }) {
         if (!currentSessionId || !currentUser?.uid) return;
         
         try {
-            await fetch(`https://leetcode-orchestration-55z3.onrender.com/api/auth/sessions/other/${currentUser.uid}/${currentSessionId}`, {
+            await fetch(`https://leetcode-orchestration.onrender.com/api/auth/sessions/other/${currentUser.uid}/${currentSessionId}`, {
                 method: 'DELETE'
             });
             setSessionWipe(true);

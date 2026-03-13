@@ -17,7 +17,7 @@ export function useAuth() {
     return useContext(AuthContext);
 }
 
-const API_BASE = 'https://leetcode-orchestration-55z3.onrender.com';
+const API_BASE = 'https://leetcode-orchestration.onrender.com';
 
 async function registerSession(uid) {
     try {

@@ -16,7 +16,7 @@ const STORAGE_KEY_REFERRER  = 'ca_referrer';
 const STORAGE_KEY_SESSION   = 'ca_session_id';
 const STORAGE_KEY_FIRST_URL = 'ca_first_url';
 const UTM_PARAMS            = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
-const API_BASE              = 'https://leetcode-orchestration-55z3.onrender.com';
+const API_BASE              = 'https://leetcode-orchestration.onrender.com';
 
 // ─── Session ID ─────────────────────────────────────────────────────────────
 export function getOrCreateSessionId() {

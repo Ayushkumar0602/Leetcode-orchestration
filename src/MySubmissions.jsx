@@ -16,7 +16,7 @@ export default function MySubmissions() {
     useEffect(() => {
         if (!currentUser) return;
 
-        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/user-problems/${currentUser.uid}`)
+        fetch(`https://leetcode-orchestration.onrender.com/api/user-problems/${currentUser.uid}`)
             .then(res => res.json())
             .then(data => {
                 setProblems(data.problems || []);

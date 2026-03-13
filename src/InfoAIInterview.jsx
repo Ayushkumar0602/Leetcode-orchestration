@@ -41,7 +41,7 @@ export default function InfoAIInterview() {
         }
 
         setLoading(true);
-        fetch(`https://leetcode-orchestration-55z3.onrender.com/api/interviews/${currentUser.uid}`)
+        fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${currentUser.uid}`)
             .then(res => res.json())
             .then(data => {
                 if (!data.error) {

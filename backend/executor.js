@@ -1,8 +1,8 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const { exec } = require('child_process');
-const util = require('util');
+import fs from 'fs/promises';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { exec } from 'child_process';
+import util from 'util';
 
 const execPromise = util.promisify(exec);
 
@@ -139,4 +139,4 @@ async function executeCode(code, language, input, expectedOutput) {
     }
 }
 
-module.exports = { executeCode };
+export { executeCode };
