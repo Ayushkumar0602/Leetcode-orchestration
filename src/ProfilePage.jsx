@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { uploadProfilePicture } from './lib/s3';
 import { useAuth } from './contexts/AuthContext';
 import {
     ArrowLeft, User, Mail, Calendar, Shield, Star, Zap, Target,
     Code2, Brain, TrendingUp, Award, CheckCircle, Flame,
     Trophy, ChevronRight, BarChart3, Clock, FileText,
-    LayoutDashboard, Briefcase, Palette, Lock, Database, Edit3, LogOut, ExternalLink
+    LayoutDashboard, Briefcase, Palette, Lock, Database, Edit3, LogOut, ExternalLink, Menu, X
 } from 'lucide-react';
 import PortfolioTab from './profile/PortfolioTab';
 import CustomizationTab from './profile/CustomizationTab';
@@ -21,6 +22,7 @@ const S = `
 @keyframes scaleIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
 @keyframes pulseGlow { 0%,100%{box-shadow:0 0 20px rgba(168,85,247,0.3);}50%{box-shadow:0 0 40px rgba(168,85,247,0.6);} }
 @keyframes badgePop { 0%{transform:scale(0.8);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;} }
+@keyframes spin { to { transform: rotate(360deg); } }
 .profile-body { font-family: 'Inter', system-ui, sans-serif; }
 .glass-card { background:rgba(20,22,30,0.65); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:1.5rem; box-shadow:0 8px 40px rgba(0,0,0,0.25); }
 .p-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
@@ -35,7 +37,70 @@ const S = `
 .settings-row:hover { background:rgba(255,255,255,0.04); }
 .tab-btn { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:10px; border:none; cursor:pointer; font-size:0.82rem; font-weight:600; transition:all 0.2s; white-space:nowrap; }
 @media(max-width:1100px){.p-two-col{grid-template-columns:1fr;} .p-stats-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:640px){.p-stats-grid{grid-template-columns:repeat(2,1fr);} .p-badges-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){
+    .p-stats-grid{grid-template-columns:1fr !important; gap:0.75rem;}
+    .p-badges-grid{grid-template-columns:repeat(2,1fr); gap:0.75rem;}
+    .p-two-col{gap:1rem;}
+    .glass-card{padding:1.25rem;}
+}
+@media(max-width:640px){
+    .p-stats-grid{grid-template-columns:1fr !important;} 
+    .p-badges-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+.mobile-nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+@media (max-width: 768px) {
+    .mobile-nav-toggle { display: flex; }
+    .desktop-nav-profile { display: none !important; }
+}
+
+.mobile-nav-overlay {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(5,5,5,0.98);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+}
 `;
 
 // ── Sub-components ────────────────────────────────────────────────
@@ -77,29 +142,29 @@ function OverviewTab({ userStats, totalCounts, validInterviews, avgScore, interv
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Plan row */}
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', animation: 'fadeUp 0.3s ease-out both' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', flexWrap: 'wrap', gap: '1rem', animation: 'fadeUp 0.3s ease-out both' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '200px' }}>
                     <div style={{ width: 44, height: 44, borderRadius: '12px', background: isBlaze ? 'linear-gradient(135deg,rgba(168,85,247,0.2),rgba(59,130,246,0.1))' : 'rgba(255,255,255,0.05)', border: `1px solid ${isBlaze ? 'rgba(168,85,247,0.4)' : 'rgba(255,255,255,0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {isBlaze ? <Zap size={24} color="#a855f7" /> : <Star size={24} color="#94a3b8" />}
                     </div>
                     <div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--txt3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Current Plan</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--txt3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>Current Plan</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>{isBlaze ? 'Blaze' : 'Spark'}</span>
+                            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>{isBlaze ? 'Blaze' : 'Spark'}</span>
                             {isBlaze ?
-                                <span style={{ fontSize: '0.65rem', background: '#10b98120', color: '#10b981', border: '1px solid #10b98140', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>PREMIUM</span> :
-                                <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.1)', color: 'var(--txt2)', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>FREE</span>
+                                <span style={{ fontSize: '0.6rem', background: '#10b98120', color: '#10b981', border: '1px solid #10b98140', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>PREMIUM</span> :
+                                <span style={{ fontSize: '0.6rem', background: 'rgba(255,255,255,0.1)', color: 'var(--txt2)', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>FREE</span>
                             }
                         </div>
                         {isBlaze && expiresDate && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--txt3)', marginTop: '4px' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--txt3)', marginTop: '2px' }}>
                                 Renews / Expires: <strong style={{ color: '#fff' }}>{expiresDate}</strong>
                             </div>
                         )}
                     </div>
                 </div>
                 {!isBlaze && (
-                    <button onClick={openUpgrade} style={{ background: 'linear-gradient(135deg, #a855f7, #3b82f6)', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#fff', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 14px rgba(168,85,247,0.3)', transition: 'transform 0.2s', ':hover': { transform: 'translateY(-2px)' } }}>
+                    <button onClick={openUpgrade} style={{ width: window.innerWidth <= 480 ? '100%' : 'auto', background: 'linear-gradient(135deg, #a855f7, #3b82f6)', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#fff', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 14px rgba(168,85,247,0.3)', transition: 'transform 0.2s' }}>
                         <Zap size={14} /> Upgrade to Blaze
                     </button>
                 )}
@@ -127,18 +192,18 @@ function OverviewTab({ userStats, totalCounts, validInterviews, avgScore, interv
             {/* Two-col: difficulty + interview list */}
             <div className="p-two-col">
                 <div className="glass-card" style={{ animation: 'fadeUp 0.4s ease-out 0.1s both' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}><BarChart3 size={18} color="#a855f7" /><span style={{ fontWeight: 700, fontSize: '1rem' }}>Difficulty Breakdown</span></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}><BarChart3 size={18} color="#a855f7" /><span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Difficulty Breakdown</span></div>
                     {loading ? <div style={{ textAlign: 'center', color: 'var(--txt3)', padding: '1.5rem 0', fontSize: '0.85rem' }}>Loading…</div> : (
-                        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', padding: '0.5rem 0 1rem' }}>
-                            <CircleProgress value={userStats?.Easy || 0} max={totalCounts?.Easy || 1} color="#00b8a3" label="Easy" />
-                            <CircleProgress value={userStats?.Medium || 0} max={totalCounts?.Medium || 1} color="#ffa116" label="Medium" size={88} sw={7} />
-                            <CircleProgress value={userStats?.Hard || 0} max={totalCounts?.Hard || 1} color="#ef4743" label="Hard" />
+                        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', padding: '0.5rem 0 1rem', gap: '10px', flexWrap: 'wrap' }}>
+                            <CircleProgress value={userStats?.Easy || 0} max={totalCounts?.Easy || 1} color="#00b8a3" label="Easy" size={window.innerWidth <= 480 ? 60 : 72} />
+                            <CircleProgress value={userStats?.Medium || 0} max={totalCounts?.Medium || 1} color="#ffa116" label="Medium" size={window.innerWidth <= 480 ? 76 : 88} sw={window.innerWidth <= 480 ? 6 : 7} />
+                            <CircleProgress value={userStats?.Hard || 0} max={totalCounts?.Hard || 1} color="#ef4743" label="Hard" size={window.innerWidth <= 480 ? 60 : 72} />
                         </div>
                     )}
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1rem' }}>
                         {[{ label: 'Easy', color: '#00b8a3', count: userStats?.Easy || 0, total: totalCounts?.Easy || 1 }, { label: 'Medium', color: '#ffa116', count: userStats?.Medium || 0, total: totalCounts?.Medium || 1 }, { label: 'Hard', color: '#ef4743', count: userStats?.Hard || 0, total: totalCounts?.Hard || 1 }].map(d => (
                             <div key={d.label} style={{ marginBottom: '10px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '5px' }}><span style={{ color: d.color, fontWeight: 600 }}>{d.label}</span><span style={{ color: 'var(--txt2)' }}><strong>{d.count}</strong> <span style={{ color: 'var(--txt3)' }}>/ {d.total}</span></span></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '5px' }}><span style={{ color: d.color, fontWeight: 600 }}>{d.label}</span><span style={{ color: 'var(--txt2)' }}><strong>{d.count}</strong> <span style={{ color: 'var(--txt3)' }}>/ {d.total}</span></span></div>
                                 <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.07)', borderRadius: '999px', overflow: 'hidden' }}><div style={{ width: `${(d.count / d.total) * 100}%`, height: '100%', background: d.color, borderRadius: '999px', transition: 'width 1.2s cubic-bezier(0.16,1,0.3,1)' }} /></div>
                             </div>
                         ))}
@@ -146,9 +211,9 @@ function OverviewTab({ userStats, totalCounts, validInterviews, avgScore, interv
                 </div>
 
                 <div className="glass-card" style={{ animation: 'fadeUp 0.4s ease-out 0.15s both' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={18} color="#3b82f6" /><span style={{ fontWeight: 700, fontSize: '1rem' }}>Interview History</span></div>
-                        <button onClick={() => navigate('/infoaiinterview')} style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '8px', padding: '5px 12px', color: '#3b82f6', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>View All <ChevronRight size={12} /></button>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FileText size={18} color="#3b82f6" /><span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Interview History</span></div>
+                        <button onClick={() => navigate('/infoaiinterview')} style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '8px', padding: '5px 12px', color: '#3b82f6', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>View All <ChevronRight size={12} /></button>
                     </div>
                     {loading ? <div style={{ textAlign: 'center', color: 'var(--txt3)', padding: '2rem', fontSize: '0.85rem' }}>Loading…</div>
                         : interviews.length === 0 ? <div style={{ textAlign: 'center', color: 'var(--txt3)', padding: '2.5rem', fontSize: '0.85rem' }}>No interviews yet. <button onClick={() => navigate('/aiinterview')} style={{ background: 'none', border: 'none', color: '#a855f7', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>Start one!</button></div>
@@ -201,9 +266,31 @@ const TABS = [
 ];
 
 export default function ProfilePage() {
-    const { currentUser, logout } = useAuth();
+    const { currentUser, logout, updateUserProfile } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef(null);
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file || !currentUser) return;
+        
+        setIsUploading(true);
+        try {
+            const newPhotoUrl = await uploadProfilePicture(file, currentUser.uid);
+            await updateUserProfile({ photoURL: newPhotoUrl });
+            setProfile(p => ({ ...p, photoURL: newPhotoUrl }));
+        } catch (error) {
+            console.error("Failed to upload image:", error);
+            alert("Failed to upload image.");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
     const [userStats, setUserStats] = useState(null);
     const [totalCounts, setTotalCounts] = useState(null);
     const [interviews, setInterviews] = useState([]);
@@ -211,6 +298,7 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState({});
     const [loading, setLoading] = useState(true);
     const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         if (!currentUser) { setLoading(false); return; }
@@ -265,47 +353,103 @@ export default function ProfilePage() {
             <style>{S}</style>
 
             {/* Nav */}
-            <nav style={{ height: '64px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 100 }}>
+            <nav style={{ height: '64px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 100, boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button onClick={() => navigate('/dashboard')} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--txt2)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}><ArrowLeft size={15} /> Dashboard</button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}><img src="/logo.jpeg" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} /><span style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.4px' }}>CodeArena</span></div>
+                    <button 
+                        onClick={() => navigate('/dashboard')} 
+                        style={{ 
+                            background: 'rgba(255,255,255,0.05)', 
+                            border: '1px solid rgba(255,255,255,0.1)', 
+                            borderRadius: '10px', 
+                            padding: '7px 14px', 
+                            display: window.innerWidth > 768 ? 'flex' : 'none', 
+                            alignItems: 'center', 
+                            gap: '6px', 
+                            color: 'var(--txt2)', 
+                            cursor: 'pointer', 
+                            fontSize: '0.85rem', 
+                            fontWeight: 600, 
+                            transition: 'all 0.2s' 
+                        }}
+                    >
+                        <ArrowLeft size={15} /> Dashboard
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
+                        <img src="/logo.jpeg" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} />
+                        <span style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.4px', display: window.innerWidth > 480 ? 'inline' : 'none' }}>CodeArena</span>
+                    </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <NavProfile />
-                    <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', padding: '6px 14px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}><LogOut size={14} /> Sign Out</button>
+                    <div className="desktop-nav-profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <NavProfile />
+                        <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', padding: '6px 14px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}>
+                            <LogOut size={14} /> Sign Out
+                        </button>
+                    </div>
+                    <button className="mobile-nav-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
                 </div>
             </nav>
 
+            {isMobileMenuOpen && (
+                <div className="mobile-nav-overlay">
+                    <button className="mobile-nav-link" onClick={() => { navigate('/dashboard'); setIsMobileMenuOpen(false); }}>
+                        <LayoutDashboard size={18} /> Dashboard
+                    </button>
+                    <button className="mobile-nav-link" onClick={() => { navigate(`/public/${currentUser?.uid}`); setIsMobileMenuOpen(false); }}>
+                        <ExternalLink size={18} /> Public Profile
+                    </button>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', marginTop: 'auto' }}>
+                        <button className="mobile-nav-link" onClick={handleLogout} style={{ color: '#ef4444', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                            <LogOut size={18} /> Sign Out
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Hero Banner */}
             <div style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18) 0%,rgba(59,130,246,0.12) 50%,rgba(16,185,129,0.08) 100%)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '2.5rem 2rem 2rem' }}>
-                <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+                <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', justifyContent: window.innerWidth <= 640 ? 'center' : 'flex-start', textAlign: window.innerWidth <= 640 ? 'center' : 'left' }}>
                     <div style={{ position: 'relative', flexShrink: 0, animation: 'scaleIn 0.5s ease-out' }}>
-                        <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #3b82f6)', padding: '3px', animation: 'pulseGlow 3s ease-in-out infinite' }}>
-                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={40} color="rgba(168,85,247,0.6)" />}
+                        <div 
+                            style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #3b82f6)', padding: '3px', animation: 'pulseGlow 3s ease-in-out infinite', cursor: 'pointer', position: 'relative' }}
+                            onClick={() => fileInputRef.current?.click()}
+                            title="Change Profile Picture"
+                        >
+                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                                {currentUser?.photoURL ? <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isUploading ? 0.5 : 1 }} /> : <User size={40} color="rgba(168,85,247,0.6)" style={{ opacity: isUploading ? 0.5 : 1 }} />}
+                                {isUploading && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}><div style={{ width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /></div>}
                             </div>
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                onChange={handleImageUpload} 
+                                accept="image/*" 
+                                style={{ display: 'none' }} 
+                            />
                         </div>
-                        <div style={{ position: 'absolute', bottom: '4px', right: '4px', width: '16px', height: '16px', borderRadius: '50%', background: '#10b981', border: '2px solid #050505' }} />
+                        <div style={{ position: 'absolute', bottom: '4px', right: '4px', width: '16px', height: '16px', borderRadius: '50%', background: '#10b981', border: '2px solid #050505', pointerEvents: 'none' }} />
                     </div>
-                    <div style={{ flex: 1, minWidth: '200px', animation: 'fadeUp 0.5s ease-out 0.1s both' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                            <h1 style={{ fontSize: '1.9rem', fontWeight: 900, margin: 0, letterSpacing: '-0.04em' }}>{currentUser?.displayName || 'Developer'}</h1>
+                    <div style={{ flex: 1, minWidth: '200px', animation: 'fadeUp 0.5s ease-out 0.1s both', display: 'flex', flexDirection: 'column', alignItems: window.innerWidth <= 640 ? 'center' : 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px', justifyContent: window.innerWidth <= 640 ? 'center' : 'flex-start' }}>
+                            <h1 style={{ fontSize: window.innerWidth <= 480 ? '1.5rem' : '1.9rem', fontWeight: 900, margin: 0, letterSpacing: '-0.04em' }}>{currentUser?.displayName || 'Developer'}</h1>
                             <div style={{ background: 'linear-gradient(135deg,#a855f7,#3b82f6)', borderRadius: '8px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>PRO</div>
                             <button onClick={() => navigate(`/public/${currentUser?.uid}`)} style={{
-                                display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                                display: window.innerWidth <= 768 ? 'none' : 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
                                 borderRadius: '8px', padding: '5px 12px', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
                             }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}>
                                 <ExternalLink size={13} /> View Public Profile
                             </button>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', justifyContent: window.innerWidth <= 640 ? 'center' : 'flex-start' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Mail size={12} />{currentUser?.email}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Calendar size={12} />Joined {joinDate}</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Shield size={12} />Verified Account</span>
+                            <span style={{ display: window.innerWidth <= 480 ? 'none' : 'flex', alignItems: 'center', gap: '4px' }}><Shield size={12} />Verified Account</span>
                             {profile.github && <a href={`https://${profile.github}`} target="_blank" rel="noreferrer" style={{ color: '#60a5fa', fontSize: '0.78rem' }}>{profile.github}</a>}
                         </div>
                     </div>
-                    {profile.bio && <p style={{ flex: '100%', fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', margin: '0', maxWidth: '600px', fontStyle: 'italic' }}>"{profile.bio}"</p>}
+                    {profile.bio && <p style={{ flex: '100%', fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', margin: '0', maxWidth: '600px', fontStyle: 'italic', textAlign: window.innerWidth <= 640 ? 'center' : 'left' }}>"{profile.bio}"</p>}
                 </div>
 
                 {/* Tab navigation */}
@@ -319,7 +463,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Tab content */}
-            <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+            <div style={{ maxWidth: '1300px', margin: '0 auto', padding: window.innerWidth <= 768 ? '1.5rem 1rem' : '2rem 1.5rem' }}>
                 {activeTab === 'overview' && <OverviewTab userStats={userStats} totalCounts={totalCounts} validInterviews={validInterviews} avgScore={avgScore} interviews={interviews} badges={badges} loading={loading} navigate={navigate} profile={profile} openUpgrade={() => setUpgradeModalOpen(true)} />}
                 {activeTab === 'portfolio' && <PortfolioTab uid={currentUser?.uid} profile={profile} onSave={saveProfile} />}
                 {activeTab === 'customization' && <CustomizationTab preferences={profile.preferences} onSave={saveProfile} />}

@@ -32,6 +32,10 @@ const CSS = `
 .ov-card{background:linear-gradient(135deg,rgba(168,85,247,0.07),rgba(59,130,246,0.04));backdrop-filter:blur(16px);border:1px solid rgba(168,85,247,0.18);border-radius:24px;padding:1.75rem;margin-bottom:1.5rem;}
 .slink{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:5px 12px;font-size:0.75rem;font-weight:600;color:#e8e8e8;text-decoration:none;}
 @media(max-width:900px){.pf-grid{grid-template-columns:1fr !important;}}
+@media(max-width:640px){
+    .pf-section{padding:1.25rem;}
+    .pf-input{font-size:0.85rem;}
+}
 `;
 
 // ── Components ────────────────────────────────────────────────────

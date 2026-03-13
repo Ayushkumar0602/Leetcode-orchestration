@@ -27,7 +27,7 @@ export default function DataTab({ currentUser, userStats, interviews }) {
     const copy = () => { navigator.clipboard.writeText(publicUrl); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', gap: '1.5rem' }}>
             {/* QR Code */}
             <div style={{ ...glass, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ fontWeight: 700, fontSize: '1rem', width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}>

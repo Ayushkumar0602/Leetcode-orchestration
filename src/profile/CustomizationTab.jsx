@@ -38,7 +38,7 @@ export default function CustomizationTab({ preferences, onSave }) {
                 <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Palette size={16} color="#a855f7" /> Profile Theme
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? 'repeat(3, 1fr)' : window.innerWidth <= 768 ? 'repeat(4, 1fr)' : 'repeat(6, 1fr)', gap: '10px' }}>
                     {THEMES.map(t => (
                         <div key={t.name} onClick={() => upd('theme', t.name)} style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
                             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: t.gradient, border: prefs.theme === t.name ? `3px solid #fff` : '3px solid transparent', transition: 'all 0.2s', boxShadow: prefs.theme === t.name ? `0 0 20px ${t.accent}60` : 'none' }} />
@@ -49,7 +49,7 @@ export default function CustomizationTab({ preferences, onSave }) {
             </div>
 
             {/* Layout & Mode */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', gap: '1.5rem' }}>
                 <div style={glass}>
                     <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Layout size={16} color="#3b82f6" /> Layout
@@ -94,7 +94,7 @@ export default function CustomizationTab({ preferences, onSave }) {
                     <Eye size={16} color="#10b981" /> Featured Content (Public Profile)
                 </div>
                 <p style={{ fontSize: '0.82rem', color: 'var(--txt3)', marginBottom: '1rem' }}>Choose what's visible on your public QR profile.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 480 ? '1fr' : '1fr 1fr', gap: '8px' }}>
                     {[{ key: 'showStats', label: 'Problem Stats' }, { key: 'showInterviews', label: 'Interview History' }, { key: 'showBadges', label: 'Achievements' }, { key: 'showActivity', label: 'Activity Calendar' }].map(row => (
                         <div key={row.key} onClick={() => upd(row.key, !prefs[row.key])} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '10px', background: prefs[row.key] ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.02)', border: `1px solid ${prefs[row.key] ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.06)'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
                             <span style={{ fontSize: '0.82rem', fontWeight: 600, color: prefs[row.key] ? '#34d399' : 'var(--txt3)' }}>{row.label}</span>

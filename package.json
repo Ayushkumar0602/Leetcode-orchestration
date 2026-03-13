@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1008.0",
     "@monaco-editor/react": "^4.7.0",
+    "@supabase/supabase-js": "^2.99.1",
     "@xyflow/react": "^12.10.1",
     "firebase": "^12.10.0",
     "framer-motion": "^12.35.2",

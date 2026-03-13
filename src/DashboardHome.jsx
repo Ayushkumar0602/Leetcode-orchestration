@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import {
     Brain, Code2, Layers, TrendingUp,
-    Award, Target, ArrowRight, User, ExternalLink
+    Award, Target, ArrowRight, User, ExternalLink, Menu, X
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
@@ -177,12 +177,61 @@ const styles = `
     .actions-grid { gap: 1rem; }
     .dash-nav-links { display: none !important; }
     .dash-featured-inner { flex-direction: column !important; align-items: flex-start !important; }
+    .mobile-nav-toggle { display: flex !important; }
 }
+
+.mobile-nav-overlay {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(5,5,5,0.95);
+    backdrop-filter: blur(20px);
+    z-index: 99;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-nav-link {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
 /* Extra small */
-@media (max-width: 360px) {
+@media (max-width: 400px) {
     .dash-header h1 { font-size: 1.2rem !important; }
     .metrics-grid { grid-template-columns: 1fr !important; }
     .problems-card { grid-column: span 1 !important; }
+}
+
+    /* Specific Fix for Mobile Toggle Visibility */
+    @media (max-width: 768px) {
+        .mobile-nav-toggle { display: block !important; }
+        .nav-links { display: none !important; }
+        .desktop-nav-profile { display: none !important; }
+        .metrics-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem;
+        }
+        .problems-card {
+            grid-column: span 1 !important;
+        }
+    }
 }
 `;
 
@@ -196,6 +245,8 @@ export default function DashboardHome() {
     const [avgScore, setAvgScore] = useState(null);
     const [profile, setProfile] = useState(null);
     const [statsLoading, setStatsLoading] = useState(true);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
 
     useEffect(() => {
         if (!currentUser) {
@@ -258,21 +309,62 @@ export default function DashboardHome() {
                 </div>
 
                 <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: '1 1 0', justifyContent: 'center' }}>
-                    <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
+                    <button className="dash-nav-links" onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
                         DSA Practice
                     </button>
-                    <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
+                    <button className="dash-nav-links" onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
                         AI Interview
                     </button>
-                    <button onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
+                    <button className="dash-nav-links" onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
                         System Design
                     </button>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 0', justifyContent: 'flex-end' }}>
-                    <NavProfile />
+                    <div className="desktop-nav-profile">
+                        <NavProfile />
+                    </div>
+                    <button 
+                        className="mobile-nav-toggle"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        style={{ 
+                            display: 'none', 
+                            background: 'transparent', 
+                            border: 'none', 
+                            color: '#fff', 
+                            cursor: 'pointer',
+                            padding: '8px',
+                            zIndex: 110
+                        }}
+                    >
+                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                    {/* Only show NavProfile on mobile if logged out (Sign In button) */}
+                    {!currentUser && (
+                        <div className="mobile-nav-toggle" style={{ display: 'none' }}>
+                             <NavProfile />
+                        </div>
+                    )}
                 </div>
             </nav>
+
+            {/* ── Mobile Menu Overlay ── */}
+            {isMenuOpen && (
+                <div className="mobile-nav-overlay">
+                    <button className="mobile-nav-link" onClick={() => { navigate('/dsaquestion'); setIsMenuOpen(false); }}>DSA Practice</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/aiinterviewselect'); setIsMenuOpen(false); }}>AI Interview</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/systemdesign'); setIsMenuOpen(false); }}>System Design</button>
+                    {currentUser && (
+                        <>
+                            <button className="mobile-nav-link" onClick={() => { navigate(`/public/${currentUser.uid}`); setIsMenuOpen(false); }}>Public Portfolio</button>
+                            <button className="mobile-nav-link" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}>My Profile</button>
+                        </>
+                    )}
+                    {!currentUser && (
+                        <button className="mobile-nav-link" onClick={() => { navigate('/login'); setIsMenuOpen(false); }}>Sign In</button>
+                    )}
+                </div>
+            )}
 
             {/* ── Main Content ── */}
             <div className="dash-content">

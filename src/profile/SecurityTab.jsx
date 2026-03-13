@@ -66,7 +66,7 @@ export default function SecurityTab({ currentUser }) {
     const otherSessionsCount = sessions.filter(s => s.id !== localStorage.getItem('currentSessionId')).length;
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', gap: '1.5rem' }}>
             {/* Password & 2FA */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div style={glass}>
