@@ -393,15 +393,29 @@ export default function DashboardHome() {
                     />
 
                     {/* Dynamic Problems Solved Widget */}
-                    <div className="problems-card" style={{
-                        background: 'rgba(20, 22, 30, 0.6)',
-                        backdropFilter: 'blur(12px)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: '20px',
-                        padding: '1.5rem',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                        animation: 'cardAppear 0.5s ease-out 0.3s both',
-                    }}>
+                    <div className="problems-card" 
+                        onClick={() => navigate('/dsaquestion')}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.borderColor = 'rgba(168,85,247,0.4)';
+                            e.currentTarget.style.boxShadow = '0 12px 32px rgba(168,85,247,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2)';
+                        }}
+                        style={{
+                            background: 'rgba(20, 22, 30, 0.6)',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '20px',
+                            padding: '1.5rem',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                            animation: 'cardAppear 0.5s ease-out 0.3s both',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.2rem' }}>
                             <Code2 size={18} color="#a855f7" />
                             <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--txt)' }}>Problems Solved</span>
