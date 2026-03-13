@@ -1,5 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import 'dotenv/config';
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const dotenv = require('dotenv');
+dotenv.config();
 
 function getApiKeys() {
   const keys = [];
@@ -85,4 +86,4 @@ async function parseResumeWithAI(base64Data, mimeType) {
   throw new Error("Failed to parse resume after trying all keys. Last error: " + lastError.message);
 }
 
-export { parseResumeWithAI };
+module.exports = { parseResumeWithAI };
