@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
     ChevronRight, Search, Brain, LogOut, CheckCircle2, Trophy,
@@ -10,6 +10,9 @@ import { useAuth } from './contexts/AuthContext';
 import ActivityCalendar from './ActivityCalendar';
 import BookmarkModal from './BookmarkModal';
 import NavProfile from './NavProfile';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchMetadata, fetchStats, fetchLists, fetchProblems, createList as apiCreateList, queryKeys } from './lib/api';
+import { useDebounce } from './hooks/useDebounce';
 
 const LANG_OPTIONS = {
     'python': 'Python 3', 'javascript': 'JavaScript',
@@ -27,77 +30,84 @@ export default function ProblemList() {
     const { page: pageParam } = useParams();
     const page = parseInt(pageParam) || 1;
     const { currentUser, logout } = useAuth();
+    const queryClient = useQueryClient();
 
-    const [problems, setProblems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [totalPages, setTotalPages] = useState(1);
     const [search, setSearch] = useState('');
-
-    const [metadata, setMetadata] = useState({ topics: [], companies: [] });
     const [selectedTopics, setSelectedTopics] = useState([]);
     const [selectedCompanies, setSelectedCompanies] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState(
         () => localStorage.getItem('codearena_lang') || 'python'
     );
 
-    const [userStats, setUserStats] = useState(null);
-    const [totalCounts, setTotalCounts] = useState(null);
-    const [statsLoading, setStatsLoading] = useState(true);
-
     // Bookmark / List state
-    const [userLists, setUserLists] = useState([]);
-    const [activeList, setActiveList] = useState(null); // null = show all
-    const [bookmarkModal, setBookmarkModal] = useState(null); // { problemId }
+    const [activeList, setActiveList] = useState(null);
+    const [bookmarkModal, setBookmarkModal] = useState(null);
     const [showNewList, setShowNewList] = useState(false);
     const [newListName, setNewListName] = useState('');
-    const [creatingList, setCreatingList] = useState(false);
 
     // LinkedIn/LeetCode profile sync (temporary module)
     const [linkedInProfileId, setLinkedInProfileId] = useState('');
     const [showSyncModule, setShowSyncModule] = useState(false);
 
-    // --- Data fetching ---
-    useEffect(() => {
-        fetch('https://leetcode-orchestration.onrender.com/api/metadata')
-            .then(r => r.json())
-            .then(data => {
-                if (!data.error) setMetadata({
-                    topics: data.topics.map(t => ({ value: t, label: t })),
-                    companies: data.companies.map(c => ({ value: c, label: c }))
-                });
-            }).catch(console.error);
-    }, []);
+    // Debounce the search so we don't hit the API on every keystroke
+    const debouncedSearch = useDebounce(search, 300);
 
-    useEffect(() => {
-        if (!currentUser) { setStatsLoading(false); return; }
-        setStatsLoading(true);
-        fetch(`https://leetcode-orchestration.onrender.com/api/stats/user/${currentUser.uid}`)
-            .then(r => r.json())
-            .then(data => { if (!data.error) { setUserStats(data.userStats); setTotalCounts(data.totalCounts); } })
-            .catch(console.error).finally(() => setStatsLoading(false));
-    }, [currentUser]);
+    // ── Queries ──────────────────────────────────────────────────────────
+    const { data: metadata = { topics: [], companies: [] } } = useQuery({
+        queryKey: queryKeys.metadata(),
+        queryFn: fetchMetadata,
+        staleTime: 1000 * 60 * 30, // 30 min – near-static data
+    });
 
-    useEffect(() => {
-        if (!currentUser) return;
-        fetch(`https://leetcode-orchestration.onrender.com/api/lists/${currentUser.uid}`)
-            .then(r => r.json())
-            .then(data => setUserLists(data.lists || []))
-            .catch(console.error);
-    }, [currentUser]);
+    const { data: statsResult, isLoading: statsLoading } = useQuery({
+        queryKey: queryKeys.stats(currentUser?.uid),
+        queryFn: () => fetchStats(currentUser.uid),
+        enabled: !!currentUser,
+        staleTime: 1000 * 60 * 5,
+    });
 
-    useEffect(() => {
-        const t = setTimeout(() => {
-            setLoading(true);
-            const topicQuery = selectedTopics.map(t => t.value).join(',');
-            const companyQuery = selectedCompanies.map(c => c.value).join(',');
-            const params = new URLSearchParams({ page, limit: 20, search, topics: topicQuery, companies: companyQuery });
-            fetch(`https://leetcode-orchestration.onrender.com/api/problems?${params}`)
-                .then(r => r.json())
-                .then(data => { if (data.data) { setProblems(data.data); setTotalPages(data.totalPages); } })
-                .catch(console.error).finally(() => setLoading(false));
-        }, 300);
-        return () => clearTimeout(t);
-    }, [page, search, selectedTopics, selectedCompanies]);
+    const { data: userListsData } = useQuery({
+        queryKey: queryKeys.lists(currentUser?.uid),
+        queryFn: () => fetchLists(currentUser.uid),
+        enabled: !!currentUser,
+        staleTime: 1000 * 60 * 3,
+    });
+
+    const problemParams = {
+        page,
+        search: debouncedSearch,
+        topics: selectedTopics.map(t => t.value),
+        companies: selectedCompanies.map(c => c.value),
+    };
+
+    const { data: problemsData, isLoading: loading } = useQuery({
+        queryKey: queryKeys.problems(problemParams),
+        queryFn: () => fetchProblems(problemParams),
+        staleTime: 1000 * 60 * 2, // 2 min
+        keepPreviousData: true, // smoother pagination
+    });
+
+    // ── Derived state ────────────────────────────────────────────────────
+    const userStats   = statsResult?.userStats   ?? null;
+    const totalCounts = statsResult?.totalCounts ?? null;
+    const userLists   = userListsData ?? [];
+    const problems    = problemsData?.problems ?? [];
+    const totalPages  = problemsData?.totalPages ?? 1;
+
+    // ── Mutations ────────────────────────────────────────────────────────
+    const createListMutation = useMutation({
+        mutationFn: ({ name }) => apiCreateList(currentUser.uid, name),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.lists(currentUser?.uid) });
+            setNewListName('');
+            setShowNewList(false);
+        },
+    });
+
+    // Filter by active list
+    const displayedProblems = activeList
+        ? problems.filter(p => activeList.problemIds?.includes(String(p.id)))
+        : problems;
 
     // --- Handlers ---
     const handleSolve = (p) => navigate(`/solvingpage/${p.id}`, {
@@ -118,25 +128,10 @@ export default function ProblemList() {
         navigate(`/scraper?username=${encodeURIComponent(trimmed)}`);
     };
 
-    const createList = async () => {
+    const createList = () => {
         if (!newListName.trim() || !currentUser) return;
-        setCreatingList(true);
-        try {
-            const res = await fetch('https://leetcode-orchestration.onrender.com/api/lists', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: currentUser.uid, name: newListName.trim() })
-            });
-            const newList = await res.json();
-            if (newList.id) { setUserLists(prev => [...prev, newList]); setNewListName(''); setShowNewList(false); }
-        } catch (e) { console.error(e); }
-        setCreatingList(false);
+        createListMutation.mutate({ name: newListName.trim() });
     };
-
-    // Filter by active list
-    const displayedProblems = activeList
-        ? problems.filter(p => activeList.problemIds?.includes(String(p.id)))
-        : problems;
 
     // --- Render ---
     return (
@@ -475,9 +470,7 @@ export default function ProblemList() {
                     userId={currentUser.uid}
                     onClose={() => {
                         setBookmarkModal(null);
-                        // Refresh lists to update bookmark indicators
-                        fetch(`https://leetcode-orchestration.onrender.com/api/lists/${currentUser.uid}`)
-                            .then(r => r.json()).then(d => setUserLists(d.lists || [])).catch(console.error);
+                        queryClient.invalidateQueries({ queryKey: queryKeys.lists(currentUser.uid) });
                     }}
                 />
             )}

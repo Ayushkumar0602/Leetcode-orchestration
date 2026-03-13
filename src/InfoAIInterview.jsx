@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import {
@@ -6,6 +6,8 @@ import {
     ChevronLeft, ChevronRight, ArrowRight, XCircle, AlertCircle, FileText
 } from 'lucide-react';
 import NavProfile from './NavProfile';
+import { useQuery } from '@tanstack/react-query';
+import { fetchInterviews, queryKeys } from './lib/api';
 
 const styles = `
 @keyframes slideUpFade {
@@ -31,26 +33,14 @@ export default function InfoAIInterview() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
 
-    const [interviews, setInterviews] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { data: interviewsData, isLoading: loading } = useQuery({
+        queryKey: queryKeys.interviews(currentUser?.uid),
+        queryFn: () => fetchInterviews(currentUser.uid),
+        enabled: !!currentUser,
+        staleTime: 1000 * 60 * 3, // 3 min
+    });
 
-    useEffect(() => {
-        if (!currentUser) {
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${currentUser.uid}`)
-            .then(res => res.json())
-            .then(data => {
-                if (!data.error) {
-                    setInterviews(data.interviews || []);
-                }
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, [currentUser]);
+    const interviews = interviewsData || [];
 
     // Format date nicely
     const formatDate = (ds) => {

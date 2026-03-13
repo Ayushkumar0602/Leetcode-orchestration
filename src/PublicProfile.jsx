@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavProfile from './NavProfile';
 import {
     User, Github, Linkedin, Globe, Code2, Brain, Award, TrendingUp, Star, Flame, Zap, Trophy,
     Briefcase, GraduationCap, Calendar, FileText, ExternalLink, CheckCircle, ChevronRight, MapPin, Mail
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
 
 // ── Devicon ──────────────────────────────────────────────────────
 const DEVICON_MAP = { react: 'react', javascript: 'javascript', typescript: 'typescript', python: 'python', nodejs: 'nodejs', 'node.js': 'nodejs', java: 'java', cpp: 'cplusplus', 'c++': 'cplusplus', c: 'c', go: 'go', rust: 'rust', swift: 'swift', kotlin: 'kotlin', dart: 'dart', flutter: 'flutter', html: 'html5', css: 'css3', sass: 'sass', tailwind: 'tailwindcss', mongodb: 'mongodb', postgres: 'postgresql', postgresql: 'postgresql', mysql: 'mysql', redis: 'redis', firebase: 'firebase', docker: 'docker', kubernetes: 'kubernetes', git: 'git', github: 'github', linux: 'linux', aws: 'amazonwebservices', gcp: 'googlecloud', azure: 'azure', graphql: 'graphql', nextjs: 'nextjs', 'next.js': 'nextjs', vuejs: 'vuejs', 'vue.js': 'vuejs', angular: 'angularjs', django: 'django', flask: 'flask', express: 'express', figma: 'figma', redux: 'redux', vite: 'vite' };
@@ -65,24 +67,39 @@ function Badge({ icon: Icon, label, desc, color, unlocked }) {
 export default function PublicProfile() {
     const { uid } = useParams();
     const navigate = useNavigate();
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
-    useEffect(() => {
-        if (!uid) return;
-        Promise.all([
-            fetch(`https://leetcode-orchestration.onrender.com/api/stats/user/${uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration.onrender.com/api/profile/${uid}`).then(r => r.json()),
-        ]).then(([stats, inv, prof]) => {
-            const validInv = (inv.interviews || []).filter(i => i.overallScore || i.scoreReport);
-            const scored = validInv.filter(i => i.overallScore > 0);
-            const avg = scored.length ? Math.round(scored.reduce((s, i) => s + i.overallScore, 0) / scored.length) : 0;
-            const recentInv = validInv.slice(0, 5);
-            setData({ stats: stats.userStats || {}, totalCounts: stats.totalCounts || {}, validInvCount: validInv.length, avg, recentInv, profile: prof.profile || {} });
-        }).catch(() => setError(true)).finally(() => setLoading(false));
-    }, [uid]);
+    const { data: statsResult, isLoading: statsLoading } = useQuery({
+        queryKey: queryKeys.stats(uid),
+        queryFn: () => fetchStats(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const { data: interviewsRaw, isLoading: invLoading } = useQuery({
+        queryKey: queryKeys.interviews(uid),
+        queryFn: () => fetchInterviews(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 3,
+    });
+
+    const { data: profileData, isLoading: profileLoading, isError } = useQuery({
+        queryKey: queryKeys.profile(uid),
+        queryFn: () => fetchProfile(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const loading = statsLoading || invLoading || profileLoading;
+
+    const stats       = statsResult?.userStats   || {};
+    const totalCounts = statsResult?.totalCounts || {};
+    const profile     = profileData || {};
+
+    const validInv    = (interviewsRaw || []).filter(i => i.overallScore || i.scoreReport);
+    const scored      = validInv.filter(i => i.overallScore > 0);
+    const avg         = scored.length ? Math.round(scored.reduce((s, i) => s + i.overallScore, 0) / scored.length) : 0;
+    const recentInv   = validInv.slice(0, 5);
+    const validInvCount = validInv.length;
 
     if (loading) return (
         <div style={{ minHeight: '100vh', background: '#04050a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', fontFamily: 'Inter,sans-serif' }}>
@@ -92,15 +109,13 @@ export default function PublicProfile() {
         </div>
     );
 
-    if (error || !data || data.profile.preferences?.isPublic === false) return (
+    if (isError || !profileData || profile.preferences?.isPublic === false) return (
         <div style={{ minHeight: '100vh', background: '#04050a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', fontFamily: 'Inter,sans-serif', color: '#fff' }}>
             <div style={{ fontSize: '3rem' }}>404</div>
             <div style={{ color: 'rgba(255,255,255,0.5)' }}>Profile not found or is currently marked private.</div>
             <button onClick={() => navigate('/')} style={{ background: 'linear-gradient(135deg,#a855f7,#3b82f6)', border: 'none', borderRadius: '12px', padding: '10px 24px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>← Go Home</button>
         </div>
     );
-
-    const { stats, totalCounts, validInvCount, avg, recentInv, profile } = data;
 
     // Extract preferences
     const prefs = profile.preferences || { theme: 'Purple', layout: 'Comfortable', darkMode: true, isPublic: true, showInterviews: true, showStats: true, showBadges: true };

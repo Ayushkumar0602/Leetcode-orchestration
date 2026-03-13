@@ -15,6 +15,8 @@ import SecurityTab from './profile/SecurityTab';
 import DataTab from './profile/DataTab';
 import UpgradeModal from './components/UpgradeModal';
 import NavProfile from './NavProfile';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
 
 // ── Styles ──────────────────────────────────────────────────────
 const S = `
@@ -316,16 +318,15 @@ export default function ProfilePage() {
             if (currentUser.photoURL) {
                 await deleteProfilePicture(currentUser.photoURL);
             }
-            // Update auth state to effectively remove it
             await updateUserProfile({ photoURL: "" });
-            setProfile(p => ({ ...p, photoURL: "" }));
-
-            // Update backend
+            
             await fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ displayName: currentUser.displayName, email: currentUser.email, photoURL: "" })
-            }).catch(console.error);
+            });
+            
+            queryClient.invalidateQueries({ queryKey: queryKeys.profile(currentUser.uid) });
 
         } catch (error) {
             console.error("Failed to delete image:", error);
@@ -334,44 +335,60 @@ export default function ProfilePage() {
             setIsUploading(false);
         }
     };
-    const [userStats, setUserStats] = useState(null);
-    const [totalCounts, setTotalCounts] = useState(null);
-    const [interviews, setInterviews] = useState([]);
-    const [allInterviews, setAllInterviews] = useState([]);
-    const [profile, setProfile] = useState({});
-    const [loading, setLoading] = useState(true);
+
+    const uid = currentUser?.uid;
+
+    const { data: statsData, isLoading: statsLoading } = useQuery({
+        queryKey: queryKeys.stats(uid),
+        queryFn: () => fetchStats(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const { data: interviewsData, isLoading: invLoading } = useQuery({
+        queryKey: queryKeys.interviews(uid),
+        queryFn: () => fetchInterviews(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 3,
+    });
+
+    const { data: profileQueryData, isLoading: profLoading } = useQuery({
+        queryKey: queryKeys.profile(uid),
+        queryFn: () => fetchProfile(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const loading = statsLoading || invLoading || profLoading;
+
+    const userStats = statsData?.userStats ?? null;
+    const totalCounts = statsData?.totalCounts ?? null;
+    const allInterviews = interviewsData || [];
+    const interviews = allInterviews.slice(0, 8);
+    const profile = profileQueryData || {};
+
     const [isUpgradeModalOpen, setUpgradeModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+    const queryClient = useQueryClient();
+
+    // Auto-sync Auth data to Firestore Profile doc so PublicProfile has access to it
     useEffect(() => {
-        if (!currentUser) { setLoading(false); return; }
-        Promise.all([
-            fetch(`https://leetcode-orchestration.onrender.com/api/stats/user/${currentUser.uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${currentUser.uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`).then(r => r.json()),
-        ]).then(([s, inv, prof]) => {
-            if (!s.error) { setUserStats(s.userStats); setTotalCounts(s.totalCounts); }
-            if (!inv.error && inv.interviews) { setAllInterviews(inv.interviews); setInterviews(inv.interviews.slice(0, 8)); }
-
-            const p = prof.profile || {};
-            setProfile(p);
-
-            // Auto-sync Auth data to Firestore Profile doc so PublicProfile has access to it
-            if (currentUser.displayName && (p.displayName !== currentUser.displayName || p.photoURL !== currentUser.photoURL || p.email !== currentUser.email)) {
-                fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ displayName: currentUser.displayName, email: currentUser.email, photoURL: currentUser.photoURL })
-                }).catch(console.error);
-            }
-        }).catch(console.error).finally(() => setLoading(false));
-    }, [currentUser]);
+        if (!currentUser || !profileQueryData) return;
+        if (currentUser.displayName && (profile.displayName !== currentUser.displayName || profile.photoURL !== currentUser.photoURL || profile.email !== currentUser.email)) {
+            fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ displayName: currentUser.displayName, email: currentUser.email, photoURL: currentUser.photoURL })
+            }).catch(console.error);
+        }
+    }, [currentUser, profileQueryData]);
 
     const saveProfile = async (data) => {
         if (!currentUser) return;
         try {
             await fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            setProfile(p => ({ ...p, ...data }));
+            queryClient.invalidateQueries({ queryKey: queryKeys.profile(currentUser.uid) });
         } catch (e) { console.error(e); }
     };
 

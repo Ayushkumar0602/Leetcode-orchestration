@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import {
@@ -7,6 +7,8 @@ import {
     Sparkles, User, Building, BarChart3
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { fetchInterviewDetail, queryKeys } from './lib/api';
 
 const SKILL_ICONS = {
     problemDecomposition: Brain,
@@ -53,23 +55,14 @@ export default function InterviewEvaluation() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
 
-    const [interview, setInterview] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [transcriptOpen, setTranscriptOpen] = useState(false);
 
-    useEffect(() => {
-        if (!interviewId) return;
-        setLoading(true);
-        fetch(`https://leetcode-orchestration.onrender.com/api/interviews/detail/${interviewId}`)
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) setError(data.error);
-                else setInterview(data);
-            })
-            .catch(() => setError('Failed to load interview'))
-            .finally(() => setLoading(false));
-    }, [interviewId]);
+    const { data: interview, isLoading: loading, error } = useQuery({
+        queryKey: queryKeys.interviewDetail(interviewId),
+        queryFn: () => fetchInterviewDetail(interviewId),
+        enabled: !!interviewId,
+        staleTime: 1000 * 60 * 10, // 10 min — evaluation data is immutable
+    });
 
     if (loading) return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#080b14', gap: '16px' }}>

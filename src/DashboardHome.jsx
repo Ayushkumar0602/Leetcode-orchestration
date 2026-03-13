@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import {
@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
+import { useQuery } from '@tanstack/react-query';
+import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
 
 const DashboardCard = ({ title, value, subtitle, icon: Icon, color, delay }) => (
     <div style={{
@@ -238,50 +240,41 @@ const styles = `
 export default function DashboardHome() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
-
-    const [userStats, setUserStats] = useState(null);
-    const [totalCounts, setTotalCounts] = useState(null);
-    const [totalInterviews, setTotalInterviews] = useState(0);
-    const [avgScore, setAvgScore] = useState(null);
-    const [profile, setProfile] = useState(null);
-    const [statsLoading, setStatsLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    const uid = currentUser?.uid;
 
-    useEffect(() => {
-        if (!currentUser) {
-            setStatsLoading(false);
-            return;
-        }
-        setStatsLoading(true);
+    const { data: statsData, isLoading: statsLoading } = useQuery({
+        queryKey: queryKeys.stats(uid),
+        queryFn: () => fetchStats(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5,
+    });
 
-        Promise.all([
-            fetch(`https://leetcode-orchestration.onrender.com/api/stats/user/${currentUser.uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${currentUser.uid}`).then(r => r.json()),
-            fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`).then(r => r.json())
-        ])
-            .then(([statsData, interviewsData, profileData]) => {
-                if (!statsData.error) {
-                    setUserStats(statsData.userStats);
-                    setTotalCounts(statsData.totalCounts);
-                }
-                if (!profileData.error && profileData.profile) {
-                    setProfile(profileData.profile);
-                }
-                if (!interviewsData.error && interviewsData.interviews) {
-                    const validInterviews = interviewsData.interviews.filter(inv =>
-                        inv.overallScore || inv.scoreReport
-                    );
-                    setTotalInterviews(validInterviews.length);
-                    const scored = validInterviews.filter(i => i.overallScore > 0);
-                    if (scored.length > 0) {
-                        setAvgScore(Math.round(scored.reduce((s, i) => s + i.overallScore, 0) / scored.length));
-                    }
-                }
-            })
-            .catch(console.error)
-            .finally(() => setStatsLoading(false));
-    }, [currentUser]);
+    const { data: interviewsData } = useQuery({
+        queryKey: queryKeys.interviews(uid),
+        queryFn: () => fetchInterviews(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 3,
+    });
+
+    const { data: profile } = useQuery({
+        queryKey: queryKeys.profile(uid),
+        queryFn: () => fetchProfile(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const userStats   = statsData?.userStats   ?? null;
+    const totalCounts = statsData?.totalCounts ?? null;
+
+    const allInterviews = interviewsData || [];
+    const validInterviews = allInterviews.filter(inv => inv.overallScore || inv.scoreReport);
+    const totalInterviews = validInterviews.length;
+    const scored = validInterviews.filter(i => i.overallScore > 0);
+    const avgScore = scored.length > 0
+        ? Math.round(scored.reduce((s, i) => s + i.overallScore, 0) / scored.length)
+        : null;
 
     return (
         <div className="dash-body" style={{

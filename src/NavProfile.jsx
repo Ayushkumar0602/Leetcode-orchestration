@@ -1,25 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Award, ExternalLink } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchProfile, queryKeys } from './lib/api';
 
 export default function NavProfile() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [profile, setProfile] = useState(null);
 
-    useEffect(() => {
-        if (!currentUser) return;
-        fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`)
-            .then(r => r.json())
-            .then(data => {
-                if (!data.error && data.profile) {
-                    setProfile(data.profile);
-                }
-            })
-            .catch(console.error);
-    }, [currentUser]);
+    const { data: profile } = useQuery({
+        queryKey: queryKeys.profile(currentUser?.uid),
+        queryFn: () => fetchProfile(currentUser.uid),
+        enabled: !!currentUser,
+        staleTime: 1000 * 60 * 5, // 5 min — profile data is slow-changing
+    });
 
     if (!currentUser) {
         return (
