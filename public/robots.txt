@@ -1,22 +1,4 @@
 User-agent: *
 Allow: /
-Allow: /public/
-Allow: /dsaquestion
-Allow: /infoaiinterview
-Allow: /systemdesign
-Allow: /login
-Allow: /signup
-allow: /submissions
-allow: /scraper
-allow: /aiinterview
-allow: /aiinterviewselect
-allow: /solvingpage
-allow: /evaluation
-allow: /aisystemdesigninterview
-allow: /systemdesigninterview
-
-# Keep private/auth pages out of index
-Disallow: /dashboard
-Disallow: /profile
 
 Sitemap: https://whizan.xyz/sitemap.xml
