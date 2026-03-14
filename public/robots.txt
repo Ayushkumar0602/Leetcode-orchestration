@@ -6,17 +6,17 @@ Allow: /infoaiinterview
 Allow: /systemdesign
 Allow: /login
 Allow: /signup
+allow: /submissions
+allow: /scraper
+allow: /aiinterview
+allow: /aiinterviewselect
+allow: /solvingpage
+allow: /evaluation
+allow: /aisystemdesigninterview
+allow: /systemdesigninterview
 
 # Keep private/auth pages out of index
 Disallow: /dashboard
 Disallow: /profile
-Disallow: /submissions
-Disallow: /scraper
-Disallow: /aiinterview
-Disallow: /aiinterviewselect
-Disallow: /solvingpage
-Disallow: /evaluation
-Disallow: /aisystemdesigninterview
-Disallow: /systemdesigninterview
 
 Sitemap: https://whizan.xyz/sitemap.xml
