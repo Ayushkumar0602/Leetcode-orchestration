@@ -30,6 +30,9 @@ import BlogPost from './BlogPost';
 // Portfolio Feature
 import PortfolioLanding from './PortfolioLanding';
 
+// Components
+import SocialShare from './components/SocialShare';
+
 function App() {
   return (
     <BrowserRouter>
@@ -69,6 +72,7 @@ function App() {
             
             <Route path="/" element={<LandingPage />} />
           </Routes>
+          <SocialShare />
         </div>
       </AuthProvider>
     </BrowserRouter>
