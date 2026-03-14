@@ -16,7 +16,9 @@ const allowedOrigins = [
     'http://localhost:5173', // Vite default local
     'http://localhost:3000', // Alternative local
     'https://aiinterview-20512.web.app', // Firebase hosted app
-    'https://aiinterview-20512.firebaseapp.com'
+    'https://aiinterview-20512.firebaseapp.com',
+    'https://whizan.xyz',
+    'https://www.whizan.xyz'
 ];
 
 app.use(cors({
@@ -48,15 +50,15 @@ app.post('/api/auth/session', async (req, res) => {
     try {
         const parser = new UAParser(req.headers['user-agent']);
         const result = parser.getResult();
-        
+
         let deviceType = 'Computer';
         if (result.device.type === 'mobile') deviceType = 'Smartphone';
         else if (result.device.type === 'tablet') deviceType = 'Tablet';
-        
+
         const os = result.os.name || 'Unknown OS';
         const browser = result.browser.name || 'Unknown Browser';
         const deviceStr = `${browser} · ${os}`; // e.g. "Chrome · macOS"
-        
+
         const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'Unknown IP';
         const time = new Date().toISOString();
 
@@ -95,18 +97,18 @@ app.delete('/api/auth/sessions/other/:uid/:currentSessionId', async (req, res) =
     try {
         const sessionsRef = rtdbRef(rtdb, `users/${uid}/sessions`);
         const snapshot = await get(sessionsRef);
-        
+
         if (snapshot.exists()) {
             const sessions = snapshot.val();
             const promises = [];
-            
+
             for (const [key, _] of Object.entries(sessions)) {
                 if (key !== currentSessionId) {
                     const sessionRef = rtdbRef(rtdb, `users/${uid}/sessions/${key}`);
                     promises.push(remove(sessionRef));
                 }
             }
-            
+
             await Promise.all(promises);
         }
         res.json({ success: true });
@@ -872,7 +874,7 @@ app.post('/api/project/extract-readme', async (req, res) => {
         // Supports: https://github.com/owner/repo or github.com/owner/repo
         const match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
         if (!match) return res.status(400).json({ error: 'Invalid GitHub URL' });
-        
+
         const owner = match[1];
         const repo = match[2].replace(/\.git$/, '');
 
@@ -887,7 +889,7 @@ app.post('/api/project/extract-readme', async (req, res) => {
                     readmeText = await response.text();
                     break;
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         if (!readmeText) {
@@ -1185,17 +1187,17 @@ app.post('/api/analytics/pageview', async (req, res) => {
 
         const analyticsRef = collection(db, 'analytics_pageviews');
         await addDoc(analyticsRef, {
-            session_id:   session_id || null,
-            user_id:      user_id || null,
-            path:         page?.path || '/',
-            url:          page?.url || '',
-            title:        page?.title || '',
+            session_id: session_id || null,
+            user_id: user_id || null,
+            path: page?.path || '/',
+            url: page?.url || '',
+            title: page?.title || '',
             query_params: safeQueryParams || {},
-            utm:          utm || null,
-            referrer:     referrer || null,
-            browser:      browser || null,
-            server_ip:    req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null,
-            timestamp:    timestamp || new Date().toISOString(),
+            utm: utm || null,
+            referrer: referrer || null,
+            browser: browser || null,
+            server_ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null,
+            timestamp: timestamp || new Date().toISOString(),
         });
     } catch (err) {
         console.error('[Analytics] Failed to save pageview:', err.message);
@@ -1215,14 +1217,14 @@ app.post('/api/analytics/event', async (req, res) => {
 
         const analyticsRef = collection(db, 'analytics_events');
         await addDoc(analyticsRef, {
-            event:      event,
+            event: event,
             session_id: session_id || null,
-            user_id:    user_id || null,
-            path:       page?.path || '/',
-            utm:        utm || null,
-            referrer:   referrer || null,
-            props:      props || {},
-            timestamp:  timestamp || new Date().toISOString(),
+            user_id: user_id || null,
+            path: page?.path || '/',
+            utm: utm || null,
+            referrer: referrer || null,
+            props: props || {},
+            timestamp: timestamp || new Date().toISOString(),
         });
     } catch (err) {
         console.error('[Analytics] Failed to save event:', err.message);
@@ -1260,10 +1262,10 @@ app.get('/api/analytics/summary', async (req, res) => {
 
         res.json({
             total_pageviews: pvSnap.size,
-            total_events:    evSnap.size,
-            top_pages:       Object.entries(pathCounts).sort((a,b) => b[1]-a[1]).slice(0, 10).map(([p,c]) => ({ path: p, count: c })),
-            traffic_sources: Object.entries(referrerCounts).sort((a,b) => b[1]-a[1]).map(([s,c]) => ({ source: s, count: c })),
-            utm_sources:     Object.entries(utmSources).sort((a,b) => b[1]-a[1]).map(([s,c]) => ({ source: s, count: c })),
+            total_events: evSnap.size,
+            top_pages: Object.entries(pathCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([p, c]) => ({ path: p, count: c })),
+            traffic_sources: Object.entries(referrerCounts).sort((a, b) => b[1] - a[1]).map(([s, c]) => ({ source: s, count: c })),
+            utm_sources: Object.entries(utmSources).sort((a, b) => b[1] - a[1]).map(([s, c]) => ({ source: s, count: c })),
         });
     } catch (err) {
         console.error('[Analytics] Summary failed:', err);
