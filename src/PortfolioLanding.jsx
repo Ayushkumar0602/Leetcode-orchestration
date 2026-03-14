@@ -302,10 +302,10 @@ export default function PortfolioLanding() {
             <footer style={{ padding: '2.5rem 5%', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>© 2026 Whizan AI. All rights reserved.</div>
                 <nav style={{ display: 'flex', gap: '24px' }}>
-                    <a href="/" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Home</a>
-                    <a href="/dsaquestion" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>DSA Practice</a>
-                    <a href="/infoaiinterview" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Interviews</a>
-                    <a href="/blog" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Blog</a>
+                    <a href="/" title="Whizan AI Home" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Home</a>
+                    <a href="/dsaquestion" title="Practice DSA Coding Questions" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>DSA Practice</a>
+                    <a href="/infoaiinterview" title="Learn about AI Mock Interviews" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Interviews</a>
+                    <a href="/blog" title="Read the Whizan AI Engineering Blog" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Blog</a>
                 </nav>
             </footer>
         </main>

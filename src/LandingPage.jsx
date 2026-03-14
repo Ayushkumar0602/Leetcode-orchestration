@@ -248,10 +248,10 @@ export default function LandingPage() {
                         <span className="lp-brand-name">Whizan AI</span>
                     </div>
                     <div className="lp-nav-links">
-                        <a href="#features">Features</a>
-                        <a href="#demo">Live Demo</a>
-                        <a href="#architecture">How it works</a>
-                        <a href="#problems">Practice</a>
+                        <a href="#features" title="View Whizan AI Features">Features</a>
+                        <a href="#demo" title="Watch Whizan AI Live Demo">Live Demo</a>
+                        <a href="#architecture" title="How Whizan AI Works">How it works</a>
+                        <a href="#problems" title="Practice DSA Problems">Practice</a>
                     </div>
                     <div className="lp-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {currentUser ? (
