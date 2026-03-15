@@ -134,4 +134,102 @@ router.get('/db/:collectionName', verifyAdmin, async (req, res) => {
     }
 });
 
+// ---------------------------------------------------------
+// 3. Infrastructure & Server Health
+// ---------------------------------------------------------
+router.get('/health', verifyAdmin, (req, res) => {
+    try {
+        const mem = process.memoryUsage();
+        res.json({
+            status: 'Healthy',
+            uptime: process.uptime(),
+            memory: {
+                rss: mem.rss,
+                heapTotal: mem.heapTotal,
+                heapUsed: mem.heapUsed,
+                external: mem.external
+            },
+            cpuUsage: process.cpuUsage(),
+            timestamp: new Date().toISOString()
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ---------------------------------------------------------
+// 4. Overview Statistics
+// ---------------------------------------------------------
+router.get('/stats', verifyAdmin, async (req, res) => {
+    if (!admin.apps.length) return res.status(501).json({ error: "Not configured" });
+    try {
+        const firestore = admin.firestore();
+        
+        let totalUsers = 0;
+        try {
+            const listUsersResult = await admin.auth().listUsers(1000);
+            totalUsers = listUsersResult.users.length;
+        } catch (e) { console.error("Error getting auth users count", e); }
+        
+        let eventsCount = 0;
+        try {
+            const logsReq = await firestore.collection('admin_logs').count().get();
+            eventsCount = logsReq.data().count;
+        } catch(e) { console.error("No logs", e); }
+
+        res.json({
+            totalUsers,
+            eventsCount,
+            serverUptime: process.uptime(),
+            dbStatus: 'Connected'
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ---------------------------------------------------------
+// 5. System Configuration
+// ---------------------------------------------------------
+router.get('/config', verifyAdmin, async (req, res) => {
+    if (!admin.apps.length) return res.status(501).json({ error: "Not configured" });
+    try {
+        const docSnap = await admin.firestore().collection('admin_settings').doc('global').get();
+        if (docSnap.exists) {
+            res.json(docSnap.data());
+        } else {
+            // Default config if none exists
+            res.json({
+                maintenanceMode: false,
+                openRegistration: true,
+                requireEmailVerification: false,
+                maxUploadSize: 10,
+                supportEmail: 'support@whizan.xyz',
+                appName: 'Whizan - AI Interview Prep',
+                stripeTestMode: true,
+                aiModel: 'gpt-4o'
+            });
+        }
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/config', verifyAdmin, async (req, res) => {
+    if (!admin.apps.length) return res.status(501).json({ error: "Not configured" });
+    try {
+        await admin.firestore().collection('admin_settings').doc('global').set(req.body, { merge: true });
+        
+        // Log the config change
+        if (req.adminUser) {
+            await admin.firestore().collection('admin_logs').add({
+                action: 'Updated System Config',
+                details: 'Admin updated platform configurations.',
+                level: 'info',
+                adminEmail: req.adminUser.email || req.adminUser.uid,
+                timestamp: new Date().toISOString()
+            });
+        }
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;

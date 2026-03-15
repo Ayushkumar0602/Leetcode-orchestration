@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Save, Bell, Shield, Globe, Mail } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export default function AdminConfig() {
-    // Mock configuration state representing feature flags and app settings
+    const { currentUser } = useAuth();
+    
+    // Config state
     const [config, setConfig] = useState({
         maintenanceMode: false,
         openRegistration: true,
@@ -16,13 +22,48 @@ export default function AdminConfig() {
     
     const [saving, setSaving] = useState(false);
 
-    const handleSave = () => {
+    // Fetch real config
+    const { data: remoteConfig, isLoading } = useQuery({
+        queryKey: ['admin-config'],
+        queryFn: async () => {
+            if (!currentUser) return null;
+            const token = await currentUser.getIdToken();
+            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/config`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to fetch config");
+            return res.json();
+        },
+        enabled: !!currentUser
+    });
+
+    // Populate local form state when fetched
+    useEffect(() => {
+        if (remoteConfig) {
+            setConfig(remoteConfig);
+        }
+    }, [remoteConfig]);
+
+    const handleSave = async () => {
         setSaving(true);
-        // Simulate an API call to save settings
-        setTimeout(() => {
-            setSaving(false);
+        try {
+            const token = await currentUser.getIdToken();
+            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/config`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            });
+            if (!res.ok) throw new Error("Failed to save config");
             alert("Settings saved successfully.");
-        }, 800);
+        } catch (e) {
+            console.error(e);
+            alert("Error saving settings");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleChange = (e) => {

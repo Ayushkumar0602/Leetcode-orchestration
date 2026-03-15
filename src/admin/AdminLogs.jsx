@@ -19,44 +19,17 @@ export default function AdminLogs() {
         });
         
         if (!res.ok) {
-            // Because admin_logs might not exist initially, we'll swallow 404/500 and return empty OR mocked
-            // For the sake of the demo and avoiding a totally empty screen if the DB is fresh, we'll mix in some realistic mock logs if it fails/is empty.
-            console.warn("Failed to fetch real admin_logs or collection is empty using mocked fallback.");
-            return generateMockLogs();
+            console.warn("Failed to fetch real admin_logs or collection is empty.");
+            return [];
         }
         
         const data = await res.json();
         if (!data.docs || data.docs.length === 0) {
-            return generateMockLogs(); // Fallback so the UI isn't empty on first load
+            return []; 
         }
         
         // Sort newest first
         return data.docs.sort((a,b) => new Date(b.timestamp || b.createdAt) - new Date(a.timestamp || a.createdAt));
-    };
-
-    const generateMockLogs = () => {
-        const actions = [
-            { action: "Suspended User", details: "User 'johndoe' was suspended due to ToS violation.", level: "warning" },
-            { action: "Updated System Config", details: "Changed 'Maintenance Mode' to false.", level: "info" },
-            { action: "Deleted Object", details: "File 'profiles/old_pic.jpg' removed from S3.", level: "critical" },
-            { action: "Viewed Database", details: "Admin accessed 'userProfiles' collection.", level: "info" },
-            { action: "Deleted User", details: "Permamently deleted user ID 'xYz123'.", level: "critical" },
-        ];
-        
-        const mocks = [];
-        const now = Date.now();
-        for(let i=0; i<15; i++) {
-            const act = actions[Math.floor(Math.random() * actions.length)];
-            mocks.push({
-                id: `mock_log_${i}`,
-                adminEmail: "superadmin@whizan.xyz",
-                action: act.action,
-                details: act.details,
-                level: act.level,
-                timestamp: new Date(now - (i * 3600000 * Math.random())).toISOString()
-            });
-        }
-        return mocks;
     };
 
     const { data: logs = [], isLoading, error, refetch } = useQuery({

@@ -10,13 +10,13 @@ export default function AdminOverview() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
 
-    // Fetch total users for the stat card
-    const { data: usersData, isLoading: isLoadingUsers } = useQuery({
-        queryKey: ['admin-overview-users'],
+    // Fetch stats
+    const { data: statsData, isLoading: isLoadingStats } = useQuery({
+        queryKey: ['admin-overview-stats'],
         queryFn: async () => {
             if (!currentUser) return null;
             const token = await currentUser.getIdToken();
-            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users`, {
+            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) return null;
@@ -25,7 +25,7 @@ export default function AdminOverview() {
         enabled: !!currentUser
     });
 
-    const StatCard = ({ title, value, subtitle, icon: Icon, color, linkTo }) => (
+    const StatCard = ({ title, value, subtitle, icon: Icon, color, linkTo, loading }) => (
         <div 
             onClick={() => navigate(linkTo)}
             style={{ 
@@ -44,7 +44,7 @@ export default function AdminOverview() {
                 </div>
             </div>
             <div style={{ color: '#fff', fontSize: '2rem', fontWeight: 800, margin: '4px 0' }}>
-                {value}
+                {loading ? '...' : (value ?? '-')}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--txt3)' }}>{subtitle}</span>
@@ -52,8 +52,6 @@ export default function AdminOverview() {
             </div>
         </div>
     );
-
-    const totalUsers = usersData?.users ? usersData.users.length : (isLoadingUsers ? '...' : 'Data Off');
 
     return (
         <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -63,10 +61,10 @@ export default function AdminOverview() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
-                <StatCard title="Total Users" value={totalUsers} subtitle="+12 this week" icon={Users} color="#3b82f6" linkTo="/admin/users" />
-                <StatCard title="Database Size" value="2.4 GB" subtitle="Firestore & RTDB" icon={Database} color="#10b981" linkTo="/admin/database" />
-                <StatCard title="Server Uptime" value="99.9%" subtitle="All systems go" icon={Server} color="#a855f7" linkTo="/admin/infrastructure" />
-                <StatCard title="Recent Activity" value="2,481" subtitle="Events today" icon={Activity} color="#f59e0b" linkTo="/admin/logs" />
+                <StatCard loading={isLoadingStats} title="Total Users" value={statsData?.totalUsers} subtitle="All registered accounts" icon={Users} color="#3b82f6" linkTo="/admin/users" />
+                <StatCard loading={isLoadingStats} title="Database Status" value={statsData?.dbStatus} subtitle="Firestore Connected" icon={Database} color="#10b981" linkTo="/admin/database" />
+                <StatCard loading={isLoadingStats} title="Server Uptime" value={statsData?.serverUptime ? `${(statsData.serverUptime / 3600).toFixed(1)}h` : null} subtitle="Instance Uptime" icon={Server} color="#a855f7" linkTo="/admin/infrastructure" />
+                <StatCard loading={isLoadingStats} title="Audit Events" value={statsData?.eventsCount} subtitle="Total admin log events" icon={Activity} color="#f59e0b" linkTo="/admin/logs" />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>

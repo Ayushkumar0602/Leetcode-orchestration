@@ -1,42 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { Server, Activity, Cpu, HardDrive, Network, AlertCircle, RefreshCw, CheckCircle2, Clock } from 'lucide-react';
+import { Server, Activity, Cpu, HardDrive, Network, AlertCircle, RefreshCw, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export default function AdminInfrastructure() {
-    // Note: Since no real provider API keys (Vercel/Render) were given yet, this view simulates
-    // healthy data to show how it should look. It generates realistic-looking fluctuating metrics.
-    const [metrics, setMetrics] = useState({
-        cpu: 12,
-        memory: 45,
-        reqPerSec: 124,
-        latency: 42,
-        uptime: '99.99%'
-    });
+    const { currentUser } = useAuth();
     
-    const [logs, setLogs] = useState([]);
+    const { data: healthData, isLoading, error, refetch } = useQuery({
+        queryKey: ['admin-infrastructure-health'],
+        queryFn: async () => {
+            if (!currentUser) return null;
+            const token = await currentUser.getIdToken();
+            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/health`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to reach backend.");
+            return res.json();
+        },
+        enabled: !!currentUser,
+        refetchInterval: 10000 // auto refresh every 10s
+    });
 
-    useEffect(() => {
-        // Initial mock logs
-        const initialLogs = [
-            { id: 1, type: 'info', msg: 'Frontend deployment #2844 successful', time: '10 mins ago' },
-            { id: 2, type: 'info', msg: 'Backend Node.js container restarted', time: '1 hour ago' },
-            { id: 3, type: 'warn', msg: 'High memory usage threshold warning (85%) on Worker 1', time: '3 hours ago' },
-            { id: 4, type: 'info', msg: 'Database backup completed automatically', time: '12 hours ago' },
-        ];
-        setLogs(initialLogs);
+    const metrics = healthData ? {
+        // Mock cpu if standard process.cpuUsage() is too chaotic, but let's use accurate format if possible 
+        // process.cpuUsage generates huge numbers (microseconds). Here we just map it loosely or show MB.
+        cpu: healthData.cpuUsage ? (healthData.cpuUsage.user / 1000000).toFixed(1) : 0, 
+        memory: healthData.memory ? (healthData.memory.rss / 1024 / 1024).toFixed(0) : 0,
+        uptime: healthData.uptime ? (healthData.uptime / 3600).toFixed(2) : 0,
+        status: healthData.status || 'Unknown'
+    } : { cpu: 0, memory: 0, uptime: 0, status: 'Loading' };
+    
+    // We fetch recent errors or logs from the actual DB instead of mock logs.
+    const { data: recentLogs = [] } = useQuery({
+        queryKey: ['admin-infra-logs'],
+        queryFn: async () => {
+            if (!currentUser) return [];
+            const token = await currentUser.getIdToken();
+            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/db/admin_logs?limit=5`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) return [];
+            const data = await res.json();
+            return (data.docs || []).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        },
+        enabled: !!currentUser
+    });
 
-        // Simulate fluctuating metrics every 3 seconds
-        const interval = setInterval(() => {
-            setMetrics(prev => ({
-                ...prev,
-                cpu: Math.max(5, Math.min(95, prev.cpu + (Math.random() * 10 - 5))),
-                memory: Math.max(30, Math.min(90, prev.memory + (Math.random() * 4 - 2))),
-                reqPerSec: Math.max(50, Math.min(500, prev.reqPerSec + (Math.random() * 40 - 20))),
-                latency: Math.max(15, Math.min(200, prev.latency + (Math.random() * 20 - 10)))
-            }));
-        }, 3000);
-
-        return () => clearInterval(interval);
-    }, []);
+    const logs = recentLogs.map((l, i) => ({
+        id: l.id || i,
+        type: l.level === 'critical' ? 'warn' : 'info',
+        msg: l.action + ': ' + l.details,
+        time: new Date(l.timestamp).toLocaleTimeString()
+    }));
 
     const MetricCard = ({ title, value, unit, icon: Icon, color, trend = null }) => (
         <div style={{ background: 'rgba(20, 22, 30, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', overflow: 'hidden' }}>
@@ -86,11 +101,12 @@ export default function AdminInfrastructure() {
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {[
-                            { name: 'Frontend Application (Vite/React)', provider: 'Vercel / Firebase Hosting', status: 'Healthy', ping: '12ms' },
-                            { name: 'Backend API (Node.js/Express)', provider: 'Render', status: 'Healthy', ping: '45ms' },
-                            { name: 'Primary Database (Firestore)', provider: 'Firebase', status: 'Healthy', ping: '28ms' },
-                            { name: 'Realtime Code Sync (RTDB)', provider: 'Firebase', status: 'Healthy', ping: '35ms' },
-                            { name: 'Media Storage Bucket', provider: 'Supabase S3', status: 'Healthy', ping: '60ms' }
+                            { 
+                                name: 'Backend API (Node.js/Express)', 
+                                provider: 'Self-hosted', 
+                                status: metrics.status, 
+                                ping: healthData ? '< 50ms' : '...' 
+                            }
                         ].map(service => (
                             <div key={service.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div>
@@ -99,8 +115,8 @@ export default function AdminInfrastructure() {
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--txt3)', fontFamily: 'monospace' }}>{service.ping}</span>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#34d399', fontWeight: 600, background: 'rgba(16,185,129,0.1)', padding: '4px 8px', borderRadius: '6px' }}>
-                                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399' }} /> {service.status}
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: service.status === 'Healthy' ? '#34d399' : '#f59e0b', fontWeight: 600, background: service.status === 'Healthy' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)', padding: '4px 8px', borderRadius: '6px' }}>
+                                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: service.status === 'Healthy' ? '#34d399' : '#f59e0b' }} /> {service.status}
                                     </span>
                                 </div>
                             </div>
