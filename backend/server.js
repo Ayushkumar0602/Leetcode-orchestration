@@ -1281,14 +1281,14 @@ app.get('/api/analytics/summary', async (req, res) => {
 const EMAILJS_REST_URL     = 'https://api.emailjs.com/api/v1.0/email/send';
 
 // Primary EmailJS Account (Expiry Reminder)
-const PRIMARY_SERVICE_ID   = 'service_3hcmwzo';
-const PRIMARY_PUBLIC_KEY   = 'jqVZqs-raFP7VHsqS';
-const TEMPLATE_REMINDER    = 'template_expiry_reminder';
+const PRIMARY_SERVICE_ID   = process.env.EMAILJS_PRIMARY_SERVICE_ID;
+const PRIMARY_PUBLIC_KEY   = process.env.EMAILJS_PRIMARY_PUBLIC_KEY;
+const TEMPLATE_REMINDER    = process.env.EMAILJS_TEMPLATE_REMINDER;
 
 // Secondary EmailJS Account (Subscription Ended)
-const SECONDARY_SERVICE_ID = 'service_ifrkd2o';
-const SECONDARY_PUBLIC_KEY = 'yAHoktwg19W6fYRz9';
-const TEMPLATE_EXPIRED     = 'template_gl4yxom';
+const SECONDARY_SERVICE_ID = process.env.EMAILJS_SECONDARY_SERVICE_ID;
+const SECONDARY_PUBLIC_KEY = process.env.EMAILJS_SECONDARY_PUBLIC_KEY;
+const TEMPLATE_EXPIRED     = process.env.EMAILJS_TEMPLATE_EXPIRED;
 
 function formatDateNice(iso) {
     return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });

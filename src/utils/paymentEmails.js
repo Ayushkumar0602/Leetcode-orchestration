@@ -1,14 +1,14 @@
 import emailjs from '@emailjs/browser';
 
 // Primary EmailJS Account (Success)
-const SUCCESS_SERVICE_ID = 'service_3hcmwzo';
-const SUCCESS_PUBLIC_KEY = 'jqVZqs-raFP7VHsqS';
-const TEMPLATE_SUCCESS   = 'template_sltyg6u';
+const SUCCESS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SUCCESS_SERVICE_ID;
+const SUCCESS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_SUCCESS_PUBLIC_KEY;
+const TEMPLATE_SUCCESS   = import.meta.env.VITE_EMAILJS_SUCCESS_TEMPLATE_ID;
 
 // Secondary EmailJS Account (Failed & Ended)
-const FAILED_SERVICE_ID  = 'service_ifrkd2o';
-const FAILED_PUBLIC_KEY  = 'yAHoktwg19W6fYRz9';
-const TEMPLATE_FAILED    = 'template_m5klrh8';
+const FAILED_SERVICE_ID  = import.meta.env.VITE_EMAILJS_FAILED_SERVICE_ID;
+const FAILED_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_FAILED_PUBLIC_KEY;
+const TEMPLATE_FAILED    = import.meta.env.VITE_EMAILJS_FAILED_TEMPLATE_ID;
 
 
 /**

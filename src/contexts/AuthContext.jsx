@@ -22,9 +22,9 @@ export function useAuth() {
 const API_BASE = 'https://leetcode-orchestration.onrender.com';
 
 // ── EmailJS Config ────────────────────────────────────────────
-const EMAILJS_SERVICE_ID  = 'service_3hcmwzo';
-const EMAILJS_TEMPLATE_ID = 'template_r0a2xym';
-const EMAILJS_PUBLIC_KEY  = 'jqVZqs-raFP7VHsqS';
+const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_WELCOME;
+const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 async function sendWelcomeEmail(user) {
     try {
