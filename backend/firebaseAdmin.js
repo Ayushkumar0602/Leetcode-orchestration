@@ -3,9 +3,16 @@ const admin = require('firebase-admin');
 
 // We expect FIREBASE_SERVICE_ACCOUNT_KEY in the environment
 // If it's a JSON string, we parse it. If it's a base64 encoded string, we decode and parse it.
+const fs = require('fs');
+const path = require('path');
+
 let serviceAccount;
 try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+  const localKeyPath = path.join(__dirname, 'aiinterview-20512-firebase-adminsdk-fbsvc-f44ebbdc72.json');
+  if (fs.existsSync(localKeyPath)) {
+      serviceAccount = require('./aiinterview-20512-firebase-adminsdk-fbsvc-f44ebbdc72.json');
+      console.log("Loaded Firebase key from local JSON file.");
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
       if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY.startsWith('{')) {
           serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
       } else {
@@ -13,7 +20,9 @@ try {
           const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8');
           serviceAccount = JSON.parse(decoded);
       }
+      console.log("Loaded Firebase key from environment variables.");
   }
+
 } catch (error) {
   console.warn("⚠️ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY. Admin SDK features will be disabled.", error.message);
 }

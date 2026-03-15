@@ -30,3 +30,6 @@ backend/.env
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase services accounts
+*firebase-adminsdk*.json

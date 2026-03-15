@@ -2,7 +2,7 @@
 const express = require('express');
 const { admin } = require('../firebaseAdmin');
 const { db } = require('../firebase');
-const { collection, getDocs } = require('firebase/firestore');
+const { collection, getDocs, doc, getDoc, setDoc, query, limit, getCountFromServer, addDoc } = require('firebase/firestore');
 
 const router = express.Router();
 
@@ -117,16 +117,16 @@ router.get('/db/:collectionName', verifyAdmin, async (req, res) => {
     const { collectionName } = req.params;
     const limitCount = parseInt(req.query.limit) || 100;
     
-    // We can use the firebase-admin firestore if initialized, else fallback to standard
-    const firestore = admin.apps.length ? admin.firestore() : null;
-    
-    if (!firestore) {
-         return res.status(501).json({ error: "Admin SDK not configured." });
-    }
-
     try {
-        const snapshot = await firestore.collection(collectionName).limit(limitCount).get();
-        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let docs = [];
+        if (admin.apps.length) {
+            const snapshot = await admin.firestore().collection(collectionName).limit(limitCount).get();
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        } else {
+            const q = query(collection(db, collectionName), limit(limitCount));
+            const snapshot = await getDocs(q);
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
         res.json({ collection: collectionName, count: docs.length, docs });
     } catch (error) {
         console.error(`Error reading collection ${collectionName}:`, error);
@@ -161,21 +161,26 @@ router.get('/health', verifyAdmin, (req, res) => {
 // 4. Overview Statistics
 // ---------------------------------------------------------
 router.get('/stats', verifyAdmin, async (req, res) => {
-    if (!admin.apps.length) return res.status(501).json({ error: "Not configured" });
     try {
-        const firestore = admin.firestore();
-        
         let totalUsers = 0;
-        try {
-            const listUsersResult = await admin.auth().listUsers(1000);
-            totalUsers = listUsersResult.users.length;
-        } catch (e) { console.error("Error getting auth users count", e); }
-        
         let eventsCount = 0;
-        try {
-            const logsReq = await firestore.collection('admin_logs').count().get();
-            eventsCount = logsReq.data().count;
-        } catch(e) { console.error("No logs", e); }
+        
+        if (admin.apps.length) {
+            try {
+                const listUsersResult = await admin.auth().listUsers(1000);
+                totalUsers = listUsersResult.users.length;
+            } catch (e) { console.error("Error getting auth users count", e); }
+            
+            try {
+                const logsReq = await admin.firestore().collection('admin_logs').count().get();
+                eventsCount = logsReq.data().count;
+            } catch(e) { console.error("No logs", e); }
+        } else {
+            try {
+                const snapshot = await getCountFromServer(collection(db, 'admin_logs'));
+                eventsCount = snapshot.data().count;
+            } catch(e) { console.error("No logs", e); }
+        }
 
         res.json({
             totalUsers,
@@ -192,11 +197,17 @@ router.get('/stats', verifyAdmin, async (req, res) => {
 // 5. System Configuration
 // ---------------------------------------------------------
 router.get('/config', verifyAdmin, async (req, res) => {
-    if (!admin.apps.length) return res.status(501).json({ error: "Not configured" });
     try {
-        const docSnap = await admin.firestore().collection('admin_settings').doc('global').get();
-        if (docSnap.exists) {
-            res.json(docSnap.data());
+        let data = null;
+        if (admin.apps.length) {
+            const docSnap = await admin.firestore().collection('admin_settings').doc('global').get();
+            if (docSnap.exists) data = docSnap.data();
+        } else {
+            const docSnap = await getDoc(doc(db, 'admin_settings', 'global'));
+            if (docSnap.exists()) data = docSnap.data();
+        }
+        if (data) {
+            res.json(data);
         } else {
             // Default config if none exists
             res.json({
@@ -214,19 +225,29 @@ router.get('/config', verifyAdmin, async (req, res) => {
 });
 
 router.post('/config', verifyAdmin, async (req, res) => {
-    if (!admin.apps.length) return res.status(501).json({ error: "Not configured" });
     try {
-        await admin.firestore().collection('admin_settings').doc('global').set(req.body, { merge: true });
-        
-        // Log the config change
-        if (req.adminUser) {
-            await admin.firestore().collection('admin_logs').add({
-                action: 'Updated System Config',
-                details: 'Admin updated platform configurations.',
-                level: 'info',
-                adminEmail: req.adminUser.email || req.adminUser.uid,
-                timestamp: new Date().toISOString()
-            });
+        if (admin.apps.length) {
+            await admin.firestore().collection('admin_settings').doc('global').set(req.body, { merge: true });
+            if (req.adminUser && req.adminUser.uid) {
+                await admin.firestore().collection('admin_logs').add({
+                    action: 'Updated System Config',
+                    details: 'Admin updated platform configurations.',
+                    level: 'info',
+                    adminEmail: req.adminUser.email || req.adminUser.uid,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } else {
+            await setDoc(doc(db, 'admin_settings', 'global'), req.body, { merge: true });
+            if (req.adminUser && req.adminUser.uid) {
+                await addDoc(collection(db, 'admin_logs'), {
+                    action: 'Updated System Config',
+                    details: 'Admin updated platform configurations.',
+                    level: 'info',
+                    adminEmail: req.adminUser.email || req.adminUser.uid,
+                    timestamp: new Date().toISOString()
+                });
+            }
         }
         res.json({ success: true });
     } catch (e) { res.status(500).json({ error: e.message }); }

@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { Database, Search, Loader2, ArrowRight, ShieldAlert, FileJson } from 'lucide-react';
 
-const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
 const COMMON_COLLECTIONS = ['users', 'userProfiles', 'interviews', 'problems', 'stats', 'submissions', 'admin_logs'];
 

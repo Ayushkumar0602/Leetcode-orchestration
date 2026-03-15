@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Users, Database, Server, Activity, ArrowUpRight, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
 export default function AdminOverview() {
     const { currentUser } = useAuth();

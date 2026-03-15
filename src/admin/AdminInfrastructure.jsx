@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Server, Activity, Cpu, HardDrive, Network, AlertCircle, RefreshCw, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
-const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
 export default function AdminInfrastructure() {
     const { currentUser } = useAuth();

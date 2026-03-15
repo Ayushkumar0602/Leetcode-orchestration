@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const app = express();
 const allowedOrigins = [
     'http://localhost:5173', // Vite default local
+    'http://localhost:5174', // Vite alternative local
     'http://localhost:3000', // Alternative local
     'https://aiinterview-20512.web.app', // Firebase hosted app
     'https://aiinterview-20512.firebaseapp.com',
