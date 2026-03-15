@@ -13,10 +13,11 @@ const THEMES = [
 ];
 
 const LAYOUTS = ['Compact', 'Comfortable', 'Wide'];
+const TEMPLATES = ['Signature', 'Cinematic', 'Interactive3D'];
 
 export default function CustomizationTab({ preferences, onSave }) {
     const [prefs, setPrefs] = useState({
-        theme: 'Purple', layout: 'Comfortable', darkMode: true,
+        theme: 'Purple', layout: 'Comfortable', darkMode: true, template: 'Signature',
         isPublic: true, showInterviews: true, showStats: true, showBadges: true, showActivity: true,
         ...preferences
     });
@@ -48,19 +49,60 @@ export default function CustomizationTab({ preferences, onSave }) {
                 </div>
             </div>
 
-            {/* Layout & Mode */}
-            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', gap: '1.5rem' }}>
+            {/* Layout, Template & Mode */}
+            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 900 ? '1fr' : '1.2fr 0.9fr', gap: '1.5rem' }}>
                 <div style={glass}>
                     <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Layout size={16} color="#3b82f6" /> Layout
+                        <Layout size={16} color="#3b82f6" /> Layout & Template
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {LAYOUTS.map(l => (
-                            <div key={l} onClick={() => upd('layout', l)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '10px', background: prefs.layout === l ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.03)', border: `1px solid ${prefs.layout === l ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.07)'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: prefs.layout === l ? '#60a5fa' : 'var(--txt2)' }}>{l}</span>
-                                <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${prefs.layout === l ? '#3b82f6' : 'rgba(255,255,255,0.2)'}`, background: prefs.layout === l ? '#3b82f6' : 'transparent' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {/* Layout selector */}
+                        <div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--txt3)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                                Layout width
                             </div>
-                        ))}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {LAYOUTS.map(l => (
+                                    <div key={l} onClick={() => upd('layout', l)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '10px', background: prefs.layout === l ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.03)', border: `1px solid ${prefs.layout === l ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.07)'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: prefs.layout === l ? '#60a5fa' : 'var(--txt2)' }}>{l}</span>
+                                        <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${prefs.layout === l ? '#3b82f6' : 'rgba(255,255,255,0.2)'}`, background: prefs.layout === l ? '#3b82f6' : 'transparent' }} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Template selector */}
+                        <div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--txt3)', margin: '10px 0 6px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                                Portfolio template
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                {TEMPLATES.map(t => (
+                                    <button
+                                        key={t}
+                                        type="button"
+                                        onClick={() => upd('template', t)}
+                                        style={{
+                                            padding: '6px 12px',
+                                            borderRadius: '999px',
+                                            border: `1px solid ${prefs.template === t ? '#a855f7' : 'rgba(255,255,255,0.16)'}`,
+                                            background: prefs.template === t ? 'rgba(168,85,247,0.18)' : 'rgba(15,23,42,0.6)',
+                                            color: '#e5e7eb',
+                                            fontSize: '0.78rem',
+                                            fontWeight: prefs.template === t ? 700 : 500,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {t === 'Signature'
+                                            ? 'Signature (default)'
+                                            : t === 'Cinematic'
+                                                ? 'Cinematic'
+                                                : 'Interactive 3D'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { auth, googleProvider, githubProvider, rtdb } from '../firebase';
 import {
     onAuthStateChanged,
@@ -18,6 +19,37 @@ export function useAuth() {
 }
 
 const API_BASE = 'https://leetcode-orchestration.onrender.com';
+
+// ── EmailJS Config ────────────────────────────────────────────
+const EMAILJS_SERVICE_ID  = 'service_3hcmwzo';
+const EMAILJS_TEMPLATE_ID = 'template_r0a2xym';
+const EMAILJS_PUBLIC_KEY  = 'jqVZqs-raFP7VHsqS';
+
+async function sendWelcomeEmail(user) {
+    try {
+        const name = user.displayName || user.email?.split('@')[0] || 'there';
+        await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            {
+                to_name:  name,
+                to_email: user.email,
+                from_name: 'Whizan Team',
+                reply_to:  'whizanai@gmail.com',
+            },
+            EMAILJS_PUBLIC_KEY
+        );
+        console.log('✅ Welcome email sent to', user.email);
+    } catch (err) {
+        console.error('⚠️  Welcome email failed (non-blocking):', err);
+    }
+}
+
+/** Returns true only for brand-new Firebase accounts */
+function isNewUser(userCredential) {
+    const meta = userCredential.user?.metadata;
+    return meta?.creationTime === meta?.lastSignInTime;
+}
 
 async function registerSession(uid) {
     try {
@@ -77,6 +109,9 @@ export function AuthProvider({ children }) {
         const result = await signInWithPopup(auth, googleProvider);
         if (result.user) {
             await registerSession(result.user.uid);
+            if (isNewUser(result)) {
+                await sendWelcomeEmail(result.user);
+            }
         }
         return result;
     };
@@ -86,6 +121,9 @@ export function AuthProvider({ children }) {
         const result = await signInWithPopup(auth, githubProvider);
         if (result.user) {
             await registerSession(result.user.uid);
+            if (isNewUser(result)) {
+                await sendWelcomeEmail(result.user);
+            }
         }
         return result;
     };
@@ -95,6 +133,8 @@ export function AuthProvider({ children }) {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         if (result.user) {
             await sendEmailVerification(result.user);
+            // Always a new user when created via email/password
+            await sendWelcomeEmail(result.user);
         }
         return result;
     };
