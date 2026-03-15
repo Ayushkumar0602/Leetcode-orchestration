@@ -196,6 +196,32 @@ export default function ProjectDetails() {
     const T = THEMES[pref.theme] ?? THEMES.Purple;
     const idx = parseInt(projId);
 
+    // Dynamic SEO
+    const authorName = profile?.displayName || profile?.name || 'Developer';
+    const projectName = project?.detailedData?.name || project?.name || 'Project';
+    const projectDesc = project?.detailedData?.overview || project?.desc || project?.tagline || `View the technical details, source code, and live demo by ${authorName} on Whizan AI.`;
+    
+    useSEO({
+        title: project ? `${projectName} – ${authorName}'s Portfolio` : 'Loading Project...',
+        description: projectDesc,
+        canonical: `/public/${uid}/project/${projId}`,
+        image: profile?.photoURL || undefined,
+        jsonLd: project ? {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: projectName,
+            applicationCategory: 'DeveloperApplication',
+            operatingSystem: 'Any',
+            description: projectDesc,
+            author: {
+                '@type': 'Person',
+                name: authorName,
+                url: `https://whizan.xyz/public/${uid}`
+            },
+            url: `https://whizan.xyz/public/${uid}/project/${projId}`
+        } : undefined
+    });
+
     const CSS = `
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -257,10 +283,17 @@ export default function ProjectDetails() {
             background:linear-gradient(90deg, ${T.muted}, ${T.accent});
         }
 
+        /* Navigation */
+        .top-nav-container {
+            position: fixed; top: 20px; left: 24px; right: 24px; z-index: 600;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            flex-wrap: wrap; gap: 12px; pointer-events: none;
+        }
+        .top-nav-container > * { pointer-events: auto; }
+
         /* Nav pill */
         .nav-pill {
-            position:fixed; top:20px; left:50%; transform:translateX(-50%);
-            z-index:600; background:rgba(12,12,16,0.85);
+            background:rgba(12,12,16,0.85);
             border:1px solid var(--border2);
             border-radius:99px; padding:8px 20px;
             display:flex; align-items:center; gap:16px;
@@ -273,7 +306,6 @@ export default function ProjectDetails() {
         }
 
         .profile-float {
-            position:fixed; top:20px; right:24px; z-index:600;
             background:rgba(12,12,16,0.85); border:1px solid var(--border);
             border-radius:12px; padding:6px 12px 6px 14px;
             display:flex; align-items:center; gap:10px;
@@ -415,10 +447,13 @@ export default function ProjectDetails() {
         /* Responsive */
         @media(max-width:900px) {
             .two-col { grid-template-columns:1fr !important; gap:3rem !important; }
+            .top-nav-container { top: 16px; left: 16px; right: 16px; }
+        }
+        @media(max-width:768px) {
+            .nav-hide-mobile { display: none !important; }
         }
         @media(max-width:640px) {
             .feat-grid { grid-template-columns:1fr !important; }
-            .nav-pill { display:none; }
             .stats-grid { grid-template-columns:repeat(2,1fr) !important; }
         }
         @media(max-width:420px) {
@@ -496,29 +531,6 @@ export default function ProjectDetails() {
         { value: d.installation.length, label: 'Setup Steps' },
     ];
 
-    // Dynamic SEO
-    const authorName = profile?.displayName || profile?.name || 'Developer';
-    useSEO({
-        title: `${d.name} – ${authorName}'s Portfolio`,
-        description: d.overview || d.tagline || `View the technical details, source code, and live demo of ${d.name} by ${authorName} on Whizan AI.`,
-        canonical: `/public/${uid}/project/${projId}`,
-        image: profile?.photoURL || undefined,
-        jsonLd: {
-            '@context': 'https://schema.org',
-            '@type': 'SoftwareApplication',
-            name: d.name,
-            applicationCategory: 'DeveloperApplication',
-            operatingSystem: 'Any',
-            description: d.overview || d.tagline,
-            author: {
-                '@type': 'Person',
-                name: authorName,
-                url: `https://whizan.xyz/public/${uid}`
-            },
-            url: `https://whizan.xyz/public/${uid}/project/${projId}`
-        }
-    });
-
     return (
         <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--bg)', overflowX: 'hidden' }}>
             <style>{CSS}</style>
@@ -528,42 +540,45 @@ export default function ProjectDetails() {
                 <motion.div className="scroll-bar-fill" style={{ width: lineW }} />
             </div>
 
-            {/* ── Floating nav pill ───────────────────────── */}
-            <motion.div
-                className={`nav-pill${scrolled ? ' scrolled' : ''}`}
-                initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-                <button onClick={() => navigate(-1)} style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'var(--txt3)', fontSize: '0.72rem',
-                    fontFamily: 'JetBrains Mono,monospace', letterSpacing: '0.1em',
-                    display: 'flex', alignItems: 'center', gap: 6, transition: 'color 0.2s',
-                }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--txt)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--txt3)'}
+            {/* ── Top Navigation Container ────────────────── */}
+            <div className="top-nav-container">
+                {/* ── Floating nav pill ───────────────────────── */}
+                <motion.div
+                    className={`nav-pill${scrolled ? ' scrolled' : ''}`}
+                    initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 >
-                    ← Back
-                </button>
-                <div style={{ width: 1, height: 14, background: 'var(--border)' }} />
-                <span className="s-label" style={{ fontSize: '0.6rem', whiteSpace: 'nowrap' }}>
-                    CASE {String(idx + 1).padStart(2, '0')}
-                </span>
-                <div style={{ width: 1, height: 14, background: 'var(--border)' }} />
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--txt2)', maxWidth: '18ch', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {d.name}
-                </span>
-            </motion.div>
+                    <button onClick={() => navigate(-1)} style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: 'var(--txt3)', fontSize: '0.72rem',
+                        fontFamily: 'JetBrains Mono,monospace', letterSpacing: '0.1em',
+                        display: 'flex', alignItems: 'center', gap: 6, transition: 'color 0.2s',
+                    }}
+                        onMouseEnter={e => e.currentTarget.style.color = 'var(--txt)'}
+                        onMouseLeave={e => e.currentTarget.style.color = 'var(--txt3)'}
+                    >
+                        ← Back
+                    </button>
+                    <div className="nav-hide-mobile" style={{ width: 1, height: 14, background: 'var(--border)' }} />
+                    <span className="s-label nav-hide-mobile" style={{ fontSize: '0.6rem', whiteSpace: 'nowrap' }}>
+                        CASE {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <div className="nav-hide-mobile" style={{ width: 1, height: 14, background: 'var(--border)' }} />
+                    <span className="nav-hide-mobile" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--txt2)', maxWidth: '18ch', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {d.name}
+                    </span>
+                </motion.div>
 
-            {/* ── Profile pill ────────────────────────────── */}
-            <motion.div className="profile-float"
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.4 }}
-            >
-                <span className="s-label" style={{ fontSize: '0.58rem' }}>DEV</span>
-                <div style={{ width: 1, height: 14, background: 'var(--border)' }} />
-                <NavProfile />
-            </motion.div>
+                {/* ── Profile pill ────────────────────────────── */}
+                <motion.div className="profile-float"
+                    initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.4 }}
+                >
+                    <span className="s-label" style={{ fontSize: '0.58rem' }}>DEV</span>
+                    <div style={{ width: 1, height: 14, background: 'var(--border)' }} />
+                    <NavProfile />
+                </motion.div>
+            </div>
 
             {/* ══════════════════════════════════════════════
                 HERO
