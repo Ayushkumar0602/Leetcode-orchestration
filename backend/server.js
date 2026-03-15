@@ -10,6 +10,7 @@ const { db, rtdb } = require('./firebase');
 const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where } = require('firebase/firestore');
 const { ref: rtdbRef, push, set, remove, get } = require('firebase/database');
 const UAParser = require('ua-parser-js');
+const cron = require('node-cron');
 
 const app = express();
 const allowedOrigins = [
@@ -153,7 +154,7 @@ app.post('/api/verify-payment', async (req, res) => {
                 planExpiresAt: expiryDate
             }, { merge: true });
 
-            res.status(200).json({ success: true, message: "Payment verified successfully" });
+            res.status(200).json({ success: true, message: "Payment verified successfully", expiryDate });
         } else {
             res.status(400).json({ success: false, message: "Invalid signature" });
         }
@@ -1274,6 +1275,119 @@ app.get('/api/analytics/summary', async (req, res) => {
 });
 // ---------------------------------------------------------------------------
 
+
+// ── Subscription Expiry Email Cron ───────────────────────────────────────────
+
+const EMAILJS_REST_URL     = 'https://api.emailjs.com/api/v1.0/email/send';
+
+// Primary EmailJS Account (Expiry Reminder)
+const PRIMARY_SERVICE_ID   = 'service_3hcmwzo';
+const PRIMARY_PUBLIC_KEY   = 'jqVZqs-raFP7VHsqS';
+const TEMPLATE_REMINDER    = 'template_expiry_reminder';
+
+// Secondary EmailJS Account (Subscription Ended)
+const SECONDARY_SERVICE_ID = 'service_ifrkd2o';
+const SECONDARY_PUBLIC_KEY = 'yAHoktwg19W6fYRz9';
+const TEMPLATE_EXPIRED     = 'template_gl4yxom';
+
+function formatDateNice(iso) {
+    return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+async function sendEmailViaREST(serviceId, templateId, publicKey, params) {
+    try {
+        const res = await fetch(EMAILJS_REST_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                service_id:  serviceId,
+                template_id: templateId,
+                user_id:     publicKey,
+                template_params: params,
+            }),
+        });
+        const text = await res.text();
+        console.log(`[EmailJS] ${templateId} → ${params.to_email} : ${text}`);
+    } catch (err) {
+        console.error(`[EmailJS] Failed to send ${templateId}:`, err.message);
+    }
+}
+
+async function runExpiryCheck() {
+    console.log('[Cron] Running subscription expiry check...');
+    try {
+        const snapshot = await getDocs(collection(db, 'userProfiles'));
+        const now = new Date();
+        const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+        let reminders = 0, expired = 0;
+
+        for (const docSnap of snapshot.docs) {
+            const data = docSnap.data();
+            if (data.plan !== 'Blaze' || !data.planExpiresAt) continue;
+
+            const expiresAt = new Date(data.planExpiresAt);
+            const name       = data.displayName || data.email?.split('@')[0] || 'there';
+            const email      = data.email;
+
+            if (!email) continue;
+
+            // ── Already expired ──────────────────────────────────────────────
+            if (now > expiresAt) {
+                // Only send once: track with `expiredEmailSent` flag
+                if (!data.expiredEmailSent) {
+                    await sendEmailViaREST(SECONDARY_SERVICE_ID, TEMPLATE_EXPIRED, SECONDARY_PUBLIC_KEY, {
+                        to_name:    name,
+                        to_email:   email,
+                        expired_on: formatDateNice(data.planExpiresAt),
+                        from_name:  'Whizan Team',
+                        reply_to:   'whizanai@gmail.com',
+                    });
+                    await setDoc(doc(db, 'userProfiles', docSnap.id), {
+                        plan: 'Spark',
+                        expiredEmailSent: true,
+                    }, { merge: true });
+                    expired++;
+                }
+            }
+            // ── Expires within 3 days ────────────────────────────────────────
+            else if (expiresAt <= threeDaysFromNow) {
+                // Only send once: track with `reminderEmailSent` flag
+                if (!data.reminderEmailSent) {
+                    await sendEmailViaREST(PRIMARY_SERVICE_ID, TEMPLATE_REMINDER, PRIMARY_PUBLIC_KEY, {
+                        to_name:     name,
+                        to_email:    email,
+                        expiry_date: formatDateNice(data.planExpiresAt),
+                        from_name:   'Whizan Team',
+                        reply_to:    'whizanai@gmail.com',
+                    });
+                    await setDoc(doc(db, 'userProfiles', docSnap.id), {
+                        reminderEmailSent: true,
+                    }, { merge: true });
+                    reminders++;
+                }
+            }
+        }
+
+        console.log(`[Cron] Done — ${reminders} reminders sent, ${expired} expired & downgraded.`);
+        return { reminders, expired };
+    } catch (err) {
+        console.error('[Cron] Expiry check failed:', err);
+        return { error: err.message };
+    }
+}
+
+// Run daily at 9:00 AM IST (3:30 AM UTC)
+cron.schedule('30 3 * * *', runExpiryCheck, { timezone: 'UTC' });
+console.log('[Cron] Subscription expiry check scheduled — daily at 9:00 AM IST');
+
+// Manual trigger endpoint for testing
+app.get('/api/cron/check-expiry', async (req, res) => {
+    const result = await runExpiryCheck();
+    res.json(result);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Start loading the dataset
 loadDataset();

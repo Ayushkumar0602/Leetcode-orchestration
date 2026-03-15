@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Zap, CheckCircle, Loader2 } from 'lucide-react';
+import { sendPaymentSuccessEmail, sendPaymentFailedEmail } from '../utils/paymentEmails';
 
 export default function UpgradeModal({ isOpen, onClose, user, onUpgradeSuccess }) {
     const [loading, setLoading] = useState(false);
@@ -41,6 +42,13 @@ export default function UpgradeModal({ isOpen, onClose, user, onUpgradeSuccess }
                     });
                     const verifyData = await verifyRes.json();
                     if (verifyData.success) {
+                        // ✅ Send beautiful success email with bill
+                        await sendPaymentSuccessEmail(
+                            user,
+                            response.razorpay_payment_id,
+                            response.razorpay_order_id,
+                            verifyData.expiryDate
+                        );
                         onUpgradeSuccess();
                     } else {
                         alert("Payment verification failed.");
@@ -57,6 +65,12 @@ export default function UpgradeModal({ isOpen, onClose, user, onUpgradeSuccess }
 
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', function (response) {
+                // ❌ Send payment failure email with error details
+                sendPaymentFailedEmail(
+                    user,
+                    response.error?.code,
+                    response.error?.description
+                );
                 alert("Payment failed! Please try again.");
                 console.error(response.error);
             });
