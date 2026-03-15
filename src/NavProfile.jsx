@@ -63,7 +63,7 @@ export default function NavProfile() {
 
             {/* Public Portfolio Link */}
             <button
-                onClick={() => navigate('/portfolio')}
+                onClick={() => navigate(`/public/${currentUser.uid}`)}
                 style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     background: 'rgba(59,130,246,0.1)',

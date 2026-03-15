@@ -357,7 +357,7 @@ export default function DashboardHome() {
                     <button className="mobile-nav-link" onClick={() => { navigate('/systemdesign'); setIsMenuOpen(false); }}>System Design</button>
                     {currentUser && (
                         <>
-                            <button className="mobile-nav-link" onClick={() => { navigate('/portfolio'); setIsMenuOpen(false); }}>Public Portfolio</button>
+                            <button className="mobile-nav-link" onClick={() => { navigate(`/public/${currentUser.uid}`); setIsMenuOpen(false); }}>Public Portfolio</button>
                             <button className="mobile-nav-link" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}>My Profile</button>
                         </>
                     )}
