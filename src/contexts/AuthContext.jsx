@@ -9,6 +9,7 @@ import {
     signInWithEmailAndPassword,
     sendEmailVerification,
     updateProfile,
+    getAdditionalUserInfo,
 } from 'firebase/auth';
 import { ref, onValue } from 'firebase/database';
 
@@ -45,11 +46,7 @@ async function sendWelcomeEmail(user) {
     }
 }
 
-/** Returns true only for brand-new Firebase accounts */
-function isNewUser(userCredential) {
-    const meta = userCredential.user?.metadata;
-    return meta?.creationTime === meta?.lastSignInTime;
-}
+
 
 async function registerSession(uid) {
     try {
@@ -109,7 +106,7 @@ export function AuthProvider({ children }) {
         const result = await signInWithPopup(auth, googleProvider);
         if (result.user) {
             await registerSession(result.user.uid);
-            if (isNewUser(result)) {
+            if (getAdditionalUserInfo(result)?.isNewUser) {
                 await sendWelcomeEmail(result.user);
             }
         }
@@ -121,7 +118,7 @@ export function AuthProvider({ children }) {
         const result = await signInWithPopup(auth, githubProvider);
         if (result.user) {
             await registerSession(result.user.uid);
-            if (isNewUser(result)) {
+            if (getAdditionalUserInfo(result)?.isNewUser) {
                 await sendWelcomeEmail(result.user);
             }
         }
