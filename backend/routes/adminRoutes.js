@@ -33,16 +33,22 @@ const verifyAdmin = async (req, res, next) => {
         // Option 1: Hardcoded list (e.g. env var ADMIN_UIDS)
         // Option 2: Check Firestore custom claims or a specific 'admins' collection.
         
-        // For now, looking at the user's Firestore profile `isAdmin` flag:
-        // Because the client SDK is already imported in server.js, we can also use admin SDK db
-        const userDoc = await admin.firestore().collection('users').doc(uid).get();
+        // For now, looking at the user's Firestore profile `isAdmin` flag in userProfiles:
+        const userDoc = await admin.firestore().collection('userProfiles').doc(uid).get();
         
         if (!userDoc.exists) {
-            return res.status(403).json({ error: "Forbidden: User not found." });
+            // Fallback: If user not in userProfiles, check if UID is hardcoded admin
+            if (['sD1yZ4068yO9a88xIeM3n7rU6hU2'].includes(uid)) {
+                req.adminUser = decodedToken;
+                return next();
+            }
+            return res.status(403).json({ error: "Forbidden: User profile not found." });
         }
         
         const userData = userDoc.data();
-        if (userData.role !== 'admin' && userData.isAdmin !== true && !['sD1yZ4068yO9a88xIeM3n7rU6hU2'].includes(uid)) {
+        const isAdmin = userData.role === 'admin' || userData.isAdmin === true || ['sD1yZ4068yO9a88xIeM3n7rU6hU2'].includes(uid);
+        
+        if (!isAdmin) {
             return res.status(403).json({ error: "Forbidden: Admin privileges required." });
         }
 
