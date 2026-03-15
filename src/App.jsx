@@ -23,6 +23,10 @@ import SystemDesignLLD from './SystemDesignLLD';
 import AISystemDesignInterview from './AISystemDesignInterview';
 import SystemDesignInterview from './SystemDesignInterview';
 
+// Admin Features
+import AdminPortal from './admin/AdminPortal';
+import AdminRoute from './components/AdminRoute';
+
 // Blog Features
 import BlogList from './BlogList';
 import BlogPost from './BlogPost';
@@ -71,6 +75,13 @@ function App() {
             <Route path="/blog/:slug" element={<BlogPost />} />
             
             <Route path="/" element={<LandingPage />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/*" element={
+              <AdminRoute>
+                <AdminPortal />
+              </AdminRoute>
+            } />
           </Routes>
           <SocialShare />
         </div>
