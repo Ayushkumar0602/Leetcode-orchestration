@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, Users, Database, Server, Image as ImageIcon, 
-    Settings, Activity, Shield 
+    Settings, Activity, Shield, Bell 
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -39,7 +39,7 @@ export default function AdminPortal() {
         { path: '/admin/database', icon: Database, label: 'Database Admin' },
         { path: '/admin/infrastructure', icon: Server, label: 'Infrastructure' },
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
-        { path: '/admin/notifications', icon: Shield, label: 'Notifications' },
+        { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
         { path: '/admin/config', icon: Settings, label: 'Configuration' },
         { path: '/admin/logs', icon: Activity, label: 'Activity Logs' },
     ];

@@ -273,6 +273,13 @@ function normalizeCampaign(body, adminUid) {
         type: body.type || 'feed', // feed | popup | announcement
         display: body.display || body.type || 'feed',
         link: body.link || null,
+        imageUrl: body.imageUrl || null,
+        videoUrl: body.videoUrl || null,
+        htmlContent: body.htmlContent || null,
+        ctaText: body.ctaText || null,
+        ctaLink: body.ctaLink || null,
+        ctaSecondaryText: body.ctaSecondaryText || null,
+        ctaSecondaryLink: body.ctaSecondaryLink || null,
         target: body.target || { kind: 'all' }, // { kind:'all' } | {kind:'uids', uids:[...]} | {kind:'segment', segment:'...'}
         priority: Number.isFinite(body.priority) ? body.priority : 0,
         startAt: body.startAt || now,
@@ -320,6 +327,7 @@ async function sendFcmForCampaign(campaignDoc, adminUid) {
             notification: {
                 title: c.title || 'Notification',
                 body: c.message || '',
+                ...(c.imageUrl ? { imageUrl: c.imageUrl } : {})
             },
             data: {
                 kind: 'campaign',
@@ -327,6 +335,8 @@ async function sendFcmForCampaign(campaignDoc, adminUid) {
                 title: c.title || '',
                 body: c.message || '',
                 link: c.link || '/notifications',
+                ...(c.imageUrl ? { imageUrl: c.imageUrl } : {}),
+                ...(c.videoUrl ? { videoUrl: c.videoUrl } : {})
             },
         });
         success += resp.successCount || 0;

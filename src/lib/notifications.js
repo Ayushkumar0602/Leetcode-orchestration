@@ -71,3 +71,45 @@ export async function setCampaignReceipt(uid, campaignId, patch) {
   );
 }
 
+/** Listen to ALL campaigns (admin use — no status filter). */
+export function listenAllCampaigns(cb) {
+  const q = query(
+    campaignsCol(),
+    orderBy("createdAt", "desc"),
+    limit(200)
+  );
+  return onSnapshot(q, (snap) => {
+    const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    cb(items);
+  });
+}
+
+/** Batch mark all personal notifications as read. */
+export async function markAllPersonalRead(uid) {
+  const q = query(notificationsCol(uid), where("readAt", "==", null), limit(100));
+  const { getDocs } = await import("firebase/firestore");
+  const snap = await getDocs(q);
+  const now = new Date().toISOString();
+  await Promise.all(
+    snap.docs.map((d) =>
+      setDoc(d.ref, { readAt: now }, { merge: true })
+    )
+  );
+}
+
+/** Relative time string, e.g. "2 hours ago". */
+export function getRelativeTime(iso) {
+  if (!iso) return "";
+  const diff = Date.now() - new Date(iso).getTime();
+  const secs = Math.floor(diff / 1000);
+  if (secs < 60) return "just now";
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
