@@ -49,7 +49,6 @@ const EMPTY_DRAFT = {
   ctaLink: "",
   ctaSecondaryText: "",
   ctaSecondaryLink: "",
-  ctaSecondaryLink: "",
   imageUrl: "",
   videoUrl: "",
   htmlContent: "",
