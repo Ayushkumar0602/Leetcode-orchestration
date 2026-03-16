@@ -37,12 +37,18 @@ import PortfolioLanding from './PortfolioLanding';
 // Components
 import SocialShare from './components/SocialShare';
 
+// Notification Features
+import NotificationsPage from './notifications/NotificationsPage';
+import PopupNotification from './notifications/PopupNotification';
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         {/* Global route-change tracker — renders nothing, fires analytics on every navigation */}
         <RouteTracker />
+        {/* Global popup notification layer — shows real-time popup notifications */}
+        <PopupNotification />
         <div className="app-root">
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -73,6 +79,9 @@ function App() {
             {/* Blog Routes */}
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+
+            {/* Notifications */}
+            <Route path="/notifications" element={<NotificationsPage />} />
             
             <Route path="/" element={<LandingPage />} />
             

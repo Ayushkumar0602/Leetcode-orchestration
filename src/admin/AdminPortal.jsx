@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, Users, Database, Server, Image as ImageIcon, 
-    Settings, Activity, Shield 
+    Settings, Activity, Shield, Megaphone, BarChart2 
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -14,6 +14,8 @@ import AdminStorage from './AdminStorage';
 import AdminInfrastructure from './AdminInfrastructure';
 import AdminConfig from './AdminConfig';
 import AdminLogs from './AdminLogs';
+import AdminCampaigns from './AdminCampaigns';
+import AdminNotificationAnalytics from './AdminNotificationAnalytics';
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -35,6 +37,8 @@ export default function AdminPortal() {
     const navItems = [
         { path: '/admin', icon: LayoutDashboard, label: 'Overview' },
         { path: '/admin/users', icon: Users, label: 'User Management' },
+        { path: '/admin/campaigns', icon: Megaphone, label: 'Campaigns' },
+        { path: '/admin/notification-analytics', icon: BarChart2, label: 'Notif Analytics' },
         { path: '/admin/database', icon: Database, label: 'Database Admin' },
         { path: '/admin/infrastructure', icon: Server, label: 'Infrastructure' },
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
@@ -117,6 +121,8 @@ export default function AdminPortal() {
                 <Routes>
                     <Route path="/" element={<AdminOverview />} />
                     <Route path="/users" element={<AdminUsers />} />
+                    <Route path="/campaigns" element={<AdminCampaigns />} />
+                    <Route path="/notification-analytics" element={<AdminNotificationAnalytics />} />
                     <Route path="/database" element={<AdminDatabase />} />
                     <Route path="/infrastructure" element={<AdminInfrastructure />} />
                     <Route path="/storage" element={<AdminStorage />} />
