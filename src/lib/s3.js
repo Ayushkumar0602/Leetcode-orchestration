@@ -18,47 +18,31 @@ const s3Client = new S3Client({
   },
 });
 
-export const uploadToSupabaseStorage = async ({ file, keyPrefix }) => {
-  if (!file) throw new Error("file required");
-  const safePrefix = String(keyPrefix || "").replace(/^\/+/, "").replace(/\/+$/, "");
-  const fileExt = (file.name || "bin").split(".").pop();
-  const base = file.name ? file.name.replace(/\.[^/.]+$/, "") : "file";
-  const safeBase = base.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 60);
-  const fileName = `${safePrefix}/${safeBase}_${Date.now()}.${fileExt}`;
-
-  const arrayBuffer = await file.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
-
-  const command = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: fileName,
-    Body: uint8Array,
-    ContentType: file.type || "application/octet-stream",
-  });
-
-  await s3Client.send(command);
-  return `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}/${fileName}`;
-};
-
 export const uploadProfilePicture = async (file, userId) => {
   try {
-    return await uploadToSupabaseStorage({ file, keyPrefix: `profiles/${userId}` });
+    const fileExt = file.name.split('.').pop();
+    const fileName = `profiles/${userId}_${Date.now()}.${fileExt}`;
+    
+    // AWS SDK v3 in the browser requires a browser-compatible buffer stream, ArrayBuffer, or TypedArray
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: fileName,
+      Body: uint8Array,
+      ContentType: file.type,
+      // ACL: 'public-read' // Might not be needed if bucket is already public
+    });
+
+    await s3Client.send(command);
+
+    // After success, construct the Supabase storage public URL
+    // Format: https://[project_ref].supabase.co/storage/v1/object/public/[bucket]/[key]
+    const publicUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}/${fileName}`;
+    return publicUrl;
   } catch (error) {
     console.error("Error uploading to S3:", error);
-    throw error;
-  }
-};
-
-export const deleteSupabaseStorageObjectByPublicUrl = async (publicUrl) => {
-  try {
-    const baseUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}/`;
-    const urlWithoutQuery = String(publicUrl || "").split("?")[0];
-    if (!urlWithoutQuery.startsWith(baseUrl)) return;
-    const key = decodeURIComponent(urlWithoutQuery.substring(baseUrl.length));
-    const command = new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: key });
-    await s3Client.send(command);
-  } catch (error) {
-    console.error("Error deleting from S3:", error);
     throw error;
   }
 };
@@ -69,7 +53,23 @@ export const deleteProfilePicture = async (publicUrl) => {
     // URL format: https://[project_ref].supabase.co/storage/v1/object/public/[bucket]/[key]
     const baseUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}/`;
     
-    await deleteSupabaseStorageObjectByPublicUrl(publicUrl);
+    // Remove query parameters if any (e.g. ?t=123)
+    const urlWithoutQuery = publicUrl.split('?')[0];
+
+    if (!urlWithoutQuery.startsWith(baseUrl)) {
+      console.warn("URL does not match expected bucket format, skipping delete.");
+      return;
+    }
+    
+    // Decode URI component because S3 Keys are literal characters, but URLs are encoded
+    const key = decodeURIComponent(urlWithoutQuery.substring(baseUrl.length));
+    
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+
+    await s3Client.send(command);
   } catch (error) {
     console.error("Error deleting from S3:", error);
     throw error;

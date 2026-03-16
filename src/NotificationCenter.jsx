@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Filter, MessageSquare, Sparkles, X } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 import { useAuth } from "./contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { fetchProfile, queryKeys } from "./lib/api";
-import { campaignAppliesToUser } from "./lib/audience";
 import {
   listenActiveCampaigns,
   listenCampaignReceipts,
@@ -26,44 +22,10 @@ function kindLabel(n) {
   return n.kind || "Personal";
 }
 
-function renderCtas(n, onClickCta) {
-  const ctas = n.rich?.ctas || [];
-  if (!Array.isArray(ctas) || ctas.length === 0) return null;
-  return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-      {ctas.slice(0, 3).map((b, i) => (
-        <button
-          key={`${b.label || "cta"}_${i}`}
-          onClick={() => onClickCta(b)}
-          style={{
-            background: b.variant === "secondary" ? "rgba(255,255,255,0.04)" : "rgba(59,130,246,0.18)",
-            border: b.variant === "secondary" ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(59,130,246,0.32)",
-            color: b.variant === "secondary" ? "#fff" : "#60a5fa",
-            borderRadius: 12,
-            padding: "8px 10px",
-            fontWeight: 900,
-            cursor: "pointer",
-            fontSize: 12,
-          }}
-        >
-          {b.label || "Open"}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export default function NotificationCenter() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const uid = currentUser?.uid;
-
-  const { data: profile } = useQuery({
-    queryKey: queryKeys.profile(uid),
-    queryFn: () => fetchProfile(uid),
-    enabled: !!uid,
-    staleTime: 1000 * 60 * 5,
-  });
 
   const [personal, setPersonal] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
@@ -84,7 +46,6 @@ export default function NotificationCenter() {
 
   const merged = useMemo(() => {
     const activeCampaigns = campaigns
-      .filter((c) => campaignAppliesToUser(c, { uid, profile }))
       .map((c) => {
         const r = receipts.get(c.id) || {};
         return {
@@ -114,11 +75,6 @@ export default function NotificationCenter() {
     if (filter === "personal") return merged.filter((n) => n._source !== "campaign");
     return merged;
   }, [merged, filter]);
-
-  const pinned = useMemo(() => {
-    // Announcements: still appear in the list, but show a "Pinned" section for clarity.
-    return merged.filter((n) => n._source === "campaign" && (n.display === "announcement" || n.type === "announcement")).slice(0, 3);
-  }, [merged]);
 
   useEffect(() => {
     if (!uid) return;
@@ -215,32 +171,12 @@ export default function NotificationCenter() {
         </div>
 
         <div style={{ ...glass, overflow: "hidden" }}>
-          {pinned.length > 0 && (
-            <div style={{ padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "linear-gradient(135deg, rgba(168,85,247,0.10), rgba(59,130,246,0.08))" }}>
-              <div style={{ fontWeight: 900, marginBottom: 8 }}>Pinned announcements</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {pinned.map((a) => (
-                  <div key={`pin_${a.id}`} style={{ background: "rgba(0,0,0,0.20)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14, padding: 12 }}>
-                    <div style={{ fontWeight: 900 }}>{a.title || "Announcement"}</div>
-                    <div style={{ color: "var(--txt2)", fontSize: 13, marginTop: 6, lineHeight: 1.5 }}>
-                      {a.rich?.format === "markdown" ? <ReactMarkdown>{a.message || ""}</ReactMarkdown> : <span>{a.message || ""}</span>}
-                    </div>
-                    {renderCtas(a, async (b) => {
-                      await setCampaignReceipt(uid, a.id, { clickedAt: new Date().toISOString(), readAt: new Date().toISOString() });
-                      navigate(b.link || a.link || "/notifications");
-                    })}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           {filtered.length === 0 ? (
             <div style={{ padding: "2rem", color: "var(--txt3)" }}>No notifications yet.</div>
           ) : (
             filtered.map((n) => {
               const isUnread = !n.readAt;
               const Icon = n._source === "campaign" ? Sparkles : MessageSquare;
-              const media = n.rich?.media || [];
               return (
                 <div
                   key={`${n._source}_${n.id}`}
@@ -280,29 +216,8 @@ export default function NotificationCenter() {
                       )}
                     </div>
                     <div style={{ color: "var(--txt2)", fontSize: 13, marginTop: 6, lineHeight: 1.5 }}>
-                      {n.rich?.format === "markdown" ? <ReactMarkdown>{n.message || n.body || ""}</ReactMarkdown> : <span>{n.message || n.body || ""}</span>}
+                      {n.message || n.body || ""}
                     </div>
-                    {Array.isArray(media) && media.length > 0 && (
-                      <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr", gap: 10 }}>
-                        {media.slice(0, 1).map((m) => (
-                          <div key={m.url} style={{ borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
-                            {m.type === "video" ? (
-                              <video src={m.url} controls style={{ width: "100%", display: "block", maxHeight: 260, background: "#000" }} />
-                            ) : (
-                              <img src={m.url} alt={m.alt || ""} style={{ width: "100%", display: "block", maxHeight: 260, objectFit: "cover" }} />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {renderCtas(n, async (b) => {
-                      if (n._source === "campaign") {
-                        await setCampaignReceipt(uid, n.id, { clickedAt: new Date().toISOString(), readAt: new Date().toISOString() });
-                      } else {
-                        await markPersonalNotificationRead(uid, n.id);
-                      }
-                      navigate(b.link || n.link || "/notifications");
-                    })}
                     {n.link && (
                       <button
                         onClick={async () => {

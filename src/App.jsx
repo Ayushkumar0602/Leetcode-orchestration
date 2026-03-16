@@ -38,7 +38,6 @@ import PortfolioLanding from './PortfolioLanding';
 // Components
 import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
-import NotificationBannerManager from './components/NotificationBannerManager';
 
 function App() {
   return (
@@ -46,7 +45,6 @@ function App() {
       <AuthProvider>
         {/* Global route-change tracker — renders nothing, fires analytics on every navigation */}
         <RouteTracker />
-        <NotificationBannerManager />
         <NotificationPopupManager />
         <div className="app-root">
           <Routes>
