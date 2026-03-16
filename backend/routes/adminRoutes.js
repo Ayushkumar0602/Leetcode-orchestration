@@ -4,6 +4,7 @@ const { admin } = require('../firebaseAdmin');
 const { db } = require('../firebase');
 const { collection, getDocs, doc, getDoc, setDoc, query, limit, getCountFromServer, addDoc } = require('firebase/firestore');
 const { FieldPath } = require('firebase-admin/firestore');
+const { presignPutObject, deleteByPublicUrl } = require('../supabaseS3');
 
 const router = express.Router();
 
@@ -270,7 +271,7 @@ function normalizeCampaign(body, adminUid) {
         name: String(body.name || body.title || 'Campaign').slice(0, 140),
         title: String(body.title || '').slice(0, 140),
         message: String(body.message || body.body || '').slice(0, 2000),
-        type: body.type || 'feed', // feed | popup | announcement
+        type: body.type || 'feed', // feed | popup | banner | announcement
         display: body.display || body.type || 'feed',
         link: body.link || null,
         target: body.target || { kind: 'all' }, // { kind:'all' } | {kind:'uids', uids:[...]} | {kind:'segment', segment:'...'}
@@ -278,6 +279,7 @@ function normalizeCampaign(body, adminUid) {
         startAt: body.startAt || now,
         endAt: body.endAt || body.expiresAt || null,
         status: body.status || 'draft', // draft | scheduled | active | ended
+        rich: body.rich || { format: 'markdown', media: [], ctas: [] },
         createdBy: adminUid,
         updatedAt: now,
     };
@@ -419,6 +421,28 @@ router.post('/notifications/campaigns/:id/end', verifyAdmin, async (req, res) =>
     }
 });
 
+router.post('/notifications/campaigns/:id/deactivate', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const id = req.params.id;
+        await admin.firestore().collection('campaigns').doc(id).set({ status: 'draft', updatedAt: new Date().toISOString() }, { merge: true });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to deactivate campaign' });
+    }
+});
+
+router.delete('/notifications/campaigns/:id', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const id = req.params.id;
+        await admin.firestore().collection('campaigns').doc(id).delete();
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to delete campaign' });
+    }
+});
+
 router.get('/notifications/campaigns/:id/analytics', verifyAdmin, async (req, res) => {
     try {
         if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
@@ -441,6 +465,34 @@ router.get('/notifications/campaigns/:id/analytics', verifyAdmin, async (req, re
     } catch (e) {
         console.error('Failed to get campaign analytics', e);
         res.status(500).json({ error: 'Failed to get analytics' });
+    }
+});
+
+// Presign upload for campaign media (Supabase Storage via S3)
+router.post('/notifications/media/presign', verifyAdmin, async (req, res) => {
+    try {
+        const { campaignId, filename, contentType } = req.body || {};
+        if (!campaignId) return res.status(400).json({ error: 'campaignId required' });
+        if (!filename) return res.status(400).json({ error: 'filename required' });
+
+        const safeName = String(filename).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80);
+        const key = `campaigns/${campaignId}/${Date.now()}_${safeName}`;
+        const result = await presignPutObject({ key, contentType: contentType || 'application/octet-stream' });
+        res.json({ key, ...result });
+    } catch (e) {
+        console.error('presign failed', e.message);
+        res.status(500).json({ error: 'Failed to presign upload' });
+    }
+});
+
+router.post('/notifications/media/delete', verifyAdmin, async (req, res) => {
+    try {
+        const { publicUrl } = req.body || {};
+        if (!publicUrl) return res.status(400).json({ error: 'publicUrl required' });
+        const result = await deleteByPublicUrl(publicUrl);
+        res.json({ success: true, ...result });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to delete media' });
     }
 });
 

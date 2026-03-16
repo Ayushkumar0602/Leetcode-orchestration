@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint src/firebase.js src/lib/fcm.js src/lib/notifications.js src/components/NotificationBell.jsx src/components/NotificationPopupManager.jsx src/NotificationCenter.jsx src/admin/AdminNotifications.jsx src/admin/AdminPortal.jsx",
+    "lint": "eslint src/firebase.js src/lib/fcm.js src/lib/notifications.js src/lib/s3.js src/components/NotificationBell.jsx src/components/NotificationBannerManager.jsx src/components/NotificationPopupManager.jsx src/NotificationCenter.jsx src/admin/AdminNotifications.jsx src/admin/AdminPortal.jsx backend/routes/adminRoutes.js backend/routes/notificationRoutes.js backend/server.js",
     "preview": "vite preview"
   },
   "dependencies": {

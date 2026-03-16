@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { X, ExternalLink, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProfile, queryKeys } from "../lib/api";
+import { campaignAppliesToUser } from "../lib/audience";
 import { listenActiveCampaigns, listenCampaignReceipts, setCampaignReceipt } from "../lib/notifications";
 import { listenForegroundFcmMessages, registerFcmToken } from "../lib/fcm";
 
@@ -106,6 +109,13 @@ export default function NotificationPopupManager() {
   const navigate = useNavigate();
   const uid = currentUser?.uid;
 
+  const { data: profile } = useQuery({
+    queryKey: queryKeys.profile(uid),
+    queryFn: () => fetchProfile(uid),
+    enabled: !!uid,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const [campaigns, setCampaigns] = useState([]);
   const [receipts, setReceipts] = useState(new Map());
   const [toasts, setToasts] = useState([]);
@@ -144,6 +154,7 @@ export default function NotificationPopupManager() {
 
   const popupCandidates = useMemo(() => {
     return campaigns
+      .filter((c) => campaignAppliesToUser(c, { uid, profile }))
       .filter((c) => {
         const display = c.display || c.type;
         if (display !== "popup") return false;
@@ -152,7 +163,7 @@ export default function NotificationPopupManager() {
         return true;
       })
       .sort((a, b) => (b.priority || 0) - (a.priority || 0));
-  }, [campaigns, receipts]);
+  }, [campaigns, receipts, uid, profile]);
 
   useEffect(() => {
     if (!uid) return;
