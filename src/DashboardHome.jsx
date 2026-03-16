@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
+import NotificationBell from './components/NotificationBell';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
 import { useSEO } from './hooks/useSEO';
@@ -322,6 +323,7 @@ export default function DashboardHome() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 0', justifyContent: 'flex-end' }}>
+                    <NotificationBell />
                     <div className="desktop-nav-profile">
                         <NavProfile />
                     </div>

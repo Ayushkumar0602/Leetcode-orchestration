@@ -14,6 +14,7 @@ import AdminStorage from './AdminStorage';
 import AdminInfrastructure from './AdminInfrastructure';
 import AdminConfig from './AdminConfig';
 import AdminLogs from './AdminLogs';
+import AdminNotifications from './AdminNotifications';
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -38,6 +39,7 @@ export default function AdminPortal() {
         { path: '/admin/database', icon: Database, label: 'Database Admin' },
         { path: '/admin/infrastructure', icon: Server, label: 'Infrastructure' },
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
+        { path: '/admin/notifications', icon: Shield, label: 'Notifications' },
         { path: '/admin/config', icon: Settings, label: 'Configuration' },
         { path: '/admin/logs', icon: Activity, label: 'Activity Logs' },
     ];
@@ -120,6 +122,7 @@ export default function AdminPortal() {
                     <Route path="/database" element={<AdminDatabase />} />
                     <Route path="/infrastructure" element={<AdminInfrastructure />} />
                     <Route path="/storage" element={<AdminStorage />} />
+                    <Route path="/notifications" element={<AdminNotifications />} />
                     <Route path="/config" element={<AdminConfig />} />
                     <Route path="/logs" element={<AdminLogs />} />
                 </Routes>

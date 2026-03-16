@@ -15,6 +15,7 @@ import LandingPage from './LandingPage';
 import ProfilePage from './ProfilePage';
 import PublicProfile from './PublicProfile';
 import ProjectDetails from './ProjectDetails';
+import NotificationCenter from './NotificationCenter';
 
 // System Design Features
 import SystemDesign from './SystemDesign';
@@ -36,6 +37,7 @@ import PortfolioLanding from './PortfolioLanding';
 
 // Components
 import SocialShare from './components/SocialShare';
+import NotificationPopupManager from './components/NotificationPopupManager';
 
 function App() {
   return (
@@ -43,6 +45,7 @@ function App() {
       <AuthProvider>
         {/* Global route-change tracker — renders nothing, fires analytics on every navigation */}
         <RouteTracker />
+        <NotificationPopupManager />
         <div className="app-root">
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -66,6 +69,7 @@ function App() {
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
 
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/notifications" element={<NotificationCenter />} />
             <Route path="/portfolio" element={<PortfolioLanding />} />
             <Route path="/public/:uid" element={<PublicProfile />} />
             <Route path="/public/:uid/project/:projId" element={<ProjectDetails />} />

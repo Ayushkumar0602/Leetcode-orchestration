@@ -3,6 +3,7 @@ const express = require('express');
 const { admin } = require('../firebaseAdmin');
 const { db } = require('../firebase');
 const { collection, getDocs, doc, getDoc, setDoc, query, limit, getCountFromServer, addDoc } = require('firebase/firestore');
+const { FieldPath } = require('firebase-admin/firestore');
 
 const router = express.Router();
 
@@ -257,6 +258,190 @@ router.post('/config', verifyAdmin, async (req, res) => {
         }
         res.json({ success: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ---------------------------------------------------------
+// 6. Notification Campaigns (Admin)
+// ---------------------------------------------------------
+
+function normalizeCampaign(body, adminUid) {
+    const now = new Date().toISOString();
+    return {
+        name: String(body.name || body.title || 'Campaign').slice(0, 140),
+        title: String(body.title || '').slice(0, 140),
+        message: String(body.message || body.body || '').slice(0, 2000),
+        type: body.type || 'feed', // feed | popup | announcement
+        display: body.display || body.type || 'feed',
+        link: body.link || null,
+        target: body.target || { kind: 'all' }, // { kind:'all' } | {kind:'uids', uids:[...]} | {kind:'segment', segment:'...'}
+        priority: Number.isFinite(body.priority) ? body.priority : 0,
+        startAt: body.startAt || now,
+        endAt: body.endAt || body.expiresAt || null,
+        status: body.status || 'draft', // draft | scheduled | active | ended
+        createdBy: adminUid,
+        updatedAt: now,
+    };
+}
+
+async function sendFcmForCampaign(campaignDoc, adminUid) {
+    if (!admin.apps.length) return { ok: false, reason: 'admin_sdk_missing' };
+    if (!admin.messaging) return { ok: false, reason: 'messaging_unavailable' };
+
+    const campaignId = campaignDoc.id;
+    const c = campaignDoc.data();
+    const target = c.target || { kind: 'all' };
+
+    let tokenDocs = [];
+    if (target.kind === 'uids' && Array.isArray(target.uids) && target.uids.length > 0) {
+        // Query subcollections per UID (bounded and safer than scanning).
+        for (const uid of target.uids.slice(0, 500)) {
+            const snap = await admin.firestore().collection('userProfiles').doc(String(uid)).collection('fcmTokens').get();
+            snap.forEach(d => tokenDocs.push({ uid, ...d.data() }));
+        }
+    } else {
+        // All users / broad segments: best-effort scan of token subcollections.
+        const snap = await admin.firestore().collectionGroup('fcmTokens').get();
+        snap.forEach(d => tokenDocs.push(d.data()));
+    }
+
+    const tokens = tokenDocs.map(t => t.token).filter(Boolean);
+    const unique = Array.from(new Set(tokens));
+    const chunks = [];
+    for (let i = 0; i < unique.length; i += 500) chunks.push(unique.slice(i, i + 500));
+
+    let sent = 0;
+    let success = 0;
+    let failure = 0;
+
+    for (const chunk of chunks) {
+        sent += chunk.length;
+        const resp = await admin.messaging().sendEachForMulticast({
+            tokens: chunk,
+            notification: {
+                title: c.title || 'Notification',
+                body: c.message || '',
+            },
+            data: {
+                kind: 'campaign',
+                campaignId,
+                title: c.title || '',
+                body: c.message || '',
+                link: c.link || '/notifications',
+            },
+        });
+        success += resp.successCount || 0;
+        failure += resp.failureCount || 0;
+    }
+
+    // Lightweight audit log
+    try {
+        await admin.firestore().collection('admin_logs').add({
+            action: 'Sent Campaign Push',
+            details: `Campaign ${campaignId} pushed to ${sent} tokens (${success} ok, ${failure} failed).`,
+            level: failure > 0 ? 'warn' : 'info',
+            adminEmail: adminUid,
+            timestamp: new Date().toISOString()
+        });
+    } catch (e) { }
+
+    return { ok: true, sent, success, failure };
+}
+
+router.get('/notifications/campaigns', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const snap = await admin.firestore().collection('campaigns').orderBy('updatedAt', 'desc').limit(200).get();
+        const campaigns = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        res.json({ campaigns });
+    } catch (e) {
+        console.error('Failed to list campaigns', e);
+        res.status(500).json({ error: 'Failed to list campaigns' });
+    }
+});
+
+router.post('/notifications/campaigns', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const data = normalizeCampaign(req.body || {}, req.adminUser?.uid || 'admin');
+        data.createdAt = new Date().toISOString();
+        const ref = await admin.firestore().collection('campaigns').add(data);
+        res.json({ id: ref.id, ...data });
+    } catch (e) {
+        console.error('Failed to create campaign', e);
+        res.status(500).json({ error: 'Failed to create campaign' });
+    }
+});
+
+router.patch('/notifications/campaigns/:id', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const id = req.params.id;
+        const ref = admin.firestore().collection('campaigns').doc(id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ error: 'Campaign not found' });
+        const merged = normalizeCampaign({ ...snap.data(), ...req.body }, req.adminUser?.uid || 'admin');
+        await ref.set(merged, { merge: true });
+        res.json({ id, ...merged });
+    } catch (e) {
+        console.error('Failed to update campaign', e);
+        res.status(500).json({ error: 'Failed to update campaign' });
+    }
+});
+
+router.post('/notifications/campaigns/:id/activate', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const id = req.params.id;
+        const ref = admin.firestore().collection('campaigns').doc(id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ error: 'Campaign not found' });
+        await ref.set({ status: 'active', updatedAt: new Date().toISOString() }, { merge: true });
+
+        const push = req.body?.push === true;
+        let pushResult = null;
+        if (push) pushResult = await sendFcmForCampaign(await ref.get(), req.adminUser?.email || req.adminUser?.uid || 'admin');
+
+        res.json({ success: true, push: pushResult });
+    } catch (e) {
+        console.error('Failed to activate campaign', e);
+        res.status(500).json({ error: 'Failed to activate campaign' });
+    }
+});
+
+router.post('/notifications/campaigns/:id/end', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const id = req.params.id;
+        await admin.firestore().collection('campaigns').doc(id).set({ status: 'ended', updatedAt: new Date().toISOString() }, { merge: true });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to end campaign' });
+    }
+});
+
+router.get('/notifications/campaigns/:id/analytics', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const campaignId = req.params.id;
+        const snap = await admin
+            .firestore()
+            .collectionGroup('campaignReceipts')
+            .where(FieldPath.documentId(), '==', campaignId)
+            .get();
+
+        let seen = 0, read = 0, clicked = 0, dismissed = 0;
+        snap.forEach(d => {
+            const r = d.data() || {};
+            if (r.firstSeenAt) seen++;
+            if (r.readAt) read++;
+            if (r.clickedAt) clicked++;
+            if (r.dismissedAt) dismissed++;
+        });
+        res.json({ campaignId, receipts: snap.size, seen, read, clicked, dismissed });
+    } catch (e) {
+        console.error('Failed to get campaign analytics', e);
+        res.status(500).json({ error: 'Failed to get analytics' });
+    }
 });
 
 module.exports = router;
