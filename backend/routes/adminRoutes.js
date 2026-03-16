@@ -398,6 +398,18 @@ router.patch('/notifications/campaigns/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+router.delete('/notifications/campaigns/:id', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+        const id = req.params.id;
+        await admin.firestore().collection('campaigns').doc(id).delete();
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Failed to delete campaign', e);
+        res.status(500).json({ error: 'Failed to delete campaign' });
+    }
+});
+
 router.post('/notifications/campaigns/:id/activate', verifyAdmin, async (req, res) => {
     try {
         if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });

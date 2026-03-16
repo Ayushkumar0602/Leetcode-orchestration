@@ -1026,7 +1026,36 @@
 @media (max-width: 600px) {
   .notif-type-cards { grid-template-columns: 1fr 1fr; }
   .notif-stats-grid { grid-template-columns: 1fr 1fr; }
-  .notif-popup-card { padding: 20px; }
-  .notif-announcement-card { padding: 28px 20px; }
-  .notif-toast { width: calc(100vw - 32px); }
+  .notif-priority-cards { grid-template-columns: 1fr 1fr; }
+  .notif-popup-card { padding: 20px; width: calc(100vw - 20px); }
+  .notif-announcement-card { padding: 28px 20px; width: calc(100vw - 20px); }
+  .notif-toast { width: calc(100vw - 20px); padding: 12px; }
+  .notif-banner-toast {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .notif-banner-toast-text h4 { font-size: 0.8125rem; }
+  .notif-banner-toast-text p { font-size: 0.75rem; }
+  .notif-card-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .notif-announcement-banner {
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .notif-announcement-banner > div:first-child {
+    margin: 0 auto 10px;
+  }
+  .notif-announcement-actions {
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .notif-filter-tab {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
 }
+
