@@ -12,7 +12,6 @@ const { ref: rtdbRef, push, set, remove, get } = require('firebase/database');
 const UAParser = require('ua-parser-js');
 const cron = require('node-cron');
 const adminRoutes = require('./routes/adminRoutes');
-const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 const allowedOrigins = [
@@ -40,9 +39,6 @@ app.use(express.json({ limit: '10mb' }));
 
 // Admin Routes (Auth List/Delete, DB Browser, etc)
 app.use('/api/admin', adminRoutes);
-
-// Notification Routes (Campaigns, Personal Notifications, Analytics)
-app.use('/api/notifications', notificationRoutes);
 
 const Razorpay = require('razorpay');
 const crypto = require('crypto');

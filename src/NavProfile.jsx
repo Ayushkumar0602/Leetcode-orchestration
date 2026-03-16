@@ -4,7 +4,6 @@ import { useAuth } from './contexts/AuthContext';
 import { Award, ExternalLink } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProfile, queryKeys } from './lib/api';
-import NotificationBell from './notifications/NotificationBell';
 
 export default function NavProfile() {
     const { currentUser } = useAuth();
@@ -61,9 +60,6 @@ export default function NavProfile() {
             >
                 Blog
             </span>
-            
-            {/* Notification Bell */}
-            <NotificationBell />
 
             {/* Public Portfolio Link */}
             <button

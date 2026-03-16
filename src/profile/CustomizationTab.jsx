@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Palette, Layout, Eye, Sun, Moon, BellRing } from 'lucide-react';
+import { Palette, Layout, Eye, Sun, Moon } from 'lucide-react';
 
 const glass = { background: 'rgba(20,22,30,0.65)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '1.5rem' };
 
@@ -19,7 +19,6 @@ export default function CustomizationTab({ preferences, onSave }) {
     const [prefs, setPrefs] = useState({
         theme: 'Purple', layout: 'Comfortable', darkMode: true, template: 'Signature',
         isPublic: true, showInterviews: true, showStats: true, showBadges: true, showActivity: true,
-        enablePopups: true, enableFeed: true, muteCampaigns: false,
         ...preferences
     });
     const [saving, setSaving] = useState(false);
@@ -125,30 +124,6 @@ export default function CustomizationTab({ preferences, onSave }) {
                             </div>
                             <div onClick={() => upd(row.key, !prefs[row.key])} style={{ width: 36, height: 20, borderRadius: '10px', cursor: 'pointer', background: prefs[row.key] ? '#a855f7' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background 0.2s' }}>
                                 <div style={{ position: 'absolute', top: '2px', left: prefs[row.key] ? '18px' : '2px', width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Notification Preferences */}
-            <div style={glass}>
-                <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <BellRing size={16} color="#fbbf24" /> Notification Preferences
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth <= 640 ? '1fr' : 'repeat(3, 1fr)', gap: '12px' }}>
-                    {[
-                        { key: 'enablePopups', label: 'Popup Alerts', sub: 'In-app popup toasts', icon: Sun },
-                        { key: 'enableFeed', label: 'Notif Feed', sub: 'Show in bell dropdown', icon: Layout },
-                        { key: 'muteCampaigns', label: 'Mute Campaigns', sub: 'Hide global broadcasts', icon: Moon },
-                    ].map(row => (
-                        <div key={row.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                            <div style={{ minWidth: 0 }}>
-                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#fff' }}>{row.label}</div>
-                                <div style={{ fontSize: '0.65rem', color: 'var(--txt3)', marginTop: '2px' }}>{row.sub}</div>
-                            </div>
-                            <div onClick={() => upd(row.key, !prefs[row.key])} style={{ width: 34, height: 18, borderRadius: '9px', cursor: 'pointer', background: prefs[row.key] ? '#fbbf24' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                                <div style={{ position: 'absolute', top: '2px', left: prefs[row.key] ? '18px' : '2px', width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
                             </div>
                         </div>
                     ))}
