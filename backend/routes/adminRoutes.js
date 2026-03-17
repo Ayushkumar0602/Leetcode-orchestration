@@ -302,6 +302,106 @@ router.patch('/users/:uid/detail', verifyAdmin, async (req, res) => {
     }
 });
 
+// Full user data (Auth + multiple Firestore collections + RTDB)
+router.get('/users/:uid/full', verifyAdmin, async (req, res) => {
+    const { uid } = req.params;
+    if (!admin.apps.length) {
+        return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+    }
+    try {
+        const afs = admin.firestore();
+
+        const [userRecord, profileSnap] = await Promise.all([
+            admin.auth().getUser(uid),
+            afs.collection('userProfiles').doc(uid).get(),
+        ]);
+
+        // Firestore collections keyed by userId (best-effort, bounded)
+        const [interviewsSnap, submissionsSnap, listsSnap, notificationsSnap, receiptsSnap] = await Promise.all([
+            afs.collection('interviews').where('userId', '==', String(uid)).limit(200).get().catch(() => ({ docs: [] })),
+            afs.collection('submissions').where('userId', '==', String(uid)).limit(200).get().catch(() => ({ docs: [] })),
+            afs.collection('lists').where('userId', '==', String(uid)).limit(200).get().catch(() => ({ docs: [] })),
+            afs.collection('users').doc(uid).collection('notifications').orderBy('createdAt', 'desc').limit(200).get().catch(() => ({ docs: [] })),
+            afs.collection('users').doc(uid).collection('campaignReceipts').limit(200).get().catch(() => ({ docs: [] })),
+        ]);
+
+        // RTDB bits
+        const [sessionsSnap, connectReqSnap, connectionsSnap] = await Promise.all([
+            rtdbGet(rtdbRef(rtdb, `users/${uid}/sessions`)).catch(() => null),
+            rtdbGet(rtdbRef(rtdb, `connectRequests/${uid}`)).catch(() => null),
+            rtdbGet(rtdbRef(rtdb, `connections/${uid}`)).catch(() => null),
+        ]);
+
+        const interviews = (interviewsSnap.docs || []).map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        const submissions = (submissionsSnap.docs || []).map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => new Date(b.submittedAt || b.createdAt || 0) - new Date(a.submittedAt || a.createdAt || 0));
+        const lists = (listsSnap.docs || []).map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+        const notifications = (notificationsSnap.docs || []).map(d => ({ id: d.id, ...d.data() }));
+        const campaignReceipts = (receiptsSnap.docs || []).map(d => ({ id: d.id, ...d.data() }));
+
+        res.json({
+            auth: {
+                uid: userRecord.uid,
+                email: userRecord.email,
+                emailVerified: userRecord.emailVerified,
+                displayName: userRecord.displayName,
+                photoURL: userRecord.photoURL,
+                disabled: userRecord.disabled,
+                metadata: userRecord.metadata,
+                providerData: userRecord.providerData || [],
+                customClaims: userRecord.customClaims || {},
+            },
+            userProfiles: {
+                id: uid,
+                data: profileSnap.exists ? profileSnap.data() : null,
+            },
+            interviews,
+            submissions,
+            lists,
+            notifications,
+            campaignReceipts,
+            rtdb: {
+                sessions: sessionsSnap?.exists() ? sessionsSnap.val() : null,
+                connectRequests: connectReqSnap?.exists() ? connectReqSnap.val() : null,
+                connections: connectionsSnap?.exists() ? connectionsSnap.val() : null,
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+router.patch('/users/:uid/full', verifyAdmin, async (req, res) => {
+    const { uid } = req.params;
+    if (!admin.apps.length) {
+        return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+    }
+    try {
+        const authPatch = req.body?.auth && typeof req.body.auth === 'object' ? req.body.auth : null;
+        const profilePatch = req.body?.userProfiles && typeof req.body.userProfiles === 'object'
+            ? (req.body.userProfiles.data || req.body.userProfiles)
+            : (req.body?.profile && typeof req.body.profile === 'object' ? req.body.profile : null);
+
+        if (authPatch) {
+            const allowed = {};
+            if (authPatch.displayName !== undefined) allowed.displayName = String(authPatch.displayName);
+            if (authPatch.photoURL !== undefined) allowed.photoURL = String(authPatch.photoURL);
+            if (authPatch.disabled !== undefined) allowed.disabled = !!authPatch.disabled;
+            if (authPatch.email !== undefined) allowed.email = String(authPatch.email);
+            await admin.auth().updateUser(uid, allowed);
+        }
+        if (profilePatch) {
+            await admin.firestore().collection('userProfiles').doc(uid).set(profilePatch, { merge: true });
+        }
+
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // ---------------------------------------------------------
 // 3. Infrastructure & Server Health
 // ---------------------------------------------------------

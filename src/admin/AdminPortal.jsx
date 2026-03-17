@@ -15,6 +15,7 @@ import AdminInfrastructure from './AdminInfrastructure';
 import AdminConfig from './AdminConfig';
 import AdminLogs from './AdminLogs';
 import AdminNotifications from './AdminNotifications';
+import AdminUserDetail from './AdminUserDetail';
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -119,6 +120,7 @@ export default function AdminPortal() {
                 <Routes>
                     <Route path="/" element={<AdminOverview />} />
                     <Route path="/users" element={<AdminUsers />} />
+                    <Route path="/users/:uid" element={<AdminUserDetail />} />
                     <Route path="/database" element={<AdminDatabase />} />
                     <Route path="/infrastructure" element={<AdminInfrastructure />} />
                     <Route path="/storage" element={<AdminStorage />} />

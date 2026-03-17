@@ -1,19 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Loader2, UserX, ShieldBan, ShieldAlert, CheckCircle2, ExternalLink, FileJson, Save, X } from 'lucide-react';
+import { Search, Loader2, UserX, ShieldBan, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
 export default function AdminUsers() {
     const { currentUser } = useAuth();
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedUid, setSelectedUid] = useState(null);
-    const [detail, setDetail] = useState(null);
-    const [detailLoading, setDetailLoading] = useState(false);
-    const [authEditor, setAuthEditor] = useState('');
-    const [profileEditor, setProfileEditor] = useState('');
-    const [saving, setSaving] = useState(false);
 
     const fetchAdminUsers = async () => {
         if (!currentUser) return [];
@@ -81,51 +77,9 @@ export default function AdminUsers() {
         u.uid.includes(searchTerm)
     );
 
-    const openDetail = async (uid) => {
-        if (!currentUser || !uid) return;
-        setSelectedUid(uid);
-        setDetail(null);
-        setAuthEditor('');
-        setProfileEditor('');
-        setDetailLoading(true);
-        try {
-            const token = await currentUser.getIdToken();
-            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users/${uid}/detail`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to load user detail');
-            setDetail(data);
-            setAuthEditor(JSON.stringify(data.auth || {}, null, 2));
-            setProfileEditor(JSON.stringify(data.profile || {}, null, 2));
-        } catch (e) {
-            alert(e.message);
-        } finally {
-            setDetailLoading(false);
-        }
-    };
-
-    const saveDetail = async () => {
-        if (!currentUser || !selectedUid) return;
-        setSaving(true);
-        try {
-            const token = await currentUser.getIdToken();
-            const auth = JSON.parse(authEditor || '{}');
-            const profile = JSON.parse(profileEditor || '{}');
-            const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users/${selectedUid}/detail`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ auth, profile }),
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || 'Failed to save user');
-            await refetch();
-            await openDetail(selectedUid);
-        } catch (e) {
-            alert(e.message);
-        } finally {
-            setSaving(false);
-        }
+    const openUserPage = (uid) => {
+        if (!uid) return;
+        navigate(`/admin/users/${uid}`);
     };
 
     return (
@@ -154,8 +108,7 @@ export default function AdminUsers() {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: selectedUid ? '1.2fr 0.8fr' : '1fr', gap: 16, alignItems: 'start' }}>
-                <div style={{ background: 'rgba(20, 22, 30, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden' }}>
+            <div style={{ background: 'rgba(20, 22, 30, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
@@ -169,15 +122,19 @@ export default function AdminUsers() {
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center' }}><Loader2 className="animate-spin" style={{ margin: '0 auto', color: '#3b82f6' }} /></td></tr>
+                            <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center' }}><Loader2 style={{ margin: '0 auto', color: '#3b82f6' }} /></td></tr>
                             ) : filteredUsers.length === 0 ? (
                                 <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: 'var(--txt3)' }}>No users found.</td></tr>
                             ) : (
                                 filteredUsers.map(u => (
-                                    <tr key={u.uid} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: selectedUid === u.uid ? 'rgba(59,130,246,0.10)' : 'transparent', cursor: 'pointer' }} onClick={() => openDetail(u.uid)}>
+                                    <tr key={u.uid} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer' }} onClick={() => openUserPage(u.uid)}>
                                         <td style={{ padding: '16px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <img src={u.photoURL || `https://ui-avatars.com/api/?name=${u.displayName||'U'}&background=3b82f6&color=fff`} style={{ width: '36px', height: '36px', borderRadius: '50%' }} alt="" />
+                                                <img
+                                                    src={u.photoURL || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(u.displayName || 'U') + '&background=3b82f6&color=fff')}
+                                                    style={{ width: '36px', height: '36px', borderRadius: '50%' }}
+                                                    alt=""
+                                                />
                                                 <div>
                                                     <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{u.displayName || 'Unnamed User'}</div>
                                                     <div style={{ fontSize: '0.8rem', color: 'var(--txt3)' }}>{u.email}</div>
@@ -195,6 +152,12 @@ export default function AdminUsers() {
                                         </td>
                                         <td style={{ padding: '16px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); openUserPage(u.uid); }}
+                                                    style={{ background: 'rgba(59,130,246,0.10)', border: '1px solid rgba(59,130,246,0.22)', borderRadius: '6px', padding: '6px 10px', color: '#93c5fd', fontSize: '0.75rem', cursor: 'pointer' }}
+                                                >
+                                                    Open
+                                                </button>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleSuspend(u.uid, u.disabled); }}
                                                     style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '6px 10px', color: '#fff', fontSize: '0.75rem', cursor: 'pointer' }}
@@ -215,55 +178,6 @@ export default function AdminUsers() {
                         </tbody>
                     </table>
                 </div>
-
-                {selectedUid && (
-                    <div style={{ background: 'rgba(20, 22, 30, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden', position: 'sticky', top: 16 }}>
-                        <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800 }}>
-                                <FileJson size={16} color="#a855f7" /> User detail
-                            </div>
-                            <button onClick={() => { setSelectedUid(null); setDetail(null); }} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 10, padding: '6px 10px', color: '#fff', cursor: 'pointer', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                                <X size={14} /> Close
-                            </button>
-                        </div>
-                        <div style={{ padding: 16 }}>
-                            {detailLoading ? (
-                                <div style={{ padding: 24, textAlign: 'center', color: 'var(--txt3)' }}>
-                                    <Loader2 className="animate-spin" style={{ margin: '0 auto', color: '#3b82f6' }} />
-                                    <div style={{ marginTop: 10 }}>Loading user…</div>
-                                </div>
-                            ) : (
-                                <>
-                                    <div style={{ fontSize: '0.78rem', color: 'var(--txt3)', fontFamily: 'monospace', marginBottom: 10 }}>uid: {selectedUid}</div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-                                        <div>
-                                            <div style={{ fontWeight: 800, marginBottom: 6, color: '#93c5fd' }}>Auth (editable)</div>
-                                            <textarea value={authEditor} onChange={e => setAuthEditor(e.target.value)} rows={10} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 12, padding: 12, color: '#e8e8e8', outline: 'none', fontFamily: 'monospace', fontSize: '0.8rem' }} />
-                                        </div>
-                                        <div>
-                                            <div style={{ fontWeight: 800, marginBottom: 6, color: '#6ee7b7' }}>Firestore userProfiles/{selectedUid} (editable)</div>
-                                            <textarea value={profileEditor} onChange={e => setProfileEditor(e.target.value)} rows={12} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 12, padding: 12, color: '#e8e8e8', outline: 'none', fontFamily: 'monospace', fontSize: '0.8rem' }} />
-                                        </div>
-                                        <div style={{ display: 'flex', gap: 10 }}>
-                                            <button onClick={saveDetail} disabled={saving} style={{ flex: 1, background: 'rgba(59,130,246,0.16)', border: '1px solid rgba(59,130,246,0.30)', borderRadius: 12, padding: '10px 12px', color: '#93c5fd', fontWeight: 900, cursor: saving ? 'wait' : 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                                                <Save size={16} /> {saving ? 'Saving…' : 'Save changes'}
-                                            </button>
-                                            <button onClick={() => window.open(`/public/${selectedUid}`, '_blank')} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 12, padding: '10px 12px', color: '#fff', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                                                <ExternalLink size={16} /> Public
-                                            </button>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-            
-            <style>{`
-                .animate-spin { animation: spin 1s linear infinite; }
-                @keyframes spin { 100% { transform: rotate(360deg); } }
-            `}</style>
         </div>
     );
 }
