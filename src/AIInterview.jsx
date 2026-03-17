@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useInterviewSession } from './useInterviewSession';
 import SystemDesignBoard from './components/SystemDesignBoard';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
@@ -99,6 +100,12 @@ function ScoreBadge({ score }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AIInterview() {
+    useSEO({
+        title: 'AI Mock Interview',
+        description: 'Practice live coding interviews with AI.',
+        canonical: '/aiinterview'
+    });
+
     const navigate = useNavigate();
     const location = useLocation();
     const { id: urlId } = useParams();

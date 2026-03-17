@@ -3,10 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { ArrowLeft, CheckCircle2, Clock, Loader2, Trophy, Terminal } from 'lucide-react';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 const DIFFICULTY_COLOR = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' };
 
 export default function MySubmissions() {
+    useSEO({
+        title: 'My Submissions',
+        description: 'View your coding problem submissions.',
+        canonical: '/submissions'
+    });
+
     const navigate = useNavigate();
     const { currentUser, logout } = useAuth();
 
