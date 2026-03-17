@@ -20,14 +20,6 @@ export default function NavProfile() {
     if (!currentUser) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span
-                    onClick={() => navigate('/blog')}
-                    style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s', textDecoration: 'none' }}
-                    onMouseEnter={e => e.currentTarget.style.color = '#a855f7'}
-                    onMouseLeave={e => e.currentTarget.style.color = '#fff'}
-                >
-                    Blog
-                </span>
                 <button 
                     onClick={() => navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)} 
                     style={{ 
@@ -52,14 +44,6 @@ export default function NavProfile() {
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <span
-                onClick={() => navigate('/blog')}
-                style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s', textDecoration: 'none' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#a855f7'}
-                onMouseLeave={e => e.currentTarget.style.color = '#fff'}
-            >
-                Blog
-            </span>
 
             {/* Public Portfolio Link */}
             <button

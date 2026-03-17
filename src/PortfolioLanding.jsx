@@ -305,7 +305,7 @@ export default function PortfolioLanding() {
                     <a href="/" title="Whizan AI Home" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Home</a>
                     <a href="/dsaquestion" title="Practice DSA Coding Questions" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>DSA Practice</a>
                     <a href="/infoaiinterview" title="Learn about AI Mock Interviews" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Interviews</a>
-                    <a href="/blog" title="Read the Whizan AI Engineering Blog" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'}>Blog</a>
+
                 </nav>
             </footer>
         </main>

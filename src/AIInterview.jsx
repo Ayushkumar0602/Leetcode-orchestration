@@ -7,7 +7,7 @@ import {
     Code2, Shield, Lightbulb, BarChart3, ArrowLeft, Sparkles, Volume2, VolumeX,
     Send, Terminal, ChevronDown, ChevronUp, LogOut, Clock, History, User, Building,
     MessageCircle, AlertCircle, Info, Navigation, Trash2, RefreshCcw, LayoutTemplate,
-    Maximize2, Minimize2
+    Maximize2, Minimize2, StickyNote
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
@@ -336,6 +336,8 @@ export default function AIInterview() {
     const [historyLoading, setHistoryLoading] = useState(false);
     const [submissionCount, setSubmissionCount] = useState(0);
     const [transcriptOpen, setTranscriptOpen] = useState(false);
+    const [notes, setNotes] = useState('');
+    const [rightPanelTab, setRightPanelTab] = useState('chat'); // 'chat' | 'notes'
 
     // ─── Load problems ──────────────────────────────────────────────────────
     useEffect(() => {
@@ -361,6 +363,7 @@ export default function AIInterview() {
                     setLanguage(iv.language);
                     setCode(iv.finalCode || '');
                     setTranscript(iv.transcript || []);
+                    setNotes(iv.notes || '');
                     setSessionId(urlId); // Reconnect RTDB
 
                     if (iv.problemId) {
@@ -441,6 +444,7 @@ export default function AIInterview() {
                     problemData: problemData,
                     finalCode: code,
                     transcript: transcriptRef.current,
+                    notes,
                     submissionCount,
                     durationMinutes: interviewStartTimeRef.current
                         ? Math.round((Date.now() - interviewStartTimeRef.current) / 60000)
@@ -450,7 +454,7 @@ export default function AIInterview() {
         }, 2000); // 2 second debounce
 
         return () => clearTimeout(timer);
-    }, [urlId, currentUser, appPhase, transcript, code, interviewPhase, submissionCount, problemData]);
+    }, [urlId, currentUser, appPhase, transcript, code, interviewPhase, submissionCount, problemData, notes]);
 
     // ─── Sarvam AI TTS ──────────────────────────────────────────────────────
 
@@ -907,6 +911,8 @@ export default function AIInterview() {
             setAiCode(boilerplate);
             setCode(boilerplate);
             setTranscript([]);
+            setNotes('');
+            setRightPanelTab('chat');
 
             // Immediately create the Firestore document to reserve an ID
             const initRes = await fetch('https://leetcode-orchestration.onrender.com/api/interviews/save', {
@@ -920,7 +926,8 @@ export default function AIInterview() {
                     problemDifficulty: selectedProblem.difficulty,
                     problemData: data,
                     finalCode: boilerplate,
-                    transcript: []
+                    transcript: [],
+                    notes: ''
                 })
             });
             const initData = await initRes.json();
@@ -1114,6 +1121,7 @@ export default function AIInterview() {
                         problemData: problemData,
                         finalCode: code,
                         transcript: transcriptRef.current,
+                        notes,
                         scoreReport: report,
                         submissionCount,
                         durationMinutes: durationMins
@@ -1702,6 +1710,24 @@ export default function AIInterview() {
                         </div>
                     </div>
 
+                    {/* ── Your Notes ── */}
+                    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.9rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <StickyNote size={15} color="var(--ai)" />
+                                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--txt)' }}>Your Notes</span>
+                            </div>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--txt3)', background: 'rgba(255,255,255,0.07)', padding: '2px 10px', borderRadius: '6px' }}>
+                                {notes?.trim() ? `${notes.trim().length} chars` : 'No notes'}
+                            </span>
+                        </div>
+                        <div style={{ padding: '1rem 1.25rem' }}>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--txt2)', lineHeight: 1.7, whiteSpace: 'pre-wrap', minHeight: '80px' }}>
+                                {notes?.trim() ? notes : 'No notes were saved for this interview.'}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* ── Interview Transcript ── */}
                     <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden', marginBottom: '3rem' }}>
                         <button onClick={() => setTranscriptOpen(o => !o)}
@@ -1797,6 +1823,12 @@ export default function AIInterview() {
                     <button onClick={() => setWhiteboardOpen(!whiteboardOpen)}
                         style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', fontWeight: 600, background: whiteboardOpen ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.08)', border: `1px solid ${whiteboardOpen ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.15)'}`, color: whiteboardOpen ? '#60a5fa' : '#e8e8e8', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginRight: '8px', transition: 'all 0.2s' }}>
                         <LayoutTemplate size={14} /> Whiteboard
+                    </button>
+
+                    {/* Notes Toggle */}
+                    <button onClick={() => setRightPanelTab(t => t === 'notes' ? 'chat' : 'notes')}
+                        style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', fontWeight: 600, background: rightPanelTab === 'notes' ? 'rgba(168,85,247,0.18)' : 'rgba(255,255,255,0.08)', border: `1px solid ${rightPanelTab === 'notes' ? 'rgba(168,85,247,0.35)' : 'rgba(255,255,255,0.15)'}`, color: rightPanelTab === 'notes' ? '#c084fc' : '#e8e8e8', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginRight: '8px', transition: 'all 0.2s' }}>
+                        <StickyNote size={14} /> Notes
                     </button>
 
                     {/* Phase transitions are controlled by the AI */}
@@ -2308,46 +2340,94 @@ export default function AIInterview() {
                         </div>
                     )}
 
-                    {/* Chat log */}
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '1rem', scrollBehavior: 'smooth' }}>
-                        {transcript.length === 0 && (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.6 }}>
-                                <MessageSquare size={32} color="rgba(255,255,255,0.2)" style={{ marginBottom: '12px' }} />
-                                <div style={{ textAlign: 'center', color: '#888', fontSize: '0.85rem' }}>
-                                    The interview will begin shortly.<br />AI will start the conversation.
+                    {/* Chat / Notes */}
+                    {rightPanelTab === 'notes' ? (
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <StickyNote size={16} color="#a855f7" />
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e8e8e8' }}>Interview Notes</div>
                                 </div>
+                                <button
+                                    onClick={() => setNotes('')}
+                                    disabled={!notes}
+                                    style={{
+                                        padding: '0.35rem 0.65rem',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 600,
+                                        background: notes ? 'rgba(239,71,67,0.12)' : 'rgba(255,255,255,0.05)',
+                                        border: `1px solid ${notes ? 'rgba(239,71,67,0.25)' : 'rgba(255,255,255,0.1)'}`,
+                                        color: notes ? '#ef4743' : '#666',
+                                        borderRadius: '10px',
+                                        cursor: notes ? 'pointer' : 'default'
+                                    }}
+                                >
+                                    Clear
+                                </button>
                             </div>
-                        )}
-                        {transcript.map((msg, i) => (
-                            <div key={i} style={{
-                                maxWidth: '90%', alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                                display: 'flex', flexDirection: 'column', gap: '4px'
-                            }}>
-                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: msg.role === 'user' ? 'rgba(255,255,255,0.4)' : '#a855f7', marginLeft: msg.role === 'user' ? 'auto' : '4px', marginRight: msg.role === 'user' ? '4px' : 'auto', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                    {msg.role === 'user' ? 'You' : 'AI Interviewer'}
+                            <textarea
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                placeholder="Write your notes here (they’ll be auto-saved with this interview)."
+                                style={{
+                                    width: '100%',
+                                    minHeight: '240px',
+                                    resize: 'vertical',
+                                    padding: '0.9rem 0.95rem',
+                                    borderRadius: '14px',
+                                    border: '1px solid rgba(255,255,255,0.12)',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    color: '#e8e8e8',
+                                    outline: 'none',
+                                    fontSize: '0.85rem',
+                                    lineHeight: 1.6,
+                                }}
+                            />
+                            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
+                                Notes are saved to this interview and will be available when you reopen it.
+                            </div>
+                        </div>
+                    ) : (
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '1rem', scrollBehavior: 'smooth' }}>
+                            {transcript.length === 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.6 }}>
+                                    <MessageSquare size={32} color="rgba(255,255,255,0.2)" style={{ marginBottom: '12px' }} />
+                                    <div style={{ textAlign: 'center', color: '#888', fontSize: '0.85rem' }}>
+                                        The interview will begin shortly.<br />AI will start the conversation.
+                                    </div>
                                 </div>
-                                <div style={{
-                                    padding: '0.85rem 1rem',
-                                    background: msg.role === 'user' ? 'rgba(255,255,255,0.08)' : 'rgba(168,85,247,0.08)',
-                                    border: `1px solid ${msg.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(168,85,247,0.2)'}`,
-                                    borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                                    fontSize: '0.85rem', lineHeight: 1.6, color: '#e8e8e8',
-                                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                            )}
+                            {transcript.map((msg, i) => (
+                                <div key={i} style={{
+                                    maxWidth: '90%', alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                    display: 'flex', flexDirection: 'column', gap: '4px'
                                 }}>
-                                    {msg.text}
+                                    <div style={{ fontSize: '0.65rem', fontWeight: 700, color: msg.role === 'user' ? 'rgba(255,255,255,0.4)' : '#a855f7', marginLeft: msg.role === 'user' ? 'auto' : '4px', marginRight: msg.role === 'user' ? '4px' : 'auto', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {msg.role === 'user' ? 'You' : 'AI Interviewer'}
+                                    </div>
+                                    <div style={{
+                                        padding: '0.85rem 1rem',
+                                        background: msg.role === 'user' ? 'rgba(255,255,255,0.08)' : 'rgba(168,85,247,0.08)',
+                                        border: `1px solid ${msg.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(168,85,247,0.2)'}`,
+                                        borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                                        fontSize: '0.85rem', lineHeight: 1.6, color: '#e8e8e8',
+                                        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                                    }}>
+                                        {msg.text}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        {isAiThinking && (
-                            <div style={{ alignSelf: 'flex-start', marginLeft: '4px' }}>
-                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#a855f7', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Interviewer</div>
-                                <div style={{ padding: '0.8rem 1rem', background: 'rgba(168,85,247,0.05)', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '16px 16px 16px 4px', display: 'flex', gap: '4px', alignItems: 'center', width: 'fit-content' }}>
-                                    <div className="typing-dot" style={{ background: '#a855f7' }} /><div className="typing-dot" style={{ animationDelay: '0.15s', background: '#a855f7' }} /><div className="typing-dot" style={{ animationDelay: '0.3s', background: '#a855f7' }} />
+                            ))}
+                            {isAiThinking && (
+                                <div style={{ alignSelf: 'flex-start', marginLeft: '4px' }}>
+                                    <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#a855f7', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Interviewer</div>
+                                    <div style={{ padding: '0.8rem 1rem', background: 'rgba(168,85,247,0.05)', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '16px 16px 16px 4px', display: 'flex', gap: '4px', alignItems: 'center', width: 'fit-content' }}>
+                                        <div className="typing-dot" style={{ background: '#a855f7' }} /><div className="typing-dot" style={{ animationDelay: '0.15s', background: '#a855f7' }} /><div className="typing-dot" style={{ animationDelay: '0.3s', background: '#a855f7' }} />
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        <div ref={chatEndRef} />
-                    </div>
+                            )}
+                            <div ref={chatEndRef} />
+                        </div>
+                    )}
 
                     {/* Voice / Text input bar */}
                     <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.2)' }}>

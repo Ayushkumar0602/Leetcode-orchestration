@@ -373,7 +373,7 @@ app.post('/api/submit', async (req, res) => {
 // Save or Update a completed/ongoing interview session
 app.post('/api/interviews/save', async (req, res) => {
     const { id, userId, role, company, language, problemId, problemTitle, problemDifficulty,
-        finalCode, transcript, scoreReport, submissionCount, durationMinutes, problemData } = req.body;
+        finalCode, transcript, scoreReport, submissionCount, durationMinutes, problemData, notes } = req.body;
     if (!userId) return res.status(400).json({ error: 'userId required' });
     try {
         const now = new Date().toISOString();
@@ -383,6 +383,7 @@ app.post('/api/interviews/save', async (req, res) => {
             problemTitle: problemTitle || '', problemDifficulty: problemDifficulty || '',
             problemData: problemData || null,
             finalCode: finalCode || '', transcript: transcript || [],
+            notes: typeof notes === 'string' ? notes : '',
             scoreReport: scoreReport || null,
             submissionCount: submissionCount || 0,
             durationMinutes: durationMinutes || 0,
