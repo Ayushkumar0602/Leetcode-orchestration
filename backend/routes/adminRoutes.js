@@ -2,8 +2,10 @@
 const express = require('express');
 const { admin } = require('../firebaseAdmin');
 const { db } = require('../firebase');
-const { collection, getDocs, doc, getDoc, setDoc, query, limit, getCountFromServer, addDoc } = require('firebase/firestore');
+const { rtdb } = require('../firebase');
+const { collection, getDocs, doc, getDoc, setDoc, query, limit, getCountFromServer, addDoc, deleteDoc, updateDoc } = require('firebase/firestore');
 const { FieldPath } = require('firebase-admin/firestore');
+const { ref: rtdbRef, get: rtdbGet } = require('firebase/database');
 
 const router = express.Router();
 
@@ -122,14 +124,42 @@ router.delete('/users/:uid', verifyAdmin, async (req, res) => {
 // Warning: This exposes raw data. Protected by verifyAdmin.
 router.get('/db/:collectionName', verifyAdmin, async (req, res) => {
     const { collectionName } = req.params;
-    const limitCount = parseInt(req.query.limit) || 100;
+    const limitCount = Math.min(parseInt(req.query.limit) || 100, 500);
     
     try {
         let docs = [];
+        const whereField = req.query.whereField ? String(req.query.whereField) : null;
+        const whereOp = req.query.whereOp ? String(req.query.whereOp) : null;
+        const whereValueRaw = req.query.whereValue;
+        const whereType = req.query.whereType ? String(req.query.whereType) : 'string'; // string|number|boolean|null|json
+        const orderByField = req.query.orderBy ? String(req.query.orderBy) : null;
+        const orderDir = (req.query.orderDir === 'asc' ? 'asc' : 'desc');
+
+        const parseValue = () => {
+            if (whereValueRaw === undefined) return undefined;
+            if (whereType === 'number') return Number(whereValueRaw);
+            if (whereType === 'boolean') return String(whereValueRaw) === 'true';
+            if (whereType === 'null') return null;
+            if (whereType === 'json') {
+                try { return JSON.parse(String(whereValueRaw)); } catch { return String(whereValueRaw); }
+            }
+            return String(whereValueRaw);
+        };
+        const whereValue = parseValue();
+
         if (admin.apps.length) {
-            const snapshot = await admin.firestore().collection(collectionName).limit(limitCount).get();
+            let q = admin.firestore().collection(collectionName);
+            if (whereField && whereOp && whereValueRaw !== undefined) {
+                q = q.where(whereField, whereOp, whereValue);
+            }
+            if (orderByField) {
+                q = q.orderBy(orderByField, orderDir);
+            }
+            const snapshot = await q.limit(limitCount).get();
             docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         } else {
+            // Client SDK fallback: supports only no-filter queries here.
+            // (Most admin actions require Admin SDK on production server.)
             const q = query(collection(db, collectionName), limit(limitCount));
             const snapshot = await getDocs(q);
             docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -138,6 +168,137 @@ router.get('/db/:collectionName', verifyAdmin, async (req, res) => {
     } catch (error) {
         console.error(`Error reading collection ${collectionName}:`, error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Get a single document
+router.get('/db/:collectionName/:docId', verifyAdmin, async (req, res) => {
+    const { collectionName, docId } = req.params;
+    try {
+        if (admin.apps.length) {
+            const snap = await admin.firestore().collection(collectionName).doc(docId).get();
+            if (!snap.exists) return res.status(404).json({ error: 'Doc not found' });
+            return res.json({ id: snap.id, ...snap.data() });
+        }
+        const snap = await getDoc(doc(db, collectionName, docId));
+        if (!snap.exists()) return res.status(404).json({ error: 'Doc not found' });
+        return res.json({ id: snap.id, ...snap.data() });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Create a document (auto-id or specified via docId)
+router.post('/db/:collectionName', verifyAdmin, async (req, res) => {
+    const { collectionName } = req.params;
+    const docId = req.body?.id ? String(req.body.id) : null;
+    const data = req.body?.data && typeof req.body.data === 'object' ? req.body.data : req.body;
+    try {
+        if (admin.apps.length) {
+            const col = admin.firestore().collection(collectionName);
+            const ref = docId ? col.doc(docId) : col.doc();
+            await ref.set(data, { merge: false });
+            return res.json({ success: true, id: ref.id });
+        }
+        if (docId) {
+            await setDoc(doc(db, collectionName, docId), data, { merge: false });
+            return res.json({ success: true, id: docId });
+        }
+        const ref = await addDoc(collection(db, collectionName), data);
+        return res.json({ success: true, id: ref.id });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Update a document (merge)
+router.patch('/db/:collectionName/:docId', verifyAdmin, async (req, res) => {
+    const { collectionName, docId } = req.params;
+    const data = req.body?.data && typeof req.body.data === 'object' ? req.body.data : req.body;
+    try {
+        if (admin.apps.length) {
+            await admin.firestore().collection(collectionName).doc(docId).set(data, { merge: true });
+            return res.json({ success: true });
+        }
+        await setDoc(doc(db, collectionName, docId), data, { merge: true });
+        return res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Delete a document
+router.delete('/db/:collectionName/:docId', verifyAdmin, async (req, res) => {
+    const { collectionName, docId } = req.params;
+    try {
+        if (admin.apps.length) {
+            await admin.firestore().collection(collectionName).doc(docId).delete();
+            return res.json({ success: true });
+        }
+        await deleteDoc(doc(db, collectionName, docId));
+        return res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Detailed user view (Auth + Firestore profile + RTDB connections/requests)
+router.get('/users/:uid/detail', verifyAdmin, async (req, res) => {
+    const { uid } = req.params;
+    if (!admin.apps.length) {
+        return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+    }
+    try {
+        const userRecord = await admin.auth().getUser(uid);
+        const profileSnap = await admin.firestore().collection('userProfiles').doc(uid).get();
+
+        const connectionsSnap = await admin.firestore().collection('connections').doc(uid).get().catch(() => null);
+        // RTDB: connectRequests/{uid}
+        const reqSnap = await rtdbGet(rtdbRef(rtdb, `connectRequests/${uid}`)).catch(() => null);
+
+        res.json({
+            auth: {
+                uid: userRecord.uid,
+                email: userRecord.email,
+                displayName: userRecord.displayName,
+                photoURL: userRecord.photoURL,
+                disabled: userRecord.disabled,
+                metadata: userRecord.metadata,
+                customClaims: userRecord.customClaims || {},
+                providerData: userRecord.providerData || [],
+            },
+            profile: profileSnap.exists ? profileSnap.data() : null,
+            connections: connectionsSnap && connectionsSnap.exists ? connectionsSnap.data() : null,
+            connectRequests: reqSnap && reqSnap.exists() ? reqSnap.val() : null,
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Update user profile + auth fields
+router.patch('/users/:uid/detail', verifyAdmin, async (req, res) => {
+    const { uid } = req.params;
+    if (!admin.apps.length) {
+        return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
+    }
+    const authPatch = req.body?.auth && typeof req.body.auth === 'object' ? req.body.auth : null;
+    const profilePatch = req.body?.profile && typeof req.body.profile === 'object' ? req.body.profile : null;
+    try {
+        if (authPatch) {
+            const allowed = {};
+            if (authPatch.displayName !== undefined) allowed.displayName = String(authPatch.displayName);
+            if (authPatch.photoURL !== undefined) allowed.photoURL = String(authPatch.photoURL);
+            if (authPatch.disabled !== undefined) allowed.disabled = !!authPatch.disabled;
+            if (authPatch.email !== undefined) allowed.email = String(authPatch.email);
+            await admin.auth().updateUser(uid, allowed);
+        }
+        if (profilePatch) {
+            await admin.firestore().collection('userProfiles').doc(uid).set(profilePatch, { merge: true });
+        }
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 });
 

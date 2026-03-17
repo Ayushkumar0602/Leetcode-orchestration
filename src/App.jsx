@@ -16,6 +16,7 @@ import ProfilePage from './ProfilePage';
 import PublicProfile from './PublicProfile';
 import ProjectDetails from './ProjectDetails';
 import NotificationCenter from './NotificationCenter';
+import Chat from './Chat';
 
 // System Design Features
 import SystemDesign from './SystemDesign';
@@ -73,6 +74,7 @@ function App() {
             <Route path="/portfolio" element={<PortfolioLanding />} />
             <Route path="/public/:uid" element={<PublicProfile />} />
             <Route path="/public/:uid/project/:projId" element={<ProjectDetails />} />
+            <Route path="/chat" element={<Chat />} />
             
             {/* Blog Routes */}
             <Route path="/blog" element={<BlogList />} />

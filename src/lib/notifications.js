@@ -58,6 +58,40 @@ export async function markPersonalNotificationRead(uid, notificationId) {
   await setDoc(ref, { readAt: new Date().toISOString() }, { merge: true });
 }
 
+export async function upsertPersonalNotification(uid, notificationId, patch) {
+  const ref = doc(db, "users", uid, "notifications", notificationId);
+  const nowIso = new Date().toISOString();
+  await setDoc(
+    ref,
+    {
+      ...patch,
+      updatedAt: nowIso,
+      updatedAtServer: serverTimestamp(),
+    },
+    { merge: true }
+  );
+}
+
+export async function createConnectRequestNotification(toUid, { fromUid, fromName, message }) {
+  const id = `connect_request_${fromUid}`;
+  const title = `${fromName || "Someone"} sent you a connect request`;
+  const body = message?.trim()
+    ? message.trim()
+    : "Open Chat to accept or decline the request.";
+
+  await upsertPersonalNotification(toUid, id, {
+    type: "connect_request",
+    display: "feed",
+    title,
+    message: body,
+    link: "/chat?tab=requests",
+    fromUid,
+    readAt: null,
+    createdAt: new Date().toISOString(),
+    createdAtServer: serverTimestamp(),
+  });
+}
+
 export async function setCampaignReceipt(uid, campaignId, patch) {
   const ref = doc(db, "users", uid, "campaignReceipts", campaignId);
   await setDoc(

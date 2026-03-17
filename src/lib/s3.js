@@ -6,6 +6,7 @@ const ACCESS_KEY = "6136a2c5906ac98f8e89eb175c837423b0f5cddd0ea95a6eea757c921e44
 const ENDPOINT = "https://vnnkhcqswoeqnghztpvh.storage.supabase.co/storage/v1/s3";
 const REGION = "us-east-1"; // Region can be generic for Supabase S3
 const BUCKET_NAME = "images";
+const CHAT_BUCKET_NAME = "chat-files";
 const SUPABASE_PROJECT_URL = "https://vnnkhcqswoeqnghztpvh.supabase.co"; // To form public URL
 
 const s3Client = new S3Client({
@@ -72,6 +73,35 @@ export const deleteProfilePicture = async (publicUrl) => {
     await s3Client.send(command);
   } catch (error) {
     console.error("Error deleting from S3:", error);
+    throw error;
+  }
+};
+
+export const uploadChatFile = async (file, { conversationId, senderUid }) => {
+  try {
+    const safeBaseName = (file.name || 'file')
+      .replace(/[^\w.\- ]+/g, '')
+      .trim()
+      .slice(0, 80) || 'file';
+
+    const fileName = `chats/${conversationId}/${senderUid}_${Date.now()}_${safeBaseName}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    const command = new PutObjectCommand({
+      Bucket: CHAT_BUCKET_NAME,
+      Key: fileName,
+      Body: uint8Array,
+      ContentType: file.type || 'application/octet-stream',
+    });
+
+    await s3Client.send(command);
+
+    const publicUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${CHAT_BUCKET_NAME}/${encodeURIComponent(fileName).replace(/%2F/g, '/')}`;
+    return publicUrl;
+  } catch (error) {
+    console.error("Error uploading chat file to S3:", error);
     throw error;
   }
 };

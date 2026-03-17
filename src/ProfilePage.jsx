@@ -7,7 +7,7 @@ import {
     ArrowLeft, User, Mail, Calendar, Shield, Star, Zap, Target,
     Code2, Brain, TrendingUp, Award, CheckCircle, Flame,
     Trophy, ChevronRight, BarChart3, Clock, FileText,
-    LayoutDashboard, Briefcase, Palette, Lock, Database, Edit3, LogOut, ExternalLink, Menu, X, Camera, Trash2
+    LayoutDashboard, Briefcase, Palette, Lock, Database, Edit3, LogOut, ExternalLink, Menu, X, Camera, Trash2, MessageSquare
 } from 'lucide-react';
 import PortfolioTab from './profile/PortfolioTab';
 import CustomizationTab from './profile/CustomizationTab';
@@ -449,6 +449,28 @@ export default function ProfilePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div className="desktop-nav-profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <NavProfile />
+                        <button
+                            onClick={() => navigate('/chat')}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                background: 'rgba(168,85,247,0.10)',
+                                border: '1px solid rgba(168,85,247,0.22)',
+                                borderRadius: '10px',
+                                padding: '6px 12px',
+                                color: '#d8b4fe',
+                                fontSize: '0.82rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.18)'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.38)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.10)'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.22)'; }}
+                            title="Open Chat"
+                        >
+                            <MessageSquare size={14} /> Chat
+                        </button>
                         <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', padding: '6px 14px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}>
                             <LogOut size={14} /> Sign Out
                         </button>
@@ -466,6 +488,9 @@ export default function ProfilePage() {
                     </button>
                     <button className="mobile-nav-link" onClick={() => { navigate(`/public/${currentUser?.uid}`); setIsMobileMenuOpen(false); }}>
                         <ExternalLink size={18} /> Public Profile
+                    </button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/chat'); setIsMobileMenuOpen(false); }}>
+                        <MessageSquare size={18} /> Chat
                     </button>
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', marginTop: 'auto' }}>
                         <button className="mobile-nav-link" onClick={handleLogout} style={{ color: '#ef4444', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>

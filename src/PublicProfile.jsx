@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavProfile from './NavProfile';
 import {
     User, Github, Linkedin, Globe, Code2, Brain, Award, TrendingUp, Star, Flame, Zap, Trophy,
-    Briefcase, GraduationCap, Calendar, FileText, ExternalLink, CheckCircle, ChevronRight, MapPin, Mail
+    Briefcase, GraduationCap, Calendar, FileText, ExternalLink, CheckCircle, ChevronRight, MapPin, Mail, MessageSquare, UserPlus, X as XIcon, Send as SendIcon, Loader2
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
 import { useSEO } from './hooks/useSEO';
+import { useAuth } from './contexts/AuthContext';
+import { rtdb } from './firebase';
+import { ref, onValue, update, set, serverTimestamp } from 'firebase/database';
+import { createConnectRequestNotification } from './lib/notifications';
 
 // ── Devicon ──────────────────────────────────────────────────────
 const DEVICON_MAP = { react: 'react', javascript: 'javascript', typescript: 'typescript', python: 'python', nodejs: 'nodejs', 'node.js': 'nodejs', java: 'java', cpp: 'cplusplus', 'c++': 'cplusplus', c: 'c', go: 'go', rust: 'rust', swift: 'swift', kotlin: 'kotlin', dart: 'dart', flutter: 'flutter', html: 'html5', css: 'css3', sass: 'sass', tailwind: 'tailwindcss', mongodb: 'mongodb', postgres: 'postgresql', postgresql: 'postgresql', mysql: 'mysql', redis: 'redis', firebase: 'firebase', docker: 'docker', kubernetes: 'kubernetes', git: 'git', github: 'github', linux: 'linux', aws: 'amazonwebservices', gcp: 'googlecloud', azure: 'azure', graphql: 'graphql', nextjs: 'nextjs', 'next.js': 'nextjs', vuejs: 'vuejs', 'vue.js': 'vuejs', angular: 'angularjs', django: 'django', flask: 'flask', express: 'express', figma: 'figma', redux: 'redux', vite: 'vite' };
@@ -68,6 +72,16 @@ function Badge({ icon: Icon, label, desc, color, unlocked }) {
 export default function PublicProfile() {
     const { uid } = useParams();
     const navigate = useNavigate();
+    const { currentUser } = useAuth();
+
+    const myUid = currentUser?.uid || null;
+    const isSelf = !!myUid && myUid === uid;
+
+    const [connectModalOpen, setConnectModalOpen] = useState(false);
+    const [connectMessage, setConnectMessage] = useState('');
+    const [connectStatus, setConnectStatus] = useState('none'); // none | pending | accepted | declined
+    const [connectBusy, setConnectBusy] = useState(false);
+    const [connected, setConnected] = useState(false);
 
     const { data: statsResult, isLoading: statsLoading } = useQuery({
         queryKey: queryKeys.stats(uid),
@@ -123,6 +137,66 @@ export default function PublicProfile() {
             ].filter(Boolean),
         },
     });
+
+    // ── Connection state (Realtime DB) ─────────────────────────────
+    useEffect(() => {
+        if (!myUid || !uid || isSelf) return;
+
+        const connRef = ref(rtdb, `connections/${myUid}/${uid}`);
+        const reqRef = ref(rtdb, `connectRequests/${uid}/${myUid}`);
+
+        const unsubConn = onValue(connRef, (snap) => {
+            setConnected(!!snap.val());
+        });
+        const unsubReq = onValue(reqRef, (snap) => {
+            const v = snap.val();
+            if (!v) return setConnectStatus('none');
+            setConnectStatus(v.status || 'pending');
+        });
+
+        return () => {
+            unsubConn();
+            unsubReq();
+        };
+    }, [myUid, uid, isSelf]);
+
+    const sendConnectRequest = async () => {
+        if (!myUid || !uid || isSelf) return;
+        setConnectBusy(true);
+        try {
+            await set(ref(rtdb, `connectRequests/${uid}/${myUid}`), {
+                fromUid: myUid,
+                toUid: uid,
+                fromName: currentUser?.displayName || 'User',
+                fromPhotoURL: currentUser?.photoURL || '',
+                message: connectMessage.trim(),
+                status: 'pending',
+                createdAt: serverTimestamp(),
+            });
+
+            // Also create a NotificationCenter entry (Firestore) for the receiver.
+            // Non-blocking: connect request is RTDB-first.
+            createConnectRequestNotification(uid, {
+                fromUid: myUid,
+                fromName: currentUser?.displayName || 'User',
+                message: connectMessage.trim(),
+            }).catch(() => { });
+
+            setConnectModalOpen(false);
+            setConnectMessage('');
+        } finally {
+            setConnectBusy(false);
+        }
+    };
+
+    const primaryCta = (() => {
+        if (!myUid) return { label: 'Sign in to connect', action: () => navigate(`/login?redirect=${encodeURIComponent(`/public/${uid}`)}`), icon: UserPlus, disabled: false };
+        if (isSelf) return null;
+        if (connected || connectStatus === 'accepted') return { label: 'Message', action: () => navigate(`/chat?uid=${uid}`), icon: MessageSquare, disabled: false };
+        if (connectStatus === 'pending') return { label: 'Request sent', action: () => { }, icon: Loader2, disabled: true };
+        if (connectStatus === 'declined') return { label: 'Connect again', action: () => setConnectModalOpen(true), icon: UserPlus, disabled: false };
+        return { label: 'Connect', action: () => setConnectModalOpen(true), icon: UserPlus, disabled: false };
+    })();
 
 
     if (loading) return (
@@ -197,6 +271,20 @@ export default function PublicProfile() {
     .stat-card{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:18px;padding:1.2rem;display:flex;flex-direction:column;gap:4px;transition:all 0.25s;}
     .stat-card:hover{transform:translateY(-3px);border-color:var(--pill-hover-border);box-shadow:var(--card-shadow);}
     .slink{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:8px 16px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;}
+
+    .spin{animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .pp-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:999;}
+    .pp-modal{width:min(520px,calc(100vw - 24px));background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,0.6);overflow:hidden;}
+    .pp-modal-head{padding:14px 16px;border-bottom:1px solid var(--divide);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .pp-modal-title{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-0.02em;color:var(--txt1);}
+    .pp-modal-body{padding:14px 16px;}
+    .pp-modal-textarea{width:100%;min-height:110px;resize:vertical;border-radius:14px;padding:12px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);color:var(--txt1);outline:none;font-weight:600;line-height:1.45;}
+    .pp-modal-actions{display:flex;gap:10px;margin-top:12px;}
+    .pp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:10px 14px;font-weight:900;cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+    .pp-btn:disabled{opacity:0.6;cursor:not-allowed;}
+    .pp-btn-ghost{background:transparent;border-color:var(--pill-border);color:var(--txt1);}
+    .pp-btn-primary{background:var(--hero-grad);color:#0b1120;}
     
     /* Responsive */
     @media(max-width:1024px){.pub-main-grid{grid-template-columns:1fr !important;}}
@@ -1563,6 +1651,49 @@ export default function PublicProfile() {
                     </div>
                 </div>
 
+                {/* ── Connect modal ── */}
+                {connectModalOpen && primaryCta && (
+                    <div className="pp-modal-backdrop" onClick={() => !connectBusy && setConnectModalOpen(false)}>
+                        <div className="pp-modal" onClick={e => e.stopPropagation()}>
+                            <div className="pp-modal-head">
+                                <div className="pp-modal-title">
+                                    <UserPlus size={16} color="var(--accent)" />
+                                    <span>Connect with {profile.displayName || 'this developer'}</span>
+                                </div>
+                                <button
+                                    onClick={() => setConnectModalOpen(false)}
+                                    disabled={connectBusy}
+                                    style={{ background: 'transparent', border: '1px solid var(--pill-border)', borderRadius: 12, width: 36, height: 36, color: 'var(--txt1)', cursor: connectBusy ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    title="Close"
+                                >
+                                    <XIcon size={16} />
+                                </button>
+                            </div>
+                            <div className="pp-modal-body">
+                                <div style={{ color: 'var(--txt3)', fontSize: '0.85rem', fontWeight: 600, marginBottom: 10 }}>
+                                    Add a short message so they know why you’re reaching out.
+                                </div>
+                                <textarea
+                                    className="pp-modal-textarea"
+                                    placeholder="Hi! I saw your portfolio and would love to connect…"
+                                    value={connectMessage}
+                                    onChange={e => setConnectMessage(e.target.value)}
+                                    disabled={connectBusy}
+                                />
+                                <div className="pp-modal-actions">
+                                    <button className="pp-btn pp-btn-ghost" onClick={() => setConnectModalOpen(false)} disabled={connectBusy}>
+                                        Cancel
+                                    </button>
+                                    <button className="pp-btn pp-btn-primary" onClick={sendConnectRequest} disabled={connectBusy}>
+                                        {connectBusy ? <Loader2 size={16} className="spin" /> : <SendIcon size={16} />}
+                                        Send request
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Footer */}
                 <div style={{ borderTop: '1px solid var(--divide)', padding: '1.5rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '1.5rem' }}>
                     <img src="/logo.jpeg" alt="Whizan AI" style={{ width: '18px', height: '18px', borderRadius: '4px', opacity: 0.5 }} />
@@ -1673,6 +1804,22 @@ export default function PublicProfile() {
                                             <FileText size={15} />
                                             <span>Resume</span>
                                         </a>
+                                    )}
+                                    {primaryCta && (
+                                        <button
+                                            onClick={primaryCta.action}
+                                            disabled={primaryCta.disabled}
+                                            className="cin-btn cin-btn-outline"
+                                            style={{
+                                                borderColor: primaryCta.label === 'Message' ? 'rgba(59,130,246,0.55)' : undefined,
+                                                opacity: primaryCta.disabled ? 0.6 : 1,
+                                                cursor: primaryCta.disabled ? 'not-allowed' : 'pointer',
+                                            }}
+                                            title={primaryCta.label}
+                                        >
+                                            {primaryCta.label === 'Request sent' ? <Loader2 size={15} className="spin" /> : <primaryCta.icon size={15} />}
+                                            <span>{primaryCta.label}</span>
+                                        </button>
                                     )}
                                 </div>
                             </div>
@@ -2027,6 +2174,49 @@ export default function PublicProfile() {
                     </div>
                 </main>
 
+                {/* ── Connect modal ── */}
+                {connectModalOpen && primaryCta && (
+                    <div className="pp-modal-backdrop" onClick={() => !connectBusy && setConnectModalOpen(false)}>
+                        <div className="pp-modal" onClick={e => e.stopPropagation()}>
+                            <div className="pp-modal-head">
+                                <div className="pp-modal-title">
+                                    <UserPlus size={16} color="var(--accent)" />
+                                    <span>Connect with {profile.displayName || 'this developer'}</span>
+                                </div>
+                                <button
+                                    onClick={() => setConnectModalOpen(false)}
+                                    disabled={connectBusy}
+                                    style={{ background: 'transparent', border: '1px solid var(--pill-border)', borderRadius: 12, width: 36, height: 36, color: 'var(--txt1)', cursor: connectBusy ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    title="Close"
+                                >
+                                    <XIcon size={16} />
+                                </button>
+                            </div>
+                            <div className="pp-modal-body">
+                                <div style={{ color: 'var(--txt3)', fontSize: '0.85rem', fontWeight: 600, marginBottom: 10 }}>
+                                    Add a short message so they know why you’re reaching out.
+                                </div>
+                                <textarea
+                                    className="pp-modal-textarea"
+                                    placeholder="Hi! I saw your portfolio and would love to connect…"
+                                    value={connectMessage}
+                                    onChange={e => setConnectMessage(e.target.value)}
+                                    disabled={connectBusy}
+                                />
+                                <div className="pp-modal-actions">
+                                    <button className="pp-btn pp-btn-ghost" onClick={() => setConnectModalOpen(false)} disabled={connectBusy}>
+                                        Cancel
+                                    </button>
+                                    <button className="pp-btn pp-btn-primary" onClick={sendConnectRequest} disabled={connectBusy}>
+                                        {connectBusy ? <Loader2 size={16} className="spin" /> : <SendIcon size={16} />}
+                                        Send request
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Footer (shared) */}
                 <div style={{ borderTop: '1px solid var(--divide)', padding: '1.5rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '2rem' }}>
                     <img src="/logo.jpeg" alt="Whizan AI" style={{ width: '18px', height: '18px', borderRadius: '4px', opacity: 0.5 }} />
@@ -2102,6 +2292,24 @@ export default function PublicProfile() {
                                 {profile.linkedin && <a href={`https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="slink" style={{ background: 'rgba(10,102,194,0.12)', border: '1px solid rgba(10,102,194,0.28)', color: isDark ? '#60a5fa' : '#084c94' }}><Linkedin size={14} />LinkedIn</a>}
                                 {profile.portfolio && <a href={`https://${profile.portfolio}`} target="_blank" rel="noreferrer" className="slink" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', color: isDark ? '#34d399' : '#0d9467' }}><Globe size={14} />Portfolio</a>}
                                 {profile.resume && <a href={profile.resume} target="_blank" rel="noreferrer" className="slink" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: isDark ? '#fcd34d' : '#d97706' }}><FileText size={14} />Resume / CV</a>}
+                                {primaryCta && (
+                                    <button
+                                        onClick={primaryCta.action}
+                                        disabled={primaryCta.disabled}
+                                        className="slink"
+                                        style={{
+                                            background: primaryCta.label === 'Message' ? 'rgba(59,130,246,0.12)' : `rgba(var(--accent-rgb),0.12)`,
+                                            border: primaryCta.label === 'Message' ? '1px solid rgba(59,130,246,0.28)' : `1px solid rgba(var(--accent-rgb),0.28)`,
+                                            color: primaryCta.label === 'Message' ? (isDark ? '#93c5fd' : '#1d4ed8') : 'var(--txt1)',
+                                            cursor: primaryCta.disabled ? 'not-allowed' : 'pointer',
+                                            opacity: primaryCta.disabled ? 0.7 : 1,
+                                        }}
+                                        title={primaryCta.label}
+                                    >
+                                        {primaryCta.label === 'Request sent' ? <Loader2 size={14} className="spin" /> : <primaryCta.icon size={14} />}
+                                        {primaryCta.label}
+                                    </button>
+                                )}
                             </div>
 
                             {/* Quick meta */}
@@ -2341,6 +2549,49 @@ export default function PublicProfile() {
                     </div>
                 </div>
             </div>
+
+            {/* ── Connect modal ── */}
+            {connectModalOpen && primaryCta && (
+                <div className="pp-modal-backdrop" onClick={() => !connectBusy && setConnectModalOpen(false)}>
+                    <div className="pp-modal" onClick={e => e.stopPropagation()}>
+                        <div className="pp-modal-head">
+                            <div className="pp-modal-title">
+                                <UserPlus size={16} color="var(--accent)" />
+                                <span>Connect with {profile.displayName || 'this developer'}</span>
+                            </div>
+                            <button
+                                onClick={() => setConnectModalOpen(false)}
+                                disabled={connectBusy}
+                                style={{ background: 'transparent', border: '1px solid var(--pill-border)', borderRadius: 12, width: 36, height: 36, color: 'var(--txt1)', cursor: connectBusy ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                title="Close"
+                            >
+                                <XIcon size={16} />
+                            </button>
+                        </div>
+                        <div className="pp-modal-body">
+                            <div style={{ color: 'var(--txt3)', fontSize: '0.85rem', fontWeight: 600, marginBottom: 10 }}>
+                                Add a short message so they know why you’re reaching out.
+                            </div>
+                            <textarea
+                                className="pp-modal-textarea"
+                                placeholder="Hi! I saw your portfolio and would love to connect…"
+                                value={connectMessage}
+                                onChange={e => setConnectMessage(e.target.value)}
+                                disabled={connectBusy}
+                            />
+                            <div className="pp-modal-actions">
+                                <button className="pp-btn pp-btn-ghost" onClick={() => setConnectModalOpen(false)} disabled={connectBusy}>
+                                    Cancel
+                                </button>
+                                <button className="pp-btn pp-btn-primary" onClick={sendConnectRequest} disabled={connectBusy}>
+                                    {connectBusy ? <Loader2 size={16} className="spin" /> : <SendIcon size={16} />}
+                                    Send request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Footer ── */}
             <div style={{ borderTop: '1px solid var(--divide)', padding: '1.5rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '2rem' }}>
