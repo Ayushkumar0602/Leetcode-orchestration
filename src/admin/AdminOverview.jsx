@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { Users, Database, Server, Activity, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { Users, Database, Server, Activity, ArrowUpRight, TrendingUp, Radio, Terminal, Sparkles, DollarSign, Power, Pause, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
@@ -9,6 +9,45 @@ const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode
 export default function AdminOverview() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
+    const [actionLoading, setActionLoading] = useState(false);
+
+    const handleQuickAction = async (actionType) => {
+        if (!currentUser) return;
+        if (!window.confirm(`Are you sure you want to perform: ${actionType}?`)) return;
+        setActionLoading(true);
+        try {
+            const token = await currentUser.getIdToken();
+            let url = '';
+            let method = 'POST';
+            let body = null;
+
+            if (actionType === 'kill-executions') {
+                url = `${VITE_API_BASE_URL}/api/admin/executions/kill-all`;
+            } else if (actionType === 'toggle-maintenance') {
+                url = `${VITE_API_BASE_URL}/api/admin/config`;
+                body = JSON.stringify({ maintenanceMode: true }); 
+            } else if (actionType === 'pause-ai') {
+                url = `${VITE_API_BASE_URL}/api/admin/config`;
+                body = JSON.stringify({ aiPaused: true });
+            }
+
+            const res = await fetch(url, {
+                method,
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    ...(body && { 'Content-Type': 'application/json' })
+                },
+                body
+            });
+            
+            if (res.ok) alert(`Action ${actionType} successful`);
+            else alert('Action failed');
+        } catch (err) {
+            alert('Action failed: ' + err.message);
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     // Fetch stats
     const { data: statsData, isLoading: isLoadingStats } = useQuery({
@@ -60,11 +99,18 @@ export default function AdminOverview() {
                 <p style={{ color: 'var(--txt2)', margin: 0 }}>System snapshot and quick metrics.</p>
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                <StatCard loading={isLoadingStats} title="Active Users" value={statsData?.activeUsers} subtitle="Live Sessions" icon={Radio} color="#ef4444" linkTo="/admin/users" />
+                <StatCard loading={isLoadingStats} title="Running Interviews" value={statsData?.runningInterviews} subtitle="In-progress" icon={Activity} color="#f59e0b" linkTo="/admin/users" />
+                <StatCard loading={isLoadingStats} title="Execution Load" value={statsData?.execLoad?.jobsPerMin} subtitle={`${statsData?.execLoad?.failedJobs || 0} failed jobs`} icon={Terminal} color="#10b981" linkTo="/admin/infrastructure" />
+                <StatCard loading={isLoadingStats} title="AI Usage" value={statsData?.aiUsage?.totalCalls} subtitle={`${statsData?.aiUsage?.avgLatencyMs || 0}ms avg latency`} icon={Sparkles} color="#8b5cf6" linkTo="/admin/infrastructure" />
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                <StatCard loading={isLoadingStats} title="Total Revenue" value={`$${statsData?.revenueSnapshot?.estimatedMRR || 0}`} subtitle={`${statsData?.revenueSnapshot?.plansActive || 0} active plans`} icon={DollarSign} color="#ec4899" linkTo="/admin/users" />
                 <StatCard loading={isLoadingStats} title="Total Users" value={statsData?.totalUsers} subtitle="All registered accounts" icon={Users} color="#3b82f6" linkTo="/admin/users" />
                 <StatCard loading={isLoadingStats} title="Database Status" value={statsData?.dbStatus} subtitle="Firestore Connected" icon={Database} color="#10b981" linkTo="/admin/database" />
                 <StatCard loading={isLoadingStats} title="Server Uptime" value={statsData?.serverUptime ? `${(statsData.serverUptime / 3600).toFixed(1)}h` : null} subtitle="Instance Uptime" icon={Server} color="#a855f7" linkTo="/admin/infrastructure" />
-                <StatCard loading={isLoadingStats} title="Audit Events" value={statsData?.eventsCount} subtitle="Total admin log events" icon={Activity} color="#f59e0b" linkTo="/admin/logs" />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
@@ -88,6 +134,22 @@ export default function AdminOverview() {
                                 <div style={{ fontSize: '0.8rem', color: 'var(--txt3)' }}>{act.desc}</div>
                             </div>
                         ))}
+                    </div>
+
+                    <h3 style={{ margin: '1.5rem 0 1rem 0', fontWeight: 700, fontSize: '1.1rem', color: '#fff' }}>Power Tools</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                        <button onClick={() => handleQuickAction('kill-executions')} disabled={actionLoading} style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '12px', borderRadius: '12px', color: '#ef4444', fontWeight: 600, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}>
+                            <XCircle size={20} />
+                            Kill Active Executions
+                        </button>
+                        <button onClick={() => handleQuickAction('toggle-maintenance')} disabled={actionLoading} style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '12px', borderRadius: '12px', color: '#f59e0b', fontWeight: 600, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}>
+                            <Power size={20} />
+                            Enable Maintenance
+                        </button>
+                        <button onClick={() => handleQuickAction('pause-ai')} disabled={actionLoading} style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '12px', borderRadius: '12px', color: '#8b5cf6', fontWeight: 600, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}>
+                            <Pause size={20} />
+                            Pause AI Globally
+                        </button>
                     </div>
                 </div>
 

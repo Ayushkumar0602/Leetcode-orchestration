@@ -14,7 +14,11 @@ export default function AdminUsers() {
     const fetchAdminUsers = async () => {
         if (!currentUser) return [];
         const token = await currentUser.getIdToken();
-        const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users`, {
+        const url = new URL(`${VITE_API_BASE_URL}/api/admin/users`);
+        if (searchTerm.trim()) {
+            url.searchParams.append('search', searchTerm.trim());
+        }
+        const res = await fetch(url.toString(), {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) {
@@ -26,7 +30,7 @@ export default function AdminUsers() {
     };
 
     const { data: users = [], isLoading, error, refetch } = useQuery({
-        queryKey: ['admin-users'],
+        queryKey: ['admin-users', searchTerm],
         queryFn: fetchAdminUsers,
         enabled: !!currentUser,
         retry: false
@@ -71,6 +75,7 @@ export default function AdminUsers() {
         }
     };
 
+    // The frontend filtering is now mostly a fallback for partial lists since the server does exact lookup
     const filteredUsers = users.filter(u => 
         (u.email || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
         (u.displayName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||

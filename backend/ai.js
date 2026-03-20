@@ -239,18 +239,27 @@ async function generateCodeAndTests(problemStatement, language, problemId) {
       const genAI = new GoogleGenerativeAI(currentKey);
       let model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
+      const startTime = Date.now();
       let result;
       try {
+        if (global.aiStats) global.aiStats.totalCalls++;
         result = await model.generateContent(prompt);
       } catch (innerError) {
         if (innerError.message?.includes('503') || innerError.message?.includes('429')) {
           console.warn(`[AI] 503/429 error on key ${i + 1}. Falling back to gemini-3.1-flash-lite-preview...`);
           model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
+          if (global.aiStats) global.aiStats.totalCalls++;
           result = await model.generateContent(prompt);
           console.log(`[AI] Fallback generation successful on key ${i + 1}.`);
         } else {
           throw innerError;
         }
+      }
+
+      if (global.aiStats) {
+        const latency = Date.now() - startTime;
+        global.aiStats.recentLatencies.push(latency);
+        if (global.aiStats.recentLatencies.length > 50) global.aiStats.recentLatencies.shift();
       }
 
       const text = result.response.text().trim();
@@ -290,6 +299,7 @@ async function generateCodeAndTests(problemStatement, language, problemId) {
         throw new Error('Gemini returned invalid JSON: ' + text.slice(0, 300));
       }
     } catch (error) {
+      if (global.aiStats) global.aiStats.failedCalls++;
       lastError = error;
       console.error(`[AI] Error with key ${i + 1}:`, error.message || error);
       if (error.message && error.message.includes('429')) {

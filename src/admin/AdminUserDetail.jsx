@@ -47,22 +47,22 @@ export default function AdminUserDetail() {
   const [rawEditor, setRawEditor] = useState('');
 
   const auth = data?.auth || null;
-  const profile = data?.userProfiles?.data || null;
+  const profile = data?.profile || data?.userProfiles?.data || null;
 
-  const fetchFull = async () => {
+  const fetchOverview = async () => {
     if (!currentUser || !uid) return;
     setLoading(true);
     setError(null);
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users/${uid}/full`, {
+      const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users/${uid}/detail`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || 'Failed to load user');
-      setData(json);
+       setData(prev => ({ ...prev, ...json }));
       setAuthEditor(JSON.stringify(json.auth || {}, null, 2));
-      setProfileEditor(JSON.stringify(json.userProfiles?.data || {}, null, 2));
+      setProfileEditor(JSON.stringify(json.profile || {}, null, 2));
       setRawEditor(JSON.stringify(json || {}, null, 2));
     } catch (e) {
       setError(e.message);
@@ -71,10 +71,41 @@ export default function AdminUserDetail() {
     }
   };
 
+  const fetchTabData = async (tab) => {
+    if (!currentUser || !uid || data?.[tab]) return;
+    const token = await currentUser.getIdToken();
+    try {
+      setLoading(true);
+      let endpoint = '';
+      if (tab === 'interviews') endpoint = `/api/admin/db/interviews?whereField=userId&whereOp===&whereValue=${uid}`;
+      else if (tab === 'submissions') endpoint = `/api/admin/db/submissions?whereField=userId&whereOp===&whereValue=${uid}`;
+      else if (tab === 'notifications') endpoint = `/api/admin/db/users/${uid}/notifications`;
+      else return;
+
+      const res = await fetch(`${VITE_API_BASE_URL}${endpoint}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setData(prev => ({ ...prev, [tab]: json.docs || [] }));
+      }
+    } catch (e) {
+      console.error("Tab fetch failed", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchFull();
+    fetchOverview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, currentUser?.uid]);
+
+  useEffect(() => {
+    if (activeTab === 'interviews' || activeTab === 'submissions' || activeTab === 'notifications') {
+      fetchTabData(activeTab);
+    }
+  }, [activeTab]);
 
   const save = async () => {
     if (!currentUser || !uid) return;
@@ -83,14 +114,14 @@ export default function AdminUserDetail() {
       const token = await currentUser.getIdToken();
       const authPatch = JSON.parse(authEditor || '{}');
       const profilePatch = JSON.parse(profileEditor || '{}');
-      const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users/${uid}/full`, {
+      const res = await fetch(`${VITE_API_BASE_URL}/api/admin/users/${uid}/detail`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ auth: authPatch, userProfiles: { data: profilePatch } }),
+        body: JSON.stringify({ auth: authPatch, profile: profilePatch }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || 'Failed to save');
-      await fetchFull();
+      await fetchOverview();
     } catch (e) {
       alert(e.message);
     } finally {
@@ -99,10 +130,11 @@ export default function AdminUserDetail() {
   };
 
   const statsCards = useMemo(() => {
-    const interviews = data?.interviews?.length || 0;
-    const submissions = data?.submissions?.length || 0;
-    const lists = data?.lists?.length || 0;
-    const notifs = data?.notifications?.length || 0;
+    // Only shows counts if data is loaded else shows ? to indicate lazy load
+    const interviews = data?.interviews ? data.interviews.length : '?';
+    const submissions = data?.submissions ? data.submissions.length : '?';
+    const lists = data?.lists ? data.lists.length : '?';
+    const notifs = data?.notifications ? data.notifications.length : '?';
     return [
       { label: 'Interviews', value: interviews, color: '#60a5fa' },
       { label: 'Submissions', value: submissions, color: '#34d399' },

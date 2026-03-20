@@ -42,8 +42,27 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+// Global stats for Admin Portal Metrics
+global.codeExecStats = {
+    totalJobs: 0,
+    failedJobs: 0,
+    recentJobs: [] // stores timestamps for jobs/sec calculation
+};
+global.activeExecutions = new Map(); // process.pid or sessionId -> reject/kill function
 
+global.aiStats = {
+    totalCalls: 0,
+    failedCalls: 0,
+    recentLatencies: [] // stores last 50 latencies in ms
+};
+
+// Periodic cleanup of recentJobs older than 60 seconds
+setInterval(() => {
+    const oneMinAgo = Date.now() - 60000;
+    global.codeExecStats.recentJobs = global.codeExecStats.recentJobs.filter(t => t > oneMinAgo);
+}, 60000);
+
+app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const razorpayParams = {

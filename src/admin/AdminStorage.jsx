@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { S3Client, ListObjectsV2Command, DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { HardDrive, Loader2, Trash2, ShieldAlert, File, ExternalLink, RefreshCw, Upload, Search, ArrowUpDown, FolderOpen } from 'lucide-react';
 
@@ -29,18 +29,18 @@ export default function AdminStorage() {
     const [sortDir, setSortDir] = useState("desc");
     const [uploading, setUploading] = useState(false);
 
-    const fetchObjects = async () => {
-        const command = new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix || undefined });
-        const response = await s3Client.send(command);
-        return response.Contents || [];
-    };
-
-    const { data: objects = [], isLoading, error, refetch } = useQuery({
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery({
         queryKey: ['admin-storage-objects', bucket, prefix],
-        queryFn: fetchObjects,
+        queryFn: async ({ pageParam = null }) => {
+            const command = new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix || undefined, ContinuationToken: pageParam || undefined });
+            return await s3Client.send(command);
+        },
+        getNextPageParam: (lastPage) => lastPage.NextContinuationToken || undefined,
         enabled: !!currentUser,
         retry: false
     });
+
+    const objects = data ? data.pages.flatMap(p => p.Contents || []) : [];
 
     const formatBytes = (bytes, decimals = 2) => {
         if (!+bytes) return '0 Bytes';
@@ -223,6 +223,17 @@ export default function AdminStorage() {
                         )}
                     </tbody>
                 </table>
+                {hasNextPage && (
+                    <div style={{ padding: '16px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                        <button 
+                            onClick={() => fetchNextPage()} 
+                            disabled={isFetchingNextPage}
+                            style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', padding: '8px 16px', borderRadius: '8px', color: '#60a5fa', cursor: isFetchingNextPage ? 'wait' : 'pointer' }}
+                        >
+                            {isFetchingNextPage ? 'Loading...' : 'Load More Files'}
+                        </button>
+                    </div>
+                )}
             </div>
 
             <style>{`

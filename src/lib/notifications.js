@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where, increment } from "firebase/firestore";
 import { db } from "../firebase";
 
 export function notificationsCol(uid) {
@@ -94,6 +94,10 @@ export async function createConnectRequestNotification(toUid, { fromUid, fromNam
 
 export async function setCampaignReceipt(uid, campaignId, patch) {
   const ref = doc(db, "users", uid, "campaignReceipts", campaignId);
+  const snap = await getDoc(ref);
+  const exists = snap.exists();
+  const existingData = exists ? snap.data() : {};
+
   await setDoc(
     ref,
     {
@@ -103,6 +107,17 @@ export async function setCampaignReceipt(uid, campaignId, patch) {
     },
     { merge: true }
   );
+
+  const increments = {};
+  if (patch.firstSeenAt && !existingData.firstSeenAt) increments["counters.seen"] = increment(1);
+  if (patch.readAt && !existingData.readAt) increments["counters.read"] = increment(1);
+  if (patch.clickedAt && !existingData.clickedAt) increments["counters.clicked"] = increment(1);
+  if (patch.dismissedAt && !existingData.dismissedAt) increments["counters.dismissed"] = increment(1);
+
+  if (Object.keys(increments).length > 0) {
+    const campaignRef = doc(db, "campaigns", campaignId);
+    await setDoc(campaignRef, increments, { merge: true }).catch((e) => console.warn("Atomic update failed", e));
+  }
 }
 
 /** Listen to ALL campaigns (admin use — no status filter). */

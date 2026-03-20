@@ -32,27 +32,33 @@ const verifyAdmin = async (req, res, next) => {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const uid = decodedToken.uid;
 
-        // Verify if this UID belongs to an admin.
-        // Option 1: Hardcoded list (e.g. env var ADMIN_UIDS)
-        // Option 2: Check Firestore custom claims or a specific 'admins' collection.
+        // Check Custom Claims first (Zero DB Hits)
+        if (['sD1yZ4068yO9a88xIeM3n7rU6hU2'].includes(uid) || decodedToken.admin === true || decodedToken.isAdmin === true) {
+            req.adminUser = decodedToken;
+            return next();
+        }
         
-        // For now, looking at the user's Firestore profile `isAdmin` flag in userProfiles:
+        // Fallback: Check Firestore profile. 
+        // If they are an admin, we will stamp their Firebase Auth with a custom claim 
+        // so future requests scale effortlessly without Firestore reads.
         const userDoc = await admin.firestore().collection('userProfiles').doc(uid).get();
         
         if (!userDoc.exists) {
-            // Fallback: If user not in userProfiles, check if UID is hardcoded admin
-            if (['sD1yZ4068yO9a88xIeM3n7rU6hU2'].includes(uid)) {
-                req.adminUser = decodedToken;
-                return next();
-            }
             return res.status(403).json({ error: "Forbidden: User profile not found." });
         }
         
         const userData = userDoc.data();
-        const isAdmin = userData.role === 'admin' || userData.isAdmin === true || ['sD1yZ4068yO9a88xIeM3n7rU6hU2'].includes(uid);
+        const isAdmin = userData.role === 'admin' || userData.isAdmin === true;
         
         if (!isAdmin) {
             return res.status(403).json({ error: "Forbidden: Admin privileges required." });
+        }
+
+        // Attach custom claim for future requests
+        try {
+            await admin.auth().setCustomUserClaims(uid, { ...decodedToken, isAdmin: true });
+        } catch (claimErr) {
+            console.warn("Could not set custom claim for admin", claimErr);
         }
 
         req.adminUser = decodedToken;
@@ -64,6 +70,13 @@ const verifyAdmin = async (req, res, next) => {
 };
 
 // ---------------------------------------------------------
+// Global Cache for Dashboard Stats
+// ---------------------------------------------------------
+let statsCache = null;
+let statsCacheTimestamp = 0;
+const STATS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+// ---------------------------------------------------------
 // 1. Authentication & User Management
 // ---------------------------------------------------------
 
@@ -73,7 +86,44 @@ router.get('/users', verifyAdmin, async (req, res) => {
         return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
     }
     try {
-        const listUsersResult = await admin.auth().listUsers(1000);
+        const pageToken = req.query.pageToken;
+        const limitCount = Math.min(parseInt(req.query.limit) || 1000, 1000);
+        const searchQuery = req.query.search ? String(req.query.search).trim() : null;
+
+        if (searchQuery) {
+            // Attempt exact O(1) matches before falling back to listing
+            let userRecord = null;
+            try {
+                if (searchQuery.includes('@')) {
+                    userRecord = await admin.auth().getUserByEmail(searchQuery);
+                } else {
+                    userRecord = await admin.auth().getUser(searchQuery).catch(() => null);
+                }
+            } catch (e) {
+                // Ignore if not found by exact match
+            }
+            if (userRecord) {
+                return res.json({
+                    users: [{
+                        uid: userRecord.uid,
+                        email: userRecord.email,
+                        displayName: userRecord.displayName,
+                        photoURL: userRecord.photoURL,
+                        disabled: userRecord.disabled,
+                        creationTime: userRecord.metadata.creationTime,
+                        lastSignInTime: userRecord.metadata.lastSignInTime,
+                    }],
+                    nextPageToken: null,
+                });
+            }
+
+            // Fallback for partial/name searches: search within a limited list. 
+            // Warning: Admin Auth doesn't support substring 'name' searches natively. 
+            // In a fully scaled system, we would query Firestore 'userProfiles' or Algolia here.
+            // For now, if exact matches fail, we fallback to a standard list to let client filter if it really wants to.
+        }
+
+        const listUsersResult = await admin.auth().listUsers(limitCount, pageToken);
         const users = listUsersResult.users.map(userRecord => ({
             uid: userRecord.uid,
             email: userRecord.email,
@@ -83,7 +133,7 @@ router.get('/users', verifyAdmin, async (req, res) => {
             creationTime: userRecord.metadata.creationTime,
             lastSignInTime: userRecord.metadata.lastSignInTime,
         }));
-        res.json({ users });
+        res.json({ users, nextPageToken: listUsersResult.pageToken });
     } catch (error) {
         console.error('Error listing users:', error);
         res.status(500).json({ error: 'Failed to list users' });
@@ -125,6 +175,8 @@ router.delete('/users/:uid', verifyAdmin, async (req, res) => {
 router.get('/db/:collectionName', verifyAdmin, async (req, res) => {
     const { collectionName } = req.params;
     const limitCount = Math.min(parseInt(req.query.limit) || 100, 500);
+    const offsetCount = parseInt(req.query.offset) || 0;
+    const startAfterDocId = req.query.startAfterDocId ? String(req.query.startAfterDocId) : null;
     
     try {
         let docs = [];
@@ -155,6 +207,14 @@ router.get('/db/:collectionName', verifyAdmin, async (req, res) => {
             if (orderByField) {
                 q = q.orderBy(orderByField, orderDir);
             }
+            if (startAfterDocId) {
+                const docSnap = await admin.firestore().collection(collectionName).doc(startAfterDocId).get();
+                if (docSnap.exists) {
+                    q = q.startAfter(docSnap);
+                }
+            } else if (offsetCount > 0) {
+                q = q.offset(offsetCount);
+            }
             const snapshot = await q.limit(limitCount).get();
             docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         } else {
@@ -164,7 +224,7 @@ router.get('/db/:collectionName', verifyAdmin, async (req, res) => {
             const snapshot = await getDocs(q);
             docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         }
-        res.json({ collection: collectionName, count: docs.length, docs });
+        res.json({ collection: collectionName, count: docs.length, offset: offsetCount, docs });
     } catch (error) {
         console.error(`Error reading collection ${collectionName}:`, error);
         res.status(500).json({ error: error.message });
@@ -430,8 +490,32 @@ router.get('/health', verifyAdmin, (req, res) => {
 // ---------------------------------------------------------
 router.get('/stats', verifyAdmin, async (req, res) => {
     try {
+        const now = Date.now();
+        // Return cached stats if valid, to prevent heavy RTDB / Firestore scans
+        if (statsCache && (now - statsCacheTimestamp < STATS_CACHE_TTL_MS)) {
+            // Re-merge live memory stats overriding cached memory stats
+            statsCache.execLoad = {
+                jobsPerMin: global.codeExecStats ? global.codeExecStats.recentJobs.length : 0,
+                failedJobs: global.codeExecStats ? global.codeExecStats.failedJobs : 0,
+                totalJobs: global.codeExecStats ? global.codeExecStats.totalJobs : 0
+            };
+            let avgLatency = 0;
+            if (global.aiStats && global.aiStats.recentLatencies.length > 0) {
+                avgLatency = Math.round(global.aiStats.recentLatencies.reduce((a, b) => a + b, 0) / global.aiStats.recentLatencies.length);
+            }
+            statsCache.aiUsage = {
+                totalCalls: global.aiStats ? global.aiStats.totalCalls : 0,
+                failedCalls: global.aiStats ? global.aiStats.failedCalls : 0,
+                avgLatencyMs: avgLatency
+            };
+            statsCache.serverUptime = process.uptime();
+            return res.json(statsCache);
+        }
+
         let totalUsers = 0;
         let eventsCount = 0;
+        let activeUsers = 0;
+        let runningInterviews = 0;
         
         if (admin.apps.length) {
             try {
@@ -443,19 +527,108 @@ router.get('/stats', verifyAdmin, async (req, res) => {
                 const logsReq = await admin.firestore().collection('admin_logs').count().get();
                 eventsCount = logsReq.data().count;
             } catch(e) { console.error("No logs", e); }
+
+            try {
+                const queryRef = admin.firestore().collection('interviews').where('status', '==', 'in-progress');
+                const snap = await queryRef.count().get();
+                runningInterviews = snap.data().count;
+            } catch(e) {}
         } else {
             try {
                 const snapshot = await getCountFromServer(collection(db, 'admin_logs'));
                 eventsCount = snapshot.data().count;
             } catch(e) { console.error("No logs", e); }
+
+            try {
+                const q = query(collection(db, 'interviews'), where('status', '==', 'in-progress'));
+                const snap = await getCountFromServer(q);
+                runningInterviews = snap.data().count;
+            } catch(e) {}
         }
 
-        res.json({
+        try {
+            // RTDB count active sessions ($O(1)$ lookup to prevent scaling crashes)
+            if (admin.apps.length && admin.database) {
+                const countSnap = await admin.database().ref('stats/active_user_count').once('value');
+                activeUsers = countSnap.val() || 0;
+            } else {
+                const countSnap = await rtdbGet(rtdbRef(rtdb, 'stats/active_user_count'));
+                activeUsers = countSnap.exists() ? countSnap.val() : 0;
+            }
+        } catch (e) {
+            console.error("Error fetching active users from RTDB", e);
+        }
+
+        // Execution Load
+        const execLoad = {
+            jobsPerMin: global.codeExecStats ? global.codeExecStats.recentJobs.length : 0,
+            failedJobs: global.codeExecStats ? global.codeExecStats.failedJobs : 0,
+            totalJobs: global.codeExecStats ? global.codeExecStats.totalJobs : 0
+        };
+
+        // AI Usage
+        let avgLatency = 0;
+        if (global.aiStats && global.aiStats.recentLatencies.length > 0) {
+            avgLatency = Math.round(global.aiStats.recentLatencies.reduce((a, b) => a + b, 0) / global.aiStats.recentLatencies.length);
+        }
+        const aiUsage = {
+            totalCalls: global.aiStats ? global.aiStats.totalCalls : 0,
+            failedCalls: global.aiStats ? global.aiStats.failedCalls : 0,
+            avgLatencyMs: avgLatency
+        };
+
+        // Live Revenue Calculation
+        let activePlans = 0;
+        try {
+            if (admin.apps.length) {
+                const queryRef = admin.firestore().collection('userProfiles').where('plan', '==', 'Blaze');
+                const snap = await queryRef.count().get();
+                activePlans = snap.data().count;
+            } else {
+                const q = query(collection(db, 'userProfiles'), where('plan', '==', 'Blaze'));
+                const snap = await getCountFromServer(q);
+                activePlans = snap.data().count;
+            }
+        } catch(e) {
+            console.error("Error fetching active plans", e);
+        }
+
+        const revenueSnapshot = {
+            plansActive: activePlans,
+            estimatedMRR: activePlans * 30 // Cost is 30 INR per plan
+        };
+
+        statsCache = {
             totalUsers,
             eventsCount,
+            activeUsers,
+            runningInterviews,
+            execLoad,
+            aiUsage,
+            revenueSnapshot,
             serverUptime: process.uptime(),
             dbStatus: 'Connected'
-        });
+        };
+        statsCacheTimestamp = Date.now();
+
+        res.json(statsCache);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Kill active executions
+router.post('/executions/kill-all', verifyAdmin, async (req, res) => {
+    try {
+        let killed = 0;
+        if (global.activeExecutions) {
+            for (const [id, killFn] of global.activeExecutions.entries()) {
+                killFn();
+                killed++;
+            }
+            global.activeExecutions.clear();
+        }
+        res.json({ success: true, killed });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -521,6 +694,24 @@ router.post('/config', verifyAdmin, async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+router.post('/maintenance/prune-logs', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
+        const days = parseInt(req.body.days) || 90;
+        const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+        
+        // Bounded query to avoid memory overload
+        const snap = await admin.firestore().collection('admin_logs').where('timestamp', '<', cutoff).limit(500).get();
+        const batch = admin.firestore().batch();
+        snap.docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+
+        res.json({ success: true, prunedCount: snap.size, moreRemaining: snap.size === 500 });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // ---------------------------------------------------------
 // 6. Notification Campaigns (Admin)
 // ---------------------------------------------------------
@@ -561,14 +752,14 @@ async function sendFcmForCampaign(campaignDoc, adminUid) {
 
     let tokenDocs = [];
     if (target.kind === 'uids' && Array.isArray(target.uids) && target.uids.length > 0) {
-        // Query subcollections per UID (bounded and safer than scanning).
+        // Query global collection by UID (fast and bounded).
         for (const uid of target.uids.slice(0, 500)) {
-            const snap = await admin.firestore().collection('userProfiles').doc(String(uid)).collection('fcmTokens').get();
+            const snap = await admin.firestore().collection('global_fcm_tokens').where('uid', '==', String(uid)).get();
             snap.forEach(d => tokenDocs.push({ uid, ...d.data() }));
         }
     } else {
-        // All users / broad segments: best-effort scan of token subcollections.
-        const snap = await admin.firestore().collectionGroup('fcmTokens').get();
+        // Broad campaigns: single scan of flattened list.
+        const snap = await admin.firestore().collection('global_fcm_tokens').get();
         snap.forEach(d => tokenDocs.push(d.data()));
     }
 
@@ -706,10 +897,27 @@ router.get('/notifications/campaigns/:id/analytics', verifyAdmin, async (req, re
     try {
         if (!admin.apps.length) return res.status(501).json({ error: "Firebase Admin SDK not configured on server.", requireKey: true });
         const campaignId = req.params.id;
+
+        // Fast path: use atomic counters directly
+        const campSnap = await admin.firestore().collection('campaigns').doc(campaignId).get();
+        const counters = campSnap.data()?.counters;
+        
+        if (counters) {
+            return res.json({ 
+                campaignId, 
+                receipts: (counters.seen||0) + (counters.read||0) + (counters.clicked||0) + (counters.dismissed||0), 
+                seen: counters.seen || 0, 
+                read: counters.read || 0, 
+                clicked: counters.clicked || 0, 
+                dismissed: counters.dismissed || 0 
+            });
+        }
+
+        // Legacy/Fallback Path: expensive collectionGroup scan for old campaigns
         const snap = await admin
             .firestore()
             .collectionGroup('campaignReceipts')
-            .where(FieldPath.documentId(), '==', campaignId)
+            .where(admin.firestore.FieldPath.documentId(), '==', campaignId)
             .get();
 
         let seen = 0, read = 0, clicked = 0, dismissed = 0;
