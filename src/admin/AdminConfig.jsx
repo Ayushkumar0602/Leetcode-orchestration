@@ -17,7 +17,8 @@ export default function AdminConfig() {
         supportEmail: 'support@whizan.xyz',
         appName: 'Whizan - AI Interview Prep',
         stripeTestMode: true,
-        aiModel: 'gpt-4o'
+        aiModel: 'gpt-4o',
+        keepAlivePing: true
     });
     
     const [saving, setSaving] = useState(false);
@@ -162,6 +163,7 @@ export default function AdminConfig() {
                         <div>
                             <ToggleRow name="stripeTestMode" label="Payment Test Mode" description="Use mock payments for Subscriptions" />
                             <SelectRow name="aiModel" label="Primary AI Model" options={['gpt-4o', 'gpt-4o-mini', 'claude-3.5-sonnet', 'gemini-1.5-pro']} />
+                            <ToggleRow name="keepAlivePing" label="Keep-Alive Ping" description="Send a ping every 13 minutes to prevent the server from spinning down." />
                         </div>
                         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '16px' }}>
                             <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--txt2)', marginBottom: '8px' }}><Bell size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}/> Webhook Endpoints</div>

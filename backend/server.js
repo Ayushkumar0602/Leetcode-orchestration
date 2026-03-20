@@ -42,6 +42,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const razorpayParams = {
@@ -1393,6 +1395,29 @@ console.log('[Cron] Subscription expiry check scheduled — daily at 9:00 AM IST
 app.get('/api/cron/check-expiry', async (req, res) => {
     const result = await runExpiryCheck();
     res.json(result);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Keep-Alive Ping (Prevent Render Spin-Down)
+// ─────────────────────────────────────────────────────────────────────────────
+cron.schedule('*/13 * * * *', async () => {
+    try {
+        const docSnap = await getDoc(doc(db, 'admin_settings', 'global'));
+        if (docSnap.exists()) {
+            const config = docSnap.data();
+            if (config.keepAlivePing === false) {
+                console.log('[Cron] Keep-Alive Ping is disabled in Admin Config.');
+                return;
+            }
+        }
+        
+        const targetUrl = process.env.RENDER_EXTERNAL_URL || 'https://leetcode-orchestration.onrender.com';
+        console.log(`[Cron] Executing Keep-Alive Ping to ${targetUrl}/api/ping...`);
+        const res = await fetch(`${targetUrl}/api/ping`);
+        console.log(`[Cron] Keep-Alive Ping status: ${res.status}`);
+    } catch (err) {
+        console.error('[Cron] Keep-Alive Ping failed:', err.message);
+    }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
