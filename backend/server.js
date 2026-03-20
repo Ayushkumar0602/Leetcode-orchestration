@@ -62,6 +62,24 @@ setInterval(() => {
     global.codeExecStats.recentJobs = global.codeExecStats.recentJobs.filter(t => t > oneMinAgo);
 }, 60000);
 
+// Admin Portal: Periodic Active User Sync (O(N) background, O(1) foreground)
+setInterval(async () => {
+    try {
+        const usersRef = rtdbRef(rtdb, 'users');
+        const snap = await get(usersRef);
+        if (snap.exists()) {
+            const users = snap.val();
+            let count = 0;
+            Object.values(users).forEach(u => {
+                if (u.sessions && Object.keys(u.sessions).length > 0) count++;
+            });
+            await set(rtdbRef(rtdb, 'stats/active_user_count'), count);
+        }
+    } catch (e) {
+        console.error("Presence sync failed", e);
+    }
+}, 120000); // 2 minutes interval is plenty for dashboard freshness
+
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 const Razorpay = require('razorpay');
 const crypto = require('crypto');

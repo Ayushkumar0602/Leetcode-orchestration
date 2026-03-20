@@ -935,4 +935,99 @@ router.get('/notifications/campaigns/:id/analytics', verifyAdmin, async (req, re
     }
 });
 
+// ---------------------------------------------------------
+// 7. Problem Management System (Admin)
+// ---------------------------------------------------------
+const { generateCodeAndTests } = require('../ai');
+const { executeCode } = require('../executor');
+
+// List all custom problems
+router.get('/problems', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
+        const snap = await admin.firestore().collection('admin_problems').orderBy('updatedAt', 'desc').get();
+        const problems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        res.json({ problems });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Create new problem
+router.post('/problems', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
+        const data = req.body;
+        data.version = 1;
+        data.disabled = false;
+        data.createdAt = new Date().toISOString();
+        data.updatedAt = data.createdAt;
+        data.createdBy = req.adminUser?.uid || 'admin';
+        
+        const ref = await admin.firestore().collection('admin_problems').add(data);
+        res.json({ id: ref.id, ...data });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Update existing problem (Versioning & Soft Delete)
+router.put('/problems/:id', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
+        const id = req.params.id;
+        const ref = admin.firestore().collection('admin_problems').doc(id);
+        const snap = await ref.get();
+        if (!snap.exists) return res.status(404).json({ error: 'Problem not found' });
+        
+        const oldData = snap.data();
+        // Archive old version
+        await ref.collection('versions').doc(`v${oldData.version}`).set(oldData);
+        
+        const newData = req.body;
+        newData.version = (oldData.version || 1) + 1;
+        newData.updatedAt = new Date().toISOString();
+        
+        await ref.set(newData, { merge: true });
+        res.json({ id, ...newData });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// AI Generation for problem
+router.post('/problems/generate', verifyAdmin, async (req, res) => {
+    try {
+        const { prompt, language } = req.body;
+        if (!prompt || !language) return res.status(400).json({ error: "prompt and language required" });
+        const generated = await generateCodeAndTests(prompt, language);
+        res.json(generated);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Validate test cases via executor
+router.post('/problems/validate', verifyAdmin, async (req, res) => {
+    const { code, wrapper, language, testCases } = req.body;
+    if (!code || !wrapper || !language || !testCases || !Array.isArray(testCases)) {
+        return res.status(400).json({ error: 'code, wrapper, language, and testCases array are required.' });
+    }
+    
+    // Combine code and wrapper for natively running the complete executable
+    const fullCode = code + '\n' + wrapper;
+    
+    try {
+        const results = [];
+        for (let i = 0; i < testCases.length; i++) {
+            const tc = testCases[i];
+            const result = await executeCode(fullCode, language, tc.input, tc.expectedOutput);
+            results.push({ ...result, label: tc.label || `Case ${i+1}`, isHidden: tc.isHidden });
+        }
+        res.json({ results });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
