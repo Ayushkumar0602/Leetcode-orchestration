@@ -13,6 +13,7 @@ export default function AdminProblemControl() {
     const { currentUser } = useAuth();
     const [problems, setProblems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     
     // Editor State
@@ -29,15 +30,18 @@ export default function AdminProblemControl() {
 
     const fetchProblems = async () => {
         setLoading(true);
+        setFetchError(null);
         try {
             const token = await currentUser?.getIdToken();
             const res = await fetch(`${API_BASE_URL}/api/admin/problems`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            if (data.problems) setProblems(data.problems);
+            if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+            setProblems(data.problems || []);
         } catch (e) {
-            console.error(e);
+            console.error('[fetchProblems]', e);
+            setFetchError(e.message);
         } finally {
             setLoading(false);
         }
@@ -281,49 +285,65 @@ export default function AdminProblemControl() {
                                     
                                     <h4 style={{ color: 'var(--txt2)' }}>Primary (Visible)</h4>
                                     {(editingProblem.primaryTestCases || []).map((tc, i) => (
-                                        <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                                        <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '8px', marginBottom: '10px', position: 'relative' }}>
+                                            <button onClick={() => {
+                                                const newTc = editingProblem.primaryTestCases.filter((_,j) => j !== i);
+                                                setEditingProblem({...editingProblem, primaryTestCases: newTc});
+                                            }} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239,68,68,0.2)', color: '#ef4444', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '0.75rem' }}>✕</button>
                                             <input style={{...inputStyle, marginBottom: '10px'}} value={tc.label || ''} placeholder="Label" 
                                                 onChange={e => {
                                                     const newTc = [...editingProblem.primaryTestCases];
-                                                    newTc[i].label = e.target.value;
+                                                    newTc[i] = {...newTc[i], label: e.target.value};
                                                     setEditingProblem({...editingProblem, primaryTestCases: newTc});
                                                 }} />
                                             <div style={{ display: 'flex', gap: '10px' }}>
                                                 <textarea style={{...inputStyle, flex: 1, minHeight: '60px', fontFamily: 'monospace'}} placeholder="Input (stdin)" value={tc.input || ''} 
                                                     onChange={e => {
                                                         const newTc = [...editingProblem.primaryTestCases];
-                                                        newTc[i].input = e.target.value;
+                                                        newTc[i] = {...newTc[i], input: e.target.value};
                                                         setEditingProblem({...editingProblem, primaryTestCases: newTc});
                                                     }} />
                                                 <textarea style={{...inputStyle, flex: 1, minHeight: '60px', fontFamily: 'monospace'}} placeholder="Expected Output (stdout)" value={tc.expectedOutput || ''} 
                                                     onChange={e => {
                                                         const newTc = [...editingProblem.primaryTestCases];
-                                                        newTc[i].expectedOutput = e.target.value;
+                                                        newTc[i] = {...newTc[i], expectedOutput: e.target.value};
                                                         setEditingProblem({...editingProblem, primaryTestCases: newTc});
                                                     }} />
                                             </div>
                                         </div>
                                     ))}
+                                    <button onClick={() => setEditingProblem({...editingProblem, primaryTestCases: [...(editingProblem.primaryTestCases||[]), {label: `Example ${(editingProblem.primaryTestCases||[]).length + 1}`, input: '', expectedOutput: ''}]})}
+                                        style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px dashed rgba(59,130,246,0.3)', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', width: '100%', marginBottom: '20px' }}>
+                                        + Add Visible Test Case
+                                    </button>
 
                                     <h4 style={{ color: 'var(--txt2)', marginTop: '20px' }}>Submit (Hidden)</h4>
                                     {(editingProblem.submitTestCases || []).map((tc, i) => (
-                                        <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                                        <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '8px', marginBottom: '10px', position: 'relative' }}>
+                                            <button onClick={() => {
+                                                const newTc = editingProblem.submitTestCases.filter((_,j) => j !== i);
+                                                setEditingProblem({...editingProblem, submitTestCases: newTc});
+                                            }} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239,68,68,0.2)', color: '#ef4444', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '0.75rem' }}>✕</button>
                                             <div style={{ display: 'flex', gap: '10px' }}>
                                                 <textarea style={{...inputStyle, flex: 1, minHeight: '60px', fontFamily: 'monospace'}} placeholder="Input (stdin)" value={tc.input || ''} 
                                                     onChange={e => {
                                                         const newTc = [...editingProblem.submitTestCases];
-                                                        newTc[i].input = e.target.value;
+                                                        newTc[i] = {...newTc[i], input: e.target.value};
                                                         setEditingProblem({...editingProblem, submitTestCases: newTc});
                                                     }} />
                                                 <textarea style={{...inputStyle, flex: 1, minHeight: '60px', fontFamily: 'monospace'}} placeholder="Expected Output (stdout)" value={tc.expectedOutput || ''} 
                                                     onChange={e => {
                                                         const newTc = [...editingProblem.submitTestCases];
-                                                        newTc[i].expectedOutput = e.target.value;
+                                                        newTc[i] = {...newTc[i], expectedOutput: e.target.value};
                                                         setEditingProblem({...editingProblem, submitTestCases: newTc});
                                                     }} />
                                             </div>
                                         </div>
                                     ))}
+                                    <button onClick={() => setEditingProblem({...editingProblem, submitTestCases: [...(editingProblem.submitTestCases||[]), {label: `Test ${(editingProblem.submitTestCases||[]).length + 1}`, input: '', expectedOutput: '', isHidden: true}]})}
+                                        style={{ background: 'rgba(139,92,246,0.1)', color: '#a78bfa', border: '1px dashed rgba(139,92,246,0.3)', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', width: '100%' }}>
+                                        + Add Hidden Test Case
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -388,8 +408,14 @@ export default function AdminProblemControl() {
             <div style={{ background: 'rgba(20,22,30,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                 {loading ? (
                     <div style={{ padding: '40px', textAlign: 'center', color: 'var(--txt2)' }}>Loading problems...</div>
+                ) : fetchError ? (
+                    <div style={{ padding: '40px', textAlign: 'center' }}>
+                        <div style={{ color: '#ef4444', fontWeight: 'bold', marginBottom: '8px' }}>⚠ Failed to load problems</div>
+                        <div style={{ color: 'var(--txt2)', fontSize: '0.85rem', fontFamily: 'monospace', marginBottom: '16px' }}>{fetchError}</div>
+                        <button onClick={fetchProblems} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>Retry</button>
+                    </div>
                 ) : problems.length === 0 ? (
-                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--txt2)' }}>No custom problems found. Create one above.</div>
+                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--txt2)' }}>No custom problems yet. Click <strong style={{color:'#fff'}}>+ New Problem</strong> to create one.</div>
                 ) : (
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>

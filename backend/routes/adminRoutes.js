@@ -944,11 +944,19 @@ const { executeCode } = require('../executor');
 // List all custom problems
 router.get('/problems', verifyAdmin, async (req, res) => {
     try {
-        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
-        const snap = await admin.firestore().collection('admin_problems').orderBy('updatedAt', 'desc').get();
-        const problems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        let problems = [];
+        if (admin.apps.length) {
+            const snap = await admin.firestore().collection('admin_problems').orderBy('updatedAt', 'desc').get();
+            problems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } else {
+            // Client SDK fallback (local dev without Admin SDK)
+            const { collection: col, getDocs: gd, query: q, orderBy: ob } = require('firebase/firestore');
+            const snap = await gd(q(col(db, 'admin_problems'), ob('updatedAt', 'desc')));
+            problems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
         res.json({ problems });
     } catch (e) {
+        console.error('[Problems GET]', e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -956,17 +964,28 @@ router.get('/problems', verifyAdmin, async (req, res) => {
 // Create new problem
 router.post('/problems', verifyAdmin, async (req, res) => {
     try {
-        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
-        const data = req.body;
-        data.version = 1;
-        data.disabled = false;
-        data.createdAt = new Date().toISOString();
-        data.updatedAt = data.createdAt;
-        data.createdBy = req.adminUser?.uid || 'admin';
+        const now = new Date().toISOString();
+        const data = {
+            ...req.body,
+            version: 1,
+            disabled: false,
+            createdAt: now,
+            updatedAt: now,
+            createdBy: req.adminUser?.uid || 'admin',
+        };
         
-        const ref = await admin.firestore().collection('admin_problems').add(data);
-        res.json({ id: ref.id, ...data });
+        let id;
+        if (admin.apps.length) {
+            const ref = await admin.firestore().collection('admin_problems').add(data);
+            id = ref.id;
+        } else {
+            const { collection: col, addDoc: ad } = require('firebase/firestore');
+            const ref = await ad(col(db, 'admin_problems'), data);
+            id = ref.id;
+        }
+        res.json({ id, ...data });
     } catch (e) {
+        console.error('[Problems POST]', e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -974,23 +993,31 @@ router.post('/problems', verifyAdmin, async (req, res) => {
 // Update existing problem (Versioning & Soft Delete)
 router.put('/problems/:id', verifyAdmin, async (req, res) => {
     try {
-        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
         const id = req.params.id;
-        const ref = admin.firestore().collection('admin_problems').doc(id);
-        const snap = await ref.get();
-        if (!snap.exists) return res.status(404).json({ error: 'Problem not found' });
+        const newData = { ...req.body };
         
-        const oldData = snap.data();
-        // Archive old version
-        await ref.collection('versions').doc(`v${oldData.version}`).set(oldData);
-        
-        const newData = req.body;
-        newData.version = (oldData.version || 1) + 1;
-        newData.updatedAt = new Date().toISOString();
-        
-        await ref.set(newData, { merge: true });
+        if (admin.apps.length) {
+            const ref = admin.firestore().collection('admin_problems').doc(id);
+            const snap = await ref.get();
+            if (!snap.exists) return res.status(404).json({ error: 'Problem not found' });
+            const oldData = snap.data();
+            // Archive old version to subcollection
+            await ref.collection('versions').doc(`v${oldData.version}`).set(oldData);
+            newData.version = (oldData.version || 1) + 1;
+            newData.updatedAt = new Date().toISOString();
+            await ref.set(newData, { merge: true });
+        } else {
+            const { doc: fsDoc, getDoc, setDoc } = require('firebase/firestore');
+            const ref = fsDoc(db, 'admin_problems', id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return res.status(404).json({ error: 'Problem not found' });
+            newData.version = (snap.data().version || 1) + 1;
+            newData.updatedAt = new Date().toISOString();
+            await setDoc(ref, newData, { merge: true });
+        }
         res.json({ id, ...newData });
     } catch (e) {
+        console.error('[Problems PUT]', e);
         res.status(500).json({ error: e.message });
     }
 });
