@@ -304,18 +304,16 @@ export default function Login() {
 
     if (view === 'onboarding') {
         return (
-            <div className="auth-page">
-                <CinemaPanel />
-                <div className="auth-panel ob-panel-right">
-                    <div className="ob-scroll-area">
-                        {/* Whizan logo — shown on mobile when left panel is hidden */}
-                        <div className="mobile-brand" style={{ marginBottom: '2rem' }}>
-                            <img src="/logo.jpeg" alt="Whizan AI" onError={e => e.target.style.display = 'none'} />
-                            <span>Whizan AI</span>
-                        </div>
-                        <OnboardingFlow redirectUrl={redirectUrl} />
-                    </div>
-                </div>
+            <div style={{
+                minHeight: '100vh',
+                background: 'var(--ob-bg, #030508)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem 1rem',
+                fontFamily: "'Inter', system-ui, sans-serif"
+            }}>
+                <OnboardingFlow redirectUrl={redirectUrl} />
             </div>
         );
     }

@@ -591,14 +591,7 @@ app.get('/api/profile/:uid', async (req, res) => {
 app.post('/api/profile/:uid', async (req, res) => {
     try {
         const profileRef = doc(db, 'userProfiles', req.params.uid);
-
-        // Strip fields that cannot be stored in Firestore:
-        // - avatarDataUrl: base64 image strings can be 100KB+ which may exceed
-        //   Firestore's 1MB document limit or per-field size limits.
-        // - parsedData: raw resume parse output is transient and not needed in the profile doc.
-        const { avatarDataUrl, parsedData, ...safeBody } = req.body;
-
-        await setDoc(profileRef, { ...safeBody, updatedAt: new Date().toISOString() }, { merge: true });
+        await setDoc(profileRef, { ...req.body, updatedAt: new Date().toISOString() }, { merge: true });
         res.json({ success: true });
     } catch (err) {
         console.error('Failed to save profile:', err);

@@ -256,41 +256,22 @@ function ResumeDropZone({ onFile, parsing, parsed }) {
 
 
 
-/* ─── STEP 1: Profile Completion ───────────────────────────── */
+/* ─── STEP 3: Profile Completion ───────────────────────────── */
 function Step1Profile({ data, onChange, onContinue, error }) {
-    const avatarInputRef = useRef(null);
     const addCompany = (c) => onChange('targetCompanies', [...(data.targetCompanies || []), c]);
     const removeCompany = (c) => onChange('targetCompanies', (data.targetCompanies || []).filter(x => x !== c));
 
     const canContinue = (data.name || '').trim().length > 0 && (data.targetCompanies || []).length >= 2;
 
-    const handleAvatarChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => onChange('avatarDataUrl', reader.result);
-        reader.readAsDataURL(file);
-        e.target.value = null;
-    };
-
     return (
         <motion.div key="step1" custom={1} variants={pageVariants} initial="enter" animate="center" exit="exit" className="ob-step-page">
             <motion.div variants={stagger} initial="hidden" animate="show" className="ob-step-content">
-
-                {/* Whizan Brand Header */}
-                <motion.div variants={fadeUp} className="ob-brand-header">
-                    <div className="ob-brand-logo-wrap">
-                        <img src="/logo.jpeg" alt="Whizan AI" className="ob-brand-logo" onError={e => e.target.style.display = 'none'} />
+                <motion.div variants={fadeUp} className="ob-step-header">
+                    <div className="ob-step-icon-wrap purple">
+                        <User size={24} />
                     </div>
-                    <div>
-                        <div className="ob-brand-name">Whizan AI</div>
-                        <div className="ob-brand-tagline">Your AI Interview Companion</div>
-                    </div>
-                </motion.div>
-
-                <motion.div variants={fadeUp} className="ob-step-header" style={{ marginBottom: '1.5rem' }}>
-                    <h2 className="ob-step-title">Let's set up your profile</h2>
-                    <p className="ob-step-sub">Personalize your experience — this takes under 2 minutes</p>
+                    <h2 className="ob-step-title">Complete your profile</h2>
+                    <p className="ob-step-sub">This helps us personalize your interview prep and portfolio</p>
                 </motion.div>
 
                 {error && (
@@ -298,33 +279,6 @@ function Step1Profile({ data, onChange, onContinue, error }) {
                         {error}
                     </motion.div>
                 )}
-
-                {/* Profile Picture Upload */}
-                <motion.div variants={fadeUp} className="ob-avatar-section">
-                    <div
-                        className="ob-avatar-ring"
-                        onClick={() => avatarInputRef.current?.click()}
-                        title="Click to upload photo"
-                    >
-                        {data.avatarDataUrl ? (
-                            <img src={data.avatarDataUrl} alt="Profile" className="ob-avatar-img" />
-                        ) : (
-                            <div className="ob-avatar-placeholder">
-                                <User size={28} />
-                            </div>
-                        )}
-                        <div className="ob-avatar-overlay">
-                            <Upload size={14} />
-                        </div>
-                    </div>
-                    <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
-                    <div className="ob-avatar-meta">
-                        <span className="ob-avatar-hint">Profile Photo</span>
-                        <span className="ob-recruiter-note">
-                            <span className="ob-recruiter-dot" /> Recruiters may see your image
-                        </span>
-                    </div>
-                </motion.div>
 
                 <motion.div variants={fadeUp} className="ob-form-grid">
                     {/* Name */}
@@ -674,7 +628,7 @@ function Step2Resume({ data, onChange, onContinue, onBack, error }) {
 }
 
 /* ─── STEP 3: Welcome Page ─────────────────────────────────── */
-function Step3Welcome({ name, company, onStart, loading, error, saved, onGoToDashboard }) {
+function Step3Welcome({ name, company, onStart, loading, error }) {
     const firstName = (name || 'there').split(' ')[0];
     return (
         <motion.div key="step3" custom={1} variants={pageVariants} initial="enter" animate="center" exit="exit" className="ob-step-page ob-welcome-page">
@@ -688,9 +642,9 @@ function Step3Welcome({ name, company, onStart, loading, error, saved, onGoToDas
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 className="ob-welcome-inner"
             >
-                {/* Icon */}
+                {/* Rocket emoji with pulse ring */}
                 <div className="ob-welcome-icon-ring">
-                    <span className="ob-welcome-emoji">{saved ? '✅' : '🚀'}</span>
+                    <span className="ob-welcome-emoji">🚀</span>
                 </div>
 
                 <motion.h1
@@ -699,9 +653,9 @@ function Step3Welcome({ name, company, onStart, loading, error, saved, onGoToDas
                     transition={{ delay: 0.2, duration: 0.6 }}
                     className="ob-welcome-title"
                 >
-                    {saved ? 'Profile Saved!' : 'Welcome to Whizan AI,'}
+                    Welcome to Whizan AI,
                     <br />
-                    <span className="ob-welcome-name">{saved ? 'You\'re all set.' : `${firstName}!`}</span>
+                    <span className="ob-welcome-name">{firstName}!</span>
                 </motion.h1>
 
                 <motion.p
@@ -710,10 +664,8 @@ function Step3Welcome({ name, company, onStart, loading, error, saved, onGoToDas
                     transition={{ delay: 0.35, duration: 0.6 }}
                     className="ob-welcome-sub"
                 >
-                    {saved
-                        ? 'All your profile data has been saved successfully. Head to your dashboard to start practising.'
-                        : `Your journey to smarter interview preparation starts now.${company ? ` Let's ace that ${company} interview together.` : ''}`
-                    }
+                    Your journey to smarter interview preparation starts now.
+                    {company && ` Let's ace that ${company} interview together.`}
                 </motion.p>
 
                 <motion.div
@@ -741,31 +693,19 @@ function Step3Welcome({ name, company, onStart, loading, error, saved, onGoToDas
                     </motion.div>
                 )}
 
-                {saved ? (
-                    <motion.button
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.65, duration: 0.6 }}
-                        className="ob-primary-btn ob-journey-btn"
-                        onClick={onGoToDashboard}
-                    >
-                        <CheckCircle2 size={18} /> Go to Dashboard
-                    </motion.button>
-                ) : (
-                    <motion.button
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.65, duration: 0.6 }}
-                        className="ob-primary-btn ob-journey-btn"
-                        onClick={onStart}
-                        disabled={loading}
-                    >
-                        {loading
-                            ? <><Loader2 size={18} className="ob-spin" /> Saving your profile...</>
-                            : <><Sparkles size={18} /> Save & Start Journey</>
-                        }
-                    </motion.button>
-                )}
+                <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.65, duration: 0.6 }}
+                    className="ob-primary-btn ob-journey-btn"
+                    onClick={onStart}
+                    disabled={loading}
+                >
+                    {loading
+                        ? <><Loader2 size={18} className="ob-spin" /> Setting up your workspace...</>
+                        : <><Sparkles size={18} /> Start Your Journey</>
+                    }
+                </motion.button>
             </motion.div>
         </motion.div>
     );
@@ -782,7 +722,6 @@ export default function OnboardingFlow({ redirectUrl = '/dashboard' }) {
     const [direction, setDirection] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [saved, setSaved] = useState(false);
 
     // Unified form state
     const [data, setData] = useState({
@@ -805,7 +744,6 @@ export default function OnboardingFlow({ redirectUrl = '/dashboard' }) {
         github: '',
         linkedin: '',
         wantPortfolio: true,
-        avatarDataUrl: '',
     });
 
     const onChange = (key, value) => setData(prev => ({ ...prev, [key]: value }));
@@ -835,17 +773,15 @@ export default function OnboardingFlow({ redirectUrl = '/dashboard' }) {
         setLoading(true);
         setError('');
         try {
-            // 1. Get Firebase ID token from context user (never null during onboarding)
-            const token = await currentUser.getIdToken();
+            // 1. Update Firebase display name + terms
+            await updateUserProfile({
+                displayName: data.name.trim(),
+                photoURL: null,
+                primaryInterest: data.primaryInterest,
+                termsAccepted: true,
+            });
 
-            // 2. Update Firebase displayName
-            const { updateProfile } = await import('firebase/auth');
-            const { auth } = await import('../firebase');
-            if (data.name.trim() && auth.currentUser) {
-                await updateProfile(auth.currentUser, { displayName: data.name.trim() });
-            }
-
-            // 3. Build full profile payload
+            // 2. Build full profile payload
             const profilePayload = {
                 displayName: data.name.trim(),
                 primaryInterest: data.primaryInterest,
@@ -856,6 +792,7 @@ export default function OnboardingFlow({ redirectUrl = '/dashboard' }) {
                 wantPortfolio: data.wantPortfolio,
                 termsAccepted: true,
                 isFirstTimeUser: false,
+                // Portfolio fields from resume parsing
                 bio: data.bio,
                 github: data.github,
                 linkedin: data.linkedin,
@@ -866,30 +803,18 @@ export default function OnboardingFlow({ redirectUrl = '/dashboard' }) {
                 projects: data.projects,
             };
 
-            // 4. Authenticated POST to backend
-            const res = await fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, {
+            // 3. Update backend profile
+            await fetch(`https://leetcode-orchestration.onrender.com/api/profile/${currentUser.uid}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(profilePayload),
             });
 
-            if (!res.ok) {
-                const errText = await res.text();
-                console.error('Profile save failed:', res.status, errText);
-                setError(`Save failed (${res.status}). ${errText || 'Please try again.'}`);
-                setLoading(false);
-                return;
-            }
-
-            // 5. Mark onboarding complete
+            // 4. Mark onboarding as done so returning users skip it
             localStorage.setItem(`onboarded_${currentUser.uid}`, 'true');
 
-            // 6. Show saved confirmation (don't auto-redirect)
-            setSaved(true);
-            setLoading(false);
+            // 5. Navigate
+            navigate(redirectUrl, { replace: true });
         } catch (err) {
             console.error(err);
             setError('Something went wrong. Please try again.');
@@ -928,8 +853,6 @@ export default function OnboardingFlow({ redirectUrl = '/dashboard' }) {
                         onStart={handleStart}
                         loading={loading}
                         error={error}
-                        saved={saved}
-                        onGoToDashboard={() => navigate(redirectUrl, { replace: true })}
                     />
                 )}
             </AnimatePresence>

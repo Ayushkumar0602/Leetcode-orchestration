@@ -237,21 +237,6 @@
     background: var(--bg);
 }
 
-/* Onboarding right panel — wider since form is complex */
-.auth-panel.ob-panel-right {
-    align-items: flex-start;
-    overflow-y: auto;
-    max-height: 100vh;
-    padding: 3rem 2rem;
-}
-
-.ob-scroll-area {
-    width: 100%;
-    max-width: 820px;
-    margin: 0 auto;
-    padding-bottom: 3rem;
-}
-
 /* Subtle right-side glow */
 .auth-panel::before {
     content: '';
