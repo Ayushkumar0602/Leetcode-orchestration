@@ -914,34 +914,39 @@ const { getInterviewerResponse, analyzeCode: analyzeInterviewCode, evaluateInter
 
 // --- Project AI Extraction Route ---
 app.post('/api/project/extract-readme', async (req, res) => {
-    const { githubUrl } = req.body;
-    if (!githubUrl) return res.status(400).json({ error: 'githubUrl is required' });
+    const { githubUrl, readmeContent } = req.body;
+    if (!githubUrl && !readmeContent) return res.status(400).json({ error: 'GitHub URL or README content is required' });
 
     try {
-        // 1. Extract owner/repo
-        // Supports: https://github.com/owner/repo or github.com/owner/repo
-        const match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
-        if (!match) return res.status(400).json({ error: 'Invalid GitHub URL' });
-
-        const owner = match[1];
-        const repo = match[2].replace(/\.git$/, '');
-
-        // 2. Fetch README from GitHub API (or raw content)
-        // We'll try common branches: main, master
         let readmeText = '';
-        const branches = ['main', 'master'];
-        for (const branch of branches) {
-            try {
-                const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/README.md`);
-                if (response.ok) {
-                    readmeText = await response.text();
-                    break;
-                }
-            } catch (e) { }
-        }
 
-        if (!readmeText) {
-            return res.status(404).json({ error: 'README.md not found in main/master branch. Please ensure it exists.' });
+        if (readmeContent) {
+            readmeText = readmeContent;
+        } else {
+            // 1. Extract owner/repo
+            // Supports: https://github.com/owner/repo or github.com/owner/repo
+            const match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
+            if (!match) return res.status(400).json({ error: 'Invalid GitHub URL' });
+
+            const owner = match[1];
+            const repo = match[2].replace(/\.git$/, '');
+
+            // 2. Fetch README from GitHub API (or raw content)
+            // We'll try common branches: main, master
+            const branches = ['main', 'master'];
+            for (const branch of branches) {
+                try {
+                    const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/README.md`);
+                    if (response.ok) {
+                        readmeText = await response.text();
+                        break;
+                    }
+                } catch (e) { }
+            }
+
+            if (!readmeText) {
+                return res.status(404).json({ error: 'README.md not found in main/master branch. Please ensure it exists.' });
+            }
         }
 
         // 3. Extract with AI
