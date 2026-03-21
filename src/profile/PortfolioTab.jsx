@@ -308,19 +308,20 @@ export default function PortfolioTab({ uid, profile, onSave, setIsAIProcessing }
             const data = await res.json();
             if (data.profile) {
                 const mapped = data.profile;
-                const newForm = {
-                    ...form,
-                    bio: mapped.bio || form.bio,
-                    github: mapped.github || form.github,
-                    portfolio: mapped.portfolio || form.portfolio,
-                    skills: [...new Set([...(form.skills || []), ...(mapped.skills || [])])],
-                    certifications: [...new Set([...(form.certifications || []), ...(mapped.certifications || [])])],
-                    experience: mapped.experience && mapped.experience.length ? mapped.experience : form.experience,
-                    education: mapped.education && mapped.education.length ? mapped.education : form.education,
-                    projects: mapped.projects && mapped.projects.length ? mapped.projects : form.projects
-                };
-                setForm(newForm);
-                await onSave(newForm);
+                setForm(p => {
+                    return {
+                        ...p,
+                        bio: mapped.bio || p.bio,
+                        github: mapped.github || p.github,
+                        linkedin: mapped.linkedin || p.linkedin,
+                        portfolio: mapped.portfolio || p.portfolio,
+                        skills: [...new Set([...(p.skills || []), ...(mapped.skills || [])])],
+                        certifications: [...new Set([...(p.certifications || []), ...(mapped.certifications || [])])],
+                        experience: mapped.experience && mapped.experience.length ? mapped.experience : p.experience,
+                        education: mapped.education && mapped.education.length ? mapped.education : p.education,
+                        projects: mapped.projects && mapped.projects.length ? mapped.projects : p.projects
+                    };
+                });
             }
         } catch (err) {
             console.error(err);

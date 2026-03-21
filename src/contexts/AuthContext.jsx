@@ -170,7 +170,7 @@ export function AuthProvider({ children }) {
         throw new Error('Invalid magic link.');
     };
 
-    // ── Update User Profile (Onboarding) ──────────────────────────
+    // ── Update User Profile ──────────────────────────────────────
     const updateUserProfile = async ({ displayName, photoURL, primaryInterest, termsAccepted }) => {
         if (!auth.currentUser) return;
         
@@ -185,7 +185,7 @@ export function AuthProvider({ children }) {
         // Also update the backend profile
         try {
             await fetch(`${API_BASE}/api/profile/${auth.currentUser.uid}`, {
-                method: 'POST',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     displayName: displayName || auth.currentUser.displayName,
