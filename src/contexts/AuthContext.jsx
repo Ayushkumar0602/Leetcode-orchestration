@@ -185,7 +185,7 @@ export function AuthProvider({ children }) {
         // Also update the backend profile
         try {
             await fetch(`${API_BASE}/api/profile/${auth.currentUser.uid}`, {
-                method: 'PATCH',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     displayName: displayName || auth.currentUser.displayName,

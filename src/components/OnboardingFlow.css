@@ -24,10 +24,162 @@
 /* ── Outer shell ─────────────────────────────────────────────── */
 .ob-root {
     width: 100%;
-    max-width: 520px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ── Brand Header ────────────────────────────────────────────── */
+.ob-brand-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.ob-brand-logo-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.ob-brand-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.ob-brand-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(90deg, #fff 40%, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ob-brand-tagline {
+    font-size: 0.72rem;
+    color: var(--ob-muted);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* ── Avatar Upload ───────────────────────────────────────────── */
+.ob-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(168, 85, 247, 0.03);
+    border: 1px dashed rgba(168, 85, 247, 0.2);
+    border-radius: 16px;
+}
+
+.ob-avatar-ring {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    background: rgba(168, 85, 247, 0.08);
+    border: 2px solid rgba(168, 85, 247, 0.3);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.ob-avatar-ring:hover {
+    border-color: var(--ob-purple);
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15), 0 8px 24px rgba(168, 85, 247, 0.2);
+    transform: scale(1.04);
+}
+
+.ob-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.ob-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ob-muted);
+}
+
+.ob-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.ob-avatar-ring:hover .ob-avatar-overlay {
+    opacity: 1;
+}
+
+.ob-avatar-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+
+.ob-avatar-hint {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ob-text);
+}
+
+.ob-recruiter-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: #f59e0b;
+    font-weight: 500;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.ob-recruiter-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f59e0b;
+    display: inline-block;
+    animation: ob-recruit-blink 2s ease-in-out infinite;
+}
+
+@keyframes ob-recruit-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
 }
 
 /* ── Step Indicator (Progress Bar) ──────────────────────────── */
@@ -115,6 +267,45 @@
     gap: 0;
 }
 
+/* ── Cinematic Intro ─────────────────────────────────────────── */
+.ob-cinematic-intro {
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.ob-cinematic-intro::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(40px);
+    animation: ob-glow-pulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes ob-glow-pulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+}
+
+/* ── Features Grid ───────────────────────────────────────────── */
+.ob-features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 1.5rem;
+}
+.ob-features-grid .span-2 {
+    grid-column: span 2;
+}
+
 /* ── Step Header ─────────────────────────────────────────────── */
 .ob-step-header {
     display: flex;
@@ -183,8 +374,8 @@
 .ob-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 1.5rem;
+    gap: 20px;
+    margin-bottom: 2rem;
 }
 
 .ob-field-group {
@@ -258,7 +449,7 @@
 .ob-goal-cards {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 20px;
 }
 
 .ob-goal-card {
@@ -1145,7 +1336,10 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    .ob-root {
+        padding: 0 1rem;
+    }
     .ob-form-grid {
         grid-template-columns: 1fr;
     }
@@ -1153,7 +1347,7 @@
         grid-column: span 1;
     }
     .ob-goal-cards {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
     }
     .ob-portfolio-choices {
         grid-template-columns: 1fr;

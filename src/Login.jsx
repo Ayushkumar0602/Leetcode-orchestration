@@ -183,13 +183,13 @@ export default function Login() {
     }, []);
 
     useEffect(() => {
-        if (currentUser?.emailVerified && view !== 'onboarding') {
-            // Check first-time user: no displayName = definitely first time
+        if (currentUser?.emailVerified && view !== 'onboarding' && view !== 'verify-email' && view !== 'magic-sent') {
+            // Check first-time user: missing displayName or no onboarded flag
             const isFirstTime = !currentUser.displayName || localStorage.getItem(`onboarded_${currentUser.uid}`) !== 'true';
-            if (isFirstTime && !currentUser.displayName) setView('onboarding');
+            if (isFirstTime) setView('onboarding');
             else navigate(redirectUrl, { replace: true });
         }
-    }, [currentUser]);
+    }, [currentUser, view, navigate, redirectUrl]);
 
     useEffect(() => {
         if (lockoutTime > 0) {
@@ -304,16 +304,18 @@ export default function Login() {
 
     if (view === 'onboarding') {
         return (
-            <div style={{
-                minHeight: '100vh',
-                background: 'var(--ob-bg, #030508)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2rem 1rem',
-                fontFamily: "'Inter', system-ui, sans-serif"
-            }}>
-                <OnboardingFlow redirectUrl={redirectUrl} />
+            <div className="auth-page">
+                <CinemaPanel />
+                <div className="auth-panel ob-panel-right">
+                    <div className="ob-scroll-area">
+                        {/* Whizan logo — shown on mobile when left panel is hidden */}
+                        <div className="mobile-brand" style={{ marginBottom: '2rem' }}>
+                            <img src="/logo.jpeg" alt="Whizan AI" onError={e => e.target.style.display = 'none'} />
+                            <span>Whizan AI</span>
+                        </div>
+                        <OnboardingFlow redirectUrl={redirectUrl} />
+                    </div>
+                </div>
             </div>
         );
     }
