@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Check, Filter, MessageSquare, Sparkles, X, Bell, Megaphone,
@@ -38,6 +40,7 @@ const priorityClass = (p) => `notif-announcement-p${Math.min(Math.max(p || 1, 1)
 export default function NotificationCenter() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const uid = currentUser?.uid;
 
   const [personal, setPersonal] = useState([]);
@@ -45,6 +48,14 @@ export default function NotificationCenter() {
   const [receipts, setReceipts] = useState(new Map());
   const [filter, setFilter] = useState("all");
   const [markingAll, setMarkingAll] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+
+  useEffect(() => {
+    if (!uid) return;
+    getDoc(doc(db, "userProfiles", uid)).then(snap => {
+      setUserProfile(snap.exists() ? snap.data() : {});
+    }).catch(() => setUserProfile({}));
+  }, [uid]);
 
   useEffect(() => {
     if (!uid) return;
@@ -55,7 +66,35 @@ export default function NotificationCenter() {
   }, [uid]);
 
   const merged = useMemo(() => {
-    const activeCampaigns = campaigns.map((c) => {
+    let activeCampaigns = campaigns;
+    if (userProfile) {
+      activeCampaigns = campaigns.filter((c) => {
+        const target = c.target || { kind: "all" };
+        if (target.kind === "individual") {
+          if (!target.userIds || !target.userIds.includes(uid)) return false;
+        } else if (target.kind === "group" && target.groups) {
+          const plan = (userProfile.plan || "free").toLowerCase();
+          const role = (userProfile.role || "user").toLowerCase();
+          const isAdmin = userProfile.isAdmin === true;
+          const isBeta = userProfile.isBeta === true;
+          let match = false;
+          target.groups.forEach(g => {
+            const group = String(g).toLowerCase();
+            if (plan === group || role === group) match = true;
+            if (group === "admin" && isAdmin) match = true;
+            if (group === "beta" && isBeta) match = true;
+          });
+          if (!match) return false;
+        }
+        if (c.targetPage) {
+            const path = location.pathname;
+            if (!path.startsWith(c.targetPage)) return false;
+        }
+        return true;
+      });
+    }
+
+    const campaignItems = activeCampaigns.map((c) => {
       const r = receipts.get(c.id) || {};
       return {
         ...c, id: c.id,
@@ -69,7 +108,7 @@ export default function NotificationCenter() {
     });
     const items = [
       ...personal.map((p) => ({ ...p, _source: "personal", display: p.display || p.type || "feed" })),
-      ...activeCampaigns,
+      ...campaignItems,
     ];
     items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     return items;

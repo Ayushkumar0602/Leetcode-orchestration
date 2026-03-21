@@ -56,6 +56,7 @@ const EMPTY_DRAFT = {
   startAt: null,
   endAt: null,
   target: { kind: "all" },
+  targetPage: "",
   status: "draft",
 };
 
@@ -277,6 +278,7 @@ export default function AdminNotifications() {
       startAt: c.startAt || c.createdAt || new Date().toISOString(),
       endAt: c.endAt || null,
       target: c.target || { kind: "all" },
+      targetPage: c.targetPage || "",
       status: c.status || "draft",
     });
     setShowEditor(true);
@@ -722,6 +724,19 @@ export default function AdminNotifications() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Target Webpage */}
+                <div>
+                  <span className="notif-label">Target Webpage (Optional)</span>
+                  <div style={{ position: "relative" }}>
+                    <Layout size={14} style={{ position: "absolute", left: 12, top: 13, color: "var(--txt3)" }} />
+                    <input className="notif-input" style={{ paddingLeft: 34 }} value={draft.targetPage || ""}
+                      onChange={(e) => setDraft((p) => ({ ...p, targetPage: e.target.value }))} placeholder="e.g. /interviews (leave empty for all pages)" />
+                  </div>
+                  <div style={{ fontSize: "0.6875rem", color: "var(--txt3)", marginTop: 4 }}>
+                    Only users on this specific path (or matching path prefix) will see the popup.
+                  </div>
                 </div>
 
                 {/* Preview */}

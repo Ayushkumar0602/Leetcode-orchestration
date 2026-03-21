@@ -732,7 +732,8 @@ function normalizeCampaign(body, adminUid) {
         ctaLink: body.ctaLink || null,
         ctaSecondaryText: body.ctaSecondaryText || null,
         ctaSecondaryLink: body.ctaSecondaryLink || null,
-        target: body.target || { kind: 'all' }, // { kind:'all' } | {kind:'uids', uids:[...]} | {kind:'segment', segment:'...'}
+        target: body.target || { kind: 'all' }, // { kind:'all' } | {kind:'individual', userIds:[...]} | {kind:'group', groups:[...]}
+        targetPage: body.targetPage || '',
         priority: Number.isFinite(body.priority) ? body.priority : 0,
         startAt: body.startAt || now,
         endAt: body.endAt || body.expiresAt || null,
@@ -751,16 +752,48 @@ async function sendFcmForCampaign(campaignDoc, adminUid) {
     const target = c.target || { kind: 'all' };
 
     let tokenDocs = [];
-    if (target.kind === 'uids' && Array.isArray(target.uids) && target.uids.length > 0) {
+    if (target.kind === 'individual' && Array.isArray(target.userIds) && target.userIds.length > 0) {
         // Query global collection by UID (fast and bounded).
-        for (const uid of target.uids.slice(0, 500)) {
+        for (const uid of target.userIds.slice(0, 500)) {
             const snap = await admin.firestore().collection('global_fcm_tokens').where('uid', '==', String(uid)).get();
             snap.forEach(d => tokenDocs.push({ uid, ...d.data() }));
         }
-    } else {
+    } else if (target.kind === 'group' && Array.isArray(target.groups) && target.groups.length > 0) {
+        // Fetch all profiles to filter by plan/role
+        const profilesSnap = await admin.firestore().collection('userProfiles').get();
+        const validUids = new Set();
+        profilesSnap.forEach(doc => {
+            const data = doc.data() || {};
+            const plan = (data.plan || 'free').toLowerCase();
+            const role = (data.role || 'user').toLowerCase();
+            const isAdmin = data.isAdmin === true;
+            const isBeta = data.isBeta === true;
+            let match = false;
+            
+            target.groups.forEach(g => {
+                const group = String(g).toLowerCase();
+                if (plan === group || role === group) match = true;
+                if (group === 'admin' && isAdmin) match = true;
+                if (group === 'beta' && isBeta) match = true;
+            });
+
+            if (match) validUids.add(doc.id);
+        });
+
+        // Now fetch all tokens and filter by validUids
+        const snap = await admin.firestore().collection('global_fcm_tokens').get();
+        snap.forEach(d => {
+            const data = d.data();
+            if (data.uid && validUids.has(data.uid)) {
+                tokenDocs.push(data);
+            }
+        });
+    } else if (target.kind === 'all') {
         // Broad campaigns: single scan of flattened list.
         const snap = await admin.firestore().collection('global_fcm_tokens').get();
         snap.forEach(d => tokenDocs.push(d.data()));
+    } else {
+        console.warn('Unknown or empty campaign target:', target);
     }
 
     const tokens = tokenDocs.map(t => t.token).filter(Boolean);
@@ -787,6 +820,7 @@ async function sendFcmForCampaign(campaignDoc, adminUid) {
                 title: c.title || '',
                 body: c.message || '',
                 link: c.link || '/notifications',
+                targetPage: c.targetPage || '',
                 ...(c.imageUrl ? { imageUrl: c.imageUrl } : {}),
                 ...(c.videoUrl ? { videoUrl: c.videoUrl } : {})
             },
