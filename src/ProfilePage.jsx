@@ -274,6 +274,7 @@ export default function ProfilePage() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [isUploading, setIsUploading] = useState(false);
+    const [isAIProcessing, setIsAIProcessing] = useState(false); // New state for AI processing
     const [editorFile, setEditorFile] = useState(null);
     const [showAvatarMenu, setShowAvatarMenu] = useState(false);
     const fileInputRef = useRef(null);
@@ -594,7 +595,7 @@ export default function ProfilePage() {
             {/* Tab content */}
             <div style={{ maxWidth: '1300px', margin: '0 auto', padding: window.innerWidth <= 768 ? '1.5rem 1rem' : '2rem 1.5rem' }}>
                 {activeTab === 'overview' && <OverviewTab userStats={userStats} totalCounts={totalCounts} validInterviews={validInterviews} avgScore={avgScore} interviews={interviews} badges={badges} loading={loading} navigate={navigate} profile={profile} openUpgrade={() => setUpgradeModalOpen(true)} />}
-                {activeTab === 'portfolio' && <PortfolioTab uid={currentUser?.uid} profile={profile} onSave={saveProfile} />}
+                {activeTab === 'portfolio' && <PortfolioTab uid={currentUser?.uid} profile={profile} onSave={saveProfile} setIsAIProcessing={setIsAIProcessing} />}
                 {activeTab === 'customization' && <CustomizationTab preferences={profile.preferences} onSave={saveProfile} />}
                 {activeTab === 'security' && <SecurityTab currentUser={currentUser} />}
                 {activeTab === 'data' && <DataTab currentUser={currentUser} userStats={userStats} interviews={allInterviews} />}
@@ -606,6 +607,36 @@ export default function ProfilePage() {
                 user={currentUser}
                 onUpgradeSuccess={() => setProfile(p => ({ ...p, plan: 'Blaze', planExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() }))}
             />
+
+            {/* AI Processing Overlay */}
+            {isAIProcessing && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 2000,
+                    background: 'rgba(5, 5, 5, 0.85)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '20px',
+                    animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    <div style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        border: '4px solid rgba(168, 85, 247, 0.1)',
+                        borderTopColor: '#a855f7',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <div style={{ textAlign: 'center' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>AI is working...</h2>
+                        <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.6)', margin: 0 }}>Extracting details from your resume with magic ✨</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

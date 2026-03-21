@@ -267,7 +267,7 @@ function CertInput({ certs, onAdd, onRemove }) {
 }
 
 // ── Main PortfolioTab ─────────────────────────────────────────────
-export default function PortfolioTab({ uid, profile, onSave }) {
+export default function PortfolioTab({ uid, profile, onSave, setIsAIProcessing }) {
     const [form, setForm] = useState({ bio: '', github: '', linkedin: '', portfolio: '', resume: '', skills: [], certifications: [], education: [], experience: [], projects: [], ...profile });
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -283,39 +283,44 @@ export default function PortfolioTab({ uid, profile, onSave }) {
         const file = e.target.files[0];
         if (!file) return;
         setParsingTarget(true);
+        setIsAIProcessing(true); // Show global spinner
         try {
             const rdr = new FileReader();
-            rdr.onload = async () => {
-                const b64 = rdr.result.split(',')[1];
-                const res = await fetch('https://leetcode-orchestration.onrender.com/api/resume/parse', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ base64Data: b64, mimeType: file.type })
+            const result = await new Promise((resolve, reject) => {
+                rdr.onload = () => resolve(rdr.result);
+                rdr.onerror = reject;
+                rdr.readAsDataURL(file);
+            });
+            
+            const b64 = result.split(',')[1];
+            const res = await fetch('https://leetcode-orchestration.onrender.com/api/resume/parse', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ base64Data: b64, mimeType: file.type })
+            });
+            const data = await res.json();
+            if (data.profile) {
+                const mapped = data.profile;
+                setForm(p => {
+                    return {
+                        ...p,
+                        bio: mapped.bio || p.bio,
+                        github: mapped.github || p.github,
+                        linkedin: mapped.linkedin || p.linkedin,
+                        portfolio: mapped.portfolio || p.portfolio,
+                        skills: [...new Set([...(p.skills || []), ...(mapped.skills || [])])],
+                        certifications: [...new Set([...(p.certifications || []), ...(mapped.certifications || [])])],
+                        experience: mapped.experience && mapped.experience.length ? mapped.experience : p.experience,
+                        education: mapped.education && mapped.education.length ? mapped.education : p.education,
+                        projects: mapped.projects && mapped.projects.length ? mapped.projects : p.projects
+                    };
                 });
-                const data = await res.json();
-                if (data.profile) {
-                    const mapped = data.profile;
-                    setForm(p => {
-                        return {
-                            ...p,
-                            bio: mapped.bio || p.bio,
-                            github: mapped.github || p.github,
-                            linkedin: mapped.linkedin || p.linkedin,
-                            portfolio: mapped.portfolio || p.portfolio,
-                            skills: [...new Set([...(p.skills || []), ...(mapped.skills || [])])],
-                            certifications: [...new Set([...(p.certifications || []), ...(mapped.certifications || [])])],
-                            experience: mapped.experience && mapped.experience.length ? mapped.experience : p.experience,
-                            education: mapped.education && mapped.education.length ? mapped.education : p.education,
-                            projects: mapped.projects && mapped.projects.length ? mapped.projects : p.projects
-                        };
-                    });
-                }
-            };
-            rdr.readAsDataURL(file);
+            }
         } catch (err) {
             console.error(err);
             alert("Failed to parse resume.");
         } finally {
             setParsingTarget(false);
+            setIsAIProcessing(false); // Hide global spinner
             e.target.value = null;
         }
     };
@@ -381,6 +386,7 @@ export default function PortfolioTab({ uid, profile, onSave }) {
                                 onClick={async () => {
                                     if (!manualReadmeModal.text.trim()) return;
                                     setManualReadmeModal(p => ({ ...p, enhancing: true }));
+                                    setIsAIProcessing(true); // Show global spinner
                                     try {
                                         const res = await fetch('https://leetcode-orchestration.onrender.com/api/project/extract-readme', {
                                             method: 'POST',
@@ -406,6 +412,8 @@ export default function PortfolioTab({ uid, profile, onSave }) {
                                     } catch (err) {
                                         console.error(err);
                                         setManualReadmeModal(p => ({ ...p, error: "Failed to extract project details. Please try again.", enhancing: false }));
+                                    } finally {
+                                        setIsAIProcessing(false); // Hide global spinner
                                     }
                                 }}
                                 disabled={manualReadmeModal.enhancing || (!manualReadmeModal.text.trim())}
@@ -489,6 +497,7 @@ export default function PortfolioTab({ uid, profile, onSave }) {
                                 onEnhance={async () => {
                                     if (!p.link || !p.link.includes('github.com')) return;
                                     setParsingTarget(`proj-${i}`);
+                                    setIsAIProcessing(true); // Show global spinner
                                     try {
                                         const res = await fetch('https://leetcode-orchestration.onrender.com/api/project/extract-readme', {
                                             method: 'POST',
@@ -514,6 +523,7 @@ export default function PortfolioTab({ uid, profile, onSave }) {
                                         alert("Failed to extract project details. Please try again.");
                                     } finally {
                                         setParsingTarget(false);
+                                        setIsAIProcessing(false); // Hide global spinner
                                     }
                                 }}
                             />

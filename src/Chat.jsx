@@ -93,16 +93,21 @@ export default function Chat() {
         }
       });
 
-      // Mark unread messages as seen
+      // Mark unread messages as delivered/seen
       if (!myUid || !activeConversationId) return;
       
       let changed = false;
       const updates = {};
       arr.forEach(m => {
-        if (m.senderUid !== myUid && m.status !== 'seen') {
-          // Double check path and usage of update
-          updates[`messages/${m.id}/status`] = 'seen';
-          changed = true;
+        if (m.senderUid !== myUid) {
+          if (m.status === 'sent') {
+            updates[`messages/${m.id}/status`] = 'delivered';
+            changed = true;
+          }
+          if (m.status !== 'seen') {
+            updates[`messages/${m.id}/status`] = 'seen';
+            changed = true;
+          }
         }
       });
       if (changed) {
@@ -178,9 +183,15 @@ export default function Chat() {
       const updates = {};
       let changed = false;
       Object.entries(v).forEach(([id, m]) => {
-        if (m.senderUid !== myUid && m.status !== 'seen') {
-          updates[`messages/${id}/status`] = 'seen';
-          changed = true;
+        if (m.senderUid !== myUid) {
+          if (m.status === 'sent') {
+            updates[`messages/${id}/status`] = 'delivered';
+            changed = true;
+          }
+          if (m.status !== 'seen') {
+            updates[`messages/${id}/status`] = 'seen';
+            changed = true;
+          }
         }
       });
       if (changed) update(ref(rtdb, `chats/${activeConversationId}`), updates).catch(() => {});
@@ -602,6 +613,8 @@ export default function Chat() {
                               <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, color: m.status === 'seen' ? '#3b82f6' : 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>
                                 {m.status === 'seen' ? (
                                   <><CheckCheck size={14} /> <span>Seen</span></>
+                                ) : m.status === 'delivered' ? (
+                                  <><CheckCheck size={14} /> <span>Delivered</span></>
                                 ) : (
                                   <><Check size={14} /> <span>Sent</span></>
                                 )}
