@@ -13,7 +13,7 @@ const THEMES = [
 ];
 
 const LAYOUTS = ['Compact', 'Comfortable', 'Wide'];
-const TEMPLATES = ['Signature', 'Cinematic', 'Interactive3D'];
+const TEMPLATES = ['Signature', 'Cinematic', 'Interactive3D', 'SplitScreen', 'CodeEditor', 'Dashboard', 'AIChat', 'GlassFuturistic', 'Gamified'];
 
 export default function CustomizationTab({ preferences, onSave }) {
     const [prefs, setPrefs] = useState({
@@ -94,11 +94,7 @@ export default function CustomizationTab({ preferences, onSave }) {
                                             transition: 'all 0.2s'
                                         }}
                                     >
-                                        {t === 'Signature'
-                                            ? 'Signature (default)'
-                                            : t === 'Cinematic'
-                                                ? 'Cinematic'
-                                                : 'Interactive 3D'}
+                                        {t === 'Signature' ? 'Signature (default)' : t === 'Interactive3D' ? 'Interactive 3D' : t === 'AIChat' ? 'AI Chat' : t.replace(/([A-Z])/g, ' $1').trim()}
                                     </button>
                                 ))}
                             </div>

@@ -13,6 +13,13 @@ import { rtdb } from './firebase';
 import { ref, onValue, update, set, serverTimestamp } from 'firebase/database';
 import { createConnectRequestNotification } from './lib/notifications';
 
+import SplitScreenTheme from './profile/themes/SplitScreenTheme';
+import CodeEditorTheme from './profile/themes/CodeEditorTheme';
+import DashboardTheme from './profile/themes/DashboardTheme';
+import AIChatTheme from './profile/themes/AIChatTheme';
+import GlassFuturisticTheme from './profile/themes/GlassFuturisticTheme';
+import GamifiedTheme from './profile/themes/GamifiedTheme';
+
 // ── Devicon ──────────────────────────────────────────────────────
 const DEVICON_MAP = { react: 'react', javascript: 'javascript', typescript: 'typescript', python: 'python', nodejs: 'nodejs', 'node.js': 'nodejs', java: 'java', cpp: 'cplusplus', 'c++': 'cplusplus', c: 'c', go: 'go', rust: 'rust', swift: 'swift', kotlin: 'kotlin', dart: 'dart', flutter: 'flutter', html: 'html5', css: 'css3', sass: 'sass', tailwind: 'tailwindcss', mongodb: 'mongodb', postgres: 'postgresql', postgresql: 'postgresql', mysql: 'mysql', redis: 'redis', firebase: 'firebase', docker: 'docker', kubernetes: 'kubernetes', git: 'git', github: 'github', linux: 'linux', aws: 'amazonwebservices', gcp: 'googlecloud', azure: 'azure', graphql: 'graphql', nextjs: 'nextjs', 'next.js': 'nextjs', vuejs: 'vuejs', 'vue.js': 'vuejs', angular: 'angularjs', django: 'django', flask: 'flask', express: 'express', figma: 'figma', redux: 'redux', vite: 'vite' };
 const devIcon = s => { const n = DEVICON_MAP[s.toLowerCase().replace(/\s/g, '')]; return n ? `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${n}/${n}-original.svg` : null; };
@@ -1326,6 +1333,21 @@ export default function PublicProfile() {
     const hasProjects = (profile.projects || []).length > 0;
     const hasSkills = (profile.skills || []).length > 0;
     const hasCerts = (profile.certifications || []).length > 0;
+
+    const themeProps = {
+        profile, stats, totalCounts, recentInv, validInvCount, badges, unlockedBadges, 
+        avg, hasProjects, hasExperience, hasEducation, hasSkills, hasCerts, T,
+        navigate, uid, myUid: currentUser?.uid, isSelf, primaryCta,
+        connectModalOpen, setConnectModalOpen, connectMessage, setConnectMessage,
+        connectBusy, sendConnectRequest, isDark
+    };
+
+    if (template === 'SplitScreen') return <SplitScreenTheme {...themeProps} />;
+    if (template === 'CodeEditor') return <CodeEditorTheme {...themeProps} />;
+    if (template === 'Dashboard') return <DashboardTheme {...themeProps} />;
+    if (template === 'AIChat') return <AIChatTheme {...themeProps} />;
+    if (template === 'GlassFuturistic') return <GlassFuturisticTheme {...themeProps} />;
+    if (template === 'Gamified') return <GamifiedTheme {...themeProps} />;
 
     // Interactive 3D template
     if (template === 'Interactive3D') {
