@@ -39,6 +39,7 @@ import PortfolioLanding from './PortfolioLanding';
 // Components
 import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
+import TermsAndConditions from './TermsAndConditions';
 
 function App() {
   return (
@@ -79,6 +80,9 @@ function App() {
             {/* Blog Routes */}
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            
+            {/* Terms Route */}
+            <Route path="/terms" element={<TermsAndConditions />} />
             
             <Route path="/" element={<LandingPage />} />
             

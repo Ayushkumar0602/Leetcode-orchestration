@@ -171,7 +171,7 @@ export function AuthProvider({ children }) {
     };
 
     // ── Update User Profile (Onboarding) ──────────────────────────
-    const updateUserProfile = async ({ displayName, photoURL, primaryInterest }) => {
+    const updateUserProfile = async ({ displayName, photoURL, primaryInterest, termsAccepted }) => {
         if (!auth.currentUser) return;
         
         const updateData = {};
@@ -190,7 +190,8 @@ export function AuthProvider({ children }) {
                 body: JSON.stringify({ 
                     displayName: displayName || auth.currentUser.displayName,
                     photoURL: photoURL || auth.currentUser.photoURL,
-                    primaryInterest: primaryInterest || 'DSA'
+                    primaryInterest: primaryInterest || 'DSA',
+                    termsAccepted: termsAccepted
                 }),
             });
         } catch (err) {

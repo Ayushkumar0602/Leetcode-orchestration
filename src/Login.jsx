@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext';
 import { auth } from './firebase';
 import {
-    Brain, Mail, Lock, Eye, EyeOff, User, AlertCircle, Loader2,
-    Sparkles, Image, Code2, Terminal, Shield, Zap, ChevronRight
+    Mail, Lock, Eye, EyeOff, AlertCircle, Loader2,
+    Sparkles, Terminal, Shield, Zap
 } from 'lucide-react';
 import './Login.css';
 import { useSEO } from './hooks/useSEO';
+import OnboardingFlow from './components/OnboardingFlow';
 
 /* ─── Icons ────────────────────────────────────────────────────── */
 const GithubIcon = ({ size = 20 }) => (
@@ -159,9 +160,6 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(true);
-    const [name, setName] = useState('');
-    const [photoUrl, setPhotoUrl] = useState('');
-    const [primaryInterest, setPrimaryInterest] = useState('DSA');
 
     const [error, setError] = useState('');
     const [info, setInfo] = useState('');
@@ -186,7 +184,9 @@ export default function Login() {
 
     useEffect(() => {
         if (currentUser?.emailVerified && view !== 'onboarding') {
-            if (!currentUser.displayName) setView('onboarding');
+            // Check first-time user: no displayName = definitely first time
+            const isFirstTime = !currentUser.displayName || localStorage.getItem(`onboarded_${currentUser.uid}`) !== 'true';
+            if (isFirstTime && !currentUser.displayName) setView('onboarding');
             else navigate(redirectUrl, { replace: true });
         }
     }, [currentUser]);
@@ -209,7 +209,7 @@ export default function Login() {
                     clearInterval(pollingRef.current); pollingRef.current = null;
                     setView('onboarding');
                 }
-            } catch (_) { }
+            } catch { /* ignore poll errors */ }
         }, 3000);
     }
 
@@ -224,7 +224,10 @@ export default function Login() {
         try {
             const r = await method();
             if (typeof window !== 'undefined' && window.gtag) window.gtag('event', 'login', { method: r.providerId });
-            if (!r.user.displayName) setView('onboarding'); else navigate(redirectUrl, { replace: true });
+            // For OAuth: route to onboarding if no display name or never onboarded
+            const neverOnboarded = localStorage.getItem(`onboarded_${r.user.uid}`) !== 'true';
+            if (!r.user.displayName || neverOnboarded) setView('onboarding');
+            else navigate(redirectUrl, { replace: true });
         } catch (err) {
             if (err.code === 'auth/account-exists-with-different-credential')
                 setError('Account exists with another sign-in method.');
@@ -267,14 +270,6 @@ export default function Login() {
         finally { setLoading(false); }
     }
 
-    async function handleOnboarding(e) {
-        e.preventDefault(); if (!name.trim()) { setError('Please enter your name.'); return; }
-        setError(''); setLoading(true);
-        try { await updateUserProfile({ displayName: name.trim(), photoURL: photoUrl || null, primaryInterest }); navigate(redirectUrl, { replace: true }); }
-        catch (_) { setError('Could not save profile.'); }
-        finally { setLoading(false); }
-    }
-
     function friendly(err) {
         const m = { 'auth/email-already-in-use': 'Email is already registered. Try signing in.', 'auth/invalid-email': 'Invalid email.', 'auth/wrong-password': 'Wrong password.', 'auth/invalid-credential': 'Incorrect email or password.', 'auth/user-not-found': 'No account found. Sign up first.', 'auth/too-many-requests': 'Too many attempts. Please wait.' };
         return m[err.code] || err.message || 'Something went wrong.';
@@ -309,45 +304,16 @@ export default function Login() {
 
     if (view === 'onboarding') {
         return (
-            <div className="auth-page">
-                <CinemaPanel />
-                <div className="auth-panel">
-                    <motion.div className="auth-box" initial="hidden" animate="show" variants={stagger}>
-                        <motion.div variants={item}>
-                            <h2 className="auth-box-title">Welcome aboard! 🎉</h2>
-                            <p className="auth-box-sub">Tell us a bit about yourself to get started.</p>
-                        </motion.div>
-                        <Banner message={error} />
-                        <motion.form variants={stagger} onSubmit={handleOnboarding}>
-                            <motion.div variants={item} className="auth-field">
-                                <span className="auth-field-icon"><User size={16} /></span>
-                                <input type="text" className="auth-input" placeholder="Your full name" value={name} onChange={e => setName(e.target.value)} autoFocus required />
-                            </motion.div>
-                            <motion.div variants={item} className="auth-field">
-                                <span className="auth-field-icon"><Image size={16} /></span>
-                                <input type="url" className="auth-input" placeholder="Avatar URL (optional)" value={photoUrl} onChange={e => setPhotoUrl(e.target.value)} />
-                            </motion.div>
-                            <motion.div variants={item}>
-                                <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>Primary Goal</p>
-                                <div className="role-pick">
-                                    {[
-                                        { id: 'DSA', label: 'DSA Prep', sub: 'Leetcode & Algorithms', Icon: Code2 },
-                                        { id: 'SystemDesign', label: 'System Design', sub: 'HLD & Architecture', Icon: Brain }
-                                    ].map(({ id, label, sub, Icon }) => (
-                                        <div key={id} className={`role-pick-card ${primaryInterest === id ? 'active' : ''}`} onClick={() => setPrimaryInterest(id)}>
-                                            <Icon size={24} />
-                                            <span className="role-pick-card-label">{label}</span>
-                                            <span className="role-pick-card-sub">{sub}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </motion.div>
-                            <motion.button variants={item} className="auth-primary-btn" type="submit" disabled={loading}>
-                                {loading ? <Loader2 size={16} className="spin" /> : <>Start Practicing <ChevronRight size={16} /></>}
-                            </motion.button>
-                        </motion.form>
-                    </motion.div>
-                </div>
+            <div style={{
+                minHeight: '100vh',
+                background: 'var(--ob-bg, #030508)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem 1rem',
+                fontFamily: "'Inter', system-ui, sans-serif"
+            }}>
+                <OnboardingFlow redirectUrl={redirectUrl} />
             </div>
         );
     }
