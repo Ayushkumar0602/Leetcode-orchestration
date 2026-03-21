@@ -93,19 +93,20 @@ export default function Chat() {
         }
       });
 
-      // Mark unread messages as read
+      // Mark unread messages as seen
       if (!myUid || !activeConversationId) return;
       
       let changed = false;
       const updates = {};
       arr.forEach(m => {
-        if (m.senderUid !== myUid && m.status !== 'read') {
-          updates[`chats/${activeConversationId}/messages/${m.id}/status`] = 'read';
+        if (m.senderUid !== myUid && m.status !== 'seen') {
+          // Double check path and usage of update
+          updates[`messages/${m.id}/status`] = 'seen';
           changed = true;
         }
       });
       if (changed) {
-        update(ref(rtdb), updates).catch(err => console.error("Error marking as read", err));
+        update(ref(rtdb, `chats/${activeConversationId}`), updates).catch(() => {});
       }
     });
 
@@ -168,6 +169,22 @@ export default function Chat() {
     update(ref(rtdb, `chats/${activeConversationId}/meta`), {
       [`unread_${myUid}`]: null, // clear unread flag when opening chat
     }).catch(() => {});
+
+    // Proactively mark all messages from peer as seen when chat becomes active
+    const msgRef = ref(rtdb, `chats/${activeConversationId}/messages`);
+    onValue(msgRef, (snap) => {
+      const v = snap.val();
+      if (!v) return;
+      const updates = {};
+      let changed = false;
+      Object.entries(v).forEach(([id, m]) => {
+        if (m.senderUid !== myUid && m.status !== 'seen') {
+          updates[`messages/${id}/status`] = 'seen';
+          changed = true;
+        }
+      });
+      if (changed) update(ref(rtdb, `chats/${activeConversationId}`), updates).catch(() => {});
+    }, { onlyOnce: true });
   }, [activeConversationId, myUid]);
 
   const peerProfile = activePeerUid ? profilesByUid[activePeerUid] : null;
@@ -582,9 +599,9 @@ export default function Chat() {
                             
                             {/* Status indicator for active user's messages */}
                             {mine && (
-                              <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, color: m.status === 'read' ? '#3b82f6' : 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>
-                                {m.status === 'read' ? (
-                                  <><CheckCheck size={14} /> <span>Read</span></>
+                              <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, color: m.status === 'seen' ? '#3b82f6' : 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>
+                                {m.status === 'seen' ? (
+                                  <><CheckCheck size={14} /> <span>Seen</span></>
                                 ) : (
                                   <><Check size={14} /> <span>Sent</span></>
                                 )}
@@ -763,15 +780,18 @@ export default function Chat() {
       <style>{`
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        /* Scrollbar styles applied globally */
+        html, body, div, textarea {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
         @media (max-width: 980px) {
           .chat-grid { grid-template-columns: 1fr !important; }
         }
-        /* Custom sleek scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
-        * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.12) transparent; }
       `}</style>
     </div>
   );
