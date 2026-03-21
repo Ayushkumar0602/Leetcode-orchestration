@@ -220,6 +220,12 @@ export default function NotificationPopupManager() {
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
   const shownRef = useRef(new Set());
   const [userProfile, setUserProfile] = useState(null);
+  const locationRef = useRef(location.pathname);
+
+  // Keep locationRef updated
+  useEffect(() => {
+    locationRef.current = location.pathname;
+  }, [location.pathname]);
 
   // Fetch user profile
   useEffect(() => {
@@ -248,6 +254,9 @@ export default function NotificationPopupManager() {
     let unsub = () => {};
     (async () => {
       unsub = await listenForegroundFcmMessages((payload) => {
+        const targetPage = payload?.data?.targetPage;
+        if (targetPage && !locationRef.current.startsWith(targetPage)) return;
+
         const title = payload?.notification?.title || payload?.data?.title || "Notification";
         const message = payload?.notification?.body || payload?.data?.body || "";
         const link = payload?.data?.link || "/notifications";

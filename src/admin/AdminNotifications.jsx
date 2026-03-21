@@ -284,10 +284,11 @@ export default function AdminNotifications() {
     setShowEditor(true);
   };
 
-  const save = async () => {
-    if (!currentUser) return;
-    if (!draft.title || !draft.message) { showToast("Title and message are required", "error"); return; }
+  const save = async (returnId = false) => {
+    if (!currentUser) return null;
+    if (!draft.title || !draft.message) { showToast("Title and message are required", "error"); return null; }
     setSaving(true);
+    let newId = selected;
     try {
       if (selected) {
         await adminFetch(currentUser, `/api/admin/notifications/campaigns/${selected}`, {
@@ -295,24 +296,28 @@ export default function AdminNotifications() {
         });
         showToast("Campaign updated");
       } else {
-        await adminFetch(currentUser, "/api/admin/notifications/campaigns", {
+        const res = await adminFetch(currentUser, "/api/admin/notifications/campaigns", {
           method: "POST", body: JSON.stringify(draft),
         });
         showToast("Campaign created");
+        if (res?.campaign?.id) newId = res.campaign.id;
       }
       await refetch();
     } catch (e) { showToast(e.message, "error"); }
     setSaving(false);
+    return newId;
   };
 
   const activate = async ({ push }) => {
-    if (!selected) return;
-    setSaving(true);
     try {
-      await adminFetch(currentUser, `/api/admin/notifications/campaigns/${selected}/activate`, {
+      const activeId = await save(true);
+      if (!activeId) return;
+      setSaving(true);
+      await adminFetch(currentUser, `/api/admin/notifications/campaigns/${activeId}/activate`, {
         method: "POST", body: JSON.stringify({ push: push === true }),
       });
-      showToast(push ? "Campaign activated + push sent" : "Campaign activated");
+      showToast(push ? "Campaign activated & pushed" : "Campaign activated");
+      setSelected(activeId);
       await refetch();
     } catch (e) { showToast(e.message, "error"); }
     setSaving(false);
@@ -745,16 +750,16 @@ export default function AdminNotifications() {
                 {/* Actions */}
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}>
                   <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-                    <button className="notif-btn notif-btn-success" style={{ flex: 1 }} onClick={save} disabled={saving}>
+                    <button className="notif-btn notif-btn-success" style={{ flex: 1 }} onClick={() => save(false)} disabled={saving}>
                       <Save size={15} /> {saving ? "Saving..." : "Save"}
                     </button>
-                    <button className="notif-btn notif-btn-blue" style={{ flex: 1 }} disabled={!selected || saving}
-                      onClick={() => activate({ push: false })} title={selected ? "Activate (in-app)" : "Save first"}>
+                    <button className="notif-btn notif-btn-blue" style={{ flex: 1 }} disabled={saving}
+                      onClick={() => activate({ push: false })} title="Activate (in-app)">
                       <Send size={15} /> Activate
                     </button>
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button className="notif-btn notif-btn-primary" style={{ flex: 1 }} disabled={!selected || saving}
+                    <button className="notif-btn notif-btn-primary" style={{ flex: 1 }} disabled={saving}
                       onClick={() => activate({ push: true })} title="Activate + FCM push">
                       <Send size={15} /> Activate + Push
                     </button>
