@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Github, Linkedin, Globe, Plus, X, Briefcase, GraduationCap, Code2, Link2, FileText, ExternalLink, ChevronDown, ChevronUp, Upload, Loader2 } from 'lucide-react';
+import { Github, Linkedin, Globe, Plus, X, Briefcase, GraduationCap, Code2, Link2, FileText, ExternalLink, ChevronDown, ChevronUp, Upload, Loader2, MapPin, Target, Layers, Compass } from 'lucide-react';
 
 // ── Devicon resolver ──────────────────────────────────────────────
 const DEVICON_MAP = {
@@ -53,6 +53,14 @@ function OverviewCard({ form }) {
     return (
         <div className="ov-card">
             <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(168,85,247,0.6)', textTransform: 'uppercase', marginBottom: '10px' }}>⚡ Live Portfolio Preview</div>
+            
+            {(form.preferredRole || form.location) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    {form.preferredRole && <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#fff' }}>{form.preferredRole}</div>}
+                    {form.location && <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={10} />{form.location}</div>}
+                </div>
+            )}
+            
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '1rem' }}>
                 {form.bio && <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.65)', margin: 0, fontStyle: 'italic', flex: 1 }}>"{form.bio}"</p>}
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -268,13 +276,13 @@ function CertInput({ certs, onAdd, onRemove }) {
 
 // ── Main PortfolioTab ─────────────────────────────────────────────
 export default function PortfolioTab({ uid, profile, onSave, setIsAIProcessing }) {
-    const [form, setForm] = useState({ bio: '', github: '', linkedin: '', portfolio: '', resume: '', skills: [], certifications: [], education: [], experience: [], projects: [], ...profile });
+    const [form, setForm] = useState({ bio: '', location: '', preferredRole: '', primaryInterest: '', targetCompanies: [], github: '', linkedin: '', portfolio: '', resume: '', skills: [], certifications: [], education: [], experience: [], projects: [], ...profile });
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [parsingTarget, setParsingTarget] = useState(false);
     const [manualReadmeModal, setManualReadmeModal] = useState({ show: false, index: null, error: '', text: '', enhancing: false });
 
-    useEffect(() => { setForm(p => ({ bio: '', github: '', linkedin: '', portfolio: '', resume: '', skills: [], certifications: [], education: [], experience: [], projects: [], ...profile })); }, [profile]);
+    useEffect(() => { setForm({ bio: '', location: '', preferredRole: '', primaryInterest: '', targetCompanies: [], github: '', linkedin: '', portfolio: '', resume: '', skills: [], certifications: [], education: [], experience: [], projects: [], ...profile }); }, [profile]);
 
     const save = async () => { setSaving(true); await onSave(form); setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2200); };
 
@@ -450,6 +458,42 @@ export default function PortfolioTab({ uid, profile, onSave, setIsAIProcessing }
                                     <input className="pf-input" value={form[s.key] || ''} onChange={e => upd(s.key, e.target.value)} placeholder={s.placeholder} style={{ border: 'none', borderRadius: 0, height: '40px', padding: '0 12px', flex: 1 }} />
                                 </div>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Career Details */}
+                    <div className="pf-section">
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 1.25rem', color: '#fff' }}>
+                            <Compass size={16} color="#06b6d4" /> Career Details
+                        </h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+                            <div>
+                                <label className="pf-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><MapPin size={12} /> Location</label>
+                                <input className="pf-input" value={form.location || ''} onChange={e => upd('location', e.target.value)} placeholder="City, Country" />
+                            </div>
+                            <div>
+                                <label className="pf-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Briefcase size={12} /> Preferred Role</label>
+                                <input className="pf-input" value={form.preferredRole || ''} onChange={e => upd('preferredRole', e.target.value)} placeholder="e.g. Frontend Engineer" />
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '14px' }}>
+                            <label className="pf-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><Layers size={12} /> Primary Goal</label>
+                            <select 
+                                className="pf-input" 
+                                value={form.primaryInterest || ''} 
+                                onChange={e => upd('primaryInterest', e.target.value)}
+                                style={{ appearance: 'none', cursor: 'pointer', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2364748b\' stroke-width=\'2\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
+                            >
+                                <option value="" style={{ background: '#141620' }}>Select primary goal...</option>
+                                <option value="DSA" style={{ background: '#141620' }}>DSA Prep (LeetCode & Algorithms)</option>
+                                <option value="SystemDesign" style={{ background: '#141620' }}>System Design (HLD & Architecture)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="pf-label" style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}><Target size={12} /> Target Companies</label>
+                            <CertInput certs={form.targetCompanies || []} onAdd={v => addTag('targetCompanies', v)} onRemove={v => rmTag('targetCompanies', v)} />
                         </div>
                     </div>
 
