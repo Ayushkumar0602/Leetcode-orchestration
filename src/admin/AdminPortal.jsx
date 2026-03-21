@@ -16,6 +16,8 @@ import AdminConfig from './AdminConfig';
 import AdminLogs from './AdminLogs';
 import AdminNotifications from './AdminNotifications';
 import AdminUserDetail from './AdminUserDetail';
+import AdminCourses from './AdminCourses';
+import { BookOpen } from 'lucide-react';
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -42,6 +44,7 @@ export default function AdminPortal() {
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
         { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
         { path: '/admin/config', icon: Settings, label: 'Configuration' },
+        { path: '/admin/courses', icon: BookOpen, label: 'Course Management' },
         { path: '/admin/logs', icon: Activity, label: 'Activity Logs' },
     ];
 
@@ -126,6 +129,7 @@ export default function AdminPortal() {
                     <Route path="/storage" element={<AdminStorage />} />
                     <Route path="/notifications" element={<AdminNotifications />} />
                     <Route path="/config" element={<AdminConfig />} />
+                    <Route path="/courses" element={<AdminCourses />} />
                     <Route path="/logs" element={<AdminLogs />} />
                 </Routes>
             </div>
