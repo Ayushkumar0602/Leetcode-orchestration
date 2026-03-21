@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ref, onValue, push, set, update, serverTimestamp } from 'firebase/database';
-import { MessageSquare, UserPlus, Check, X, Paperclip, Send, ExternalLink, Loader2, File as FileIcon } from 'lucide-react';
+import { MessageSquare, UserPlus, Check, CheckCheck, X, Paperclip, Send, ExternalLink, Loader2, File as FileIcon } from 'lucide-react';
 import NavProfile from './NavProfile';
 import { useAuth } from './contexts/AuthContext';
 import { rtdb } from './firebase';
@@ -43,6 +43,8 @@ export default function Chat() {
 
   const [profilesByUid, setProfilesByUid] = useState({});
   const [preview, setPreview] = useState(null); // { url, mime, name }
+  const textInputRef = useRef(null);
+  const [conversationsMeta, setConversationsMeta] = useState({});
 
   useEffect(() => {
     if (!currentUser) return;
@@ -85,7 +87,26 @@ export default function Chat() {
       const arr = Object.entries(v).map(([id, m]) => ({ id, ...m }));
       arr.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
       setMessages(arr);
-      requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }));
+      requestAnimationFrame(() => {
+        if (bottomRef.current) {
+          bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+
+      // Mark unread messages as read
+      if (!myUid || !activeConversationId) return;
+      
+      let changed = false;
+      const updates = {};
+      arr.forEach(m => {
+        if (m.senderUid !== myUid && m.status !== 'read') {
+          updates[`chats/${activeConversationId}/messages/${m.id}/status`] = 'read';
+          changed = true;
+        }
+      });
+      if (changed) {
+        update(ref(rtdb), updates).catch(err => console.error("Error marking as read", err));
+      }
     });
 
     return () => unsub();
@@ -128,6 +149,26 @@ export default function Chat() {
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connections, requests, activePeerUid]);
+
+  useEffect(() => {
+    if (!myUid || !connections.length) return;
+    const unsubs = connections.map(c => {
+      if (!c.uid) return () => {};
+      const cid = makeConversationId(myUid, c.uid);
+      const metaRef = ref(rtdb, `chats/${cid}/meta`);
+      return onValue(metaRef, (snap) => {
+        setConversationsMeta(prev => ({ ...prev, [c.uid]: snap.val() || {} }));
+      });
+    });
+    return () => unsubs.forEach(u => u());
+  }, [connections, myUid]);
+
+  useEffect(() => {
+    if (!activeConversationId || !myUid) return;
+    update(ref(rtdb, `chats/${activeConversationId}/meta`), {
+      [`unread_${myUid}`]: null, // clear unread flag when opening chat
+    }).catch(() => {});
+  }, [activeConversationId, myUid]);
 
   const peerProfile = activePeerUid ? profilesByUid[activePeerUid] : null;
   const peerName = peerProfile?.displayName || peerProfile?.name || (activePeerUid || '');
@@ -182,14 +223,17 @@ export default function Chat() {
         text: t,
         senderUid: currentUser.uid,
         createdAt: serverTimestamp(),
+        status: 'sent',
       });
       await update(ref(rtdb, `chats/${activeConversationId}/meta`), {
         lastMessageAt: serverTimestamp(),
         lastMessagePreview: t.slice(0, 120),
+        [`unread_${activePeerUid}`]: true,
       });
       setText('');
     } finally {
       setSending(false);
+      setTimeout(() => textInputRef.current?.focus(), 10);
     }
   };
 
@@ -203,6 +247,7 @@ export default function Chat() {
         type: 'file',
         senderUid: currentUser.uid,
         createdAt: serverTimestamp(),
+        status: 'sent',
         file: {
           name: file.name,
           size: file.size,
@@ -213,10 +258,12 @@ export default function Chat() {
       await update(ref(rtdb, `chats/${activeConversationId}/meta`), {
         lastMessageAt: serverTimestamp(),
         lastMessagePreview: `📎 ${file.name}`,
+        [`unread_${activePeerUid}`]: true,
       });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+      setTimeout(() => textInputRef.current?.focus(), 10);
     }
   };
 
@@ -262,8 +309,8 @@ export default function Chat() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '1rem' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1.5rem', height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '1rem', flexShrink: 0 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 6 }}>
               <MessageSquare size={18} color="#60a5fa" />
@@ -303,15 +350,15 @@ export default function Chat() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '1rem' }}>
+        <div className="chat-grid" style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '1rem', flex: 1, minHeight: 0 }}>
           {/* Left rail */}
-          <div style={{ background: 'rgba(20,22,30,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden' }}>
-            <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ background: 'rgba(20,22,30,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
               {activeTab === 'requests' ? <UserPlus size={16} color="#a855f7" /> : <MessageSquare size={16} color="#60a5fa" />}
               <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>{activeTab === 'requests' ? 'Connect requests' : 'Connections'}</span>
             </div>
 
-            <div style={{ padding: 10 }}>
+            <div style={{ padding: 10, overflow: 'auto', flex: 1 }}>
               {activeTab === 'requests' ? (
                 requests.length === 0 ? (
                   <div style={{ padding: 14, color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem' }}>No requests yet.</div>
@@ -377,51 +424,60 @@ export default function Chat() {
                 connections.length === 0 ? (
                   <div style={{ padding: 14, color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem' }}>No connections yet. Accept a request to start chatting.</div>
                 ) : (
-                  connections.map(c => (
-                    <button
-                      key={c.uid}
-                      onClick={() => setActivePeerUid(c.uid)}
-                      style={{
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: 12,
-                        borderRadius: 14,
-                        border: activePeerUid === c.uid ? '1px solid rgba(59,130,246,0.5)' : '1px solid rgba(255,255,255,0.06)',
-                        background: activePeerUid === c.uid ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.02)',
-                        color: '#fff',
-                        cursor: 'pointer',
-                        marginBottom: 10,
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: 12, overflow: 'hidden', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-                          {profilesByUid[c.uid]?.photoURL ? (
-                            <img src={profilesByUid[c.uid]?.photoURL} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          ) : (
-                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.55)', fontWeight: 900 }}>
-                              {(profilesByUid[c.uid]?.displayName || 'U').slice(0, 1).toUpperCase()}
+                  connections.map(c => {
+                    const meta = conversationsMeta[c.uid];
+                    const isUnread = meta?.[`unread_${myUid}`];
+                    const lastMsg = meta?.lastMessagePreview;
+
+                    return (
+                      <button
+                        key={c.uid}
+                        onClick={() => setActivePeerUid(c.uid)}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: 12,
+                          borderRadius: 14,
+                          border: activePeerUid === c.uid ? '1px solid rgba(59,130,246,0.5)' : (isUnread ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(255,255,255,0.06)'),
+                          background: activePeerUid === c.uid ? 'rgba(59,130,246,0.12)' : (isUnread ? 'rgba(59,130,246,0.05)' : 'rgba(255,255,255,0.02)'),
+                          color: '#fff',
+                          cursor: 'pointer',
+                          marginBottom: 10,
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 34, height: 34, borderRadius: 12, overflow: 'hidden', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+                            {profilesByUid[c.uid]?.photoURL ? (
+                              <img src={profilesByUid[c.uid]?.photoURL} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.55)', fontWeight: 900 }}>
+                                {(profilesByUid[c.uid]?.displayName || 'U').slice(0, 1).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontWeight: isUnread ? 900 : 700, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {profilesByUid[c.uid]?.displayName || profilesByUid[c.uid]?.name || 'User'}
                             </div>
+                            <div style={{ color: isUnread ? '#fff' : 'rgba(255,255,255,0.55)', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: isUnread ? 800 : 400 }}>
+                              {lastMsg || 'Tap to open chat'}
+                            </div>
+                          </div>
+                          {isUnread && (
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#60a5fa', flexShrink: 0 }} />
                           )}
                         </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontWeight: 900, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {profilesByUid[c.uid]?.displayName || profilesByUid[c.uid]?.name || 'User'}
-                          </div>
-                          <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            Tap to open chat
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))
+                      </button>
+                    );
+                  })
                 )
               )}
             </div>
           </div>
 
           {/* Right panel */}
-          <div style={{ background: 'rgba(20,22,30,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 520 }}>
-            <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ background: 'rgba(20,22,30,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                 {activePeerUid ? (
                   <>
@@ -436,7 +492,9 @@ export default function Chat() {
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{peerName}</div>
-                      <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activePeerUid}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {profilesByUid[activePeerUid]?.email || activePeerUid}
+                      </div>
                     </div>
                   </>
                 ) : (
@@ -469,12 +527,20 @@ export default function Chat() {
                           <div
                             style={{
                               maxWidth: '78%',
-                              padding: '10px 12px',
-                              borderRadius: 14,
-                              background: mine ? 'rgba(59,130,246,0.22)' : 'rgba(255,255,255,0.06)',
-                              border: mine ? '1px solid rgba(59,130,246,0.35)' : '1px solid rgba(255,255,255,0.08)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: mine ? 'flex-end' : 'flex-start',
                             }}
                           >
+                            <div
+                              style={{
+                                padding: '10px 12px',
+                                borderRadius: 14,
+                                background: mine ? 'rgba(59,130,246,0.22)' : 'rgba(255,255,255,0.06)',
+                                border: mine ? '1px solid rgba(59,130,246,0.35)' : '1px solid rgba(255,255,255,0.08)',
+                                width: '100%',
+                              }}
+                            >
                             {m.type === 'file' && m.file ? (
                               <div>
                                 {isImageMime(mime) ? (
@@ -510,20 +576,33 @@ export default function Chat() {
                                 </a>
                               </div>
                             ) : (
-                              <div style={{ color: '#fff', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>{m.text}</div>
+                              <div style={{ color: '#fff', whiteSpace: 'pre-wrap', lineHeight: 1.4, wordBreak: 'break-word' }}>{m.text}</div>
+                            )}
+                            </div>
+                            
+                            {/* Status indicator for active user's messages */}
+                            {mine && (
+                              <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, color: m.status === 'read' ? '#3b82f6' : 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>
+                                {m.status === 'read' ? (
+                                  <><CheckCheck size={14} /> <span>Read</span></>
+                                ) : (
+                                  <><Check size={14} /> <span>Sent</span></>
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
                       );
                     })
                   )}
-                  <div ref={bottomRef} />
+                  <div ref={bottomRef} style={{ height: 1 }} />
                 </>
               )}
             </div>
 
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
               <input
+                ref={textInputRef}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {
@@ -651,6 +730,22 @@ export default function Chat() {
                 <video src={preview.url} controls style={{ width: '100%', maxHeight: '72vh', borderRadius: 14, border: '1px solid rgba(255,255,255,0.10)' }} />
               ) : isAudioMime(preview.mime) ? (
                 <audio src={preview.url} controls style={{ width: '100%' }} />
+              ) : preview.mime === 'application/pdf' ? (
+                <object data={preview.url} type="application/pdf" style={{ width: '100%', height: '72vh', borderRadius: 14, background: '#fff' }}>
+                  <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                    <div style={{ color: '#fff', fontWeight: 900, marginBottom: 8 }}>Unable to display PDF inline</div>
+                    <a href={preview.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#a855f7,#3b82f6)', borderRadius: 14, padding: '10px 14px', color: '#fff', textDecoration: 'none', fontWeight: 900 }}>
+                      <ExternalLink size={16} /> Open PDF
+                    </a>
+                  </div>
+                </object>
+              ) : (preview.mime && preview.mime.includes('word')) || preview.name.endsWith('.doc') || preview.name.endsWith('.docx') ? (
+                <iframe 
+                  src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(preview.url)}`} 
+                  title={preview.name} 
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                  style={{ width: '100%', height: '72vh', borderRadius: 14, border: 'none', background: '#fff' }} 
+                />
               ) : (
                 <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
                   <div style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 900, marginBottom: 8 }}>No inline preview available</div>
@@ -671,6 +766,12 @@ export default function Chat() {
         @media (max-width: 980px) {
           .chat-grid { grid-template-columns: 1fr !important; }
         }
+        /* Custom sleek scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.12) transparent; }
       `}</style>
     </div>
   );
