@@ -973,7 +973,7 @@ export default function Dashboard() {
                                                         <div className="lc-case-detail">
                                                             <div className="lc-detail-row">
                                                                 <span className="lc-detail-label">Input</span>
-                                                                <pre className="lc-code-box">{tc.input || '(none)'}</pre>
+                                                                <pre className="lc-code-box">{tc.displayInput || tc.input || '(none)'}</pre>
                                                             </div>
                                                             <div className="lc-detail-row">
                                                                 <span className="lc-detail-label">Expected Output</span>
@@ -1024,7 +1024,7 @@ export default function Dashboard() {
                                                         <div className="lc-case-detail" style={{ marginTop: '1rem' }}>
                                                             <div className="lc-detail-row">
                                                                 <span className="lc-detail-label">Input</span>
-                                                                <pre className="lc-code-box">{tc.input || '(hidden)'}</pre>
+                                                                <pre className="lc-code-box">{tc.displayInput || tc.input || '(hidden)'}</pre>
                                                             </div>
                                                             <div className="lc-detail-row">
                                                                 <span className="lc-detail-label">Expected Output</span>

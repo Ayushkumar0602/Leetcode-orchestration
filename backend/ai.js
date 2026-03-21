@@ -174,15 +174,15 @@ RESPONSE FORMAT (pure JSON — no markdown wrapping):
     "rust": "stdin-parsing driver code for rust"
   },
   "primaryTestCases": [
-    { "label": "Example 1", "input": "exact stdin string", "expectedOutput": "exact stdout string" },
-    { "label": "Example 2", "input": "...", "expectedOutput": "..." },
-    { "label": "Example 3", "input": "...", "expectedOutput": "..." }
+    { "label": "Example 1", "input": "exact stdin string", "expectedOutput": "exact stdout string", "displayInput": "A beautifully formatted string explicitly showing parameter names and values, e.g. 'nums = [1, 2, 3], k = 1'" },
+    { "label": "Example 2", "input": "...", "expectedOutput": "...", "displayInput": "..." },
+    { "label": "Example 3", "input": "...", "expectedOutput": "...", "displayInput": "..." }
   ],
   "submitTestCases": [
-    { "label": "Test 1 — normal", "input": "...", "expectedOutput": "..." },
-    { "label": "Test 2 — edge: empty / min", "input": "...", "expectedOutput": "..." },
-    { "label": "Test 3 — corner: max size", "input": "...", "expectedOutput": "..." },
-    { "label": "Test n — [generate all possible edge and corner cases]", "input": "...", "expectedOutput": "..." }
+    { "label": "Test 1 — normal", "input": "...", "expectedOutput": "...", "displayInput": "..." },
+    { "label": "Test 2 — edge: empty / min", "input": "...", "expectedOutput": "...", "displayInput": "..." },
+    { "label": "Test 3 — corner: max size", "input": "...", "expectedOutput": "...", "displayInput": "..." },
+    { "label": "Test n — [generate all possible edge and corner cases]", "input": "...", "expectedOutput": "...", "displayInput": "..." }
   ]
 }
 
@@ -289,8 +289,18 @@ async function generateCodeAndTests(problemStatement, language, problemId) {
         // Return only the requested language
         return {
           problem: parsed.problem,
-          primaryTestCases: parsed.primaryTestCases,
-          submitTestCases: parsed.submitTestCases,
+          primaryTestCases: parsed.primaryTestCases.map(tc => ({
+            label: tc.label || 'Example',
+            input: String(tc.input),
+            expectedOutput: String(tc.expectedOutput),
+            displayInput: tc.displayInput ? String(tc.displayInput) : undefined
+          })),
+          submitTestCases: parsed.submitTestCases.map(tc => ({
+            label: tc.label || 'Submit Test',
+            input: String(tc.input),
+            expectedOutput: String(tc.expectedOutput),
+            displayInput: tc.displayInput ? String(tc.displayInput) : undefined
+          })),
           code: parsed.code[language],
           wrapper: parsed.wrapper[language]
         };
@@ -373,4 +383,68 @@ Rules:
   throw new Error(`AI Project Extraction failed: ${lastError?.message}`);
 }
 
-module.exports = { generateCodeAndTests, extractProjectDetails };
+/**
+ * Regenerates or modifies specific parts of a problem using Gemini.
+ */
+async function regenerateProblemData(instruction, originalData) {
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys found");
+
+  const prompt = `
+You are an expert competitive programming assistant.
+An administrator wants to modify an existing coding problem.
+
+ORIGINAL PROBLEM JSON:
+"""
+${JSON.stringify(originalData, null, 2)}
+"""
+
+INSTRUCTION FROM ADMIN:
+"""
+${instruction}
+"""
+
+You must return the ENTIRE updated problem JSON in the exact same schema.
+Apply the admin's requested changes (e.g., adding edge cases, fixing typos, changing the story).
+Do NOT include any markdown blocks or explanation. ONLY return valid JSON.
+`.trim();
+
+  let lastError;
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      const genAI = new GoogleGenerativeAI(keys[i]);
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().trim();
+      const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
+
+      // Map displayInput explicitly just like generation
+      if (parsed.primaryTestCases) {
+          parsed.primaryTestCases = parsed.primaryTestCases.map(tc => ({
+              label: tc.label || 'Example',
+              input: String(tc.input),
+              expectedOutput: String(tc.expectedOutput),
+              displayInput: tc.displayInput ? String(tc.displayInput) : undefined
+          }));
+      }
+      if (parsed.submitTestCases) {
+          parsed.submitTestCases = parsed.submitTestCases.map(tc => ({
+              label: tc.label || 'Submit Test',
+              input: String(tc.input),
+              expectedOutput: String(tc.expectedOutput),
+              displayInput: tc.displayInput ? String(tc.displayInput) : undefined
+          }));
+      }
+
+      return parsed;
+    } catch (error) {
+      lastError = error;
+      console.warn(`[AI Regenerate] Key ${i + 1} failed:`, error.message);
+      continue;
+    }
+  }
+  throw new Error(`AI Regeneration failed: ${lastError?.message}`);
+}
+
+module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData };

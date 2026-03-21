@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, Users, Database, Server, Image as ImageIcon, 
-    Settings, Activity, Shield, Bell, Code
+    Settings, Activity, Shield, Bell, BookOpen 
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -16,7 +16,7 @@ import AdminConfig from './AdminConfig';
 import AdminLogs from './AdminLogs';
 import AdminNotifications from './AdminNotifications';
 import AdminUserDetail from './AdminUserDetail';
-import AdminProblemControl from './AdminProblemControl';
+import AdminQuestions from './AdminQuestions';
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -38,8 +38,8 @@ export default function AdminPortal() {
     const navItems = [
         { path: '/admin', icon: LayoutDashboard, label: 'Overview' },
         { path: '/admin/users', icon: Users, label: 'User Management' },
+        { path: '/admin/questions', icon: BookOpen, label: 'Questions & Tests' },
         { path: '/admin/database', icon: Database, label: 'Database Admin' },
-        { path: '/admin/problemcontrol', icon: Code, label: 'Problem Management' },
         { path: '/admin/infrastructure', icon: Server, label: 'Infrastructure' },
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
         { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
@@ -123,13 +123,13 @@ export default function AdminPortal() {
                     <Route path="/" element={<AdminOverview />} />
                     <Route path="/users" element={<AdminUsers />} />
                     <Route path="/users/:uid" element={<AdminUserDetail />} />
+                    <Route path="/questions" element={<AdminQuestions />} />
                     <Route path="/database" element={<AdminDatabase />} />
                     <Route path="/infrastructure" element={<AdminInfrastructure />} />
                     <Route path="/storage" element={<AdminStorage />} />
                     <Route path="/notifications" element={<AdminNotifications />} />
                     <Route path="/config" element={<AdminConfig />} />
                     <Route path="/logs" element={<AdminLogs />} />
-                    <Route path="/problemcontrol" element={<AdminProblemControl />} />
                 </Routes>
             </div>
         </div>

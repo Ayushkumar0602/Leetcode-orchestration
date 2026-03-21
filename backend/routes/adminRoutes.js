@@ -936,124 +936,53 @@ router.get('/notifications/campaigns/:id/analytics', verifyAdmin, async (req, re
 });
 
 // ---------------------------------------------------------
-// 7. Problem Management System (Admin)
+// 7. Question & Test Case Management (Admin)
 // ---------------------------------------------------------
-const { generateCodeAndTests } = require('../ai');
-const { executeCode } = require('../executor');
 
-// List all custom problems
-router.get('/problems', verifyAdmin, async (req, res) => {
+router.post('/problems/:id/versions', verifyAdmin, async (req, res) => {
     try {
-        let problems = [];
-        if (admin.apps.length) {
-            const snap = await admin.firestore().collection('admin_problems').orderBy('updatedAt', 'desc').get();
-            problems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        } else {
-            // Client SDK fallback (local dev without Admin SDK)
-            const { collection: col, getDocs: gd, query: q, orderBy: ob } = require('firebase/firestore');
-            const snap = await gd(q(col(db, 'admin_problems'), ob('updatedAt', 'desc')));
-            problems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        }
-        res.json({ problems });
-    } catch (e) {
-        console.error('[Problems GET]', e);
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Create new problem
-router.post('/problems', verifyAdmin, async (req, res) => {
-    try {
-        const now = new Date().toISOString();
-        const data = {
-            ...req.body,
-            version: 1,
-            disabled: false,
-            createdAt: now,
-            updatedAt: now,
-            createdBy: req.adminUser?.uid || 'admin',
-        };
+        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
+        const { id } = req.params;
+        const problemData = req.body.data || req.body;
         
-        let id;
-        if (admin.apps.length) {
-            const ref = await admin.firestore().collection('admin_problems').add(data);
-            id = ref.id;
-        } else {
-            const { collection: col, addDoc: ad } = require('firebase/firestore');
-            const ref = await ad(col(db, 'admin_problems'), data);
-            id = ref.id;
-        }
-        res.json({ id, ...data });
-    } catch (e) {
-        console.error('[Problems POST]', e);
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Update existing problem (Versioning & Soft Delete)
-router.put('/problems/:id', verifyAdmin, async (req, res) => {
-    try {
-        const id = req.params.id;
-        const newData = { ...req.body };
+        // Save current snapshot to versions subcollection
+        const versionRef = admin.firestore().collection('problems').doc(id).collection('versions').doc();
+        await versionRef.set({
+            ...problemData,
+            versionCreatedAt: new Date().toISOString(),
+            versionCreatedBy: req.adminUser?.email || req.adminUser?.uid || 'admin'
+        });
         
-        if (admin.apps.length) {
-            const ref = admin.firestore().collection('admin_problems').doc(id);
-            const snap = await ref.get();
-            if (!snap.exists) return res.status(404).json({ error: 'Problem not found' });
-            const oldData = snap.data();
-            // Archive old version to subcollection
-            await ref.collection('versions').doc(`v${oldData.version}`).set(oldData);
-            newData.version = (oldData.version || 1) + 1;
-            newData.updatedAt = new Date().toISOString();
-            await ref.set(newData, { merge: true });
-        } else {
-            const { doc: fsDoc, getDoc, setDoc } = require('firebase/firestore');
-            const ref = fsDoc(db, 'admin_problems', id);
-            const snap = await getDoc(ref);
-            if (!snap.exists()) return res.status(404).json({ error: 'Problem not found' });
-            newData.version = (snap.data().version || 1) + 1;
-            newData.updatedAt = new Date().toISOString();
-            await setDoc(ref, newData, { merge: true });
-        }
-        res.json({ id, ...newData });
-    } catch (e) {
-        console.error('[Problems PUT]', e);
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// AI Generation for problem
-router.post('/problems/generate', verifyAdmin, async (req, res) => {
-    try {
-        const { prompt, language } = req.body;
-        if (!prompt || !language) return res.status(400).json({ error: "prompt and language required" });
-        const generated = await generateCodeAndTests(prompt, language);
-        res.json(generated);
+        res.json({ success: true, versionId: versionRef.id });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-// Validate test cases via executor
-router.post('/problems/validate', verifyAdmin, async (req, res) => {
-    const { code, wrapper, language, testCases } = req.body;
-    if (!code || !wrapper || !language || !testCases || !Array.isArray(testCases)) {
-        return res.status(400).json({ error: 'code, wrapper, language, and testCases array are required.' });
-    }
-    
-    // Combine code and wrapper for natively running the complete executable
-    const fullCode = code + '\n' + wrapper;
-    
+router.get('/problems/:id/versions', verifyAdmin, async (req, res) => {
     try {
-        const results = [];
-        for (let i = 0; i < testCases.length; i++) {
-            const tc = testCases[i];
-            const result = await executeCode(fullCode, language, tc.input, tc.expectedOutput);
-            results.push({ ...result, label: tc.label || `Case ${i+1}`, isHidden: tc.isHidden });
-        }
-        res.json({ results });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
+        const { id } = req.params;
+        const snap = await admin.firestore().collection('problems').doc(id).collection('versions')
+            .orderBy('versionCreatedAt', 'desc').limit(20).get();
+        const versions = snap.docs.map(d => ({ versionId: d.id, ...d.data() }));
+        res.json({ versions });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+router.post('/problems/:id/regenerate', verifyAdmin, async (req, res) => {
+    try {
+        if (!admin.apps.length) return res.status(501).json({ error: "Require Admin SDK" });
+        const { instruction, originalData } = req.body;
+        if (!instruction || !originalData) return res.status(400).json({ error: "Missing instruction or originalData" });
+
+        const { regenerateProblemData } = require('../ai');
+        const newData = await regenerateProblemData(instruction, originalData);
+        res.json({ success: true, data: newData });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 });
 
