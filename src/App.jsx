@@ -41,6 +41,11 @@ import BlogPost from './BlogPost';
 // Portfolio Feature
 import PortfolioLanding from './PortfolioLanding';
 
+// Courses Feature
+import CoursesPage from './courses/CoursesPage';
+import CourseDetail from './courses/CourseDetail';
+import LectureDashboard from './courses/LectureDashboard';
+
 // Components
 import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
@@ -55,6 +60,11 @@ function App() {
         <NotificationPopupManager />
         <div className="app-root">
           <Routes>
+            {/* Courses Routes - Moved to top for priority */}
+            <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/courses/:courseId" element={<CourseDetail />} />
+            <Route path="/courses/:courseId/lecture" element={<LectureDashboard />} />
+
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Login />} />
             <Route path="/dashboard" element={<DashboardHome />} />
@@ -81,7 +91,7 @@ function App() {
             <Route path="/public/:uid" element={<PublicProfile />} />
             <Route path="/public/:uid/project/:projId" element={<ProjectDetails />} />
             <Route path="/chat" element={<Chat />} />
-            
+
             {/* Blog Routes */}
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />

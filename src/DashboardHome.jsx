@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import {
     Brain, Code2, Layers, TrendingUp,
-    Award, Target, ArrowRight, User, ExternalLink, Menu, X
+    Award, Target, ArrowRight, User, ExternalLink, Menu, X, BookOpen
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
@@ -128,7 +128,7 @@ const styles = `
 }
 .actions-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
 }
 .nav-logo-text { display: inline; }
@@ -320,6 +320,9 @@ export default function DashboardHome() {
                     <button className="dash-nav-links" onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
                         System Design
                     </button>
+                    <button className="dash-nav-links" onClick={() => navigate('/courses')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--txt2)'}>
+                        Courses
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 0', justifyContent: 'flex-end' }}>
@@ -357,6 +360,7 @@ export default function DashboardHome() {
                     <button className="mobile-nav-link" onClick={() => { navigate('/dsaquestion'); setIsMenuOpen(false); }}>DSA Practice</button>
                     <button className="mobile-nav-link" onClick={() => { navigate('/aiinterviewselect'); setIsMenuOpen(false); }}>AI Interview</button>
                     <button className="mobile-nav-link" onClick={() => { navigate('/systemdesign'); setIsMenuOpen(false); }}>System Design</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/courses'); setIsMenuOpen(false); }}>Courses</button>
                     {currentUser && (
                         <>
                             <button className="mobile-nav-link" onClick={() => { navigate(`/public/${currentUser.uid}`); setIsMenuOpen(false); }}>Public Portfolio</button>
@@ -524,6 +528,13 @@ export default function DashboardHome() {
                             icon={Code2} color="#00b8a3"
                             cta="View Problem List"
                             onClick={() => navigate('/dsaquestion')}
+                        />
+                        <QuickActionCard
+                            title="Course Library"
+                            desc="Comprehensive learning materials and lecture dashboards."
+                            icon={BookOpen} color="#10b981"
+                            cta="Browse Courses"
+                            onClick={() => navigate('/courses')}
                         />
                     </div>
                 </div>
