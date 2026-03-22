@@ -47,6 +47,15 @@ router.post("/register-token", verifyUser, async (req, res) => {
         },
         { merge: true }
       );
+
+    await admin.firestore().collection("global_fcm_tokens").doc(tokenId).set({
+        token,
+        uid,
+        platform: platform || "web",
+        createdAt: new Date().toISOString(),
+        lastSeenAt: new Date().toISOString(),
+    }, { merge: true });
+
     res.json({ success: true });
   } catch (e) {
     console.error("[notifications] register-token failed", e);

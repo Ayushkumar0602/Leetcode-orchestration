@@ -170,7 +170,7 @@ export function AuthProvider({ children }) {
         throw new Error('Invalid magic link.');
     };
 
-    // ── Update User Profile (Onboarding) ──────────────────────────
+    // ── Update User Profile ──────────────────────────────────────
     const updateUserProfile = async ({ displayName, photoURL, primaryInterest, termsAccepted }) => {
         if (!auth.currentUser) return;
         

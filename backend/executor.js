@@ -98,8 +98,22 @@ async function executeCode(code, language, input, expectedOutput) {
         let stdout, stderr;
         let executionError = null;
 
+        const ac = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        if (ac && global.activeExecutions) {
+            global.activeExecutions.set(sessionId, () => ac.abort('Admin killed execution'));
+        }
+
+        if (global.codeExecStats) {
+            global.codeExecStats.totalJobs++;
+            global.codeExecStats.recentJobs.push(Date.now());
+        }
+
         try {
-            const result = await execPromise(cmd, { timeout: 15000, killSignal: 'SIGKILL' });
+            const result = await execPromise(cmd, { 
+                timeout: 15000, 
+                killSignal: 'SIGKILL',
+                ...(ac ? { signal: ac.signal } : {})
+            });
             stdout = result.stdout;
             stderr = result.stderr;
         } catch (err) {
@@ -130,6 +144,12 @@ async function executeCode(code, language, input, expectedOutput) {
         };
 
     } finally {
+        if (global.activeExecutions) {
+            global.activeExecutions.delete(sessionId);
+        }
+        if (executionError && global.codeExecStats) {
+            global.codeExecStats.failedJobs++;
+        }
         // 7. Cleanup temp directory
         try {
             await fs.rm(tempDir, { recursive: true, force: true });

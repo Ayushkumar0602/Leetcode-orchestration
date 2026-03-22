@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, Users, Database, Server, Image as ImageIcon, 
-    Settings, Activity, Shield, Bell 
+    Settings, Activity, Shield, Bell, BookOpen 
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -17,10 +17,7 @@ import AdminLogs from './AdminLogs';
 import AdminNotifications from './AdminNotifications';
 import AdminUserDetail from './AdminUserDetail';
 import AdminCourses from './AdminCourses';
-<<<<<<< HEAD
-=======
-import { BookOpen } from 'lucide-react';
->>>>>>> 828a25a02eee1d10bc0fcbd34b659d2499a8af9b
+import AdminQuestions from './AdminQuestions';
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -42,13 +39,13 @@ export default function AdminPortal() {
     const navItems = [
         { path: '/admin', icon: LayoutDashboard, label: 'Overview' },
         { path: '/admin/users', icon: Users, label: 'User Management' },
+        { path: '/admin/questions', icon: BookOpen, label: 'Questions & Tests' },
+        { path: '/admin/courses', icon: Server, label: 'Course Management' },
         { path: '/admin/database', icon: Database, label: 'Database Admin' },
         { path: '/admin/infrastructure', icon: Server, label: 'Infrastructure' },
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
-        { path: '/admin/courses', icon: Server, label: 'Course Management' },
         { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
         { path: '/admin/config', icon: Settings, label: 'Configuration' },
-        { path: '/admin/courses', icon: BookOpen, label: 'Course Management' },
         { path: '/admin/logs', icon: Activity, label: 'Activity Logs' },
     ];
 
@@ -65,7 +62,7 @@ export default function AdminPortal() {
             }}>
                 <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Shield color="#ef4444" size={24} />
+                        < Shield color="#ef4444" size={24} />
                         <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Admin Portal</span>
                     </div>
                 </div>
@@ -128,6 +125,7 @@ export default function AdminPortal() {
                     <Route path="/" element={<AdminOverview />} />
                     <Route path="/users" element={<AdminUsers />} />
                     <Route path="/users/:uid" element={<AdminUserDetail />} />
+                    <Route path="/questions" element={<AdminQuestions />} />
                     <Route path="/database" element={<AdminDatabase />} />
                     <Route path="/infrastructure" element={<AdminInfrastructure />} />
                     <Route path="/storage" element={<AdminStorage />} />
@@ -135,7 +133,6 @@ export default function AdminPortal() {
                     <Route path="/config" element={<AdminConfig />} />
                     <Route path="/courses" element={<AdminCourses />} />
                     <Route path="/logs" element={<AdminLogs />} />
-                    <Route path="/courses" element={<AdminCourses />} />
                 </Routes>
             </div>
         </div>

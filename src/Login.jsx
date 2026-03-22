@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import './Login.css';
 import { useSEO } from './hooks/useSEO';
-import OnboardingFlow from './components/OnboardingFlow';
+
 
 /* ─── Icons ────────────────────────────────────────────────────── */
 const GithubIcon = ({ size = 20 }) => (
@@ -174,7 +174,7 @@ export default function Login() {
                 if (saved) {
                     setLoading(true);
                     signInWithMagicLink(saved, window.location.href)
-                        .then(r => { if (!r.user.displayName) setView('onboarding'); else navigate(redirectUrl, { replace: true }); })
+                        .then(() => navigate(redirectUrl, { replace: true }))
                         .catch(err => setError(friendly(err)))
                         .finally(() => setLoading(false));
                 }
@@ -183,11 +183,8 @@ export default function Login() {
     }, []);
 
     useEffect(() => {
-        if (currentUser?.emailVerified && view !== 'onboarding') {
-            // Check first-time user: no displayName = definitely first time
-            const isFirstTime = !currentUser.displayName || localStorage.getItem(`onboarded_${currentUser.uid}`) !== 'true';
-            if (isFirstTime && !currentUser.displayName) setView('onboarding');
-            else navigate(redirectUrl, { replace: true });
+        if (currentUser?.emailVerified) {
+            navigate(redirectUrl, { replace: true });
         }
     }, [currentUser]);
 
@@ -207,7 +204,7 @@ export default function Login() {
                 await auth.currentUser?.reload();
                 if (auth.currentUser?.emailVerified) {
                     clearInterval(pollingRef.current); pollingRef.current = null;
-                    setView('onboarding');
+                    navigate(redirectUrl, { replace: true });
                 }
             } catch { /* ignore poll errors */ }
         }, 3000);
@@ -224,10 +221,7 @@ export default function Login() {
         try {
             const r = await method();
             if (typeof window !== 'undefined' && window.gtag) window.gtag('event', 'login', { method: r.providerId });
-            // For OAuth: route to onboarding if no display name or never onboarded
-            const neverOnboarded = localStorage.getItem(`onboarded_${r.user.uid}`) !== 'true';
-            if (!r.user.displayName || neverOnboarded) setView('onboarding');
-            else navigate(redirectUrl, { replace: true });
+            navigate(redirectUrl, { replace: true });
         } catch (err) {
             if (err.code === 'auth/account-exists-with-different-credential')
                 setError('Account exists with another sign-in method.');
@@ -252,7 +246,7 @@ export default function Login() {
             await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
             const r = await loginWithEmail(email, password);
             if (!r.user.emailVerified) { setPendingEmail(email); setView('verify-email'); startPolling(); return; }
-            if (!r.user.displayName) setView('onboarding'); else navigate(redirectUrl, { replace: true });
+            navigate(redirectUrl, { replace: true });
         } catch (err) { setError(friendly(err)); increaseFailure(); }
         finally { setLoading(false); }
     }
@@ -302,21 +296,6 @@ export default function Login() {
         );
     }
 
-    if (view === 'onboarding') {
-        return (
-            <div style={{
-                minHeight: '100vh',
-                background: 'var(--ob-bg, #030508)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2rem 1rem',
-                fontFamily: "'Inter', system-ui, sans-serif"
-            }}>
-                <OnboardingFlow redirectUrl={redirectUrl} />
-            </div>
-        );
-    }
 
     /* ── Main Login / Signup ──────────────────────────────────────── */
     return (

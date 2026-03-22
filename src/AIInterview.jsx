@@ -2099,7 +2099,7 @@ export default function AIInterview() {
                                                 <div style={{ fontSize: '0.82rem' }}>
                                                     <div style={{ marginBottom: '0.75rem' }}>
                                                         <span style={{ display: 'block', color: 'var(--txt2)', marginBottom: '4px', fontSize: '0.75rem' }}>Input</span>
-                                                        <pre style={{ background: 'var(--surface2)', padding: '0.6rem', borderRadius: '6px', color: 'var(--txt)', fontFamily: 'JetBrains Mono, monospace' }}>{tc.input || '(none)'}</pre>
+                                                        <pre style={{ background: 'var(--surface2)', padding: '0.6rem', borderRadius: '6px', color: 'var(--txt)', fontFamily: 'JetBrains Mono, monospace' }}>{tc.displayInput || tc.input || '(none)'}</pre>
                                                     </div>
                                                     <div style={{ marginBottom: '0.75rem' }}>
                                                         <span style={{ display: 'block', color: 'var(--txt2)', marginBottom: '4px', fontSize: '0.75rem' }}>Expected Output</span>

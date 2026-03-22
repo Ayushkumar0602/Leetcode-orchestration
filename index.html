@@ -40,16 +40,17 @@
   <meta name="theme-color" content="#a855f7" />
   <link rel="manifest" href="/site.webmanifest" />
 
-  <!-- ── Performance: Preconnect ── -->
+  <!-- ── LCP: Preload critical image ── -->
+  <link rel="preload" href="/logo.jpeg" as="image" fetchpriority="high" />
+
+  <!-- ── Performance: Preconnect (≤4, fonts only) ── -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
-  <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin />
 
-  <!-- ── DNS Prefetch ── -->
-  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <!-- ── DNS Prefetch (lighter hint for non-critical origins) ── -->
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
   <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
   <!-- ── Structured Data: WebSite ── -->
@@ -146,7 +147,8 @@
     </nav>
   </div>
   <script type="module" src="/src/main.jsx"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- defer prevents Razorpay from blocking first render -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 </body>
 
 </html>

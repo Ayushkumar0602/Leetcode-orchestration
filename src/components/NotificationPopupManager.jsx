@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { X, ExternalLink, Sparkles, Megaphone, Zap, Bell } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { listenActiveCampaigns, listenCampaignReceipts, setCampaignReceipt } from "../lib/notifications";
@@ -207,6 +209,7 @@ function AnnouncementOverlay({ campaign, onClose, onAction }) {
 export default function NotificationPopupManager() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const uid = currentUser?.uid;
 
   const [campaigns, setCampaigns] = useState([]);
@@ -216,6 +219,21 @@ export default function NotificationPopupManager() {
   const [activeBanner, setActiveBanner] = useState(null);
   const [activeAnnouncement, setActiveAnnouncement] = useState(null);
   const shownRef = useRef(new Set());
+  const [userProfile, setUserProfile] = useState(null);
+  const locationRef = useRef(location.pathname);
+
+  // Keep locationRef updated
+  useEffect(() => {
+    locationRef.current = location.pathname;
+  }, [location.pathname]);
+
+  // Fetch user profile
+  useEffect(() => {
+    if (!uid) return;
+    getDoc(doc(db, "userProfiles", uid)).then(snap => {
+      setUserProfile(snap.exists() ? snap.data() : {});
+    }).catch(() => setUserProfile({}));
+  }, [uid]);
 
   // Register FCM token
   useEffect(() => {
@@ -236,6 +254,9 @@ export default function NotificationPopupManager() {
     let unsub = () => {};
     (async () => {
       unsub = await listenForegroundFcmMessages((payload) => {
+        const targetPage = payload?.data?.targetPage;
+        if (targetPage && !locationRef.current.startsWith(targetPage)) return;
+
         const title = payload?.notification?.title || payload?.data?.title || "Notification";
         const message = payload?.notification?.body || payload?.data?.body || "";
         const link = payload?.data?.link || "/notifications";
@@ -263,7 +284,7 @@ export default function NotificationPopupManager() {
 
   // Process campaigns by display type
   useEffect(() => {
-    if (!uid || campaigns.length === 0) return;
+    if (!uid || campaigns.length === 0 || userProfile === null) return;
 
     for (const c of campaigns) {
       const display = c.display || c.type || "feed";
@@ -272,6 +293,31 @@ export default function NotificationPopupManager() {
 
       const key = `${display}_${c.id}`;
       if (shownRef.current.has(key)) continue;
+
+      // Target Audience Filter
+      const target = c.target || { kind: "all" };
+      if (target.kind === "individual") {
+        if (!target.userIds || !target.userIds.includes(uid)) continue;
+      } else if (target.kind === "group" && target.groups) {
+        const plan = (userProfile.plan || "free").toLowerCase();
+        const role = (userProfile.role || "user").toLowerCase();
+        const isAdmin = userProfile.isAdmin === true;
+        const isBeta = userProfile.isBeta === true;
+        let match = false;
+        target.groups.forEach(g => {
+            const group = String(g).toLowerCase();
+            if (plan === group || role === group) match = true;
+            if (group === "admin" && isAdmin) match = true;
+            if (group === "beta" && isBeta) match = true;
+        });
+        if (!match) continue;
+      }
+
+      // Target Page Filter
+      if (c.targetPage) {
+          const path = location.pathname;
+          if (!path.startsWith(c.targetPage)) continue;
+      }
 
       const priority = c.priority || 1;
 

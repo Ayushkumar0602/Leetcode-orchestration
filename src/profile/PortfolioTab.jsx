@@ -180,7 +180,7 @@ function ListEditor({ label, icon: Icon, color, items, onAdd, onRemove, fields }
     );
 }
 
-function ProjectItem({ project, onRemove, onEnhance, enhancing }) {
+function ProjectItem({ project, onRemove, onEnhance, enhancing, onUpdate }) {
     return (
         <div className="pf-entry-card" style={{ display: 'flex', gap: '10px' }}>
             <div style={{ flex: 1 }}>
@@ -212,6 +212,29 @@ function ProjectItem({ project, onRemove, onEnhance, enhancing }) {
                 {project.desc && <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginBottom: '4px' }}>{project.desc}</div>}
                 {project.link && <a href={project.link.startsWith('http') ? project.link : `https://${project.link}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', color: '#60a5fa', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}><ExternalLink size={9} />View project</a>}
                 {project.detailedData && <div style={{ fontSize: '0.65rem', color: '#10b981', marginTop: '4px', fontWeight: 700 }}>✓ AI Enhanced Content Ready</div>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Template:</span>
+                    {['cinematic', 'bento', 'minimal'].map(t => (
+                        <button 
+                            key={t}
+                            onClick={() => onUpdate && onUpdate('template', t)}
+                            style={{ 
+                                background: (project.template || 'cinematic') === t ? 'rgba(168,85,247,0.2)' : 'transparent',
+                                border: `1px solid ${(project.template || 'cinematic') === t ? 'rgba(168,85,247,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                                color: (project.template || 'cinematic') === t ? '#c084fc' : 'rgba(255,255,255,0.5)',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.65rem',
+                                fontWeight: 600,
+                                textTransform: 'capitalize',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {t}
+                        </button>
+                    ))}
+                </div>
             </div>
             <button onClick={onRemove} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(239,68,68,0.5)', flexShrink: 0 }}><X size={13} /></button>
         </div>
@@ -252,11 +275,12 @@ function CertInput({ certs, onAdd, onRemove }) {
 }
 
 // ── Main PortfolioTab ─────────────────────────────────────────────
-export default function PortfolioTab({ profile, onSave }) {
+export default function PortfolioTab({ uid, profile, onSave, setIsAIProcessing }) {
     const [form, setForm] = useState({ bio: '', location: '', preferredRole: '', primaryInterest: '', targetCompanies: [], github: '', linkedin: '', portfolio: '', resume: '', skills: [], certifications: [], education: [], experience: [], projects: [], ...profile });
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [parsingTarget, setParsingTarget] = useState(false);
+    const [manualReadmeModal, setManualReadmeModal] = useState({ show: false, index: null, error: '', text: '', enhancing: false });
 
     useEffect(() => { setForm({ bio: '', location: '', preferredRole: '', primaryInterest: '', targetCompanies: [], github: '', linkedin: '', portfolio: '', resume: '', skills: [], certifications: [], education: [], experience: [], projects: [], ...profile }); }, [profile]);
 
@@ -267,39 +291,44 @@ export default function PortfolioTab({ profile, onSave }) {
         const file = e.target.files[0];
         if (!file) return;
         setParsingTarget(true);
+        setIsAIProcessing(true); // Show global spinner
         try {
             const rdr = new FileReader();
-            rdr.onload = async () => {
-                const b64 = rdr.result.split(',')[1];
-                const res = await fetch('https://leetcode-orchestration.onrender.com/api/resume/parse', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ base64Data: b64, mimeType: file.type })
+            const result = await new Promise((resolve, reject) => {
+                rdr.onload = () => resolve(rdr.result);
+                rdr.onerror = reject;
+                rdr.readAsDataURL(file);
+            });
+            
+            const b64 = result.split(',')[1];
+            const res = await fetch('https://leetcode-orchestration.onrender.com/api/resume/parse', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ base64Data: b64, mimeType: file.type })
+            });
+            const data = await res.json();
+            if (data.profile) {
+                const mapped = data.profile;
+                setForm(p => {
+                    return {
+                        ...p,
+                        bio: mapped.bio || p.bio,
+                        github: mapped.github || p.github,
+                        linkedin: mapped.linkedin || p.linkedin,
+                        portfolio: mapped.portfolio || p.portfolio,
+                        skills: [...new Set([...(p.skills || []), ...(mapped.skills || [])])],
+                        certifications: [...new Set([...(p.certifications || []), ...(mapped.certifications || [])])],
+                        experience: mapped.experience && mapped.experience.length ? mapped.experience : p.experience,
+                        education: mapped.education && mapped.education.length ? mapped.education : p.education,
+                        projects: mapped.projects && mapped.projects.length ? mapped.projects : p.projects
+                    };
                 });
-                const data = await res.json();
-                if (data.profile) {
-                    const mapped = data.profile;
-                    setForm(p => {
-                        return {
-                            ...p,
-                            bio: mapped.bio || p.bio,
-                            github: mapped.github || p.github,
-                            linkedin: mapped.linkedin || p.linkedin,
-                            portfolio: mapped.portfolio || p.portfolio,
-                            skills: [...new Set([...(p.skills || []), ...(mapped.skills || [])])],
-                            certifications: [...new Set([...(p.certifications || []), ...(mapped.certifications || [])])],
-                            experience: mapped.experience && mapped.experience.length ? mapped.experience : p.experience,
-                            education: mapped.education && mapped.education.length ? mapped.education : p.education,
-                            projects: mapped.projects && mapped.projects.length ? mapped.projects : p.projects
-                        };
-                    });
-                }
-            };
-            rdr.readAsDataURL(file);
+            }
         } catch (err) {
             console.error(err);
             alert("Failed to parse resume.");
         } finally {
             setParsingTarget(false);
+            setIsAIProcessing(false); // Hide global spinner
             e.target.value = null;
         }
     };
@@ -329,6 +358,81 @@ export default function PortfolioTab({ profile, onSave }) {
             </div>
 
             <OverviewCard form={form} />
+
+            {manualReadmeModal.show && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}>
+                    <div className="pf-section" style={{ width: '90%', maxWidth: '600px', background: '#1e1b4b', border: '1px solid rgba(168,85,247,0.3)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <FileText size={18} color="#c084fc" /> Manual README Entry
+                            </h3>
+                            <button onClick={() => setManualReadmeModal({ show: false, index: null, error: '', text: '', enhancing: false })} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}><X size={16} /></button>
+                        </div>
+                        {manualReadmeModal.error && (
+                            <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', padding: '10px', borderRadius: '8px', color: '#fca5a5', fontSize: '0.8rem', marginBottom: '1rem', lineHeight: 1.4 }}>
+                                <strong>Scraper Failed:</strong> {manualReadmeModal.error}
+                                <br />Please paste the raw Markdown content of your README below to continue.
+                            </div>
+                        )}
+                        <textarea 
+                            className="pf-input" 
+                            style={{ minHeight: '250px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.75rem', lineHeight: 1.5 }}
+                            placeholder="# Project Overview&#10;Paste your README.md here..."
+                            value={manualReadmeModal.text}
+                            onChange={(e) => setManualReadmeModal(p => ({ ...p, text: e.target.value }))}
+                            disabled={manualReadmeModal.enhancing}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1rem' }}>
+                            <button 
+                                onClick={() => setManualReadmeModal({ show: false, index: null, error: '', text: '', enhancing: false })}
+                                disabled={manualReadmeModal.enhancing}
+                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '8px', color: '#fff', fontSize: '0.8rem', cursor: 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={async () => {
+                                    if (!manualReadmeModal.text.trim()) return;
+                                    setManualReadmeModal(p => ({ ...p, enhancing: true }));
+                                    setIsAIProcessing(true); // Show global spinner
+                                    try {
+                                        const res = await fetch('https://leetcode-orchestration.onrender.com/api/project/extract-readme', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ readmeContent: manualReadmeModal.text })
+                                        });
+                                        const data = await res.json();
+                                        if (data.projectData) {
+                                            const updatedProjs = [...form.projects];
+                                            const i = manualReadmeModal.index;
+                                            updatedProjs[i] = { 
+                                                ...updatedProjs[i], 
+                                                name: data.projectData.name || updatedProjs[i].name,
+                                                desc: data.projectData.overview ? data.projectData.overview.slice(0, 150) + '...' : updatedProjs[i].desc,
+                                                tagline: data.projectData.tagline,
+                                                detailedData: data.projectData 
+                                            };
+                                            upd('projects', updatedProjs);
+                                            setManualReadmeModal({ show: false, index: null, error: '', text: '', enhancing: false });
+                                        } else if (data.error) {
+                                            setManualReadmeModal(p => ({ ...p, error: data.error, enhancing: false }));
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        setManualReadmeModal(p => ({ ...p, error: "Failed to extract project details. Please try again.", enhancing: false }));
+                                    } finally {
+                                        setIsAIProcessing(false); // Hide global spinner
+                                    }
+                                }}
+                                disabled={manualReadmeModal.enhancing || (!manualReadmeModal.text.trim())}
+                                style={{ background: 'linear-gradient(135deg,#a855f7,#3b82f6)', border: 'none', padding: '8px 16px', borderRadius: '8px', color: '#fff', fontSize: '0.8rem', fontWeight: 700, cursor: manualReadmeModal.enhancing ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', opacity: manualReadmeModal.enhancing || (!manualReadmeModal.text.trim()) ? 0.6 : 1 }}
+                            >
+                                {manualReadmeModal.enhancing ? <><Loader2 size={14} className="animate-spin" /> Processing...</> : '✨ Extract Details'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="pf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
 
@@ -429,9 +533,15 @@ export default function PortfolioTab({ profile, onSave }) {
                                 project={p} 
                                 enhancing={parsingTarget === `proj-${i}`}
                                 onRemove={() => rmItem('projects', i)} 
+                                onUpdate={(k, v) => {
+                                    const updatedProjs = [...form.projects];
+                                    updatedProjs[i] = { ...updatedProjs[i], [k]: v };
+                                    upd('projects', updatedProjs);
+                                }}
                                 onEnhance={async () => {
                                     if (!p.link || !p.link.includes('github.com')) return;
                                     setParsingTarget(`proj-${i}`);
+                                    setIsAIProcessing(true); // Show global spinner
                                     try {
                                         const res = await fetch('https://leetcode-orchestration.onrender.com/api/project/extract-readme', {
                                             method: 'POST',
@@ -450,13 +560,14 @@ export default function PortfolioTab({ profile, onSave }) {
                                             };
                                             upd('projects', updatedProjs);
                                         } else if (data.error) {
-                                            alert(data.error);
+                                            setManualReadmeModal({ show: true, index: i, error: data.error, text: '', enhancing: false });
                                         }
                                     } catch (err) {
                                         console.error(err);
                                         alert("Failed to extract project details. Please try again.");
                                     } finally {
                                         setParsingTarget(false);
+                                        setIsAIProcessing(false); // Hide global spinner
                                     }
                                 }}
                             />
