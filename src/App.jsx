@@ -25,6 +25,11 @@ import SystemDesignLLD from './SystemDesignLLD';
 import AISystemDesignInterview from './AISystemDesignInterview';
 import SystemDesignInterview from './SystemDesignInterview';
 
+// Courses Features
+import CoursesPage from './pages/CoursesPage';
+import CourseDetails from './pages/CourseDetails';
+import LectureDashboard from './pages/LectureDashboard';
+
 // Admin Features
 import AdminPortal from './admin/AdminPortal';
 import AdminRoute from './components/AdminRoute';
@@ -80,6 +85,11 @@ function App() {
             {/* Blog Routes */}
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            
+            {/* Course Routes */}
+            <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/courses/:courseId" element={<CourseDetails />} />
+            <Route path="/courses/:courseId/lecture" element={<LectureDashboard />} />
             
             {/* Terms Route */}
             <Route path="/terms" element={<TermsAndConditions />} />

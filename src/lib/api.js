@@ -1,7 +1,7 @@
 // Centralized API fetch functions and query key factories for TanStack Query.
 // Every component should import fetch functions and query keys from here.
 
-const BASE = 'https://leetcode-orchestration.onrender.com';
+const BASE = 'http://localhost:3001';
 
 // ─── Query Key Factories ─────────────────────────────────────────────────────
 // These produce stable, de-duped cache keys. Components must only use these.
@@ -13,6 +13,9 @@ export const queryKeys = {
     problems: (params) => ['problems', params],
     metadata: () => ['metadata'],
     lists:   (uid) => ['lists', uid],
+    courses: () => ['courses'],
+    courseDetail: (id) => ['course', id],
+    userCourses: (uid) => ['user-courses', uid],
 };
 
 // ─── API Functions ───────────────────────────────────────────────────────────
@@ -90,6 +93,72 @@ export const createList = async (userId, name) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, name }),
+    });
+    return res.json();
+};
+
+export const fetchAllCourses = async () => {
+    const res = await fetch(`${BASE}/api/courses`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.courses || [];
+};
+
+export const fetchCourseDetail = async (id) => {
+    const res = await fetch(`${BASE}/api/courses/detail/${id}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.course || null;
+};
+
+export const fetchPlaylist = async (url) => {
+    const res = await fetch(`${BASE}/api/courses/playlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.playlist || [];
+};
+
+export const enrollInCourse = async (uid, courseId, paymentData = null) => {
+    const res = await fetch(`${BASE}/api/courses/enroll`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, courseId, paymentData }),
+    });
+    return res.json();
+};
+
+export const fetchUserCourses = async (uid) => {
+    const res = await fetch(`${BASE}/api/courses/user/${uid}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.courses || [];
+};
+
+export const createCourse = async (courseData) => {
+    const res = await fetch(`${BASE}/api/courses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(courseData),
+    });
+    return res.json();
+};
+
+export const updateCourse = async (id, courseData) => {
+    const res = await fetch(`${BASE}/api/courses/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(courseData),
+    });
+    return res.json();
+};
+
+export const deleteCourse = async (id) => {
+    const res = await fetch(`${BASE}/api/courses/${id}`, {
+        method: 'DELETE'
     });
     return res.json();
 };

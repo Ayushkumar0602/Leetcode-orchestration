@@ -1,0 +1,24 @@
+
+C:\Users\HP\OneDrive\Desktop\Projects\Leetcode-orchestration\src\pages\CourseDetails.jsx
+  146:33  error  'ShieldCheck' is not defined  no-undef
+
+C:\Users\HP\OneDrive\Desktop\Projects\Leetcode-orchestration\src\pages\LectureDashboard.jsx
+  16:13  error  'currentUser' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+  46:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  44 |                 { id: 'v5', title: 'Linked Lists Fundamentals', thumbnail: 'https://img.youtube.com/vi/njTh_LhuG/mqdefault.jpg', videoId: 'njTh_LhuG' }
+  45 |             ];
+> 46 |             setPlaylist(mockPlaylist);
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  47 |             setActiveVideo(mockPlaylist[0]);
+  48 |         }
+  49 |     }, [course]);  react-hooks/set-state-in-effect
+
+??? 3 problems (3 errors, 0 warnings)
+
