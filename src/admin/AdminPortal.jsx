@@ -17,7 +17,10 @@ import AdminLogs from './AdminLogs';
 import AdminNotifications from './AdminNotifications';
 import AdminUserDetail from './AdminUserDetail';
 import AdminCourses from './AdminCourses';
+<<<<<<< HEAD
+=======
 import { BookOpen } from 'lucide-react';
+>>>>>>> 828a25a02eee1d10bc0fcbd34b659d2499a8af9b
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -42,6 +45,7 @@ export default function AdminPortal() {
         { path: '/admin/database', icon: Database, label: 'Database Admin' },
         { path: '/admin/infrastructure', icon: Server, label: 'Infrastructure' },
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
+        { path: '/admin/courses', icon: Server, label: 'Course Management' },
         { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
         { path: '/admin/config', icon: Settings, label: 'Configuration' },
         { path: '/admin/courses', icon: BookOpen, label: 'Course Management' },
