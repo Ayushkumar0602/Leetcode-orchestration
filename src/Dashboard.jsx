@@ -249,11 +249,19 @@ export default function Dashboard() {
             else setAiWrapper(null);
 
             if (data.primaryTestCases?.length) {
-                setPrimaryCases(data.primaryTestCases.map((tc, i) => ({ id: Date.now() + i, ...tc })));
+                setPrimaryCases(data.primaryTestCases.map((tc, i) => ({
+                    id: Date.now() + i,
+                    ...tc,
+                    label: (tc.label && tc.label !== '-' && tc.label.trim()) ? tc.label : (tc.name && tc.name !== '-' ? tc.name : `Example ${i + 1}`)
+                })));
                 setActiveTab(0);
             }
             if (data.submitTestCases?.length) {
-                setSubmitCases(data.submitTestCases.map((tc, i) => ({ id: Date.now() + 1000 + i, ...tc })));
+                setSubmitCases(data.submitTestCases.map((tc, i) => ({
+                    id: Date.now() + 1000 + i,
+                    ...tc,
+                    label: (tc.label && tc.label !== '-' && tc.label.trim()) ? tc.label : (tc.name && tc.name !== '-' ? tc.name : `Test ${i + 1}`)
+                })));
             }
             // Use structured problem data if available, else fallback to first line
             if (data.problem) {
@@ -366,31 +374,40 @@ export default function Dashboard() {
                 body: JSON.stringify({ code: fullCode, language, testCases: primaryCases })
             });
             const data = await res.json();
-            setRunResults(data.results || []);
 
-            // Save run submission to tracking system (silent)
-            if (currentUser) {
-                const activeProblemId = routeId || location.state?.problemParams?.id;
-                const diff = difficulty || location.state?.problemParams?.difficulty;
-                if (activeProblemId) {
-                    const allPassed = (data.results || []).every(r => r.success);
-                    fetch('https://leetcode-orchestration.onrender.com/api/submissions/save', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            userId: currentUser.uid,
-                            problemId: activeProblemId,
-                            difficulty: diff,
-                            code,
-                            language,
-                            status: allPassed ? 'Accepted' : 'Wrong Answer',
-                            testResults: data.results || []
-                        })
-                    }).catch(console.error);
+            // If server returned an error (non-2xx or error field without results)
+            if (!res.ok || (data.error && !data.results)) {
+                const errMsg = data.error || `Server error (${res.status})`;
+                setRunResults(primaryCases.map(() => ({ success: false, output: '', error: errMsg })));
+            } else {
+                const results = data.results || [];
+                setRunResults(results.length > 0 ? results : primaryCases.map(() => ({ success: false, output: '', error: 'No results returned from server.' })));
+
+                // Save run submission to tracking system (silent)
+                if (currentUser) {
+                    const activeProblemId = routeId || location.state?.problemParams?.id;
+                    const diff = difficulty || location.state?.problemParams?.difficulty;
+                    if (activeProblemId) {
+                        const allPassed = results.every(r => r.success);
+                        fetch('https://leetcode-orchestration.onrender.com/api/submissions/save', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId: currentUser.uid,
+                                problemId: activeProblemId,
+                                difficulty: diff,
+                                code,
+                                language,
+                                status: allPassed ? 'Accepted' : 'Wrong Answer',
+                                testResults: results
+                            })
+                        }).catch(console.error);
+                    }
                 }
             }
-        } catch {
-            setRunResults([{ success: false, output: '', error: 'Connection failed.' }]);
+        } catch (err) {
+            console.error('Run error:', err);
+            setRunResults(primaryCases.map(() => ({ success: false, output: '', error: 'Connection failed. Please try again.' })));
         } finally {
             setIsRunning(false);
         }
@@ -419,7 +436,8 @@ export default function Dashboard() {
             });
 
             if (!res.ok) {
-                throw new Error("HTTP error " + res.status);
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `Server error (${res.status})`);
             }
 
             const reader = res.body.getReader();
@@ -501,8 +519,10 @@ export default function Dashboard() {
                     boundary = buffer.indexOf('\n\n');
                 }
             }
-        } catch {
-            setSubmitResult({ accepted: false, failedLabel: 'Connection Error', results: [] });
+        } catch (err) {
+            console.error('Submit error:', err);
+            const errMsg = err?.message || 'Connection Error';
+            setSubmitResult({ accepted: false, failedLabel: errMsg, results: [] });
             setSubmitProgress(null);
         } finally {
             setIsSubmitting(false);
@@ -959,7 +979,7 @@ export default function Dashboard() {
                                                                 onClick={() => setActiveTab(i)}
                                                             >
                                                                 {res ? (res.success ? <CheckCircle2 size={12} /> : <XCircle size={12} />) : null}
-                                                                {tc.label}
+                                                                {tc.label || tc.name || `Case ${i + 1}`}
                                                             </button>
                                                         );
                                                     })}

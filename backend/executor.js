@@ -77,6 +77,10 @@ async function executeCode(code, language, input, expectedOutput) {
     const sourceFilePath = path.join(tempDir, sourceFilename);
     const inputFilePath = path.join(tempDir, 'input.txt');
 
+    // Declare these at function scope so finally block can access them
+    let stdout, stderr;
+    let executionError = null;
+
     try {
         // 1. Create temp directory
         await fs.mkdir(tempDir, { recursive: true });
@@ -95,9 +99,6 @@ async function executeCode(code, language, input, expectedOutput) {
         const cmd = config.getCommand(sourceFilePath, hasInput ? inputFilePath : null);
 
         // 5. Execute with a 15-second timeout
-        let stdout, stderr;
-        let executionError = null;
-
         const ac = typeof AbortController !== 'undefined' ? new AbortController() : null;
         if (ac && global.activeExecutions) {
             global.activeExecutions.set(sessionId, () => ac.abort('Admin killed execution'));

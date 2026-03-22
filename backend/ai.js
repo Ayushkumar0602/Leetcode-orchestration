@@ -210,10 +210,20 @@ async function generateCodeAndTests(problemStatement, language, problemId) {
       if (docSnap.exists()) {
         console.log(`[Cache Hit] Returning cached problem ${problemId} for language: ${language}`);
         const cached = docSnap.data();
+        const sanitizeLabel = (tc, i, prefix) => {
+          const raw = tc.label || tc.name || '';
+          return (raw && raw !== '-' && raw.trim()) ? raw : `${prefix} ${i + 1}`;
+        };
         return {
           problem: cached.problem,
-          primaryTestCases: cached.primaryTestCases,
-          submitTestCases: cached.submitTestCases,
+          primaryTestCases: (cached.primaryTestCases || []).map((tc, i) => ({
+            ...tc,
+            label: sanitizeLabel(tc, i, 'Example'),
+          })),
+          submitTestCases: (cached.submitTestCases || []).map((tc, i) => ({
+            ...tc,
+            label: sanitizeLabel(tc, i, 'Test'),
+          })),
           code: cached.code[language],
           wrapper: cached.wrapper[language],
         };
