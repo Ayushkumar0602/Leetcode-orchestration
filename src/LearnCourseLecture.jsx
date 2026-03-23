@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2 } from 'lucide-react';
+import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
 

@@ -225,10 +225,13 @@ app.get('/api/public/courses', async (req, res) => {
         const snapshot = await getDocs(query(collection(db, 'youtubecourses'), orderBy('createdAt', 'desc')));
         const courses = snapshot.docs.map(doc => {
             const data = doc.data();
-            const generatedSlug = data.title ? data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : doc.id;
+            // slug should always be stored. Fallback is only for legacy data.
+            const slug = data.slug || (data.title
+                ? data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+                : doc.id);
             return {
                 id: doc.id,
-                slug: data.slug || generatedSlug,
+                slug,
                 title: data.title,
                 description: data.description,
                 thumbnailUrl: data.thumbnailUrl,
@@ -245,18 +248,35 @@ app.get('/api/public/courses', async (req, res) => {
 app.get('/api/public/courses/:slug', async (req, res) => {
     try {
         const { slug } = req.params;
+
+        // 1. Try exact match on stored 'slug' field
         const q = query(collection(db, 'youtubecourses'), where('slug', '==', slug));
         const snapshot = await getDocs(q);
-        
         if (!snapshot.empty) {
             const docRef = snapshot.docs[0];
             return res.json({ id: docRef.id, ...docRef.data() });
         }
-        
-        // Fallback: Check if slug is actually an ID
+
+        // 2. Fallback: Check if slug is a Firestore document ID
         const docSnap = await getDoc(doc(db, 'youtubecourses', slug));
         if (docSnap.exists()) {
             return res.json({ id: docSnap.id, ...docSnap.data() });
+        }
+
+        // 3. Fallback: Find any course whose TITLE matches the slug (for courses without a stored slug field)
+        const allSnap = await getDocs(collection(db, 'youtubecourses'));
+        for (const d of allSnap.docs) {
+            const data = d.data();
+            if (data.title) {
+                const generatedSlug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                if (generatedSlug === slug) {
+                    // Opportunistically backfill the slug so future lookups are fast
+                    try {
+                        await setDoc(doc(db, 'youtubecourses', d.id), { slug: generatedSlug }, { merge: true });
+                    } catch (_) {}
+                    return res.json({ id: d.id, slug: generatedSlug, ...data });
+                }
+            }
         }
 
         res.status(404).json({ error: 'Course not found' });

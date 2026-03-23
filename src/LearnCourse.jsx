@@ -23,7 +23,7 @@ const getFileIcon = (type) => {
 };
 
 export default function LearnCourse() {
-    const { slug } = useParams();
+    const { slug: courseId } = useParams();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     
@@ -42,8 +42,8 @@ export default function LearnCourse() {
         const fetchAll = async () => {
             setLoading(true);
             try {
-                // 1. Fetch course details
-                const courseRes = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
+                // 1. Fetch course details by ID directly
+                const courseRes = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${courseId}`);
                 if (!courseRes.ok) throw new Error("Course not found");
                 const courseData = await courseRes.json();
                 setCourse(courseData);
@@ -52,7 +52,7 @@ export default function LearnCourse() {
                 const enrollHookRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`);
                 const enrollData = await enrollHookRes.json();
                 
-                const isEnrolled = enrollData.enrolledIds?.includes(courseData.id) || enrollData.enrolledIds?.includes(slug);
+                const isEnrolled = enrollData.enrolledIds?.includes(courseData.id) || enrollData.enrolledIds?.includes(courseId);
                 setEnrolled(isEnrolled);
 
                 if (!isEnrolled) {
@@ -149,7 +149,7 @@ export default function LearnCourse() {
                         </p>
 
                         <button 
-                            onClick={() => navigate(`/learn/${slug}/lecture`)}
+                            onClick={() => navigate(`/learn/${courseId}/lecture`)}
                             style={{
                                 background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                                 color: '#fff', border: 'none', padding: '15px 32px', borderRadius: '12px',

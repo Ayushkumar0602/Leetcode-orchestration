@@ -163,6 +163,39 @@ router.post('/optimize-text', verifyAdmin, async (req, res) => {
 // 1.c) YouTube Courses Management
 // ---------------------------------------------------------
 
+// One-time slug backfill: patches all existing courses missing a slug field
+router.post('/courses/backfill-slugs', verifyAdmin, async (req, res) => {
+    try {
+        let patched = 0;
+        if (admin.apps.length) {
+            const snap = await admin.firestore().collection('youtubecourses').get();
+            const batch = admin.firestore().batch();
+            snap.docs.forEach(d => {
+                const data = d.data();
+                if (!data.slug && data.title) {
+                    const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                    batch.update(d.ref, { slug });
+                    patched++;
+                }
+            });
+            if (patched > 0) await batch.commit();
+        } else {
+            const snap = await getDocs(collection(db, 'youtubecourses'));
+            for (const d of snap.docs) {
+                const data = d.data();
+                if (!data.slug && data.title) {
+                    const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                    await setDoc(doc(db, 'youtubecourses', d.id), { slug }, { merge: true });
+                    patched++;
+                }
+            }
+        }
+        res.json({ success: true, patched, message: `Backfilled slugs for ${patched} course(s).` });
+    } catch (error) {
+        res.status(500).json({ error: 'Backfill failed: ' + error.message });
+    }
+});
+
 router.get('/courses', verifyAdmin, async (req, res) => {
     try {
         let docs = [];
@@ -182,16 +215,17 @@ router.get('/courses', verifyAdmin, async (req, res) => {
 router.post('/courses', verifyAdmin, async (req, res) => {
     try {
         const data = { ...req.body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-        if (data.title && !data.slug) {
+        // Always generate slug from title — this is the canonical approach
+        if (data.title) {
             data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
         }
         
         if (admin.apps.length) {
             const ref = await admin.firestore().collection('youtubecourses').add(data);
-            res.json({ success: true, id: ref.id });
+            res.json({ success: true, id: ref.id, slug: data.slug });
         } else {
             const ref = await addDoc(collection(db, 'youtubecourses'), data);
-            res.json({ success: true, id: ref.id });
+            res.json({ success: true, id: ref.id, slug: data.slug });
         }
     } catch (error) {
         res.status(500).json({ error: 'Failed to create course: ' + error.message });
@@ -201,7 +235,8 @@ router.post('/courses', verifyAdmin, async (req, res) => {
 router.patch('/courses/:id', verifyAdmin, async (req, res) => {
     try {
         const data = { ...req.body, updatedAt: new Date().toISOString() };
-        if (data.title && !data.slug) {
+        // Always re-derive slug from title to keep it in sync
+        if (data.title) {
             data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
         }
 
@@ -210,7 +245,7 @@ router.patch('/courses/:id', verifyAdmin, async (req, res) => {
         } else {
             await setDoc(doc(db, 'youtubecourses', req.params.id), data, { merge: true });
         }
-        res.json({ success: true });
+        res.json({ success: true, slug: data.slug });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update course: ' + error.message });
     }
