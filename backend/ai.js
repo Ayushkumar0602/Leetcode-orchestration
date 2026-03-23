@@ -457,4 +457,44 @@ Do NOT include any markdown blocks or explanation. ONLY return valid JSON.
   throw new Error(`AI Regeneration failed: ${lastError?.message}`);
 }
 
-module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData };
+/**
+ * Optimizes course content fields using Gemini.
+ */
+async function optimizeCourseContent(text, field) {
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys found");
+
+  const prompt = `
+You are an expert instructional designer and technical course creator.
+Please optimize the following ${field} for a new professional YouTube course.
+Make the text engaging, well-structured, clear, and professional. 
+Do not add any Markdown code block wrappers like \`\`\` around the entire response. Just return the optimized text directly.
+
+ORIGINAL TEXT:
+"""
+${text}
+"""
+`.trim();
+
+  let lastError;
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      const genAI = new GoogleGenerativeAI(keys[i]);
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
+      const result = await model.generateContent(prompt);
+      let optimizedText = result.response.text().trim();
+      
+      // Remove generic markdown code wrappers if ai includes them 
+      optimizedText = optimizedText.replace(/^```[a-zA-Z]*\n/i, '').replace(/\n```$/i, '').trim();
+
+      return optimizedText;
+    } catch (error) {
+      lastError = error;
+      console.warn(`[AI Optimize Course Content] Key ${i + 1} failed:`, error.message);
+      continue;
+    }
+  }
+  throw new Error(`AI Optimization failed: ${lastError?.message}`);
+}
+
+module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData, optimizeCourseContent };

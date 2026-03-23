@@ -105,3 +105,29 @@ export const uploadChatFile = async (file, { conversationId, senderUid }) => {
     throw error;
   }
 };
+
+export const uploadFile = async (file, bucketName = "images") => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const safeBaseName = (file.name || 'file').replace(/[^\w.\- ]+/g, '').trim().slice(0, 80) || 'file';
+    const fileName = `${Date.now()}_${safeBaseName}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+      Body: uint8Array,
+      ContentType: file.type || 'application/octet-stream',
+    });
+
+    await s3Client.send(command);
+
+    const publicUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${bucketName}/${encodeURIComponent(fileName).replace(/%2F/g, '/')}`;
+    return { success: true, url: publicUrl };
+  } catch (error) {
+    console.error(`Error uploading file to ${bucketName}:`, error);
+    return { success: false, error: error.message };
+  }
+};

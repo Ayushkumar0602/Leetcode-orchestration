@@ -6,6 +6,7 @@ const { rtdb } = require('../firebase');
 const { collection, getDocs, doc, getDoc, setDoc, query, limit, getCountFromServer, addDoc, deleteDoc, updateDoc } = require('firebase/firestore');
 const { FieldPath } = require('firebase-admin/firestore');
 const { ref: rtdbRef, get: rtdbGet } = require('firebase/database');
+const { optimizeCourseContent } = require('../ai');
 
 const router = express.Router();
 
@@ -137,6 +138,86 @@ router.get('/users', verifyAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error listing users:', error);
         res.status(500).json({ error: 'Failed to list users' });
+    }
+});
+
+// ---------------------------------------------------------
+// 1.b) AI Optimization for YouTube Courses
+// ---------------------------------------------------------
+
+router.post('/optimize-text', verifyAdmin, async (req, res) => {
+    try {
+        const { text, field } = req.body;
+        if (!text || !field) {
+            return res.status(400).json({ error: 'Text and field are required.' });
+        }
+        const optimizedText = await optimizeCourseContent(text, field);
+        res.json({ optimizedText });
+    } catch (error) {
+        console.error('Text Optimization Error:', error);
+        res.status(500).json({ error: 'AI optimization failed: ' + error.message });
+    }
+});
+
+// ---------------------------------------------------------
+// 1.c) YouTube Courses Management
+// ---------------------------------------------------------
+
+router.get('/courses', verifyAdmin, async (req, res) => {
+    try {
+        let docs = [];
+        if (admin.apps.length) {
+            const snapshot = await admin.firestore().collection('youtubecourses').orderBy('createdAt', 'desc').get();
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        } else {
+            const snapshot = await getDocs(query(collection(db, 'youtubecourses')));
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+        res.json({ courses: docs });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch courses: ' + error.message });
+    }
+});
+
+router.post('/courses', verifyAdmin, async (req, res) => {
+    try {
+        const data = { ...req.body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        if (admin.apps.length) {
+            const ref = await admin.firestore().collection('youtubecourses').add(data);
+            res.json({ success: true, id: ref.id });
+        } else {
+            const ref = await addDoc(collection(db, 'youtubecourses'), data);
+            res.json({ success: true, id: ref.id });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create course: ' + error.message });
+    }
+});
+
+router.patch('/courses/:id', verifyAdmin, async (req, res) => {
+    try {
+        const data = { ...req.body, updatedAt: new Date().toISOString() };
+        if (admin.apps.length) {
+            await admin.firestore().collection('youtubecourses').doc(req.params.id).set(data, { merge: true });
+        } else {
+            await setDoc(doc(db, 'youtubecourses', req.params.id), data, { merge: true });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update course: ' + error.message });
+    }
+});
+
+router.delete('/courses/:id', verifyAdmin, async (req, res) => {
+    try {
+        if (admin.apps.length) {
+            await admin.firestore().collection('youtubecourses').doc(req.params.id).delete();
+        } else {
+            await deleteDoc(doc(db, 'youtubecourses', req.params.id));
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete course: ' + error.message });
     }
 });
 
