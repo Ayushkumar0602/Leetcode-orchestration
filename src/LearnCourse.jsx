@@ -1,9 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { Youtube, Layers, ArrowLeft, Loader2, PlayCircle, BookOpen } from 'lucide-react';
+import { Loader2, ArrowLeft, Play, FileText, ImageIcon, PlayCircle, FolderArchive, File, Lock, Download, CheckCircle, Clock } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
+
+const formatBytes = (bytes, decimals = 2) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024, dm = decimals < 0 ? 0 : decimals, sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
+
+const getFileIcon = (type) => {
+    if (!type) return <File size={20} color="#64748b" />;
+    if (type.startsWith('image/')) return <ImageIcon size={20} color="#3b82f6" />;
+    if (type.startsWith('video/')) return <PlayCircle size={20} color="#f59e0b" />;
+    if (type.includes('pdf')) return <FileText size={20} color="#ef4444" />;
+    if (type.includes('zip') || type.includes('compressed')) return <FolderArchive size={20} color="#8b5cf6" />;
+    return <File size={20} color="#64748b" />;
+};
 
 export default function LearnCourse() {
     const { slug } = useParams();
@@ -11,182 +28,227 @@ export default function LearnCourse() {
     const { currentUser } = useAuth();
     
     const [course, setCourse] = useState(null);
+    const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState('');
+    const [error, setError] = useState(null);
+    const [enrolled, setEnrolled] = useState(false);
 
     useEffect(() => {
         if (!currentUser) {
-            navigate(`/login?redirect=/learn/${slug}`);
+            navigate('/login');
             return;
         }
         
-        verifyAccessAndFetch();
-        // eslint-disable-next-line
-    }, [slug, currentUser]);
+        const fetchAll = async () => {
+            setLoading(true);
+            try {
+                // 1. Fetch course details
+                const courseRes = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
+                if (!courseRes.ok) throw new Error("Course not found");
+                const courseData = await courseRes.json();
+                setCourse(courseData);
 
-    const verifyAccessAndFetch = async () => {
-        setLoading(true);
-        try {
-            // First get the course details publicly to resolve slug -> ID
-            const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
-            if (!res.ok) {
-                setErrorMsg('Course not found');
-                setLoading(false);
-                return;
-            }
-            const courseData = await res.json();
-            
-            // Check enrollment
-            const token = await currentUser.getIdToken();
-            const enrollRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            if (enrollRes.ok) {
-                const eData = await enrollRes.json();
-                if (!(eData.enrolledIds || []).includes(courseData.id)) {
-                    // Not enrolled -> Redirect back to detail page
-                    navigate(`/courses/${slug}`);
+                // 2. Verify enrollment
+                const enrollHookRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`);
+                const enrollData = await enrollHookRes.json();
+                
+                const isEnrolled = enrollData.enrolledIds?.includes(courseData.id) || enrollData.enrolledIds?.includes(slug);
+                setEnrolled(isEnrolled);
+
+                if (!isEnrolled) {
+                    setError("You are not enrolled in this course.");
+                    setLoading(false);
                     return;
                 }
-            } else {
-                setErrorMsg('Failed to verify enrollment');
-                setLoading(false);
-                return;
-            }
 
-            // User is enrolled, set course
-            setCourse(courseData);
-        } catch (e) {
-            setErrorMsg('An error occurred loading the learning interface.');
-        } finally {
-            setLoading(false);
-        }
-    };
+                // 3. Fetch materials
+                const matRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${courseData.id}/materials`);
+                if (matRes.ok) {
+                    const matData = await matRes.json();
+                    setMaterials(matData.materials || []);
+                }
+
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAll();
+    }, [slug, currentUser, navigate]);
 
     if (loading) {
         return (
-            <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <Loader2 size={40} className="animate-spin" color="#3b82f6" />
-                <p style={{ color: '#fff', marginTop: '15px' }}>Verifying Access...</p>
+            <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Loader2 className="animate-spin" size={48} color="#3b82f6" />
             </div>
         );
     }
 
-    if (errorMsg) {
+    if (error || !course) {
         return (
-            <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <Youtube size={48} color="#ef4444" style={{ marginBottom: '20px' }} />
-                <h2>Oops!</h2>
-                <p style={{ color: 'var(--txt2)' }}>{errorMsg}</p>
+            <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', padding: '2rem' }}>
+                <Lock size={64} color="#ef4444" style={{ marginBottom: '1rem' }} />
+                <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Access Denied</h1>
+                <p style={{ color: 'var(--txt2)', marginBottom: '2rem' }}>{error}</p>
                 <button 
-                    onClick={() => navigate('/courses')}
-                    style={{ marginTop: '20px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                    onClick={() => navigate(`/courses/${slug}`)}
+                    style={{ background: '#3b82f6', color: '#fff', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600 }}
                 >
-                    Back to Course Catalog
+                    Go Back to Course Page
                 </button>
             </div>
         );
     }
 
-    if (!course) return null;
-
-    // A helper to extract the YouTube embed ID
-    const getYouTubeEmbedUrl = (url) => {
-        if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-        const match = url.match(regExp);
-        const videoId = (match && match[2].length === 11) ? match[2] : null;
-
-        // Note: For playlists, the extraction is different. This assumes video link.
-        // If it's a playlist link: https://youtube.com/playlist?list=PL...
-        if (url.includes('playlist?list=')) {
-            const listId = new URL(url).searchParams.get('list');
-            if (listId) return `https://www.youtube.com/embed/videoseries?list=${listId}`;
-        }
-        
-        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-    };
-
-    const embedUrl = getYouTubeEmbedUrl(course.youtubePlaylistLink);
-
     return (
-        <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column' }}>
-            
-            {/* Minimal Header */}
-            <header style={{ background: '#0a0a0f', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <button 
-                        onClick={() => navigate('/dashboard')}
-                        style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}
-                    >
-                        <ArrowLeft size={18} /> Dashboard
-                    </button>
-                    <div style={{ height: '24px', width: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                    <h1 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <PlayCircle size={20} color="#3b82f6" fill="rgba(59,130,246,0.2)" /> {course.title}
-                    </h1>
+        <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--txt)' }}>
+            {/* Header Navbar */}
+            <nav style={{ 
+                position: 'sticky', top: 0, zIndex: 100,
+                background: 'rgba(10, 10, 15, 0.8)', backdropFilter: 'blur(12px)',
+                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+                <button 
+                    onClick={() => navigate('/dashboard')}
+                    style={{ background: 'transparent', border: 'none', color: '#ccc', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.95rem' }}
+                >
+                    <ArrowLeft size={18} /> Back to Dashboard
+                </button>
+                <div style={{ fontWeight: 700, background: 'linear-gradient(135deg, #fff 0%, #aaa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    {course.title}
                 </div>
-            </header>
+                <div style={{ width: '100px' }}></div> {/* Spacer */}
+            </nav>
 
-            <div style={{ flex: 1, display: 'flex' }}>
-                {/* Main Content Area */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#000' }}>
-                    {embedUrl ? (
-                        <div style={{ width: '100%', paddingBottom: '56.25%', position: 'relative' }}>
-                            <iframe 
-                                src={embedUrl}
-                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowFullScreen
-                                title={course.title}
-                            />
+            <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+                
+                {/* Hero / Overview Banner */}
+                <div style={{
+                    background: 'linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))',
+                    border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px',
+                    padding: '3rem', display: 'flex', flexWrap: 'wrap', gap: '3rem', alignItems: 'center',
+                    marginBottom: '3rem', position: 'relative', overflow: 'hidden'
+                }}>
+                    <div style={{ flex: '1 1 500px', zIndex: 2 }}>
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
+                            <span style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <CheckCircle size={14} /> Enrolled
+                            </span>
+                            {course.timeline && (
+                                <span style={{ background: 'rgba(255, 255, 255, 0.05)', color: '#aaa', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <Clock size={14} /> {course.timeline}
+                                </span>
+                            )}
                         </div>
-                    ) : (
-                        <div style={{ width: '100%', paddingBottom: '56.25%', position: 'relative', background: '#111', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                                <Youtube size={64} color="rgba(255,255,255,0.1)" style={{ marginBottom: '15px' }} />
-                                <h3 style={{ color: '#fff', margin: 0 }}>No Video Linked</h3>
-                                <p style={{ color: 'var(--txt3)' }}>The instructor has not provided a YouTube link for this module.</p>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 1rem 0', color: '#fff', lineHeight: 1.2 }}>{course.title}</h1>
+                        <p style={{ color: 'var(--txt2)', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {course.description}
+                        </p>
+
+                        <button 
+                            onClick={() => navigate(`/learn/${slug}/lecture`)}
+                            style={{
+                                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                color: '#fff', border: 'none', padding: '15px 32px', borderRadius: '12px',
+                                fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer',
+                                display: 'inline-flex', alignItems: 'center', gap: '10px',
+                                boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.5)', transition: 'all 0.3s'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'}
+                            onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}
+                        >
+                            Start Learning <Play size={18} fill="currentColor" />
+                        </button>
+                    </div>
+
+                    {/* Thumbnail */}
+                    <div style={{ flex: '1 1 300px', display: 'flex', justifyContent: 'center', zIndex: 2 }}>
+                        {course.thumbnailUrl ? (
+                            <img src={course.thumbnailUrl} alt={course.title} style={{ width: '100%', maxWidth: '400px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)' }} />
+                        ) : (
+                            <div style={{ width: '100%', maxWidth: '400px', aspectRatio: '16/9', background: 'rgba(0,0,0,0.4)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                <PlayCircle size={64} color="#666" />
                             </div>
-                        </div>
-                    )}
-                    
-                    <div style={{ padding: '30px', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
-                        <h2 style={{ fontSize: '1.8rem', margin: '0 0 15px 0' }}>Overview</h2>
-                        <p style={{ color: 'var(--txt2)', lineHeight: 1.7, fontSize: '1.05rem', margin: '0 0 40px 0' }}>{course.description}</p>
+                        )}
                     </div>
                 </div>
 
-                {/* Sidebar Menu */}
-                <div style={{ width: '350px', background: '#0a0a0f', borderLeft: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                    <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Layers size={18} color="#8b5cf6" /> Course Content
-                        </h3>
-                    </div>
+                {/* Course Content Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
                     
-                    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {course.flow && (
-                            <div>
-                                <h4 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Modules Breakdown</h4>
-                                <div style={{ color: 'var(--txt2)', fontSize: '0.9rem', whiteSpace: 'pre-wrap', lineHeight: 1.6, paddingLeft: '10px', borderLeft: '2px solid rgba(255,255,255,0.1)' }}>
-                                    {course.flow}
+                    {/* Materials Section */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '2rem' }}>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <FileText size={24} color="#a855f7" /> Course Materials
+                        </h2>
+
+                        {materials.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                <FolderArchive size={40} color="#444" style={{ margin: '0 auto 1rem' }} />
+                                <p style={{ color: '#888', margin: 0 }}>No additional materials are available for this course yet.</p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {materials.map(mat => (
+                                    <div key={mat.id} style={{
+                                        display: 'flex', alignItems: 'center', gap: '15px', padding: '15px',
+                                        background: 'rgba(255,255,255,0.03)', borderRadius: '12px',
+                                        border: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s'
+                                    }} onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.06)'} onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.03)'}>
+                                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '10px' }}>
+                                            {getFileIcon(mat.type)}
+                                        </div>
+                                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                                            <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{mat.name}</h4>
+                                            <div style={{ display: 'flex', gap: '10px', fontSize: '0.8rem', color: '#888' }}>
+                                                <span>{mat.category}</span>
+                                                <span>•</span>
+                                                <span>{formatBytes(mat.size)}</span>
+                                            </div>
+                                        </div>
+                                        <a 
+                                            href={mat.url} target="_blank" rel="noreferrer"
+                                            style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.2)', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}
+                                            onMouseEnter={e => {e.currentTarget.style.background='#3b82f6'; e.currentTarget.style.color='#fff'}} 
+                                            onMouseLeave={e => {e.currentTarget.style.background='rgba(59,130,246,0.1)'; e.currentTarget.style.color='#3b82f6'}}
+                                        >
+                                            <Download size={16} /> Open
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Course Breakdown / Syllabus Preview */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        {course.prerequisite && (
+                            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '2rem' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: '0 0 1rem 0' }}>Prerequisites</h3>
+                                <div className="course-markdown-content" style={{ fontSize: '0.95rem', color: 'var(--txt2)' }}>
+                                    <ReactMarkdown>{course.prerequisite}</ReactMarkdown>
                                 </div>
                             </div>
                         )}
                         {course.syllabus && (
-                            <div>
-                                <h4 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Full Syllabus</h4>
-                                <div style={{ color: 'var(--txt2)', fontSize: '0.9rem', whiteSpace: 'pre-wrap', lineHeight: 1.6, paddingLeft: '10px', borderLeft: '2px solid rgba(255,255,255,0.1)' }}>
-                                    {course.syllabus}
+                            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '2rem' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: '0 0 1rem 0' }}>Quick Syllabus</h3>
+                                <div className="course-markdown-content" style={{ fontSize: '0.95rem', color: 'var(--txt2)' }}>
+                                    <ReactMarkdown
+                                        components={{
+                                            h1: 'h4', h2: 'h4', h3: 'h5'
+                                        }}
+                                    >{course.syllabus}</ReactMarkdown>
                                 </div>
                             </div>
                         )}
                     </div>
+
                 </div>
-            </div>
-            
+            </main>
         </div>
     );
 }

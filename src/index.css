@@ -1473,3 +1473,57 @@ body {
     gap: 0.25rem;
   }
 }
+
+/* ─── Course Markdown Content Styling ──────────────────── */
+.course-md-content a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+.course-md-content a:hover {
+  text-decoration: underline;
+}
+
+.course-md-content h1, 
+.course-md-content h2, 
+.course-md-content h3, 
+.course-md-content h4, 
+.course-md-content h5 {
+  color: #fff;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.course-md-content p {
+  margin-top: 0;
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+.course-md-content ul, 
+.course-md-content ol {
+  margin-top: 0;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.course-md-content li {
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+.course-md-content strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.course-md-content pre, 
+.course-md-content code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9em;
+  color: #e8e8e8;
+}

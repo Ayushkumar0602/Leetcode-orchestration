@@ -225,9 +225,10 @@ app.get('/api/public/courses', async (req, res) => {
         const snapshot = await getDocs(query(collection(db, 'youtubecourses'), orderBy('createdAt', 'desc')));
         const courses = snapshot.docs.map(doc => {
             const data = doc.data();
+            const generatedSlug = data.title ? data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : doc.id;
             return {
                 id: doc.id,
-                slug: data.slug || doc.id,
+                slug: data.slug || generatedSlug,
                 title: data.title,
                 description: data.description,
                 thumbnailUrl: data.thumbnailUrl,
@@ -322,11 +323,28 @@ app.get('/api/courses/:uid/enrolled', async (req, res) => {
                 });
             });
         }
-
-        res.json({ enrolledCourses: courses, enrolledIds });
+        res.json({ enrolledCourses: courses, enrolledIds: Array.from(enrolledIds) });
     } catch (error) {
         console.error('Error fetching enrolled courses:', error);
         res.status(500).json({ error: 'Failed to fetch enrolled courses' });
+    }
+});
+
+app.get('/api/courses/:id/materials', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const q = query(collection(db, 'course_materials'), where('courseId', '==', id));
+        const snapshot = await getDocs(q);
+        
+        const materials = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })).sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+
+        res.json({ materials });
+    } catch (error) {
+        console.error('Error fetching user course materials:', error);
+        res.status(500).json({ error: 'Failed to fetch course materials' });
     }
 });
 

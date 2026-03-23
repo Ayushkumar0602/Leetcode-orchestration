@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Youtube, Plus, Trash2, Edit, Sparkles, Image as ImageIcon, CheckCircle, AlertCircle, X, Loader2 } from 'lucide-react';
+import { Youtube, Plus, Trash2, Edit, Sparkles, Image as ImageIcon, CheckCircle, AlertCircle, X, Loader2, FileBox } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { uploadFile } from '../lib/s3';
+import AdminCourseMaterials from './AdminCourseMaterials';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
@@ -30,6 +31,7 @@ export default function AdminCourses() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [managingMaterialsFor, setManagingMaterialsFor] = useState(null);
     const [editingCourse, setEditingCourse] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
@@ -269,6 +271,13 @@ export default function AdminCourses() {
                                         <Edit size={14} /> Edit
                                     </button>
                                     <button 
+                                        onClick={() => setManagingMaterialsFor(course)}
+                                        title="Manage Materials"
+                                        style={{ flex: 1, background: 'rgba(59,130,246,0.1)', border: 'none', color: '#3b82f6', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.85rem' }}
+                                    >
+                                        <FileBox size={14} /> Materials
+                                    </button>
+                                    <button 
                                         onClick={() => handleDelete(course.id)}
                                         style={{ flex: 1, background: 'rgba(239,68,68,0.1)', border: 'none', color: '#ef4444', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '0.85rem' }}
                                     >
@@ -279,6 +288,13 @@ export default function AdminCourses() {
                         </div>
                     ))}
                 </div>
+            )}
+
+            {managingMaterialsFor && (
+                <AdminCourseMaterials 
+                    course={managingMaterialsFor} 
+                    onClose={() => setManagingMaterialsFor(null)} 
+                />
             )}
 
             {/* Modal */}

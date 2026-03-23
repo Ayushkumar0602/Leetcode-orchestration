@@ -229,6 +229,59 @@ router.delete('/courses/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// Course Materials Management
+router.get('/courses/:id/materials', verifyAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        let docs = [];
+        if (admin.apps.length) {
+            const snapshot = await admin.firestore().collection('course_materials').where('courseId', '==', id).orderBy('uploadedAt', 'desc').get();
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        } else {
+            const snapshot = await getDocs(query(collection(db, 'course_materials'), where('courseId', '==', id)));
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+        }
+        res.json({ materials: docs });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch course materials: ' + error.message });
+    }
+});
+
+router.post('/courses/:id/materials', verifyAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const data = { 
+            ...req.body, 
+            courseId: id,
+            uploadedAt: new Date().toISOString() 
+        };
+        
+        if (admin.apps.length) {
+            const ref = await admin.firestore().collection('course_materials').add(data);
+            res.json({ success: true, id: ref.id, material: { id: ref.id, ...data } });
+        } else {
+            const ref = await addDoc(collection(db, 'course_materials'), data);
+            res.json({ success: true, id: ref.id, material: { id: ref.id, ...data } });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to add course material: ' + error.message });
+    }
+});
+
+router.delete('/courses/:id/materials/:materialId', verifyAdmin, async (req, res) => {
+    try {
+        const { id, materialId } = req.params;
+        if (admin.apps.length) {
+            await admin.firestore().collection('course_materials').doc(materialId).delete();
+        } else {
+            await deleteDoc(doc(db, 'course_materials', materialId));
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete course material: ' + error.message });
+    }
+});
+
 // Suspend (Disable) a user account
 router.post('/users/:uid/suspend', verifyAdmin, async (req, res) => {
     if (!admin.apps.length) return res.status(501).json({ error: "Not configured" });

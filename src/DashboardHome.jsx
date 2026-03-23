@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import {
     Brain, Code2, Layers, TrendingUp,
-    Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube
+    Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube, BookOpen
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';

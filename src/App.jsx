@@ -22,6 +22,7 @@ import Chat from './Chat';
 import Courses from './Courses';
 import CourseDetail from './CourseDetail';
 import LearnCourse from './LearnCourse';
+import LearnCourseLecture from './LearnCourseLecture';
 
 // System Design Features
 import SystemDesign from './SystemDesign';
@@ -93,6 +94,7 @@ function App() {
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />
             <Route path="/learn/:slug" element={<LearnCourse />} />
+            <Route path="/learn/:slug/lecture" element={<LearnCourseLecture />} />
             
             <Route path="/" element={<LandingPage />} />
             

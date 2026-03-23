@@ -17,7 +17,6 @@ export default function Courses() {
     const [loading, setLoading] = useState(true);
     const [enrolling, setEnrolling] = useState(false);
     
-    const [selectedCourse, setSelectedCourse] = useState(null); // For modal
     const filter = searchParams.get('filter') || 'all'; // all, enrolled, not-enrolled
 
     useSEO({
@@ -97,100 +96,6 @@ export default function Courses() {
 
     const isEnrolled = (courseId) => enrolledIds.includes(courseId);
 
-    const CourseModal = ({ course, onClose }) => {
-        const enrolled = isEnrolled(course.id);
-        const [fullDetails, setFullDetails] = useState(null);
-        const [loadingDetails, setLoadingDetails] = useState(true);
-
-        useEffect(() => {
-            const getFullDetails = async () => {
-                try {
-                    const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${course.slug}`);
-                    if (res.ok) setFullDetails(await res.json());
-                } finally {
-                    setLoadingDetails(false);
-                }
-            };
-            getFullDetails();
-        }, [course.slug]);
-
-        return (
-            <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={onClose}>
-                <div 
-                    onClick={e => e.stopPropagation()}
-                    style={{ background: '#0a0a0f', width: '100%', maxWidth: '700px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
-                >
-                    {course.thumbnailUrl && (
-                        <div style={{ width: '100%', height: '220px', background: `url(${course.thumbnailUrl}) center/cover`, position: 'relative' }}>
-                            <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={18} /></button>
-                        </div>
-                    )}
-                    <div style={{ padding: '30px', overflowY: 'auto' }}>
-                        {!course.thumbnailUrl && (
-                            <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={18} /></button>
-                        )}
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 10px 0' }}>{course.title}</h2>
-                        <p style={{ color: 'var(--txt2)', margin: '0 0 25px 0', lineHeight: 1.6 }}>{course.description}</p>
-                        
-                        {loadingDetails ? (
-                            <div style={{ display: 'flex', padding: '2rem', justifyContent: 'center' }}><Loader2 className="animate-spin" size={24} color="#666" /></div>
-                        ) : fullDetails ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                {fullDetails.prerequisite && (
-                                    <div>
-                                        <h4 style={{ margin: '0 0 5px 0', color: '#fff' }}>Prerequisites</h4>
-                                        <p style={{ margin: 0, color: 'var(--txt3)', fontSize: '0.9rem' }}>{fullDetails.prerequisite}</p>
-                                    </div>
-                                )}
-                                {fullDetails.timeline && (
-                                    <div>
-                                        <h4 style={{ margin: '0 0 5px 0', color: '#fff' }}>Expected Timeline</h4>
-                                        <p style={{ margin: 0, color: 'var(--txt3)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {fullDetails.timeline}</p>
-                                    </div>
-                                )}
-                                {fullDetails.syllabus && (
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <h4 style={{ margin: '0 0 10px 0', color: '#fff', display: 'flex', alignItems: 'center', gap: '6px' }}><BookOpen size={16} color="#3b82f6" /> Syllabus Preview</h4>
-                                        <p style={{ margin: 0, color: 'var(--txt2)', fontSize: '0.85rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                                            {fullDetails.syllabus.length > 300 ? fullDetails.syllabus.slice(0, 300) + '...' : fullDetails.syllabus}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <p style={{ color: '#ef4444' }}>Failed to load full course details.</p>
-                        )}
-                        
-                        <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); navigate(`/courses/${course.slug}`); }}
-                                style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '12px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
-                            >
-                                Full Details View
-                            </button>
-                            {enrolled ? (
-                                <button 
-                                    onClick={() => navigate(`/learn/${course.slug}`)}
-                                    style={{ flex: 1, background: '#10b981', border: 'none', color: '#fff', padding: '12px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                                >
-                                    <Play size={18} /> Continue Learning
-                                </button>
-                            ) : (
-                                <button 
-                                    onClick={() => handleEnroll(course.slug)}
-                                    disabled={enrolling}
-                                    style={{ flex: 1, background: '#3b82f6', border: 'none', color: '#fff', padding: '12px', borderRadius: '8px', fontWeight: 600, cursor: enrolling ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                                >
-                                    {enrolling ? <Loader2 size={18} className="animate-spin" /> : <Lock size={18} />} Enroll Now
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
     return (
         <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column' }}>
             <nav style={{ height: '64px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 100 }}>
@@ -253,7 +158,7 @@ export default function Courses() {
                             return (
                                 <div 
                                     key={course.id}
-                                    onClick={() => setSelectedCourse(course)}
+                                    onClick={() => navigate(`/courses/${course.slug}`)}
                                     style={{
                                         background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
                                         borderRadius: '16px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s',
@@ -287,7 +192,7 @@ export default function Courses() {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     if (enrolled) navigate(`/learn/${course.slug}`);
-                                                    else handleEnroll(course.slug);
+                                                    else navigate(`/courses/${course.slug}`);
                                                 }}
                                                 disabled={enrolling}
                                                 style={{
@@ -298,7 +203,7 @@ export default function Courses() {
                                                     transition: 'background 0.2s'
                                                 }}
                                             >
-                                                {enrolled ? 'Continue' : 'Enroll'}
+                                                {enrolled ? 'Continue' : 'View Details'}
                                             </button>
                                         </div>
                                     </div>
@@ -308,7 +213,6 @@ export default function Courses() {
                     </div>
                 )}
             </main>
-            {selectedCourse && <CourseModal course={selectedCourse} onClose={() => setSelectedCourse(null)} />}
         </div>
     );
 }
