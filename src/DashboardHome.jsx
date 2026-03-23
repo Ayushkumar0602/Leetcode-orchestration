@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import {
     Brain, Code2, Layers, TrendingUp,
-    Award, Target, ArrowRight, User, ExternalLink, Menu, X
+    Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
@@ -274,6 +274,21 @@ export default function DashboardHome() {
         staleTime: 1000 * 60 * 5,
     });
 
+    const { data: enrolledData, isLoading: enrolledLoading } = useQuery({
+        queryKey: ['enrolled-courses', uid],
+        queryFn: async () => {
+            if (!uid) return null;
+            const token = await currentUser.getIdToken();
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com'}/api/courses/${uid}/enrolled`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to load enrolled courses");
+            return res.json();
+        },
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5,
+    });
+
     const userStats = statsData?.userStats ?? null;
     const totalCounts = statsData?.totalCounts ?? null;
 
@@ -373,11 +388,21 @@ export default function DashboardHome() {
             <div className="dash-content">
 
                 {/* Header Section */}
-                <div className="dash-header" style={{ marginBottom: '2.5rem', animation: 'fadeScale 0.6s ease-out' }}>
-                    <h1 style={{ fontWeight: 800, margin: '0 0 8px 0', letterSpacing: '-0.03em' }}>
-                        Welcome back, <span style={{ color: '#60a5fa' }}>{currentUser?.displayName?.split(' ')[0] || 'Developer'}</span>! 👋
-                    </h1>
-                    <p style={{ color: 'var(--txt2)', margin: 0 }}>Here's your interview preparation progress.</p>
+                <div className="dash-header" style={{ marginBottom: '2.5rem', animation: 'fadeScale 0.6s ease-out', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+                    <div>
+                        <h1 style={{ fontWeight: 800, margin: '0 0 8px 0', letterSpacing: '-0.03em' }}>
+                            Welcome back, <span style={{ color: '#60a5fa' }}>{currentUser?.displayName?.split(' ')[0] || 'Developer'}</span>! 👋
+                        </h1>
+                        <p style={{ color: 'var(--txt2)', margin: 0 }}>Here's your interview preparation progress.</p>
+                    </div>
+                    <button 
+                        onClick={() => navigate('/courses')}
+                        style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                    >
+                        <BookOpen size={18} /> Course Catalog
+                    </button>
                 </div>
 
                 {/* Metrics Grid */}
@@ -499,6 +524,56 @@ export default function DashboardHome() {
                         containerStyle={{ background: 'transparent', border: 'none', padding: 0 }}
                     />
                 </div>
+
+                {/* Enrolled Courses Section */}
+                {enrolledData?.enrolledCourses && enrolledData.enrolledCourses.length > 0 && (
+                    <div style={{ marginBottom: '3rem', animation: 'cardAppear 0.5s ease-out 0.55s both' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.3rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Youtube size={20} color="#ef4444" /> Continue Learning
+                            </h2>
+                            <button 
+                                onClick={() => navigate('/courses')} 
+                                style={{ background: 'transparent', border: 'none', color: '#60a5fa', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Browse All Courses
+                            </button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                            {enrolledData.enrolledCourses.map(course => (
+                                <div 
+                                    key={course.id}
+                                    onClick={() => navigate(`/learn/${course.slug}`)}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)',
+                                        borderRadius: '16px', overflow: 'hidden', cursor: 'pointer', display: 'flex',
+                                        transition: 'all 0.2s', boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                                    }}
+                                >
+                                    {course.thumbnailUrl ? (
+                                        <div style={{ width: '100px', flexShrink: 0, background: `url(${course.thumbnailUrl}) center/cover` }} />
+                                    ) : (
+                                        <div style={{ width: '100px', flexShrink: 0, background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(168,85,247,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Youtube size={24} color="rgba(255,255,255,0.2)" />
+                                        </div>
+                                    )}
+                                    <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                        <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 5px 0', lineHeight: 1.3 }}>{course.title}</h3>
+                                        <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}><Play size={12} fill="currentColor" /> Jump Back In</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Quick Actions Grid */}
                 <div>

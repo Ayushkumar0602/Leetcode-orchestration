@@ -182,6 +182,10 @@ router.get('/courses', verifyAdmin, async (req, res) => {
 router.post('/courses', verifyAdmin, async (req, res) => {
     try {
         const data = { ...req.body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        if (data.title && !data.slug) {
+            data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        }
+        
         if (admin.apps.length) {
             const ref = await admin.firestore().collection('youtubecourses').add(data);
             res.json({ success: true, id: ref.id });
@@ -197,6 +201,10 @@ router.post('/courses', verifyAdmin, async (req, res) => {
 router.patch('/courses/:id', verifyAdmin, async (req, res) => {
     try {
         const data = { ...req.body, updatedAt: new Date().toISOString() };
+        if (data.title && !data.slug) {
+            data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        }
+
         if (admin.apps.length) {
             await admin.firestore().collection('youtubecourses').doc(req.params.id).set(data, { merge: true });
         } else {

@@ -3,6 +3,8 @@ import { Youtube, Plus, Trash2, Edit, Sparkles, Image as ImageIcon, CheckCircle,
 import { useAuth } from '../contexts/AuthContext';
 import { uploadFile } from '../lib/s3';
 
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
+
 // We need a way to fetch with the user token for admin
 async function adminFetch(currentUser, path, opts = {}) {
     if (!currentUser) throw new Error("Not logged in");
@@ -53,7 +55,7 @@ export default function AdminCourses() {
     const fetchCourses = async () => {
         setLoading(true);
         try {
-            const data = await adminFetch(currentUser, '/api/admin/courses');
+            const data = await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses`);
             setCourses(data.courses || []);
         } catch (e) {
             console.error(e);
@@ -70,7 +72,7 @@ export default function AdminCourses() {
         if (!formData[field]) return;
         setAiLoadingField(field);
         try {
-            const res = await adminFetch(currentUser, '/api/admin/optimize-text', {
+            const res = await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/optimize-text`, {
                 method: 'POST',
                 body: JSON.stringify({ text: formData[field], field })
             });
@@ -118,12 +120,12 @@ export default function AdminCourses() {
         setErrorMsg('');
         try {
             if (editingCourse) {
-                await adminFetch(currentUser, `/api/admin/courses/${editingCourse.id}`, {
+                await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses/${editingCourse.id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(formData)
                 });
             } else {
-                await adminFetch(currentUser, '/api/admin/courses', {
+                await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses`, {
                     method: 'POST',
                     body: JSON.stringify(formData)
                 });
@@ -164,7 +166,7 @@ export default function AdminCourses() {
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this course?")) return;
         try {
-            await adminFetch(currentUser, `/api/admin/courses/${id}`, { method: 'DELETE' });
+            await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses/${id}`, { method: 'DELETE' });
             fetchCourses();
         } catch (e) {
             alert('Failed to delete: ' + e.message);

@@ -18,6 +18,11 @@ import ProjectDetails from './ProjectDetails';
 import NotificationCenter from './NotificationCenter';
 import Chat from './Chat';
 
+// Course Features
+import Courses from './Courses';
+import CourseDetail from './CourseDetail';
+import LearnCourse from './LearnCourse';
+
 // System Design Features
 import SystemDesign from './SystemDesign';
 import SystemDesignHLD from './SystemDesignHLD';
@@ -83,6 +88,11 @@ function App() {
             
             {/* Terms Route */}
             <Route path="/terms" element={<TermsAndConditions />} />
+            
+            {/* Course Routes */}
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:slug" element={<CourseDetail />} />
+            <Route path="/learn/:slug" element={<LearnCourse />} />
             
             <Route path="/" element={<LandingPage />} />
             

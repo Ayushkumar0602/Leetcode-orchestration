@@ -219,6 +219,117 @@ app.get('/api/metadata', (req, res) => {
     res.json(getMetadata());
 });
 
+// --- Public Course Routes ---
+app.get('/api/public/courses', async (req, res) => {
+    try {
+        const snapshot = await getDocs(query(collection(db, 'youtubecourses'), orderBy('createdAt', 'desc')));
+        const courses = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                slug: data.slug || doc.id,
+                title: data.title,
+                description: data.description,
+                thumbnailUrl: data.thumbnailUrl,
+                createdAt: data.createdAt
+            };
+        });
+        res.json({ courses });
+    } catch (error) {
+        console.error('Error fetching public courses:', error);
+        res.status(500).json({ error: 'Failed to load courses' });
+    }
+});
+
+app.get('/api/public/courses/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const q = query(collection(db, 'youtubecourses'), where('slug', '==', slug));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+            const docRef = snapshot.docs[0];
+            return res.json({ id: docRef.id, ...docRef.data() });
+        }
+        
+        // Fallback: Check if slug is actually an ID
+        const docSnap = await getDoc(doc(db, 'youtubecourses', slug));
+        if (docSnap.exists()) {
+            return res.json({ id: docSnap.id, ...docSnap.data() });
+        }
+
+        res.status(404).json({ error: 'Course not found' });
+    } catch (error) {
+        console.error('Error fetching course by slug:', error);
+        res.status(500).json({ error: 'Failed to load course' });
+    }
+});
+
+// --- Protected Enrollment Routes ---
+app.post('/api/courses/:slug/enroll', async (req, res) => {
+    try {
+        const { uid } = req.body;
+        if (!uid) return res.status(400).json({ error: 'User ID is required' });
+        
+        const { slug } = req.params;
+        let courseId = slug;
+
+        // Resolve slug -> courseId
+        const q = query(collection(db, 'youtubecourses'), where('slug', '==', slug));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            courseId = snapshot.docs[0].id;
+        }
+
+        const profileRef = doc(db, 'userProfiles', uid);
+        await setDoc(profileRef, {
+            enrolledCourses: arrayUnion(courseId),
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+        res.json({ success: true, message: 'Enrolled successfully', courseId });
+    } catch (error) {
+        console.error('Error enrolling in course:', error);
+        res.status(500).json({ error: 'Failed to enroll' });
+    }
+});
+
+app.get('/api/courses/:uid/enrolled', async (req, res) => {
+    try {
+        const { uid } = req.params;
+        const profileSnap = await getDoc(doc(db, 'userProfiles', uid));
+        if (!profileSnap.exists()) return res.json({ enrolledCourses: [] });
+        
+        const data = profileSnap.data();
+        const enrolledIds = data.enrolledCourses || [];
+        
+        if (enrolledIds.length === 0) return res.json({ enrolledCourses: [] });
+
+        // Retrieve course metadata for enrolled courses
+        // Due to firestore 'in' limit of 10, chunking if length > 10. For simplicity, fetch all courses and filter or chunk
+        const courses = [];
+        for (let i = 0; i < enrolledIds.length; i += 10) {
+            const chunk = enrolledIds.slice(i, i + 10);
+            const q = query(collection(db, 'youtubecourses'), where('__name__', 'in', chunk));
+            const snap = await getDocs(q);
+            snap.docs.forEach(d => {
+                const c = d.data();
+                courses.push({
+                    id: d.id,
+                    slug: c.slug || d.id,
+                    title: c.title,
+                    thumbnailUrl: c.thumbnailUrl
+                });
+            });
+        }
+
+        res.json({ enrolledCourses: courses, enrolledIds });
+    } catch (error) {
+        console.error('Error fetching enrolled courses:', error);
+        res.status(500).json({ error: 'Failed to fetch enrolled courses' });
+    }
+});
+
 app.get('/api/problems', async (req, res) => {
     if (!isDataLoaded()) {
         return res.status(503).json({ error: 'Dataset is still loading or unavailable.' });
