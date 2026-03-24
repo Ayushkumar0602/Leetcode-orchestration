@@ -45,6 +45,7 @@ export default function AdminCourseMaterials({ course, onClose }) {
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [errorMsg, setErrorMsg] = useState('');
     
     const [uploadCategory, setUploadCategory] = useState('Resource');
@@ -70,10 +71,13 @@ export default function AdminCourseMaterials({ course, onClose }) {
         if (!file) return;
 
         setUploading(true);
+        setUploadProgress(0);
         setErrorMsg('');
         try {
             // Upload to Supabase bucket 'course_material'
-            const result = await uploadFile(file, 'course_material');
+            const result = await uploadFile(file, 'course_material', (progress) => {
+                setUploadProgress(progress);
+            });
             if (!result.success) throw new Error(result.error);
 
             // Save metadata to database
@@ -96,6 +100,7 @@ export default function AdminCourseMaterials({ course, onClose }) {
             setErrorMsg('Upload error: ' + err.message);
         } finally {
             setUploading(false);
+            setUploadProgress(0);
             // Reset input
             e.target.value = '';
         }
@@ -154,10 +159,10 @@ export default function AdminCourseMaterials({ course, onClose }) {
                                 background: uploading ? 'rgba(59,130,246,0.5)' : '#3b82f6', color: '#fff',
                                 padding: '10px 20px', borderRadius: '8px', cursor: uploading ? 'wait' : 'pointer',
                                 display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '0.9rem',
-                                transition: 'background 0.2s'
+                                transition: 'background 0.2s', minWidth: '160px', justifyContent: 'center'
                             }}>
                                 {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-                                {uploading ? 'Uploading...' : 'Select File'}
+                                {uploading ? `Uploading ${uploadProgress}%` : 'Select File'}
                             </label>
                         </div>
                         <p style={{ margin: 0, color: '#666', fontSize: '0.85rem' }}>Uploads to `course_material` bucket (PDF, ZIP, Images, MP4, etc)</p>

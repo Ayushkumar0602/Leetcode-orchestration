@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 
 // Ensure keys from user prompt
 const ACCESS_ID = "b6aae57565cde6c3aa4574fca0f871f2";
@@ -106,7 +107,7 @@ export const uploadChatFile = async (file, { conversationId, senderUid }) => {
   }
 };
 
-export const uploadFile = async (file, bucketName = "images") => {
+export const uploadFile = async (file, bucketName = "images", onProgress) => {
   try {
     const fileExt = file.name.split('.').pop();
     const safeBaseName = (file.name || 'file').replace(/[^\w.\- ]+/g, '').trim().slice(0, 80) || 'file';
@@ -115,14 +116,26 @@ export const uploadFile = async (file, bucketName = "images") => {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: fileName,
-      Body: uint8Array,
-      ContentType: file.type || 'application/octet-stream',
+    const upload = new Upload({
+      client: s3Client,
+      params: {
+        Bucket: bucketName,
+        Key: fileName,
+        Body: uint8Array,
+        ContentType: file.type || 'application/octet-stream',
+      },
     });
 
-    await s3Client.send(command);
+    if (onProgress) {
+      upload.on("httpUploadProgress", (progress) => {
+        if (progress.total) {
+          const percent = Math.round((progress.loaded / progress.total) * 100);
+          onProgress(percent);
+        }
+      });
+    }
+
+    await upload.done();
 
     const publicUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${bucketName}/${encodeURIComponent(fileName).replace(/%2F/g, '/')}`;
     return { success: true, url: publicUrl };

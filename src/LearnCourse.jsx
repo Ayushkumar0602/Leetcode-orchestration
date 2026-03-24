@@ -23,7 +23,7 @@ const getFileIcon = (type) => {
 };
 
 export default function LearnCourse() {
-    const { slug: courseId } = useParams();
+    const { slug } = useParams();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     
@@ -42,8 +42,8 @@ export default function LearnCourse() {
         const fetchAll = async () => {
             setLoading(true);
             try {
-                // 1. Fetch course details by ID directly
-                const courseRes = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${courseId}`);
+                // 1. Fetch course details by slug
+                const courseRes = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
                 if (!courseRes.ok) throw new Error("Course not found");
                 const courseData = await courseRes.json();
                 setCourse(courseData);
@@ -52,8 +52,12 @@ export default function LearnCourse() {
                 const enrollHookRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`);
                 const enrollData = await enrollHookRes.json();
                 
-                const isEnrolled = enrollData.enrolledIds?.includes(courseData.id) || enrollData.enrolledIds?.includes(courseId);
+                // enrolledIds stores Firestore doc IDs. courseData.id is the Firestore doc ID.
+                // Also fallback: check if enrolledIds contains the slug (older enrollments)
+                const enrolledIds = enrollData.enrolledIds || [];
+                const isEnrolled = enrolledIds.includes(courseData.id) || enrolledIds.includes(slug);
                 setEnrolled(isEnrolled);
+                console.log('[LearnCourse] courseData.id:', courseData.id, '| slug:', slug, '| enrolledIds:', enrolledIds, '| isEnrolled:', isEnrolled);
 
                 if (!isEnrolled) {
                     setError("You are not enrolled in this course.");
@@ -144,7 +148,7 @@ export default function LearnCourse() {
                             )}
                         </div>
                         <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 1rem 0', color: '#fff', lineHeight: 1.2 }}>{course.title}</h1>
-                        <p style={{ color: 'var(--txt2)', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        <p style={{ color: 'var(--txt2)', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', whiteSpace: 'pre-wrap' }}>
                             {course.description}
                         </p>
 
@@ -229,7 +233,7 @@ export default function LearnCourse() {
                             <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '2rem' }}>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: '0 0 1rem 0' }}>Prerequisites</h3>
                                 <div className="course-markdown-content" style={{ fontSize: '0.95rem', color: 'var(--txt2)' }}>
-                                    <ReactMarkdown>{course.prerequisite}</ReactMarkdown>
+                                    <ReactMarkdown components={{ p: ({node, ...props}) => <p style={{ whiteSpace: 'pre-wrap', margin: 0 }} {...props} /> }}>{course.prerequisite}</ReactMarkdown>
                                 </div>
                             </div>
                         )}
@@ -239,7 +243,8 @@ export default function LearnCourse() {
                                 <div className="course-markdown-content" style={{ fontSize: '0.95rem', color: 'var(--txt2)' }}>
                                     <ReactMarkdown
                                         components={{
-                                            h1: 'h4', h2: 'h4', h3: 'h5'
+                                            h1: 'h4', h2: 'h4', h3: 'h5',
+                                            p: ({node, ...props}) => <p style={{ whiteSpace: 'pre-wrap', margin: 0 }} {...props} />
                                         }}
                                     >{course.syllabus}</ReactMarkdown>
                                 </div>

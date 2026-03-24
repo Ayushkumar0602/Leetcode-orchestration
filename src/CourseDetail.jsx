@@ -1,86 +1,90 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import NavProfile from './NavProfile';
 import { Youtube, Lock, Play, Clock, BookOpen, Layers, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
+
+// ─── Fetchers ────────────────────────────────────────────────────────────────
+
+async function fetchCourse(slug) {
+    const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
+    if (res.status === 404) throw Object.assign(new Error('Not found'), { status: 404 });
+    if (!res.ok) throw new Error('Failed to fetch course');
+    return res.json();
+}
+
+async function fetchEnrolledIds(currentUser) {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch enrollments');
+    const data = await res.json();
+    return data.enrolledIds || [];
+}
+
+async function enrollInCourse({ slug, currentUser }) {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${slug}/enroll`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid: currentUser.uid }),
+    });
+    if (!res.ok) throw new Error('Failed to enroll');
+    return res.json();
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function CourseDetail() {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
-    
-    const [course, setCourse] = useState(null);
-    const [loading, setLoading] = useState(true);
-    
-    // Enrollment state
-    const [enrolled, setEnrolled] = useState(false);
-    const [enrolling, setEnrolling] = useState(false);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        fetchCourseAndStatus();
-        // eslint-disable-next-line
-    }, [slug, currentUser]);
+    // ── Queries ──────────────────────────────────────────────────────────────
 
-    const fetchCourseAndStatus = async () => {
-        setLoading(true);
-        try {
-            // Fetch public course details
-            const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
-            if (!res.ok) {
-                if (res.status === 404) navigate('/courses'); // Redirect if not found
-                throw new Error("Failed to fetch course");
-            }
-            const courseData = await res.json();
-            setCourse(courseData);
+    const {
+        data: course,
+        isLoading: loadingCourse,
+        error: courseError,
+    } = useQuery({
+        queryKey: ['course', slug],
+        queryFn: () => fetchCourse(slug),
+        onError: (err) => { if (err.status === 404) navigate('/courses'); },
+    });
 
-            // Fetch enrollment status if logged in
-            if (currentUser && courseData.id) {
-                const token = await currentUser.getIdToken();
-                const enrollRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (enrollRes.ok) {
-                    const eData = await enrollRes.json();
-                    if ((eData.enrolledIds || []).includes(courseData.id)) {
-                        setEnrolled(true);
-                    }
-                }
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: enrolledIds = [] } = useQuery({
+        queryKey: ['enrolled-ids', currentUser?.uid],
+        queryFn: () => fetchEnrolledIds(currentUser),
+        enabled: !!currentUser && !!course,
+    });
 
-    const handleEnroll = async () => {
-        if (!currentUser) {
-            navigate(`/login?redirect=/courses/${slug}`);
-            return;
-        }
-        setEnrolling(true);
-        try {
-            const token = await currentUser.getIdToken();
-            const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${slug}/enroll`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ uid: currentUser.uid })
-            });
-            if (res.ok) {
-                setEnrolled(true);
-            }
-        } catch (e) {
-            alert('Failed to enroll.');
-        } finally {
-            setEnrolling(false);
-        }
+    // ── Mutation ─────────────────────────────────────────────────────────────
+
+    const enrollMutation = useMutation({
+        mutationFn: enrollInCourse,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['enrolled-ids', currentUser?.uid] });
+        },
+        onError: () => alert('Failed to enroll.'),
+    });
+
+    // ── Derived state ─────────────────────────────────────────────────────────
+
+    const enrolled = course ? enrolledIds.includes(course.id) : false;
+
+    const handleEnroll = () => {
+        if (!currentUser) { navigate(`/login?redirect=/courses/${slug}`); return; }
+        enrollMutation.mutate({ slug, currentUser });
     };
 
     useSEO({
@@ -89,8 +93,10 @@ export default function CourseDetail() {
         canonical: `/courses/${slug}`,
         robots: 'index, follow'
     });
-    // Loading state
-    if (loading) {
+
+    // ── Render guards ─────────────────────────────────────────────────────────
+
+    if (loadingCourse) {
         return (
             <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <Loader2 size={40} className="animate-spin" color="#3b82f6" />
@@ -99,13 +105,13 @@ export default function CourseDetail() {
         );
     }
 
-    if (!course) {
+    if (courseError || !course) {
         return (
             <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <Youtube size={64} color="#ef4444" style={{ marginBottom: '20px', opacity: 0.8 }} />
                 <h2 style={{ fontSize: '2rem', fontWeight: 800 }}>Course Not Found</h2>
                 <p style={{ color: 'var(--txt2)', marginTop: '10px' }}>The course you're looking for doesn't exist or was removed.</p>
-                <button 
+                <button
                     onClick={() => navigate('/courses')}
                     style={{ marginTop: '30px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
@@ -130,20 +136,16 @@ export default function CourseDetail() {
                     <NavProfile />
                 </div>
             </nav>
-            
+
             <main style={{ flex: 1, position: 'relative' }}>
-                {/* Hero Gradient Background */}
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '500px', background: 'radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.15) 0%, rgba(5,5,5,0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
-                
-                {/* Main Content Layout */}
+
                 <div style={{ maxWidth: '1250px', margin: '0 auto', padding: '40px 2rem 80px', display: 'flex', gap: '50px', position: 'relative', zIndex: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                    
-                    {/* Left Column: Details */}
+
+                    {/* Left Column */}
                     <div style={{ flex: '1 1 650px', display: 'flex', flexDirection: 'column' }}>
-                        
-                        {/* Hero Header */}
                         <div style={{ marginBottom: '40px' }}>
-                            <button 
+                            <button
                                 onClick={() => navigate('/courses')}
                                 style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, padding: 0, marginBottom: '20px', transition: 'color 0.2s' }}
                                 onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
@@ -151,9 +153,9 @@ export default function CourseDetail() {
                             >
                                 <ArrowLeft size={16} /> Back to Courses
                             </button>
-                            
+
                             <h1 style={{ fontSize: '3rem', fontWeight: 800, margin: '0 0 20px 0', lineHeight: 1.15, letterSpacing: '-1px' }}>{course.title}</h1>
-                            
+
                             <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '30px' }}>
                                 {course.timeline && (
                                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: '#a0a0a0', background: 'rgba(255,255,255,0.03)', padding: '6px 14px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -165,15 +167,13 @@ export default function CourseDetail() {
                                 </span>
                             </div>
 
-                            {/* Main Description */}
                             <div className="course-md-content" style={{ fontSize: '1.15rem', color: 'var(--txt2)', margin: 0, lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <ReactMarkdown>{course.description}</ReactMarkdown>
+                                <ReactMarkdown components={{ p: ({node, ...props}) => <p style={{ whiteSpace: 'pre-wrap', margin: 0 }} {...props} /> }}>{course.description}</ReactMarkdown>
                             </div>
                         </div>
 
                         <div style={{ height: '1px', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%)', margin: '10px 0 50px' }} />
 
-                        {/* Sections */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
                             {course.prerequisite && (
                                 <section>
@@ -184,11 +184,11 @@ export default function CourseDetail() {
                                         <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>Prerequisites</h2>
                                     </div>
                                     <div className="course-md-content" style={{ color: 'var(--txt2)', lineHeight: 1.7, fontSize: '1.05rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '15px', background: 'rgba(255,255,255,0.015)', padding: '25px 30px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                                        <ReactMarkdown>{course.prerequisite}</ReactMarkdown>
+                                        <ReactMarkdown components={{ p: ({node, ...props}) => <p style={{ whiteSpace: 'pre-wrap', margin: 0 }} {...props} /> }}>{course.prerequisite}</ReactMarkdown>
                                     </div>
                                 </section>
                             )}
-                            
+
                             {course.flow && (
                                 <section>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
@@ -198,7 +198,7 @@ export default function CourseDetail() {
                                         <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>Course Flow</h2>
                                     </div>
                                     <div className="course-md-content" style={{ color: 'var(--txt2)', lineHeight: 1.7, fontSize: '1.05rem', background: 'rgba(255,255,255,0.015)', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: 'inset 0 2px 20px rgba(255,255,255,0.01)' }}>
-                                        <ReactMarkdown components={{ h1: 'h3', h2: 'h4', h3: 'h5' }}>{course.flow}</ReactMarkdown>
+                                        <ReactMarkdown components={{ h1: 'h3', h2: 'h4', h3: 'h5', p: ({node, ...props}) => <p style={{ whiteSpace: 'pre-wrap', margin: 0 }} {...props} /> }}>{course.flow}</ReactMarkdown>
                                     </div>
                                 </section>
                             )}
@@ -212,14 +212,14 @@ export default function CourseDetail() {
                                         <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>Comprehensive Syllabus</h2>
                                     </div>
                                     <div className="course-md-content" style={{ color: 'var(--txt2)', lineHeight: 1.8, fontSize: '1.05rem', background: 'rgba(255,255,255,0.015)', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: 'inset 0 2px 20px rgba(255,255,255,0.01)' }}>
-                                        <ReactMarkdown components={{ h1: 'h3', h2: 'h4', h3: 'h5' }}>{course.syllabus}</ReactMarkdown>
+                                        <ReactMarkdown components={{ h1: 'h3', h2: 'h4', h3: 'h5', p: ({node, ...props}) => <p style={{ whiteSpace: 'pre-wrap', margin: 0 }} {...props} /> }}>{course.syllabus}</ReactMarkdown>
                                     </div>
                                 </section>
                             )}
                         </div>
                     </div>
 
-                    {/* Right Column: Sticky Sidebar Card */}
+                    {/* Right Column: Sticky Sidebar */}
                     <div style={{ flex: '1 1 350px', position: 'sticky', top: '100px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div style={{ background: '#0a0a0f', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column' }}>
                             {course.thumbnailUrl ? (
@@ -233,29 +233,29 @@ export default function CourseDetail() {
                             <div style={{ padding: '30px' }}>
                                 <h3 style={{ fontSize: '1.3rem', fontWeight: 800, margin: '0 0 10px 0', lineHeight: 1.3 }}>Ready to dive in?</h3>
                                 <p style={{ color: 'var(--txt2)', fontSize: '0.95rem', margin: '0 0 25px 0', lineHeight: 1.5 }}>Gain full access to all lectures, syllabus materials, and AI-optimized prerequisites.</p>
-                                
+
                                 {enrolled ? (
-                                    <button 
+                                    <button
                                         onClick={() => navigate(`/learn/${course.slug}`)}
                                         style={{ width: '100%', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#fff', padding: '16px', borderRadius: '12px', fontWeight: 700, fontSize: '1.05rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 16px rgba(16,185,129,0.25)', transition: 'transform 0.2s, box-shadow 0.2s' }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 20px rgba(16,185,129,0.35)' }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(16,185,129,0.25)' }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 20px rgba(16,185,129,0.35)'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(16,185,129,0.25)'; }}
                                     >
                                         <Play size={20} fill="#fff" /> Continue Learning
                                     </button>
                                 ) : (
-                                    <button 
+                                    <button
                                         onClick={handleEnroll}
-                                        disabled={enrolling}
-                                        style={{ width: '100%', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: '#fff', padding: '16px', borderRadius: '12px', fontWeight: 700, fontSize: '1.05rem', cursor: enrolling ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 16px rgba(59,130,246,0.25)', transition: 'transform 0.2s, box-shadow 0.2s' }}
-                                        onMouseEnter={(e) => { if(!enrolling){ e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 20px rgba(59,130,246,0.35)'} }}
-                                        onMouseLeave={(e) => { if(!enrolling){ e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(59,130,246,0.25)'} }}
+                                        disabled={enrollMutation.isPending}
+                                        style={{ width: '100%', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: '#fff', padding: '16px', borderRadius: '12px', fontWeight: 700, fontSize: '1.05rem', cursor: enrollMutation.isPending ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 16px rgba(59,130,246,0.25)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                                        onMouseEnter={(e) => { if (!enrollMutation.isPending) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 20px rgba(59,130,246,0.35)'; } }}
+                                        onMouseLeave={(e) => { if (!enrollMutation.isPending) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(59,130,246,0.25)'; } }}
                                     >
-                                        {enrolling ? <Loader2 size={20} className="animate-spin" /> : <Lock size={20} />} 
-                                        {enrolling ? 'Enrolling...' : 'Enroll Now'}
+                                        {enrollMutation.isPending ? <Loader2 size={20} className="animate-spin" /> : <Lock size={20} />}
+                                        {enrollMutation.isPending ? 'Enrolling...' : 'Enroll Now'}
                                     </button>
                                 )}
-                                
+
                                 <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--txt3)', fontSize: '0.85rem' }}>
                                     <Lock size={12} /> Secure 1-click enrollment
                                 </div>

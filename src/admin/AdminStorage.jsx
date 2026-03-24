@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { S3Client, ListObjectsV2Command, DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Upload as S3Upload } from "@aws-sdk/lib-storage";
 import { HardDrive, Loader2, Trash2, ShieldAlert, File, ExternalLink, RefreshCw, Upload, Search, ArrowUpDown, FolderOpen } from 'lucide-react';
 
 // Using the same credentials from src/lib/s3.js
@@ -28,6 +29,7 @@ export default function AdminStorage() {
     const [sortKey, setSortKey] = useState("lastModified");
     const [sortDir, setSortDir] = useState("desc");
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery({
         queryKey: ['admin-storage-objects', bucket, prefix],
@@ -56,24 +58,37 @@ export default function AdminStorage() {
     const handleUpload = async (file) => {
         if (!file) return;
         setUploading(true);
+        setUploadProgress(0);
         try {
             const arrayBuffer = await file.arrayBuffer();
             const uint8Array = new Uint8Array(arrayBuffer);
             const safeName = (file.name || 'file').replace(/[^\w.\- ]+/g, '').trim().slice(0, 120) || 'file';
             const key = `${bucket === 'chat-files' ? 'chats' : 'uploads'}/${Date.now()}_${safeName}`;
-            const command = new PutObjectCommand({
-                Bucket: bucket,
-                Key: key,
-                Body: uint8Array,
-                ContentType: file.type || 'application/octet-stream',
+            
+            const upload = new S3Upload({
+                client: s3Client,
+                params: {
+                    Bucket: bucket,
+                    Key: key,
+                    Body: uint8Array,
+                    ContentType: file.type || 'application/octet-stream',
+                },
             });
-            await s3Client.send(command);
+
+            upload.on("httpUploadProgress", (progress) => {
+                if (progress.total) {
+                    setUploadProgress(Math.round((progress.loaded / progress.total) * 100));
+                }
+            });
+
+            await upload.done();
             await refetch();
         } catch (err) {
             console.error(err);
             alert("Failed to upload: " + err.message);
         } finally {
             setUploading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -116,7 +131,7 @@ export default function AdminStorage() {
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <label style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 14px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', cursor: uploading ? 'wait' : 'pointer', opacity: uploading ? 0.7 : 1 }}>
                         <Upload size={16} />
-                        {uploading ? 'Uploading…' : 'Upload'}
+                        {uploading ? `Uploading ${uploadProgress}%` : 'Upload'}
                         <input type="file" style={{ display: 'none' }} disabled={uploading} onChange={(e) => handleUpload(e.target.files?.[0])} />
                     </label>
                     <button 

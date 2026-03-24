@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from './contexts/AuthContext';
 import RouteTracker from './RouteTracker';
 import Dashboard from './Dashboard';
@@ -47,8 +49,20 @@ import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
 import TermsAndConditions from './TermsAndConditions';
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,     // 5 minutes
+      gcTime:    1000 * 60 * 10,    // 10 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
         {/* Global route-change tracker — renders nothing, fires analytics on every navigation */}
@@ -109,6 +123,8 @@ function App() {
         </div>
       </AuthProvider>
     </BrowserRouter>
+    <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 

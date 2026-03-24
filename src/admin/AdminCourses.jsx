@@ -3,6 +3,7 @@ import { Youtube, Plus, Trash2, Edit, Sparkles, Image as ImageIcon, CheckCircle,
 import { useAuth } from '../contexts/AuthContext';
 import { uploadFile } from '../lib/s3';
 import AdminCourseMaterials from './AdminCourseMaterials';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
@@ -28,8 +29,7 @@ async function adminFetch(currentUser, path, opts = {}) {
 
 export default function AdminCourses() {
     const { currentUser } = useAuth();
-    const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [managingMaterialsFor, setManagingMaterialsFor] = useState(null);
     const [editingCourse, setEditingCourse] = useState(null);
@@ -43,29 +43,20 @@ export default function AdminCourses() {
         prerequisite: '',
         thumbnailUrl: ''
     });
-    const [isSaving, setIsSaving] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [aiLoadingField, setAiLoadingField] = useState(null); // 'description' | 'timeline' | 'flow' | 'syllabus' | 'prerequisite'
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
-    useEffect(() => {
-        if (currentUser) {
-            fetchCourses();
-        }
-    }, [currentUser]);
+    // ── Query: list admin courses ──────────────────────────────────────────
+    const { data: courses = [], isLoading: loading } = useQuery({
+        queryKey: ['admin-courses'],
+        queryFn: () => adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses`)
+            .then(d => d.courses || []),
+        enabled: !!currentUser,
+    });
 
-    const fetchCourses = async () => {
-        setLoading(true);
-        try {
-            const data = await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses`);
-            setCourses(data.courses || []);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // ── Mutations ─────────────────────────────────────────────────────────
     const handleInputChange = (e) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
@@ -90,6 +81,7 @@ export default function AdminCourses() {
         const file = e.target.files?.[0];
         if (!file) return;
         setUploadingImage(true);
+        setUploadProgress(0);
         setErrorMsg('');
         try {
             // Modify s3.js to accept bucketName if possible, or build the public URL here.
@@ -101,9 +93,10 @@ export default function AdminCourses() {
             // Let's implement direct presigned/upload or write a custom fetch to Supabase.
             // Actually, we can use the `uploadFile` from `lib/s3` if we modify it, but we can't easily without knowing its exact exports.
             // Wait, we can just pass the file to `uploadFile(file)` and store the result url. 
-            // But to assure bucket="course_thumbnail", we will modify `lib/s3.js` separately. 
             // Let's assume we modify lib/s3 to accept `bucketName`.
-            const result = await uploadFile(file, 'course_thumbnail');
+            const result = await uploadFile(file, 'course_thumbnail', (progress) => {
+                setUploadProgress(progress);
+            });
             if (result.success) {
                 setFormData(prev => ({ ...prev, thumbnailUrl: result.url }));
             } else {
@@ -113,34 +106,38 @@ export default function AdminCourses() {
             setErrorMsg('Upload error: ' + err.message);
         } finally {
             setUploadingImage(false);
+            setUploadProgress(0);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSaving(true);
-        setErrorMsg('');
-        try {
+    const saveMutation = useMutation({
+        mutationFn: async (data) => {
             if (editingCourse) {
-                await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses/${editingCourse.id}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify(formData)
-                });
-            } else {
-                await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses`, {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
+                return adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses/${editingCourse.id}`, {
+                    method: 'PATCH', body: JSON.stringify(data)
                 });
             }
+            return adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses`, {
+                method: 'POST', body: JSON.stringify(data)
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+            queryClient.invalidateQueries({ queryKey: ['public-courses'] });
             setIsModalOpen(false);
             setEditingCourse(null);
-            fetchCourses();
-        } catch (e) {
-            setErrorMsg(e.message);
-        } finally {
-            setIsSaving(false);
-        }
-    };
+        },
+        onError: (e) => setErrorMsg(e.message),
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id) => adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses/${id}`, { method: 'DELETE' }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+            queryClient.invalidateQueries({ queryKey: ['public-courses'] });
+        },
+        onError: (e) => alert('Failed to delete: ' + e.message),
+    });
 
     const openCreateModal = () => {
         setFormData({ title: '', description: '', timeline: '', flow: '', syllabus: '', youtubePlaylistLink: '', prerequisite: '', thumbnailUrl: '' });
@@ -173,6 +170,12 @@ export default function AdminCourses() {
         } catch (e) {
             alert('Failed to delete: ' + e.message);
         }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+        saveMutation.mutate(formData);
     };
 
     const AITextarea = ({ label, name, rows = 3 }) => (
@@ -356,7 +359,7 @@ export default function AdminCourses() {
                                                 border: '1px solid rgba(255,255,255,0.1)', padding: '8px 12px', 
                                                 borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' 
                                             }}>
-                                                {uploadingImage ? 'Uploading...' : 'Browse Image'}
+                                                {uploadingImage ? `Uploading ${uploadProgress}%` : 'Browse Image'}
                                             </label>
                                             <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', color: '#666' }}>Uploads to Supabase 'course_thumbnail' bucket.</p>
                                         </div>
@@ -379,10 +382,10 @@ export default function AdminCourses() {
                                 Cancel
                             </button>
                             <button 
-                                type="submit" form="courseForm" disabled={isSaving || uploadingImage}
+                                type="submit" form="courseForm" disabled={saveMutation.isPending || uploadingImage}
                                 style={{ background: '#2563eb', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
                             >
-                                {isSaving ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                                {saveMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
                                 {editingCourse ? 'Save Changes' : 'Create Course'}
                             </button>
                         </div>

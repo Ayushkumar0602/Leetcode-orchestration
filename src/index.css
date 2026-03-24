@@ -171,7 +171,7 @@ body {
   cursor: not-allowed;
 }
 
-.spin {
+.spin, .animate-spin {
   animation: spin 0.8s linear infinite;
 }
 
@@ -1502,18 +1502,22 @@ body {
 }
 
 .course-md-content ul, 
-.course-md-content ol {
+.course-md-content ol,
+.course-markdown-content ul, 
+.course-markdown-content ol {
   margin-top: 0;
   margin-bottom: 1em;
   padding-left: 1.5em;
 }
 
-.course-md-content li {
+.course-md-content li,
+.course-markdown-content li {
   margin-bottom: 0.5em;
   line-height: 1.6;
 }
 
-.course-md-content strong {
+.course-md-content strong,
+.course-markdown-content strong {
   color: #fff;
   font-weight: 600;
 }
@@ -1526,4 +1530,29 @@ body {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.9em;
   color: #e8e8e8;
+}
+
+.course-md-content h3, .course-markdown-content h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  color: #a855f7;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.course-md-content h4, .course-markdown-content h4 {
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.course-md-content h5, .course-markdown-content h5 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  color: #e8e8e8;
+  font-size: 1rem;
+  font-weight: 600;
 }

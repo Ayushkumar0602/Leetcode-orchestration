@@ -1,23 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Youtube, Play, CheckCircle, Lock, BookOpen, Clock, Loader2, X } from 'lucide-react';
+import { BookOpen, CheckCircle, Loader2, Youtube } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import NavProfile from './NavProfile';
 import { useSEO } from './hooks/useSEO';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
+
+// ─── Fetchers ────────────────────────────────────────────────────────────────
+
+async function fetchPublicCourses() {
+    const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses`);
+    if (!res.ok) throw new Error('Failed to fetch courses');
+    const data = await res.json();
+    return data.courses || [];
+}
+
+async function fetchEnrolledIds(currentUser) {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch enrollments');
+    const data = await res.json();
+    return data.enrolledIds || [];
+}
+
+async function enrollInCourse({ slug, currentUser }) {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${slug}/enroll`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid: currentUser.uid })
+    });
+    if (!res.ok) throw new Error('Failed to enroll');
+    return res.json();
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Courses() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    
-    const [courses, setCourses] = useState([]);
-    const [enrolledIds, setEnrolledIds] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [enrolling, setEnrolling] = useState(false);
-    
-    const filter = searchParams.get('filter') || 'all'; // all, enrolled, not-enrolled
+    const queryClient = useQueryClient();
+
+    const filter = searchParams.get('filter') || 'all';
 
     useSEO({
         title: 'Tech & Programming Courses - Whizan',
@@ -26,75 +58,46 @@ export default function Courses() {
         robots: 'index, follow'
     });
 
-    useEffect(() => {
-        fetchCoursesAndEnrollment();
-        // eslint-disable-next-line
-    }, [currentUser]);
+    // ── Queries ──────────────────────────────────────────────────────────────
 
-    const fetchCoursesAndEnrollment = async () => {
-        setLoading(true);
-        try {
-            // Fetch public courses list
-            const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses`);
-            if (res.ok) {
-                const data = await res.json();
-                setCourses(data.courses || []);
-            }
+    const { data: courses = [], isLoading: loadingCourses } = useQuery({
+        queryKey: ['public-courses'],
+        queryFn: fetchPublicCourses,
+    });
 
-            // Fetch enrolled if logged in
-            if (currentUser) {
-                const token = await currentUser.getIdToken();
-                const enrollRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (enrollRes.ok) {
-                    const eData = await enrollRes.json();
-                    setEnrolledIds(eData.enrolledIds || []);
-                }
-            }
-        } catch (e) {
-            console.error("Error fetching courses data", e);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: enrolledIds = [] } = useQuery({
+        queryKey: ['enrolled-ids', currentUser?.uid],
+        queryFn: () => fetchEnrolledIds(currentUser),
+        enabled: !!currentUser,
+    });
 
-    const handleEnroll = async (slug) => {
-        if (!currentUser) {
-            navigate('/login?redirect=/courses');
-            return;
-        }
-        setEnrolling(true);
-        try {
-            const token = await currentUser.getIdToken();
-            const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${slug}/enroll`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ uid: currentUser.uid })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setEnrolledIds(prev => [...prev, data.courseId]);
-                // Re-fetch to guarantee sync if needed, but local array is fine
-                fetchCoursesAndEnrollment();
-            }
-        } catch (e) {
-            alert('Failed to enroll. Please try again.');
-        } finally {
-            setEnrolling(false);
-        }
+    // ── Mutation ─────────────────────────────────────────────────────────────
+
+    const enrollMutation = useMutation({
+        mutationFn: enrollInCourse,
+        onSuccess: () => {
+            // Invalidate so both lists refresh from cache or network
+            queryClient.invalidateQueries({ queryKey: ['enrolled-ids', currentUser?.uid] });
+        },
+        onError: () => alert('Failed to enroll. Please try again.'),
+    });
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    const isEnrolled = (courseId) => enrolledIds.includes(courseId);
+
+    const handleEnroll = (slug) => {
+        if (!currentUser) { navigate('/login?redirect=/courses'); return; }
+        enrollMutation.mutate({ slug, currentUser });
     };
 
     const filteredCourses = courses.filter(course => {
-        if (filter === 'enrolled') return enrolledIds.includes(course.id);
-        if (filter === 'not-enrolled') return !enrolledIds.includes(course.id);
+        if (filter === 'enrolled') return isEnrolled(course.id);
+        if (filter === 'not-enrolled') return !isEnrolled(course.id);
         return true;
     });
 
-    const isEnrolled = (courseId) => enrolledIds.includes(courseId);
+    const loading = loadingCourses;
 
     return (
         <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column' }}>
@@ -109,7 +112,7 @@ export default function Courses() {
                     <NavProfile />
                 </div>
             </nav>
-            
+
             <main style={{ flex: 1, width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800, margin: '0 0 1rem 0', background: 'linear-gradient(to right, #60a5fa, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -124,7 +127,7 @@ export default function Courses() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {['all', 'enrolled', 'not-enrolled'].map(f => (
-                            <button 
+                            <button
                                 key={f}
                                 onClick={() => setSearchParams({ filter: f })}
                                 style={{
@@ -138,7 +141,6 @@ export default function Courses() {
                             </button>
                         ))}
                     </div>
-                    {/* Add search optionally here */}
                 </div>
 
                 {loading ? (
@@ -156,7 +158,7 @@ export default function Courses() {
                         {filteredCourses.map(course => {
                             const enrolled = isEnrolled(course.id);
                             return (
-                                <div 
+                                <div
                                     key={course.id}
                                     onClick={() => navigate(`/courses/${course.slug}`)}
                                     style={{
@@ -176,7 +178,7 @@ export default function Courses() {
                                     )}
                                     <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 10px 0', lineHeight: 1.3 }}>{course.title}</h3>
-                                        <p style={{ color: 'var(--txt3)', fontSize: '0.9rem', margin: '0 0 20px 0', flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                                        <p style={{ color: 'var(--txt3)', fontSize: '0.9rem', margin: '0 0 20px 0', flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', whiteSpace: 'pre-wrap' }}>
                                             {course.description}
                                         </p>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '15px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
@@ -187,19 +189,20 @@ export default function Courses() {
                                             ) : (
                                                 <span style={{ color: '#666', fontSize: '0.85rem', fontWeight: 600 }}>Available</span>
                                             )}
-                                            
-                                            <button 
+
+                                            <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     if (enrolled) navigate(`/learn/${course.slug}`);
                                                     else navigate(`/courses/${course.slug}`);
                                                 }}
-                                                disabled={enrolling}
+                                                disabled={enrollMutation.isPending}
                                                 style={{
                                                     background: enrolled ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.05)',
                                                     border: enrolled ? '1px solid rgba(16,185,129,0.2)' : 'none',
                                                     color: enrolled ? '#10b981' : '#fff',
-                                                    padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: enrolling ? 'wait' : 'pointer',
+                                                    padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600,
+                                                    cursor: enrollMutation.isPending ? 'wait' : 'pointer',
                                                     transition: 'background 0.2s'
                                                 }}
                                             >

@@ -464,11 +464,27 @@ async function optimizeCourseContent(text, field) {
   const keys = getApiKeys();
   if (keys.length === 0) throw new Error("No Gemini API keys found");
 
+  let formatInstruction = "";
+  if (field === 'description') {
+    formatInstruction = "Format as an engaging 2-3 paragraph overview highlighting the core value proposition.";
+  } else if (field === 'timeline') {
+    formatInstruction = "Format as a clean markdown list using emojis (e.g., ⏱ **Total Duration:**, 📅 **Suggested Timeline:**).";
+  } else if (field === 'flow') {
+    formatInstruction = "Format as a structured list of modules. Use '### 📌 Module X: [Title]' followed by a bulleted list of topics.";
+  } else if (field === 'syllabus') {
+    formatInstruction = "Format as a detailed curriculum breakdown. Use '#### 1. [Section]' followed by bullet points with emojis for each topic.";
+  } else if (field === 'prerequisite') {
+    formatInstruction = "Format as a bulleted checklist using ✅ for each requirement.";
+  }
+
   const prompt = `
 You are an expert instructional designer and technical course creator.
 Please optimize the following ${field} for a new professional YouTube course.
-Make the text engaging, well-structured, clear, and professional. 
-Do not add any Markdown code block wrappers like \`\`\` around the entire response. Just return the optimized text directly.
+
+INSTRUCTIONS:
+1. Make the text engaging, well-structured, clear, and professional.
+2. ${formatInstruction}
+3. Do not add any Markdown code block wrappers like \`\`\` around the entire response. Just return the optimized text directly.
 
 ORIGINAL TEXT:
 """
