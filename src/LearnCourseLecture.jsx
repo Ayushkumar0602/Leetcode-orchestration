@@ -4,6 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
+import { useQuery } from '@tanstack/react-query';
 import NavProfile from './NavProfile';
 import VideoCodeEditor from './VideoCodeEditor';
 import LectureChatBot from './LectureChatBot';
@@ -17,152 +18,130 @@ const YOUTUBE_API_KEYS = [
     'AIzaSyACa-hDsfwmTJ4lQHx-EThm8s4-i5fJbnA'
 ];
 
+async function fetchCourse(slug) {
+    const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
+    if (!res.ok) throw new Error('Course not found');
+    return res.json();
+}
+
+async function fetchEnrolledIds(currentUser) {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to verify enrollment');
+    const data = await res.json();
+    return data.enrolledIds || [];
+}
+
+async function fetchFullYoutubePlaylist(url) {
+    let playlistId = null;
+    if (url.includes('playlist?list=')) {
+        playlistId = new URL(url).searchParams.get('list');
+    } else {
+        const sp = new URL(url).searchParams;
+        if (sp.has('list')) playlistId = sp.get('list');
+    }
+    
+    if (!playlistId) throw new Error("No valid playlist ID found in the course link. Attempting to load as single video.");
+
+    let allItems = [];
+    let pageToken = '';
+    
+    let pageCount = 0;
+    while (pageCount < 6) {
+        let success = false;
+        let data = null;
+        for (let i = 0; i < YOUTUBE_API_KEYS.length; i++) {
+            try {
+                const tokenParam = pageToken ? `&pageToken=${pageToken}` : '';
+                const apiRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEYS[i]}${tokenParam}`);
+                data = await apiRes.json();
+                if (apiRes.ok) {
+                    success = true;
+                    break;
+                }
+            } catch (err) {}
+        }
+        
+        if (!success) {
+            if (allItems.length > 0) break;
+            throw new Error("Failed to load playlist. Quota exceeded or playlist is private.");
+        }
+        
+        const validVideos = (data.items || []).filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video');
+        allItems.push(...validVideos);
+        
+        if (!data.nextPageToken) break;
+        pageToken = data.nextPageToken;
+        pageCount++;
+    }
+    
+    if (allItems.length === 0) throw new Error("This playlist contains no public videos.");
+    return allItems;
+}
+
 export default function LearnCourseLecture() {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     
-    const [course, setCourse] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState('');
-    
-    const [playlistVideos, setPlaylistVideos] = useState([]);
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-    const [loadingPlaylist, setLoadingPlaylist] = useState(false);
-    const [playlistError, setPlaylistError] = useState('');
-    const [nextPageToken, setNextPageToken] = useState(null);
-    const [loadingMore, setLoadingMore] = useState(false);
     const [isPlaylistVisible, setIsPlaylistVisible] = useState(true);
     const [isEditorVisible, setIsEditorVisible] = useState(false);
-    // 'playlist' | 'editor' — only one panel shown at a time on desktop
+    // 'playlist' | 'editor' | 'ai' — only one panel shown at a time on desktop
     const [activePanel, setActivePanel] = useState('playlist');
+    const [aiExpanded, setAiExpanded] = useState(false);
     const editorRef = useRef(null); // bridge to VideoCodeEditor for AI chatbot
 
+    // When AI chat opens → auto-switch sidebar to 'ai'. When closed → restore 'playlist'.
+    const handleAiExpandChange = (expanded) => {
+        setAiExpanded(expanded);
+        setActivePanel(expanded ? 'ai' : 'playlist');
+    };
+
     useEffect(() => {
-        if (!currentUser) {
-            navigate(`/login?redirect=/learn/${slug}/lecture`);
-            return;
-        }
-        
-        verifyAccessAndFetch();
-        // eslint-disable-next-line
-    }, [slug, currentUser]);
+        if (!currentUser) navigate(`/login?redirect=/learn/${slug}/lecture`);
+    }, [currentUser, navigate, slug]);
 
-    const verifyAccessAndFetch = async () => {
-        setLoading(true);
-        try {
-            // First get the course details publicly to resolve slug -> ID
-            const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
-            if (!res.ok) {
-                setErrorMsg('Course not found');
-                setLoading(false);
-                return;
-            }
-            const courseData = await res.json();
-            
-            // Check enrollment
-            const token = await currentUser.getIdToken();
-            const enrollRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            if (enrollRes.ok) {
-                const eData = await enrollRes.json();
-                const enrolledIds = eData.enrolledIds || [];
-                if (!enrolledIds.includes(courseData.id) && !enrolledIds.includes(slug)) {
-                    // Not enrolled -> Redirect back to detail page
-                    navigate(`/courses/${slug}`);
-                    return;
-                }
-            } else {
-                setErrorMsg('Failed to verify enrollment');
-                setLoading(false);
-                return;
-            }
+    const { data: course, isLoading: loadingCourse, error: courseError } = useQuery({
+        queryKey: ['course', slug],
+        queryFn: () => fetchCourse(slug),
+        staleTime: 1000 * 60 * 5,
+    });
 
-            // User is enrolled, set course
-            setCourse(courseData);
-            
-            if (courseData.youtubePlaylistLink) {
-                fetchPlaylist(courseData.youtubePlaylistLink);
-            } else {
-                setPlaylistError("No YouTube link provided for this course.");
-            }
-        } catch (e) {
-            setErrorMsg('An error occurred loading the learning interface.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: enrolledIds = [], isLoading: loadingEnrollments, error: enrollError } = useQuery({
+        queryKey: ['enrolled-ids', currentUser?.uid],
+        queryFn: () => fetchEnrolledIds(currentUser),
+        enabled: !!currentUser,
+        staleTime: 1000 * 60 * 5,
+    });
 
-    const fetchPlaylist = async (url, pageToken = '') => {
-        let playlistId = null;
-        if (url.includes('playlist?list=')) {
-            playlistId = new URL(url).searchParams.get('list');
-        } else {
-            const sp = new URL(url).searchParams;
-            if (sp.has('list')) playlistId = sp.get('list');
-        }
-        
-        if (!playlistId) {
-            setPlaylistError("No valid playlist ID found in the course link. Attempting to load as single video.");
-            return;
-        }
+    const isEnrolled = course ? (enrolledIds.includes(course.id) || enrolledIds.includes(slug)) : false;
 
-        const isLoadMore = !!pageToken;
-        if (isLoadMore) {
-            setLoadingMore(true);
-        } else {
-            setLoadingPlaylist(true);
-        }
+    const { data: playlistVideos = [], isLoading: loadingPlaylist, error: playlistErrorObj } = useQuery({
+        queryKey: ['youtube-playlist', course?.youtubePlaylistLink],
+        queryFn: () => fetchFullYoutubePlaylist(course.youtubePlaylistLink),
+        enabled: !!course?.youtubePlaylistLink && isEnrolled,
+        staleTime: 1000 * 60 * 60,
+    });
 
-        let items = [];
-        let success = false;
-        let nextToken = null;
-        
-        for (let i = 0; i < YOUTUBE_API_KEYS.length; i++) {
-            try {
-                const tokenParam = pageToken ? `&pageToken=${pageToken}` : '';
-                const apiRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${playlistId}&key=${YOUTUBE_API_KEYS[i]}${tokenParam}`);
-                const data = await apiRes.json();
-                
-                if (apiRes.ok) {
-                    items = data.items;
-                    nextToken = data.nextPageToken || null;
-                    success = true;
-                    break;
-                } else {
-                    console.warn(`YouTube API key ${i} failed. Trying next...`, data.error);
-                }
-            } catch (err) {
-                console.warn(`Fetch error with key ${i}`, err);
-            }
-        }
-        
-        if (success) {
-            const validVideos = items.filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video');
-            if (isLoadMore) {
-                setPlaylistVideos(prev => [...prev, ...validVideos]);
-            } else {
-                setPlaylistVideos(validVideos);
-            }
-            setNextPageToken(nextToken);
-            
-            if (!isLoadMore && validVideos.length === 0) setPlaylistError("This playlist contains no public videos.");
-        } else {
-            if (!isLoadMore) {
-                setPlaylistError("Failed to load playlist. The API exceeded quota or the playlist is private.");
-            } else {
-                alert("Failed to load more videos. API limit might be reached.");
-            }
-        }
-        
-        if (isLoadMore) {
-            setLoadingMore(false);
-        } else {
-            setLoadingPlaylist(false);
-        }
-    };
+    const loading = loadingCourse || loadingEnrollments || (course && isEnrolled && loadingPlaylist);
+    
+    let errorMsg = '';
+    if (courseError) errorMsg = courseError.message;
+    else if (enrollError) errorMsg = enrollError.message;
+    else if (!loading && course && !isEnrolled) errorMsg = 'Course not found or not enrolled.';
+    
+    const playlistError = playlistErrorObj ? playlistErrorObj.message : (course && !course.youtubePlaylistLink && !loading ? "No YouTube link provided for this course." : '');
+
+    const currentVideoTitle = playlistVideos[currentVideoIndex]?.snippet?.title;
+    useSEO({
+        title: currentVideoTitle && course ? `${currentVideoTitle} - ${course.title}` : (course ? course.title : 'Lecture'),
+        description: course?.description || 'Learn comprehensive, structured engineering courses.',
+        canonical: `/learn/${slug}/lecture`,
+        robots: 'noindex, nofollow'
+    });
 
     if (loading) {
         return (
@@ -337,12 +316,6 @@ export default function LearnCourseLecture() {
                     <div style={{ padding: '20px 0', maxWidth: '1100px', width: '95%', margin: '0 auto', boxSizing: 'border-box' }}>
                         <h2 style={{ fontSize: '1.6rem', margin: '0 0 10px 0', fontWeight: 800, color: '#fff' }}>{playingTitle}</h2>
                         <div style={{ height: '2px', width: '40px', background: '#3b82f6', borderRadius: '10px', marginBottom: '20px' }}></div>
-                        {/* ── AI Chatbot ── */}
-                        <LectureChatBot
-                            videoTitle={playingTitle}
-                            getEditorCode={() => editorRef.current?.getEditorCode()}
-                            applyEditorCode={(code) => editorRef.current?.applyEditorCode(code)}
-                        />
                         {/* ── Practice Section ── */}
                         <LecturePractice videoTitle={playingTitle} />
                     </div>
@@ -367,6 +340,19 @@ export default function LearnCourseLecture() {
                             <Layers size={15} /> Playlist
                         </button>
                         <button
+                            onClick={() => setActivePanel('ai')}
+                            style={{
+                                flex: 1, padding: '13px 10px', background: 'transparent',
+                                border: 'none', borderBottom: activePanel === 'ai' ? '2px solid #8b5cf6' : '2px solid transparent',
+                                color: activePanel === 'ai' ? '#a78bfa' : '#555',
+                                cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <img src="/logo.jpeg" alt="" style={{ width: 15, height: 15, borderRadius: '4px', objectFit: 'cover' }} /> AI
+                        </button>
+                        <button
                             onClick={() => setActivePanel('editor')}
                             style={{
                                 flex: 1, padding: '13px 10px', background: 'transparent',
@@ -377,7 +363,7 @@ export default function LearnCourseLecture() {
                                 transition: 'all 0.2s'
                             }}
                         >
-                            <Code2 size={15} /> Code Editor
+                            <Code2 size={15} /> Code
                         </button>
                     </div>
 
@@ -451,30 +437,27 @@ export default function LearnCourseLecture() {
                                     This specific course only features a single video module.
                                 </div>
                             )}
-                            {nextPageToken && (
-                                <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
-                                    <button
-                                        onClick={() => fetchPlaylist(course.youtubePlaylistLink, nextPageToken)}
-                                        disabled={loadingMore}
-                                        style={{
-                                            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                                            color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: loadingMore ? 'not-allowed' : 'pointer',
-                                            fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center'
-                                        }}
-                                    >
-                                        {loadingMore ? <Loader2 size={16} className="animate-spin" /> : null}
-                                        {loadingMore ? 'Loading...' : 'Load More Videos'}
-                                    </button>
-                                </div>
-                            )}
+                            {/* Pagination automatically handled by React Query up to 300 videos */}
                         </div>
                         )}
                     </div>
                     )}
 
-                    {/* ── Code Editor Panel ── */}
-                    {activePanel === 'editor' && (
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {/* ── AI Chat Panel — always mounted to preserve history ── */}
+                    <div style={{ flex: 1, display: activePanel === 'ai' ? 'flex' : 'none', flexDirection: 'column', minHeight: 0 }}>
+                        <LectureChatBot
+                            videoTitle={playingTitle}
+                            getEditorCode={() => editorRef.current?.getEditorCode()}
+                            applyEditorCode={(code) => editorRef.current?.applyEditorCode(code)}
+                            highlightLines={(s, e) => editorRef.current?.highlightLines(s, e)}
+                            clearHighlights={() => editorRef.current?.clearHighlights()}
+                            switchToEditor={() => setActivePanel('editor')}
+                            onExpandChange={handleAiExpandChange}
+                        />
+                    </div>
+
+                    {/* ── Code Editor Panel — always mounted to preserve state ── */}
+                    <div style={{ flex: 1, display: activePanel === 'editor' ? 'flex' : 'none', flexDirection: 'column', minHeight: 0 }}>
                         <VideoCodeEditor
                             ref={editorRef}
                             userId={currentUser?.uid}
@@ -482,7 +465,6 @@ export default function LearnCourseLecture() {
                             videoId={playlistVideos[currentVideoIndex]?.snippet?.resourceId?.videoId || 'default'}
                         />
                     </div>
-                    )}
 
                 </div>
             </div>

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Loader2, ArrowLeft, Play, FileText, ImageIcon, PlayCircle, FolderArchive, File, Lock, Download, CheckCircle, Clock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useSEO } from './hooks/useSEO';
+import { useQuery } from '@tanstack/react-query';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
@@ -22,65 +24,72 @@ const getFileIcon = (type) => {
     return <File size={20} color="#64748b" />;
 };
 
+async function fetchCourse(slug) {
+    const res = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
+    if (!res.ok) throw new Error("Course not found");
+    return res.json();
+}
+
+async function fetchEnrolledIds(currentUser) {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error("Failed to fetch enrollments");
+    const data = await res.json();
+    return data.enrolledIds || [];
+}
+
+async function fetchCourseMaterials(courseId) {
+    const res = await fetch(`${VITE_API_BASE_URL}/api/courses/${courseId}/materials`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.materials || [];
+}
+
 export default function LearnCourse() {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     
-    const [course, setCourse] = useState(null);
-    const [materials, setMaterials] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [enrolled, setEnrolled] = useState(false);
-
     useEffect(() => {
-        if (!currentUser) {
-            navigate('/login');
-            return;
-        }
-        
-        const fetchAll = async () => {
-            setLoading(true);
-            try {
-                // 1. Fetch course details by slug
-                const courseRes = await fetch(`${VITE_API_BASE_URL}/api/public/courses/${slug}`);
-                if (!courseRes.ok) throw new Error("Course not found");
-                const courseData = await courseRes.json();
-                setCourse(courseData);
+        if (!currentUser) navigate('/login');
+    }, [currentUser, navigate]);
 
-                // 2. Verify enrollment
-                const enrollHookRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${currentUser.uid}/enrolled`);
-                const enrollData = await enrollHookRes.json();
-                
-                // enrolledIds stores Firestore doc IDs. courseData.id is the Firestore doc ID.
-                // Also fallback: check if enrolledIds contains the slug (older enrollments)
-                const enrolledIds = enrollData.enrolledIds || [];
-                const isEnrolled = enrolledIds.includes(courseData.id) || enrolledIds.includes(slug);
-                setEnrolled(isEnrolled);
-                console.log('[LearnCourse] courseData.id:', courseData.id, '| slug:', slug, '| enrolledIds:', enrolledIds, '| isEnrolled:', isEnrolled);
+    const { data: course, isLoading: loadingCourse, error: courseError } = useQuery({
+        queryKey: ['course', slug],
+        queryFn: () => fetchCourse(slug),
+        staleTime: 1000 * 60 * 5,
+    });
 
-                if (!isEnrolled) {
-                    setError("You are not enrolled in this course.");
-                    setLoading(false);
-                    return;
-                }
+    const { data: enrolledIds = [], isLoading: loadingEnrollments, error: enrollError } = useQuery({
+        queryKey: ['enrolled-ids', currentUser?.uid],
+        queryFn: () => fetchEnrolledIds(currentUser),
+        enabled: !!currentUser,
+        staleTime: 1000 * 60 * 5,
+    });
 
-                // 3. Fetch materials
-                const matRes = await fetch(`${VITE_API_BASE_URL}/api/courses/${courseData.id}/materials`);
-                if (matRes.ok) {
-                    const matData = await matRes.json();
-                    setMaterials(matData.materials || []);
-                }
+    const enrolled = course ? (enrolledIds.includes(course.id) || enrolledIds.includes(slug)) : false;
 
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const { data: materials = [], isLoading: loadingMaterials } = useQuery({
+        queryKey: ['course-materials', course?.id],
+        queryFn: () => fetchCourseMaterials(course.id),
+        enabled: !!course?.id && enrolled,
+        staleTime: 1000 * 60 * 5,
+    });
 
-        fetchAll();
-    }, [slug, currentUser, navigate]);
+    const loading = loadingCourse || loadingEnrollments || (course && enrolled && loadingMaterials);
+    let error = null;
+    if (courseError) error = courseError.message;
+    else if (enrollError) error = "Failed to verify enrollment";
+    else if (!loading && course && !enrolled) error = "You are not enrolled in this course.";
+
+    useSEO({
+        title: course ? `Learning: ${course.title} | Whizan Courses` : 'Learning',
+        description: course?.description || 'Learn comprehensive, structured engineering courses.',
+        canonical: `/learn/${slug}`,
+        robots: 'noindex, nofollow'
+    });
 
     if (loading) {
         return (

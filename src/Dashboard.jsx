@@ -46,7 +46,7 @@ const LANG_LABEL = {
 
 const DIFFICULTY_COLOR = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' };
 
-export default function Dashboard() {
+export default function Dashboard({ embedded = false, initialProblem = null }) {
     const location = useLocation();
     const navigate = useNavigate();
     const { id: routeId } = useParams();
@@ -287,6 +287,20 @@ export default function Dashboard() {
     // ─── Auto Trigger from Router State or Fetch by ID ─────────────
     useEffect(() => {
         const loadProblem = async () => {
+            // Case 0: Embedded with initialProblem prop — no router needed
+            if (embedded && initialProblem) {
+                const savedLang = localStorage.getItem('whizan_lang') || 'python';
+                const langToUse = initialProblem.language || savedLang;
+                setProblemStatement(initialProblem.description || '');
+                setProblemTitle(initialProblem.title || 'Problem');
+                setDifficulty(initialProblem.difficulty || 'Medium');
+                setLanguage(langToUse);
+                if (initialProblem.description) {
+                    setIsRouted(true);
+                    handleAIGenerate(initialProblem.description, langToUse, initialProblem.id);
+                }
+                return;
+            }
             // Case 1: Navigated from ProblemList (has state)
             if (location.state?.problemParams) {
                 const params = location.state.problemParams;
@@ -352,13 +366,15 @@ export default function Dashboard() {
 
         loadProblem();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location.state, routeId]);
+    }, [location.state, routeId, initialProblem]);
 
     // ─── Run (primary 3 cases concurrently) ──────────────────────
     const handleRun = async () => {
         if (!currentUser) {
-            const redirectPath = routeId ? `/solvingpage/${routeId}` : '/dsaquestion';
-            navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+            if (!embedded) {
+                const redirectPath = routeId ? `/solvingpage/${routeId}` : '/dsaquestion';
+                navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+            }
             return;
         }
 
@@ -385,8 +401,8 @@ export default function Dashboard() {
 
                 // Save run submission to tracking system (silent)
                 if (currentUser) {
-                    const activeProblemId = routeId || location.state?.problemParams?.id;
-                    const diff = difficulty || location.state?.problemParams?.difficulty;
+                    const activeProblemId = routeId || location.state?.problemParams?.id || initialProblem?.id;
+                    const diff = difficulty || location.state?.problemParams?.difficulty || initialProblem?.difficulty;
                     if (activeProblemId) {
                         const allPassed = results.every(r => r.success);
                         fetch('https://leetcode-orchestration.onrender.com/api/submissions/save', {
@@ -416,8 +432,10 @@ export default function Dashboard() {
     // ─── Submit (sequential, stop on first fail, streaming via SSE) ──
     const handleSubmit = async () => {
         if (!currentUser) {
-            const redirectPath = routeId ? `/solvingpage/${routeId}` : '/dsaquestion';
-            navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+            if (!embedded) {
+                const redirectPath = routeId ? `/solvingpage/${routeId}` : '/dsaquestion';
+                navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+            }
             return;
         }
 
@@ -469,8 +487,8 @@ export default function Dashboard() {
                             }
 
                             // ── 1. Update the global aggregate stats ──
-                            const activeProblemId = routeId || location.state?.problemParams?.id;
-                            const d = difficulty || location.state?.problemParams?.difficulty;
+                            const activeProblemId = routeId || location.state?.problemParams?.id || initialProblem?.id;
+                            const d = difficulty || location.state?.problemParams?.difficulty || initialProblem?.difficulty;
                             if (activeProblemId) {
                                 fetch('https://leetcode-orchestration.onrender.com/api/stats/submit', {
                                     method: 'POST',
@@ -535,7 +553,7 @@ export default function Dashboard() {
     // ─── Fetch Submission History ──────────────────────────────────
     const fetchSubmissionHistory = async () => {
         if (!currentUser) return;
-        const activeProblemId = routeId || location.state?.problemParams?.id;
+        const activeProblemId = routeId || location.state?.problemParams?.id || initialProblem?.id;
         if (!activeProblemId) return;
         setHistoryLoading(true);
         try {
@@ -557,6 +575,7 @@ export default function Dashboard() {
             color: '#fff'
         }}>
             {/* ── Top Nav ───────────────────────────────────────────── */}
+            {!embedded && (
             <nav className="lc-nav" style={{
                 background: 'rgba(5,5,5,0.85)',
                 backdropFilter: 'blur(16px)',
@@ -621,6 +640,49 @@ export default function Dashboard() {
                     )}
                 </div>
             </nav>
+            )}
+
+            {/* ── Embedded Action Bar (Run / Submit / Timer) — only shown when nav is hidden ── */}
+            {embedded && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '8px 16px',
+                    background: 'rgba(5,5,5,0.9)',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    position: 'sticky', top: 0, zIndex: 10,
+                }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem', color: '#e2e8f0', flex: 1,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {problemTitle}
+                        {difficulty && (
+                            <span style={{ marginLeft: 8, fontSize: '0.72rem', fontWeight: 700,
+                                color: DIFFICULTY_COLOR[difficulty] || '#999',
+                                background: `${DIFFICULTY_COLOR[difficulty] || '#999'}18`,
+                                padding: '2px 7px', borderRadius: '6px' }}>
+                                {difficulty}
+                            </span>
+                        )}
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer',
+                        color: isTimerRunning ? 'var(--pass)' : 'var(--txt2)', fontSize: '0.82rem' }}
+                        onClick={() => setIsTimerRunning(t => !t)}
+                        title={isTimerRunning ? 'Pause timer' : 'Start timer'}>
+                        <Clock size={13} />{formatTime(timeElapsed)}
+                    </div>
+                    <button className="lc-run-btn" onClick={handleRun} disabled={isLoading}>
+                        {isRunning ? <Loader2 size={14} className="spin" /> : <Play size={14} />} Run
+                    </button>
+                    <button className="lc-submit-btn" onClick={handleSubmit} disabled={isLoading}>
+                        {isSubmitting ? <Loader2 size={14} className="spin" /> : <Send size={14} />} Submit
+                    </button>
+                    <button onClick={handleReset}
+                        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                            color: 'var(--txt2)', borderRadius: '7px', padding: '5px 10px',
+                            cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <RotateCcw size={12} /> Reset
+                    </button>
+                </div>
+            )}
 
             {/* ── Main Layout ───────────────────────────────────────── */}
             <div className="lc-main" style={{ position: 'relative' }}>
@@ -904,12 +966,14 @@ export default function Dashboard() {
                                     >
                                         Test Cases
                                     </button>
+                                    {!embedded && (
                                     <button
                                         onClick={() => { setConsoleTab('submissions'); fetchSubmissionHistory(); }}
                                         style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', background: consoleTab === 'submissions' ? 'var(--accent)' : 'var(--surface2)', color: consoleTab === 'submissions' ? '#fff' : 'var(--txt2)' }}
                                     >
                                         Submissions
                                     </button>
+                                    )}
                                 </div>
                                 {/* ── Submissions History Tab ── */}
                                 {consoleTab === 'submissions' && (

@@ -82,11 +82,42 @@ const VideoCodeEditor = forwardRef(function VideoCodeEditor({ userId, courseId, 
     const [langMenuOpen, setLangMenuOpen] = useState(false);
     const [terminalOpen, setTerminalOpen] = useState(true);
     const editorRef = useRef(null);
+    const monacoRef = useRef(null); // Monaco API instance
+    const decorationsRef = useRef([]); // Monaco decoration IDs for highlights
 
-    // Bridge for AI chatbot — expose current code and language read/write
+    // Bridge for AI chatbot — expose current code and language read/write + highlight
     useImperativeHandle(ref, () => ({
         getEditorCode: () => ({ code, language }),
-        applyEditorCode: (newCode) => setCode(newCode),
+        getLanguage: () => language,
+        applyEditorCode: (newCode) => {
+            setCode(newCode);
+            // Monaco sometimes loses sync if updated externally, force it:
+            if (editorRef.current && editorRef.current.setValue) {
+                editorRef.current.setValue(newCode);
+            }
+        },
+        setLanguage: (lang) => setLanguage(lang),
+        highlightLines: (startLine, endLine) => {
+            const editor = editorRef.current;
+            const monaco = monacoRef.current;
+            if (!editor || !monaco) return;
+            decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [
+                {
+                    range: new monaco.Range(startLine, 1, endLine, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'ai-highlight-line',
+                        overviewRuler: { color: '#8b5cf6', position: 1 },
+                    },
+                },
+            ]);
+            editor.revealLineInCenter(startLine);
+        },
+        clearHighlights: () => {
+            const editor = editorRef.current;
+            if (!editor) return;
+            decorationsRef.current = editor.deltaDecorations(decorationsRef.current, []);
+        },
     }), [code, language]);
 
     const firestoreKey = useCallback(() => {
@@ -295,7 +326,10 @@ const VideoCodeEditor = forwardRef(function VideoCodeEditor({ userId, courseId, 
                     language={currentLang.monaco}
                     value={code}
                     onChange={handleCodeChange}
-                    onMount={(editor) => { editorRef.current = editor; }}
+                    onMount={(editor, monaco) => {
+                        editorRef.current = editor;
+                        monacoRef.current = monaco;
+                    }}
                     theme="vs-dark"
                     options={{
                         fontSize: 14,
@@ -313,6 +347,14 @@ const VideoCodeEditor = forwardRef(function VideoCodeEditor({ userId, courseId, 
                     }}
                 />
             </div>
+
+            {/* AI highlight line style */}
+            <style>{`
+                .ai-highlight-line {
+                    background: rgba(139, 92, 246, 0.18) !important;
+                    border-left: 3px solid #8b5cf6 !important;
+                }
+            `}</style>
 
             {/* ── Stdin Input ── */}
             <div style={{ padding: '8px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
