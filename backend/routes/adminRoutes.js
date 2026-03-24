@@ -57,7 +57,8 @@ const verifyAdmin = async (req, res, next) => {
 
         // Attach custom claim for future requests
         try {
-            await admin.auth().setCustomUserClaims(uid, { ...decodedToken, isAdmin: true });
+            const { aud, auth_time, exp, iat, iss, sub, uid: tokenUid, firebase, ...customClaims } = decodedToken;
+            await admin.auth().setCustomUserClaims(uid, { ...customClaims, isAdmin: true });
         } catch (claimErr) {
             console.warn("Could not set custom claim for admin", claimErr);
         }
