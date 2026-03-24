@@ -406,6 +406,24 @@ app.get('/api/problems', async (req, res) => {
     res.json(result);
 });
 
+
+// Search endpoint for LecturePractice panel — returns up to `limit` matching problems
+app.get('/api/problems/search', (req, res) => {
+    if (!isDataLoaded()) return res.status(503).json({ error: 'Dataset not ready.' });
+    const { q = '', limit = 8 } = req.query;
+    if (!q.trim()) return res.json({ problems: [] });
+
+    // Check if search term looks like a problem number
+    const asNumber = parseInt(q.trim(), 10);
+    if (!isNaN(asNumber)) {
+        const byId = getProblemById(String(asNumber));
+        return res.json({ problems: byId ? [byId] : [] });
+    }
+
+    const result = getProblems(1, parseInt(limit, 10), q.trim(), [], []);
+    res.json({ problems: result.data || [] });
+});
+
 app.get('/api/problems/random', async (req, res) => {
     if (!isDataLoaded()) {
         return res.status(503).json({ error: 'Dataset is still loading or unavailable.' });
@@ -1060,6 +1078,56 @@ app.post('/api/generate', async (req, res) => {
 
 // --- AI Interview Routes ---
 const { getInterviewerResponse, analyzeCode: analyzeInterviewCode, evaluateInterview, callGemini } = require('./interview');
+
+// --- Lecture AI Chatbot Route ---
+// Completely isolated; does NOT touch any execution or test-case logic.
+app.post('/api/lecture-chat', async (req, res) => {
+    const { videoTitle, messages, userCode, language, codePermissionGranted } = req.body;
+
+    if (!videoTitle) {
+        return res.status(400).json({ error: 'videoTitle is required.' });
+    }
+
+    const history = (messages || [])
+        .slice(-12) // keep last 12 messages for context
+        .map(m => `${m.role === 'user' ? 'Student' : 'AI Tutor'}: ${m.content}`)
+        .join('\n');
+
+    const codeContext = codePermissionGranted && userCode
+        ? `\n\nSTUDENT'S CURRENT CODE (${language || 'unknown'}):\n\`\`\`${language || ''}\n${userCode}\n\`\`\``
+        : '';
+
+    const systemPrompt = `You are an expert AI Tutor specialized in computer science, data structures, algorithms, and software engineering. You are helping a student who is currently watching a lecture video.
+
+CURRENT LECTURE VIDEO: "${videoTitle}"
+
+YOUR ROLE:
+- Provide concise, clear explanations directly related to the lecture topic
+- Help with code writing, debugging, and analysis using best practices
+- Give contextual suggestions based on what the student is learning
+- Be encouraging and pedagogically sound
+
+RESPONSE GUIDELINES:
+- Keep responses focused and concise (avoid walls of text)
+- Use code blocks with language tags when providing code examples
+- When asked to debug or improve code, clearly explain what was wrong and why
+- If asked something unrelated to the lecture topic, gently redirect back
+- Use markdown formatting for clarity${codeContext}
+
+CONVERSATION HISTORY:
+${history || 'New conversation started.'}
+
+Respond as the AI Tutor now (do NOT prefix with "AI Tutor:"):`;
+
+    try {
+        const text = await callGemini(systemPrompt);
+        res.json({ text });
+    } catch (error) {
+        console.error('[Lecture Chat Error]', error.message);
+        res.status(500).json({ error: error.message || 'AI tutor response failed.' });
+    }
+});
+
 
 // --- Project AI Extraction Route ---
 app.post('/api/project/extract-readme', async (req, res) => {

@@ -17,6 +17,8 @@ export default function NavProfile() {
         staleTime: 1000 * 60 * 5, // 5 min — profile data is slow-changing
     });
 
+    const isLecturePage = location.pathname.includes('/lecture');
+
     if (!currentUser) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -46,6 +48,7 @@ export default function NavProfile() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
 
             {/* Public Portfolio Link */}
+            {!isLecturePage && (
             <button
                 onClick={() => navigate(`/public/${currentUser.uid}`)}
                 style={{
@@ -76,6 +79,7 @@ export default function NavProfile() {
                 <ExternalLink size={14} />
                 <span className="nav-profile-label">Public Portfolio</span>
             </button>
+            )}
 
             {/* User Badge → click to go to profile */}
             <div

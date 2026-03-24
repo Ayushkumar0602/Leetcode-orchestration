@@ -1,13 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers } from 'lucide-react';
+import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
+import NavProfile from './NavProfile';
+import VideoCodeEditor from './VideoCodeEditor';
+import LectureChatBot from './LectureChatBot';
+import LecturePractice from './LecturePractice';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
-export default function LearnCourse() {
+const YOUTUBE_API_KEYS = [
+    'AIzaSyCoBeOf90UzMby6rZmIFInhS2DHhbAzbS4',
+    'AIzaSyDvdyjYPX0MTlDPEwWIiCW1MdtQ6K9ri6Y',
+    'AIzaSyACa-hDsfwmTJ4lQHx-EThm8s4-i5fJbnA'
+];
+
+export default function LearnCourseLecture() {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
@@ -15,10 +25,22 @@ export default function LearnCourse() {
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
+    
+    const [playlistVideos, setPlaylistVideos] = useState([]);
+    const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+    const [loadingPlaylist, setLoadingPlaylist] = useState(false);
+    const [playlistError, setPlaylistError] = useState('');
+    const [nextPageToken, setNextPageToken] = useState(null);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [isPlaylistVisible, setIsPlaylistVisible] = useState(true);
+    const [isEditorVisible, setIsEditorVisible] = useState(false);
+    // 'playlist' | 'editor' — only one panel shown at a time on desktop
+    const [activePanel, setActivePanel] = useState('playlist');
+    const editorRef = useRef(null); // bridge to VideoCodeEditor for AI chatbot
 
     useEffect(() => {
         if (!currentUser) {
-            navigate(`/login?redirect=/learn/${slug}`);
+            navigate(`/login?redirect=/learn/${slug}/lecture`);
             return;
         }
         
@@ -46,7 +68,8 @@ export default function LearnCourse() {
             
             if (enrollRes.ok) {
                 const eData = await enrollRes.json();
-                if (!(eData.enrolledIds || []).includes(courseData.id)) {
+                const enrolledIds = eData.enrolledIds || [];
+                if (!enrolledIds.includes(courseData.id) && !enrolledIds.includes(slug)) {
                     // Not enrolled -> Redirect back to detail page
                     navigate(`/courses/${slug}`);
                     return;
@@ -59,10 +82,85 @@ export default function LearnCourse() {
 
             // User is enrolled, set course
             setCourse(courseData);
+            
+            if (courseData.youtubePlaylistLink) {
+                fetchPlaylist(courseData.youtubePlaylistLink);
+            } else {
+                setPlaylistError("No YouTube link provided for this course.");
+            }
         } catch (e) {
             setErrorMsg('An error occurred loading the learning interface.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchPlaylist = async (url, pageToken = '') => {
+        let playlistId = null;
+        if (url.includes('playlist?list=')) {
+            playlistId = new URL(url).searchParams.get('list');
+        } else {
+            const sp = new URL(url).searchParams;
+            if (sp.has('list')) playlistId = sp.get('list');
+        }
+        
+        if (!playlistId) {
+            setPlaylistError("No valid playlist ID found in the course link. Attempting to load as single video.");
+            return;
+        }
+
+        const isLoadMore = !!pageToken;
+        if (isLoadMore) {
+            setLoadingMore(true);
+        } else {
+            setLoadingPlaylist(true);
+        }
+
+        let items = [];
+        let success = false;
+        let nextToken = null;
+        
+        for (let i = 0; i < YOUTUBE_API_KEYS.length; i++) {
+            try {
+                const tokenParam = pageToken ? `&pageToken=${pageToken}` : '';
+                const apiRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${playlistId}&key=${YOUTUBE_API_KEYS[i]}${tokenParam}`);
+                const data = await apiRes.json();
+                
+                if (apiRes.ok) {
+                    items = data.items;
+                    nextToken = data.nextPageToken || null;
+                    success = true;
+                    break;
+                } else {
+                    console.warn(`YouTube API key ${i} failed. Trying next...`, data.error);
+                }
+            } catch (err) {
+                console.warn(`Fetch error with key ${i}`, err);
+            }
+        }
+        
+        if (success) {
+            const validVideos = items.filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video');
+            if (isLoadMore) {
+                setPlaylistVideos(prev => [...prev, ...validVideos]);
+            } else {
+                setPlaylistVideos(validVideos);
+            }
+            setNextPageToken(nextToken);
+            
+            if (!isLoadMore && validVideos.length === 0) setPlaylistError("This playlist contains no public videos.");
+        } else {
+            if (!isLoadMore) {
+                setPlaylistError("Failed to load playlist. The API exceeded quota or the playlist is private.");
+            } else {
+                alert("Failed to load more videos. API limit might be reached.");
+            }
+        }
+        
+        if (isLoadMore) {
+            setLoadingMore(false);
+        } else {
+            setLoadingPlaylist(false);
         }
     };
 
@@ -93,113 +191,302 @@ export default function LearnCourse() {
 
     if (!course) return null;
 
-    // A helper to extract the YouTube embed ID
-    const getYouTubeEmbedUrl = (url) => {
+    const getSingleVideoId = (url) => {
         if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = url.match(regExp);
-        const videoId = (match && match[2].length === 11) ? match[2] : null;
-
-        // Note: For playlists, the extraction is different. This assumes video link.
-        // If it's a playlist link: https://youtube.com/playlist?list=PL...
-        if (url.includes('playlist?list=')) {
-            const listId = new URL(url).searchParams.get('list');
-            if (listId) return `https://www.youtube.com/embed/videoseries?list=${listId}`;
-        }
-        
-        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+        return (match && match[2].length === 11) ? match[2] : null;
     };
 
-    const embedUrl = getYouTubeEmbedUrl(course.youtubePlaylistLink);
+    let embedUrl = null;
+    let playingTitle = course.title;
+    let playingDesc = course.description;
+
+    if (playlistVideos.length > 0) {
+        const currentItem = playlistVideos[currentVideoIndex];
+        embedUrl = `https://www.youtube.com/embed/${currentItem.snippet.resourceId.videoId}?autoplay=1&rel=0&modestbranding=1`;
+        playingTitle = currentItem.snippet.title;
+        playingDesc = currentItem.snippet.description;
+    } else {
+        const vidId = getSingleVideoId(course.youtubePlaylistLink);
+        if (vidId) embedUrl = `https://www.youtube.com/embed/${vidId}?rel=0&modestbranding=1`;
+    }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ height: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <style>{`
+                .lecture-layout {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: row;
+                    overflow: hidden;
+                }
+                .lecture-sidebar {
+                    width: 400px;
+                    border-left: 1px solid rgba(255,255,255,0.05);
+                    flex-shrink: 0;
+                    display: flex;
+                    flex-direction: column;
+                    overflow-y: hidden;
+                }
+                .lecture-main {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    background-color: #000;
+                    overflow-y: auto;
+                }
+                .nav-link-btn {
+                    background: transparent;
+                    border: none;
+                    color: #999;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: color 0.2s;
+                }
+                .nav-link-btn:hover {
+                    color: #fff;
+                }
+                @media (max-width: 900px) {
+                    .lecture-layout {
+                        flex-direction: column !important;
+                        overflow-y: auto !important;
+                    }
+                    .lecture-sidebar {
+                        width: 100% !important;
+                        border-left: none !important;
+                        border-top: 1px solid rgba(255,255,255,0.05) !important;
+                        flex: none !important;
+                    }
+                    .lecture-main {
+                        flex: none !important;
+                        overflow-y: visible !important;
+                    }
+                    .hide-mobile {
+                        display: none !important;
+                    }
+                    .lecture-title {
+                        font-size: 1rem !important;
+                    }
+                    .lecture-header {
+                        padding: 15px !important;
+                    }
+                }
+            `}</style>
             
-            {/* Minimal Header */}
-            <header style={{ background: '#0a0a0f', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* Header */}
+            <header className="lecture-header" style={{ background: '#0a0a0f', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <button 
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate(`/learn/${slug}`)}
                         style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}
                     >
-                        <ArrowLeft size={18} /> Dashboard
+                        <ArrowLeft size={18} /> <span className="hide-mobile">Course Hub</span>
                     </button>
-                    <div style={{ height: '24px', width: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                    <h1 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Play size={20} color="#3b82f6" fill="rgba(59,130,246,0.2)" /> {course.title}
+                    <div className="hide-mobile" style={{ height: '24px', width: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                    <h1 className="lecture-title" style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Youtube size={20} color="#ef4444" className="hide-mobile" /> 
+                        <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{course.title}</span>
                     </h1>
+                </div>
+
+                <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <button className="nav-link-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
+                    <button className="nav-link-btn" onClick={() => navigate('/aiinterviewselect')}>AI Interview</button>
+                    <NavProfile />
                 </div>
             </header>
 
-            <div style={{ flex: 1, display: 'flex' }}>
+            <div className="lecture-layout">
                 {/* Main Content Area */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#000' }}>
+                <div className="lecture-main" style={{ background: '#050505' }}>
                     {embedUrl ? (
-                        <div style={{ width: '100%', paddingBottom: '56.25%', position: 'relative' }}>
-                            <iframe 
-                                src={embedUrl}
-                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowFullScreen
-                                title={course.title}
-                            />
+                        <div style={{ width: '95%', maxWidth: '1100px', margin: '30px auto 10px', flexShrink: 0 }}>
+                            <div style={{ width: '100%', paddingBottom: '56.25%', position: 'relative', background: '#000', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)' }}>
+                                <iframe 
+                                    src={embedUrl}
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowFullScreen
+                                    title={playingTitle}
+                                />
+                            </div>
                         </div>
                     ) : (
-                        <div style={{ width: '100%', paddingBottom: '56.25%', position: 'relative', background: '#111', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                                <Youtube size={64} color="rgba(255,255,255,0.1)" style={{ marginBottom: '15px' }} />
-                                <h3 style={{ color: '#fff', margin: 0 }}>No Video Linked</h3>
-                                <p style={{ color: 'var(--txt3)' }}>The instructor has not provided a YouTube link for this module.</p>
+                        <div style={{ width: '95%', maxWidth: '1100px', margin: '30px auto 10px', flexShrink: 0 }}>
+                            <div style={{ width: '100%', paddingBottom: '56.25%', position: 'relative', background: '#111', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '100%' }}>
+                                    {loadingPlaylist ? (
+                                        <>
+                                            <Loader2 size={48} className="animate-spin" color="#3b82f6" style={{ margin: '0 auto 15px' }} />
+                                            <h3 style={{ color: '#fff', margin: 0 }}>Loading Playlist...</h3>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Youtube size={64} color="rgba(255,255,255,0.1)" style={{ margin: '0 auto 15px' }} />
+                                            <h3 style={{ color: '#fff', margin: 0 }}>{playlistError || "No Video Linked"}</h3>
+                                            {!playlistError && <p style={{ color: '#888' }}>The instructor has not provided a valid YouTube link for this module.</p>}
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
                     
-                    <div style={{ padding: '30px', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
-                        <h2 style={{ fontSize: '1.8rem', margin: '0 0 15px 0' }}>Overview</h2>
-                        <div className="course-md-content" style={{ color: 'var(--txt2)', lineHeight: 1.7, fontSize: '1.05rem', margin: '0 0 40px 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <ReactMarkdown>{course.description}</ReactMarkdown>
+                    <div style={{ padding: '20px 0', maxWidth: '1100px', width: '95%', margin: '0 auto', boxSizing: 'border-box' }}>
+                        <h2 style={{ fontSize: '1.6rem', margin: '0 0 10px 0', fontWeight: 800, color: '#fff' }}>{playingTitle}</h2>
+                        <div style={{ height: '2px', width: '40px', background: '#3b82f6', borderRadius: '10px', marginBottom: '20px' }}></div>
+                        {/* ── AI Chatbot ── */}
+                        <LectureChatBot
+                            videoTitle={playingTitle}
+                            getEditorCode={() => editorRef.current?.getEditorCode()}
+                            applyEditorCode={(code) => editorRef.current?.applyEditorCode(code)}
+                        />
+                        {/* ── Practice Section ── */}
+                        <LecturePractice videoTitle={playingTitle} />
+                    </div>
+                </div>
+
+                {/* Sidebar: Tabbed Panel */}
+                <div className="lecture-sidebar" style={{ background: '#0a0a0f', display: 'flex', flexDirection: 'column' }}>
+
+                    {/* Tab Bar */}
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+                        <button
+                            onClick={() => setActivePanel('playlist')}
+                            style={{
+                                flex: 1, padding: '13px 10px', background: 'transparent',
+                                border: 'none', borderBottom: activePanel === 'playlist' ? '2px solid #8b5cf6' : '2px solid transparent',
+                                color: activePanel === 'playlist' ? '#fff' : '#555',
+                                cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <Layers size={15} /> Playlist
+                        </button>
+                        <button
+                            onClick={() => setActivePanel('editor')}
+                            style={{
+                                flex: 1, padding: '13px 10px', background: 'transparent',
+                                border: 'none', borderBottom: activePanel === 'editor' ? '2px solid #3b82f6' : '2px solid transparent',
+                                color: activePanel === 'editor' ? '#fff' : '#555',
+                                cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <Code2 size={15} /> Code Editor
+                        </button>
+                    </div>
+
+                    {/* ── Playlist Panel ── */}
+                    {activePanel === 'playlist' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                        <div style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#888' }}>
+                                {playlistVideos.length > 0 ? `${currentVideoIndex + 1} / ${playlistVideos.length} videos` : 'Loading...'}
+                            </p>
+                            <button 
+                                onClick={() => setIsPlaylistVisible(prev => !prev)}
+                                style={{ background: 'transparent', border: 'none', color: '#ccc', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}
+                                title={isPlaylistVisible ? "Collapse list" : "Expand list"}
+                            >
+                                {isPlaylistVisible ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                            </button>
                         </div>
 
-                        {course.syllabus && (
-                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '25px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginTop: '40px' }}>
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 15px 0' }}>Syllabus Reference</h3>
-                                <div className="course-md-content" style={{ color: 'var(--txt2)', lineHeight: 1.7, fontSize: '0.95rem' }}>
-                                    <ReactMarkdown components={{ h1: 'h4', h2: 'h5', h3: 'h6' }}>{course.syllabus}</ReactMarkdown>
+                        {isPlaylistVisible && (
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 0' }}>
+                            {loadingPlaylist && playlistVideos.length === 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'center', padding: '30px' }}>
+                                    <Loader2 size={24} className="animate-spin" color="#666" />
                                 </div>
-                            </div>
+                            )}
+                            {playlistVideos.length > 0 && playlistVideos.map((item, index) => {
+                                const isPlaying = index === currentVideoIndex;
+                                return (
+                                    <div 
+                                        key={item.id} 
+                                        onClick={() => setCurrentVideoIndex(index)}
+                                        style={{ 
+                                            display: 'flex', gap: '15px', padding: '15px 20px', 
+                                            cursor: 'pointer', transition: 'background 0.2s',
+                                            background: isPlaying ? 'rgba(59,130,246,0.1)' : 'transparent',
+                                            borderLeft: isPlaying ? '3px solid #3b82f6' : '3px solid transparent'
+                                        }}
+                                        onMouseEnter={(e) => { if (!isPlaying) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+                                        onMouseLeave={(e) => { if (!isPlaying) e.currentTarget.style.background = 'transparent'; }}
+                                    >
+                                        <div style={{ width: '120px', aspectRatio: '16/9', background: '#222', borderRadius: '8px', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                                            <img 
+                                                src={item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url} 
+                                                alt={item.snippet.title} 
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                            {isPlaying && (
+                                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <PlayCircle size={28} color="#fff" fill="#3b82f6" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                                            <h4 style={{ 
+                                                margin: '0 0 5px 0', fontSize: '0.95rem', lineHeight: 1.4, 
+                                                color: isPlaying ? '#3b82f6' : '#eee',
+                                                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' 
+                                            }}>
+                                                {item.snippet.title}
+                                            </h4>
+                                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#888' }}>
+                                                {item.snippet.channelTitle}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {!loadingPlaylist && playlistVideos.length === 0 && !playlistError && (
+                                <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontSize: '0.9rem' }}>
+                                    This specific course only features a single video module.
+                                </div>
+                            )}
+                            {nextPageToken && (
+                                <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => fetchPlaylist(course.youtubePlaylistLink, nextPageToken)}
+                                        disabled={loadingMore}
+                                        style={{
+                                            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                            color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: loadingMore ? 'not-allowed' : 'pointer',
+                                            fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center'
+                                        }}
+                                    >
+                                        {loadingMore ? <Loader2 size={16} className="animate-spin" /> : null}
+                                        {loadingMore ? 'Loading...' : 'Load More Videos'}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                         )}
                     </div>
-                </div>
+                    )}
 
-                {/* Sidebar Menu */}
-                <div style={{ width: '350px', background: '#0a0a0f', borderLeft: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                    <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Layers size={18} color="#8b5cf6" /> Course Content
-                        </h3>
+                    {/* ── Code Editor Panel ── */}
+                    {activePanel === 'editor' && (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                        <VideoCodeEditor
+                            ref={editorRef}
+                            userId={currentUser?.uid}
+                            courseId={course?.id}
+                            videoId={playlistVideos[currentVideoIndex]?.snippet?.resourceId?.videoId || 'default'}
+                        />
                     </div>
-                    
-                    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {course.flow && (
-                            <div>
-                                <h4 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Modules Breakdown</h4>
-                                <div className="course-md-content" style={{ color: 'var(--txt2)', fontSize: '0.9rem', lineHeight: 1.6, paddingLeft: '10px', borderLeft: '2px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <ReactMarkdown components={{ h1: 'h5', h2: 'h6', h3: 'h6', h4: 'h6' }}>{course.flow}</ReactMarkdown>
-                                </div>
-                            </div>
-                        )}
-                        {course.syllabus && (
-                            <div>
-                                <h4 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Full Syllabus</h4>
-                                <div className="course-md-content" style={{ color: 'var(--txt2)', fontSize: '0.9rem', lineHeight: 1.6, paddingLeft: '10px', borderLeft: '2px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <ReactMarkdown components={{ h1: 'h5', h2: 'h6', h3: 'h6', h4: 'h6' }}>{course.syllabus}</ReactMarkdown>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    )}
+
                 </div>
             </div>
-            
+
         </div>
     );
 }

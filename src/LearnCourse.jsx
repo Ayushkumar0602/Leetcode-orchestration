@@ -153,7 +153,7 @@ export default function LearnCourse() {
                         </p>
 
                         <button 
-                            onClick={() => navigate(`/learn/${courseId}/lecture`)}
+                            onClick={() => navigate(`/learn/${slug}/lecture`)}
                             style={{
                                 background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                                 color: '#fff', border: 'none', padding: '15px 32px', borderRadius: '12px',
