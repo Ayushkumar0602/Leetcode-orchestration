@@ -307,6 +307,59 @@ router.post('/courses/:id/materials', verifyAdmin, async (req, res) => {
 router.delete('/courses/:id/materials/:materialId', verifyAdmin, async (req, res) => {
     try {
         const { id, materialId } = req.params;
+
+        // ── Step 1: Fetch the material doc to get its storage URL ──────────────
+        let materialData = null;
+        try {
+            if (admin.apps.length) {
+                const snap = await admin.firestore().collection('course_materials').doc(materialId).get();
+                if (snap.exists) materialData = snap.data();
+            } else {
+                const snap = await getDoc(doc(db, 'course_materials', materialId));
+                if (snap.exists()) materialData = snap.data();
+            }
+        } catch (fetchErr) {
+            console.warn('Could not fetch material before delete:', fetchErr.message);
+        }
+
+        // ── Step 2: Delete from Supabase Storage bucket ────────────────────────
+        if (materialData?.url) {
+            try {
+                const SUPABASE_URL    = 'https://vnnkhcqswoeqnghztpvh.supabase.co';
+                const SUPABASE_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZubmtoY3Fzd29lcW5naHp0cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MzA5NzQxNiwiZXhwIjoyMDU4NjczNDE2fQ.oB12xaGIBkJEX1fwWaaxhzZKPHTJdFt1b5BaRIWBF2c'; // service_role key
+                const BUCKET          = 'course_material';
+                const storageBase     = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/`;
+
+                // Extract the storage key from the public URL
+                let rawUrl = materialData.url.split('?')[0]; // strip query params
+                let objectKey = null;
+                if (rawUrl.includes(`/object/public/${BUCKET}/`)) {
+                    objectKey = decodeURIComponent(rawUrl.split(`/object/public/${BUCKET}/`)[1]);
+                }
+
+                if (objectKey) {
+                    const deleteRes = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${encodeURIComponent(objectKey).replace(/%2F/g, '/')}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    if (!deleteRes.ok) {
+                        const errBody = await deleteRes.text().catch(() => '');
+                        console.warn(`Supabase storage delete warning (${deleteRes.status}):`, errBody);
+                        // Non-fatal — proceed to delete Firestore doc anyway
+                    } else {
+                        console.log(`Deleted from Supabase bucket: ${objectKey}`);
+                    }
+                }
+            } catch (storageErr) {
+                console.warn('Supabase storage delete failed (non-fatal):', storageErr.message);
+                // Non-fatal — still delete the Firestore record
+            }
+        }
+
+        // ── Step 3: Delete Firestore document ─────────────────────────────────
         if (admin.apps.length) {
             await admin.firestore().collection('course_materials').doc(materialId).delete();
         } else {
@@ -317,6 +370,7 @@ router.delete('/courses/:id/materials/:materialId', verifyAdmin, async (req, res
         res.status(500).json({ error: 'Failed to delete course material: ' + error.message });
     }
 });
+
 
 // Suspend (Disable) a user account
 router.post('/users/:uid/suspend', verifyAdmin, async (req, res) => {

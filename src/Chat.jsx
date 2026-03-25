@@ -7,6 +7,7 @@ import { useAuth } from './contexts/AuthContext';
 import { rtdb } from './firebase';
 import { uploadChatFile } from './lib/s3';
 import { fetchProfile } from './lib/api';
+import { useQueries } from '@tanstack/react-query';
 
 function useQueryParams() {
   const { search } = useLocation();
@@ -41,7 +42,6 @@ export default function Chat() {
   const myUid = currentUser?.uid;
   const activeConversationId = myUid && activePeerUid ? makeConversationId(myUid, activePeerUid) : null;
 
-  const [profilesByUid, setProfilesByUid] = useState({});
   const [preview, setPreview] = useState(null); // { url, mime, name }
   const textInputRef = useRef(null);
   const [conversationsMeta, setConversationsMeta] = useState({});
@@ -118,43 +118,36 @@ export default function Chat() {
     return () => unsub();
   }, [activeConversationId]);
 
-  useEffect(() => {
-    let cancelled = false;
+  const uidsToFetch = useMemo(() => {
     const uids = new Set();
-
     connections.forEach(c => c?.uid && uids.add(c.uid));
     requests.forEach(r => r?.fromUid && uids.add(r.fromUid));
     if (activePeerUid) uids.add(activePeerUid);
-
-    const missing = [...uids].filter(uid => uid && !profilesByUid[uid]);
-    if (missing.length === 0) return;
-
-    (async () => {
-      try {
-        const results = await Promise.all(
-          missing.map(async (uid) => {
-            try {
-              const p = await fetchProfile(uid);
-              return [uid, p];
-            } catch {
-              return [uid, null];
-            }
-          })
-        );
-        if (cancelled) return;
-        setProfilesByUid(prev => {
-          const next = { ...prev };
-          for (const [uid, p] of results) next[uid] = p || { displayName: 'User', photoURL: '' };
-          return next;
-        });
-      } catch {
-        // ignore; non-blocking UI enhancement
-      }
-    })();
-
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return Array.from(uids);
   }, [connections, requests, activePeerUid]);
+
+  const profileQueries = useQueries({
+    queries: uidsToFetch.map(uid => ({
+      queryKey: ['profile', uid],
+      queryFn: async () => {
+        try {
+          const p = await fetchProfile(uid);
+          return p || { displayName: 'User', photoURL: '' };
+        } catch {
+          return { displayName: 'User', photoURL: '' };
+        }
+      },
+      staleTime: 1000 * 60 * 30, // cache profiles for 30 minutes natively
+    })),
+  });
+
+  const profilesByUid = useMemo(() => {
+    const lookup = {};
+    uidsToFetch.forEach((uid, index) => {
+      lookup[uid] = profileQueries[index]?.data || { displayName: 'User', photoURL: '' };
+    });
+    return lookup;
+  }, [uidsToFetch, profileQueries]);
 
   useEffect(() => {
     if (!myUid || !connections.length) return;

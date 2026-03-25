@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { LogOut, ArrowLeft, Server, Activity, Globe, Database, Cpu, Zap, Lock, Eye, Cloud } from 'lucide-react';
+import { LogOut, ArrowLeft, Server, Activity, Globe, Database, Cpu, Zap, Lock, Eye, Cloud, BookOpen } from 'lucide-react';
 import NavProfile from './NavProfile';
 
 const HLD_SYLLABUS = [
@@ -189,17 +189,34 @@ export default function SystemDesignHLD() {
                                     </div>
                                     <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--txt)' }}>{section.title}</h2>
                                 </div>
-                                <button
-                                    onClick={() => handlePracticeClick(section.title)}
-                                    className="sd-hld-practice-btn"
-                                    style={{
-                                        background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: '#818cf8', padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px'
-                                    }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; e.currentTarget.style.borderColor = '#818cf8'; }}
-                                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'; }}
-                                >
-                                    <Activity size={14} /> Practice Topic-Wise Interview
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <button
+                                        onClick={() => {
+                                            const topicSlug = section.title.replace(/^[0-9.]+\s*/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                                            navigate(`/revise/systemdesign/hld/${topicSlug}`);
+                                        }}
+                                        className="sd-hld-revise-btn"
+                                        style={{
+                                            background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399', padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px'
+                                        }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.2)'; e.currentTarget.style.borderColor = '#34d399'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.1)'; e.currentTarget.style.borderColor = 'rgba(52,211,153,0.3)'; }}
+                                    >
+                                        <BookOpen size={14} /> Revise
+                                    </button>
+
+                                    <button
+                                        onClick={() => handlePracticeClick(section.title)}
+                                        className="sd-hld-practice-btn"
+                                        style={{
+                                            background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: '#818cf8', padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px'
+                                        }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; e.currentTarget.style.borderColor = '#818cf8'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'; }}
+                                    >
+                                        <Activity size={14} /> Practice
+                                    </button>
+                                </div>
                             </div>
                             <div style={{ padding: '1.5rem' }}>
                                 {section.isCaseStudies ? (

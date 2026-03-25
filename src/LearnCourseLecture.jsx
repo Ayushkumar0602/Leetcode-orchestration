@@ -4,7 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import NavProfile from './NavProfile';
 import VideoCodeEditor from './VideoCodeEditor';
 import LectureChatBot from './LectureChatBot';
@@ -34,7 +34,7 @@ async function fetchEnrolledIds(currentUser) {
     return data.enrolledIds || [];
 }
 
-async function fetchFullYoutubePlaylist(url) {
+async function fetchYoutubePlaylistPage(url, pageToken = '') {
     let playlistId = null;
     if (url.includes('playlist?list=')) {
         playlistId = new URL(url).searchParams.get('list');
@@ -45,40 +45,30 @@ async function fetchFullYoutubePlaylist(url) {
     
     if (!playlistId) throw new Error("No valid playlist ID found in the course link. Attempting to load as single video.");
 
-    let allItems = [];
-    let pageToken = '';
-    
-    let pageCount = 0;
-    while (pageCount < 6) {
-        let success = false;
-        let data = null;
-        for (let i = 0; i < YOUTUBE_API_KEYS.length; i++) {
-            try {
-                const tokenParam = pageToken ? `&pageToken=${pageToken}` : '';
-                const apiRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEYS[i]}${tokenParam}`);
-                data = await apiRes.json();
-                if (apiRes.ok) {
-                    success = true;
-                    break;
-                }
-            } catch (err) {}
-        }
-        
-        if (!success) {
-            if (allItems.length > 0) break;
-            throw new Error("Failed to load playlist. Quota exceeded or playlist is private.");
-        }
-        
-        const validVideos = (data.items || []).filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video');
-        allItems.push(...validVideos);
-        
-        if (!data.nextPageToken) break;
-        pageToken = data.nextPageToken;
-        pageCount++;
+    let success = false;
+    let data = null;
+    for (let i = 0; i < YOUTUBE_API_KEYS.length; i++) {
+        try {
+            const tokenParam = pageToken ? `&pageToken=${pageToken}` : '';
+            const apiRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${playlistId}&key=${YOUTUBE_API_KEYS[i]}${tokenParam}`);
+            data = await apiRes.json();
+            if (apiRes.ok) {
+                success = true;
+                break;
+            }
+        } catch (err) {}
     }
     
-    if (allItems.length === 0) throw new Error("This playlist contains no public videos.");
-    return allItems;
+    if (!success) {
+        throw new Error("Failed to load playlist. Quota exceeded or playlist is private.");
+    }
+    
+    const validVideos = (data.items || []).filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video');
+    
+    return {
+        items: validVideos,
+        nextPageToken: data.nextPageToken || null
+    };
 }
 
 export default function LearnCourseLecture() {
@@ -119,12 +109,15 @@ export default function LearnCourseLecture() {
 
     const isEnrolled = course ? (enrolledIds.includes(course.id) || enrolledIds.includes(slug)) : false;
 
-    const { data: playlistVideos = [], isLoading: loadingPlaylist, error: playlistErrorObj } = useQuery({
+    const { data: playlistData, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading: loadingPlaylist, error: playlistErrorObj } = useInfiniteQuery({
         queryKey: ['youtube-playlist', course?.youtubePlaylistLink],
-        queryFn: () => fetchFullYoutubePlaylist(course.youtubePlaylistLink),
+        queryFn: ({ pageParam = '' }) => fetchYoutubePlaylistPage(course.youtubePlaylistLink, pageParam),
+        getNextPageParam: (lastPage) => lastPage.nextPageToken || undefined,
         enabled: !!course?.youtubePlaylistLink && isEnrolled,
         staleTime: 1000 * 60 * 60,
     });
+
+    const playlistVideos = playlistData ? playlistData.pages.flatMap(page => page.items) : [];
 
     const loading = loadingCourse || loadingEnrollments || (course && isEnrolled && loadingPlaylist);
     
@@ -255,22 +248,23 @@ export default function LearnCourseLecture() {
             `}</style>
             
             {/* Header */}
-            <header className="lecture-header" style={{ background: '#0a0a0f', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <button 
-                        onClick={() => navigate(`/learn/${slug}`)}
-                        style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}
-                    >
-                        <ArrowLeft size={18} /> <span className="hide-mobile">Course Hub</span>
-                    </button>
-                    <div className="hide-mobile" style={{ height: '24px', width: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                    <h1 className="lecture-title" style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <header className="lecture-header" style={{ position: 'relative', background: '#0a0a0f', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+                {/* Brand Logo - Left */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', zIndex: 10 }} onClick={() => navigate('/dashboard')}>
+                    <img src="/logo.jpeg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
+                    <span style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.5px' }} className="hide-mobile">Whizan AI</span>
+                </div>
+
+                {/* Centered Course Title */}
+                <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', width: '50%', display: 'flex', justifyContent: 'center', zIndex: 5, pointerEvents: 'none' }}>
+                    <h1 className="lecture-title" style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                         <Youtube size={20} color="#ef4444" className="hide-mobile" /> 
-                        <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{course.title}</span>
+                        <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', textAlign: 'center' }}>{course.title}</span>
                     </h1>
                 </div>
 
-                <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                {/* Right Actions */}
+                <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '20px', zIndex: 10 }}>
                     <button className="nav-link-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
                     <button className="nav-link-btn" onClick={() => navigate('/aiinterviewselect')}>AI Interview</button>
                     <NavProfile />
@@ -437,7 +431,22 @@ export default function LearnCourseLecture() {
                                     This specific course only features a single video module.
                                 </div>
                             )}
-                            {/* Pagination automatically handled by React Query up to 300 videos */}
+                            {hasNextPage && (
+                                <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => fetchNextPage()}
+                                        disabled={isFetchingNextPage}
+                                        style={{
+                                            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                            color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: isFetchingNextPage ? 'not-allowed' : 'pointer',
+                                            fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center'
+                                        }}
+                                    >
+                                        {isFetchingNextPage ? <Loader2 size={16} className="animate-spin" /> : null}
+                                        {isFetchingNextPage ? 'Loading...' : 'Load More Videos'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         )}
                     </div>

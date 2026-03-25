@@ -27,6 +27,7 @@ import LearnCourse from './LearnCourse';
 import LearnCourseLecture from './LearnCourseLecture';
 
 // System Design Features
+import SystemDesignReviseHLD from './SystemDesignReviseHLD';
 import SystemDesign from './SystemDesign';
 import SystemDesignHLD from './SystemDesignHLD';
 import SystemDesignLLD from './SystemDesignLLD';
@@ -89,6 +90,7 @@ function App() {
             <Route path="/systemdesign/lld" element={<SystemDesignLLD />} />
             <Route path="/aisystemdesigninterview/:id" element={<AISystemDesignInterview />} />
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
+            <Route path="/revise/systemdesign/hld/:topicId" element={<SystemDesignReviseHLD />} />
 
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationCenter />} />
