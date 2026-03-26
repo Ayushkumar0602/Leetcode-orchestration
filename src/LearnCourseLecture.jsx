@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2 } from 'lucide-react';
+import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2, PenLine } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
@@ -9,6 +9,11 @@ import NavProfile from './NavProfile';
 import VideoCodeEditor from './VideoCodeEditor';
 import LectureChatBot from './LectureChatBot';
 import LecturePractice from './LecturePractice';
+import SystemDesignBoard from './components/SystemDesignBoard';
+import YouTube from 'react-youtube';
+import { useTelemetry } from './contexts/TelemetryContext';
+import { db } from './firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
@@ -81,18 +86,32 @@ export default function LearnCourseLecture() {
     const [isEditorVisible, setIsEditorVisible] = useState(false);
     // 'playlist' | 'editor' | 'ai' — only one panel shown at a time on desktop
     const [activePanel, setActivePanel] = useState('playlist');
+    const [whiteboardOpen, setWhiteboardOpen] = useState(false);
     const [aiExpanded, setAiExpanded] = useState(false);
     const editorRef = useRef(null); // bridge to VideoCodeEditor for AI chatbot
 
-    // When AI chat opens → auto-switch sidebar to 'ai'. When closed → restore 'playlist'.
-    const handleAiExpandChange = (expanded) => {
-        setAiExpanded(expanded);
-        setActivePanel(expanded ? 'ai' : 'playlist');
-    };
+    const { onVideoStart, onVideoProgress, onVideoPause, getSavedProgress, getSavedDuration } = useTelemetry() || {};
+    const ytPlayerRef = useRef(null);
+    const initialRenderTimes = useRef({});
 
+    const [currentTime, setCurrentTime] = useState(0);
+    const [showAutoAdvance, setShowAutoAdvance] = useState(false);
+    const [countdown, setCountdown] = useState(5);
+    const autoAdvanceTriggered = useRef(false);
+
+
+    // 1. Queries and Nav Hooks (Hoisted)
     useEffect(() => {
         if (!currentUser) navigate(`/login?redirect=/learn/${slug}/lecture`);
     }, [currentUser, navigate, slug]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth <= 900) setWhiteboardOpen(false);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const { data: course, isLoading: loadingCourse, error: courseError } = useQuery({
         queryKey: ['course', slug],
@@ -119,6 +138,124 @@ export default function LearnCourseLecture() {
 
     const playlistVideos = playlistData ? playlistData.pages.flatMap(page => page.items) : [];
 
+    // 2. Derived IDs (Hoisted before Effects)
+    const getSingleVideoId = (url) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    };
+
+    let playingVideoId = null;
+    let embedUrl = null;
+    let playingTitle = course?.title || '';
+    let playingDesc = course?.description || '';
+
+    if (playlistVideos.length > 0) {
+        const currentItem = playlistVideos[currentVideoIndex];
+        playingVideoId = currentItem?.snippet?.resourceId?.videoId || null;
+        if (playingVideoId) embedUrl = `https://www.youtube.com/embed/${playingVideoId}?autoplay=1&rel=0&modestbranding=1`;
+        if (currentItem) {
+            playingTitle = currentItem.snippet.title;
+            playingDesc = currentItem.snippet.description;
+        }
+    } else if (course?.youtubePlaylistLink) {
+        const vidId = getSingleVideoId(course.youtubePlaylistLink);
+        if (vidId) {
+            playingVideoId = vidId;
+            embedUrl = `https://www.youtube.com/embed/${vidId}?rel=0&modestbranding=1`;
+        }
+    }
+
+    // 3. All Effects Hook Definitions
+    const [notes, setNotes] = useState([]);
+    const [newNote, setNewNote] = useState('');
+    const [isSavingNote, setIsSavingNote] = useState(false);
+
+    useEffect(() => {
+        if (!playingVideoId || !currentUser) return;
+        const loadNotes = async () => {
+            try {
+                const snapshot = await getDoc(doc(db, 'users', currentUser.uid, 'lecture_notes', playingVideoId));
+                if (snapshot.exists()) setNotes(snapshot.data().notes || []);
+                else setNotes([]);
+            } catch (err) { console.error("Failed to load notes", err); }
+        };
+        loadNotes();
+    }, [playingVideoId, currentUser]);
+
+    const handleAddNote = async (e) => {
+        e.preventDefault();
+        if (!newNote.trim() || !playingVideoId || !currentUser) return;
+        setIsSavingNote(true);
+        const t = ytPlayerRef.current ? ytPlayerRef.current.getCurrentTime() : 0;
+        const noteObj = { id: Date.now().toString(), text: newNote.trim(), timestamp: t };
+        const updated = [...notes, noteObj].sort((a,b) => a.timestamp - b.timestamp);
+        
+        try {
+            await setDoc(doc(db, 'users', currentUser.uid, 'lecture_notes', playingVideoId), { notes: updated }, { merge: true });
+            setNotes(updated);
+            setNewNote('');
+        } catch (err) { console.error(err); } 
+        finally { setIsSavingNote(false); }
+    };
+    
+    const seekToNote = (sec) => { if (ytPlayerRef.current) ytPlayerRef.current.seekTo(sec, true); };
+    const formatTimestamp = (sec) => {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
+    // Track watching progress every 5 seconds if playing
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (ytPlayerRef.current && onVideoProgress) {
+                try {
+                    const time = ytPlayerRef.current.getCurrentTime();
+                    const duration = ytPlayerRef.current.getDuration();
+                    if (time && duration) {
+                        onVideoProgress(time, duration);
+                        setCurrentTime(time);
+                        // Auto-Advance logic
+                        if (!autoAdvanceTriggered.current && playlistVideos.length > currentVideoIndex + 1) {
+                            if (duration > 0 && (time / duration) > 0.95) {
+                                autoAdvanceTriggered.current = true;
+                                setShowAutoAdvance(true);
+                                setCountdown(5);
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [onVideoProgress, playlistVideos.length, currentVideoIndex]);
+
+    // Countdown timer for Auto-Advance
+    useEffect(() => {
+        let timer;
+        if (showAutoAdvance && countdown > 0) {
+            timer = setTimeout(() => setCountdown(c => c - 1), 1000);
+        } else if (showAutoAdvance && countdown === 0) {
+            setShowAutoAdvance(false);
+            setCurrentVideoIndex(prev => prev + 1);
+        }
+        return () => clearTimeout(timer);
+    }, [showAutoAdvance, countdown]);
+
+    // Reset auto-advance state on video change
+    useEffect(() => {
+        autoAdvanceTriggered.current = false;
+        setShowAutoAdvance(false);
+    }, [currentVideoIndex]);
+
+    const handleAiExpandChange = (expanded) => {
+        setAiExpanded(expanded);
+        setActivePanel(expanded ? 'ai' : 'playlist');
+    };
+
+    // 4. Pre-Render Calcs & Early Returns
     const loading = loadingCourse || loadingEnrollments || (course && isEnrolled && loadingPlaylist);
     
     let errorMsg = '';
@@ -163,26 +300,12 @@ export default function LearnCourseLecture() {
 
     if (!course) return null;
 
-    const getSingleVideoId = (url) => {
-        if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-    };
-
-    let embedUrl = null;
-    let playingTitle = course.title;
-    let playingDesc = course.description;
-
-    if (playlistVideos.length > 0) {
-        const currentItem = playlistVideos[currentVideoIndex];
-        embedUrl = `https://www.youtube.com/embed/${currentItem.snippet.resourceId.videoId}?autoplay=1&rel=0&modestbranding=1`;
-        playingTitle = currentItem.snippet.title;
-        playingDesc = currentItem.snippet.description;
-    } else {
-        const vidId = getSingleVideoId(course.youtubePlaylistLink);
-        if (vidId) embedUrl = `https://www.youtube.com/embed/${vidId}?rel=0&modestbranding=1`;
+    if (playingVideoId && initialRenderTimes.current[playingVideoId] === undefined) {
+        initialRenderTimes.current[playingVideoId] = getSavedProgress && getSavedProgress(playingVideoId) > 0 
+            ? getSavedProgress(playingVideoId) 
+            : 0;
     }
+    const savedStartTime = playingVideoId ? initialRenderTimes.current[playingVideoId] : 0;
 
     return (
         <div style={{ height: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -264,26 +387,132 @@ export default function LearnCourseLecture() {
                 </div>
 
                 {/* Right Actions */}
-                <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '20px', zIndex: 10 }}>
+                <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '16px', zIndex: 10 }}>
                     <button className="nav-link-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
                     <button className="nav-link-btn" onClick={() => navigate('/aiinterviewselect')}>AI Interview</button>
+                    <button
+                        onClick={() => setWhiteboardOpen(true)}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '6px 14px', borderRadius: '8px', cursor: 'pointer',
+                            background: 'rgba(0,184,163,0.12)', border: '1px solid rgba(0,184,163,0.35)',
+                            color: '#2dd4bf', fontWeight: 700, fontSize: '0.82rem',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,184,163,0.22)'; e.currentTarget.style.borderColor = 'rgba(0,184,163,0.6)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,184,163,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,184,163,0.35)'; }}
+                    >
+                        <PenLine size={14} /> Whiteboard
+                    </button>
                     <NavProfile />
                 </div>
+
+                {/* Whiteboard full-screen overlay — only available on desktop (> 900px) */}
+                {whiteboardOpen && window.innerWidth > 900 && (
+                    <div style={{
+                        position: 'fixed', inset: 0, zIndex: 9999,
+                        display: 'flex', flexDirection: 'column',
+                        background: '#0a0c10'
+                    }}>
+                        {/* Overlay header */}
+                        <div style={{
+                            height: '48px', flexShrink: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '0 16px',
+                            background: 'rgba(10,12,16,0.98)',
+                            borderBottom: '1px solid rgba(0,184,163,0.2)'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <PenLine size={16} color="#2dd4bf" />
+                                <span style={{ color: '#2dd4bf', fontWeight: 700, fontSize: '0.9rem' }}>Whiteboard</span>
+                                <span style={{ color: '#475569', fontSize: '0.78rem', marginLeft: '4px' }}>— {course?.title}</span>
+                            </div>
+                            <button
+                                onClick={() => setWhiteboardOpen(false)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                    padding: '5px 14px', borderRadius: '7px', cursor: 'pointer',
+                                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                                    color: '#94a3b8', fontWeight: 600, fontSize: '0.82rem',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#94a3b8'; }}
+                            >
+                                <X size={14} /> Close
+                            </button>
+                        </div>
+                        {/* Board canvas */}
+                        <div style={{ flex: 1, minHeight: 0 }}>
+                            <SystemDesignBoard />
+                        </div>
+                    </div>
+                )}
             </header>
 
             <div className="lecture-layout">
                 {/* Main Content Area */}
                 <div className="lecture-main" style={{ background: '#050505' }}>
-                    {embedUrl ? (
+                    {playingVideoId ? (
                         <div style={{ width: '95%', maxWidth: '1100px', margin: '30px auto 10px', flexShrink: 0 }}>
                             <div style={{ width: '100%', paddingBottom: '56.25%', position: 'relative', background: '#000', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)' }}>
-                                <iframe 
-                                    src={embedUrl}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowFullScreen
-                                    title={playingTitle}
+                                <YouTube 
+                                    videoId={playingVideoId}
+                                    opts={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        playerVars: { 
+                                            autoplay: 1, 
+                                            rel: 0, 
+                                            modestbranding: 1,
+                                            start: Math.floor(savedStartTime)
+                                        } 
+                                    }}
+                                    onReady={(e) => { ytPlayerRef.current = e.target; }}
+                                    onPlay={() => onVideoStart?.(playingVideoId)}
+                                    onPause={() => onVideoPause?.()}
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                    iframeClassName="youtube-iframe-fw"
                                 />
+                                <style>{`.youtube-iframe-fw { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; }`}</style>
+                                
+                                {showAutoAdvance && (
+                                    <div style={{
+                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                        background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column',
+                                        alignItems: 'center', justifyContent: 'center', zIndex: 50,
+                                        backdropFilter: 'blur(8px)'
+                                    }}>
+                                        <h3 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '1.5rem', fontWeight: 700 }}>Up Next:</h3>
+                                        <p style={{ color: '#3b82f6', fontSize: '1.2rem', fontWeight: 500, marginBottom: '25px', maxWidth: '80%', textAlign: 'center' }}>
+                                            {playlistVideos[currentVideoIndex + 1]?.snippet?.title}
+                                        </p>
+                                        <div style={{
+                                            width: '70px', height: '70px', borderRadius: '50%',
+                                            border: '3px solid rgba(59,130,246,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '1.8rem', fontWeight: 800, color: '#fff', marginBottom: '25px',
+                                            boxShadow: '0 0 20px rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.1)'
+                                        }}>
+                                            {countdown}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '15px' }}>
+                                            <button 
+                                                onClick={() => { setShowAutoAdvance(false); autoAdvanceTriggered.current = true; }}
+                                                style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '12px 24px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button 
+                                                onClick={() => { setShowAutoAdvance(false); setCurrentVideoIndex(c => c + 1); }}
+                                                style={{ background: '#3b82f6', color: '#fff', padding: '12px 24px', borderRadius: '10px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, boxShadow: '0 4px 14px rgba(59,130,246,0.3)' }}
+                                            >
+                                                <Play size={18} fill="#fff" /> Play Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ) : (
@@ -359,6 +588,19 @@ export default function LearnCourseLecture() {
                         >
                             <Code2 size={15} /> Code
                         </button>
+                        <button
+                            onClick={() => setActivePanel('notes')}
+                            style={{
+                                flex: 1, padding: '13px 10px', background: 'transparent',
+                                border: 'none', borderBottom: activePanel === 'notes' ? '2px solid #ef4444' : '2px solid transparent',
+                                color: activePanel === 'notes' ? '#fff' : '#555',
+                                cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <PenLine size={15} /> Notes
+                        </button>
                     </div>
 
                     {/* ── Playlist Panel ── */}
@@ -410,6 +652,20 @@ export default function LearnCourseLecture() {
                                                     <PlayCircle size={28} color="#fff" fill="#3b82f6" />
                                                 </div>
                                             )}
+                                            {(() => {
+                                                const vidId = item.snippet.resourceId.videoId;
+                                                const savedProg = getSavedProgress ? getSavedProgress(vidId) : 0;
+                                                const savedDur = getSavedDuration ? getSavedDuration(vidId) : 0;
+                                                if (savedProg > 0 && savedDur > 0) {
+                                                    const pct = Math.min(100, Math.max(0, (savedProg / savedDur) * 100));
+                                                    return (
+                                                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.3)' }}>
+                                                            <div style={{ height: '100%', background: '#ef4444', width: `${pct}%`, transition: 'width 0.3s' }}></div>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
                                         </div>
                                         <div style={{ flex: 1, overflow: 'hidden' }}>
                                             <h4 style={{ 
@@ -456,6 +712,7 @@ export default function LearnCourseLecture() {
                     <div style={{ flex: 1, display: activePanel === 'ai' ? 'flex' : 'none', flexDirection: 'column', minHeight: 0 }}>
                         <LectureChatBot
                             videoTitle={playingTitle}
+                            currentTime={currentTime}
                             getEditorCode={() => editorRef.current?.getEditorCode()}
                             applyEditorCode={(code) => editorRef.current?.applyEditorCode(code)}
                             highlightLines={(s, e) => editorRef.current?.highlightLines(s, e)}
@@ -474,6 +731,60 @@ export default function LearnCourseLecture() {
                             videoId={playlistVideos[currentVideoIndex]?.snippet?.resourceId?.videoId || 'default'}
                         />
                     </div>
+
+                    {/* ── Notes Panel ── */}
+                    <div style={{ flex: 1, display: activePanel === 'notes' ? 'flex' : 'none', flexDirection: 'column', minHeight: 0, background: '#0a0a0f' }}>
+                        <div style={{ padding: '15px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+                            <h3 style={{ margin: 0, color: '#fff', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <PenLine size={18} color="#ef4444" /> My Notes
+                            </h3>
+                            <p style={{ margin: '5px 0 0', color: '#888', fontSize: '0.8rem' }}>Notes are tied to timestamps and saved automatically.</p>
+                        </div>
+                        
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '15px 20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {notes.length === 0 ? (
+                                <div style={{ textAlign: 'center', color: '#666', padding: '40px 0', fontSize: '0.9rem' }}>
+                                    No notes for this video yet.<br/>Type below to add one at your current timestamp.
+                                </div>
+                            ) : (
+                                notes.map(n => (
+                                    <div key={n.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '12px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                        <button 
+                                            onClick={() => seekToNote(n.timestamp)}
+                                            style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '6px', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px' }}
+                                        >
+                                            <PlayCircle size={12} /> {formatTimestamp(n.timestamp)}
+                                        </button>
+                                        <div style={{ color: '#e2e8f0', fontSize: '0.9rem', lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                                            {n.text}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <form onSubmit={handleAddNote} style={{ padding: '15px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <textarea
+                                    value={newNote}
+                                    onChange={(e) => setNewNote(e.target.value)}
+                                    placeholder={`Add note at ${formatTimestamp(currentTime)}...`}
+                                    style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', padding: '10px 12px', fontSize: '0.9rem', resize: 'none', height: '60px', fontFamily: 'inherit' }}
+                                    onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddNote(e); } }}
+                                />
+                                <button 
+                                    type="submit"
+                                    disabled={!newNote.trim() || isSavingNote}
+                                    style={{ background: newNote.trim() && !isSavingNote ? '#ef4444' : 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0 15px', cursor: newNote.trim() && !isSavingNote ? 'pointer' : 'not-allowed', fontWeight: 600, transition: 'all 0.2s', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                                >
+                                    {isSavingNote ? <Loader2 size={18} className="animate-spin" /> : <PenLine size={18} />}
+                                    <span style={{ fontSize: '0.7rem' }}>Save</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+
 
                 </div>
             </div>

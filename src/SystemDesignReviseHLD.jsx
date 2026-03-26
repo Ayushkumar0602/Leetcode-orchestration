@@ -6,6 +6,7 @@ import NavProfile from './NavProfile';
 // Dynamically map topic IDs to their content files
 const topicMapping = {
     'foundations': lazy(() => import('./learn/systemdesign/hld/Foundationscontent')),
+    'traffic-scale-estimation': lazy(() => import('./learn/systemdesign/hld/TrafficScaleContent')),
     // Other topics will be wired up here progressively. For now, fallback to "coming soon" if not mapped.
 };
 

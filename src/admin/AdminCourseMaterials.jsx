@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trash2, FileText, Image as ImageIcon, File, Loader2, X, AlertCircle, PlayCircle, FolderArchive, CheckCircle2, XCircle, Zap } from 'lucide-react';
+import { Upload, Trash2, FileText, Image as ImageIcon, File, Loader2, X, AlertCircle, PlayCircle, FolderArchive, CheckCircle2, XCircle, Zap, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { uploadFile } from '../lib/s3';
+import PDFViewerModal from '../components/PDFViewerModal';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 const COMPRESSION_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -152,9 +153,10 @@ export default function AdminCourseMaterials({ course, onClose }) {
     const [loading, setLoading] = useState(true);
     const [uploadCategory, setUploadCategory] = useState('Resource');
     const [errorMsg, setErrorMsg] = useState('');
+    const [viewingMaterial, setViewingMaterial] = useState(null);
 
     // Multi-file queue state
-    const [queue, setQueue] = useState([]);         // [{ id, file, status, progress, error }]
+    const [queue, setQueue] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => { fetchMaterials(); }, [course.id]);
@@ -267,6 +269,10 @@ export default function AdminCourseMaterials({ course, onClose }) {
     };
 
     return (
+        <>
+        {viewingMaterial && (
+            <PDFViewerModal material={viewingMaterial} onClose={() => setViewingMaterial(null)} />
+        )}
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
             <div style={{ background: '#0a0a0f', width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
                 {/* Header */}
@@ -420,15 +426,28 @@ export default function AdminCourseMaterials({ course, onClose }) {
                                             {getFileIcon(mat.type)}
                                         </div>
                                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                                            <a href={mat.url} target="_blank" rel="noreferrer" style={{ margin: '0 0 4px 0', fontSize: '0.92rem', color: '#fff', fontWeight: 600, textDecoration: 'none', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <button
+                                                onClick={() => setViewingMaterial(mat)}
+                                                style={{ margin: '0 0 4px 0', fontSize: '0.92rem', color: '#fff', fontWeight: 600, textDecoration: 'none', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', width: '100%' }}
+                                            >
                                                 {mat.name}
-                                            </a>
+                                            </button>
                                             <div style={{ display: 'flex', gap: '8px', fontSize: '0.78rem', color: '#64748b' }}>
                                                 <span>{mat.category}</span>
                                                 <span>·</span>
                                                 <span>{formatBytes(mat.size)}</span>
                                             </div>
                                         </div>
+                                        {/* Open viewer button */}
+                                        <button
+                                            onClick={() => setViewingMaterial(mat)}
+                                            style={{ background: 'rgba(59,130,246,0.08)', border: 'none', color: '#60a5fa', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', flexShrink: 0 }}
+                                            onMouseEnter={e => e.currentTarget.style.background='rgba(59,130,246,0.2)'}
+                                            onMouseLeave={e => e.currentTarget.style.background='rgba(59,130,246,0.08)'}
+                                            title="Open viewer"
+                                        >
+                                            <Eye size={16} />
+                                        </button>
                                         <button
                                             onClick={() => handleDelete(mat.id)}
                                             style={{ background: 'rgba(239,68,68,0.08)', border: 'none', color: '#ef4444', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', flexShrink: 0 }}
@@ -446,5 +465,6 @@ export default function AdminCourseMaterials({ course, onClose }) {
                 </div>
             </div>
         </div>
+        </>
     );
 }

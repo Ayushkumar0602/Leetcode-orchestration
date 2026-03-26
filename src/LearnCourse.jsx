@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { Loader2, ArrowLeft, Play, FileText, ImageIcon, PlayCircle, FolderArchive, File, Lock, Download, CheckCircle, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Play, FileText, ImageIcon, PlayCircle, FolderArchive, File, Lock, Download, CheckCircle, Clock, Eye } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
 import { useQuery } from '@tanstack/react-query';
+import PDFViewerModal from './components/PDFViewerModal';
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
@@ -78,6 +79,8 @@ export default function LearnCourse() {
         staleTime: 1000 * 60 * 5,
     });
 
+    const [viewingMaterial, setViewingMaterial] = useState(null);
+
     const loading = loadingCourse || loadingEnrollments || (course && enrolled && loadingMaterials);
     let error = null;
     if (courseError) error = courseError.message;
@@ -116,6 +119,10 @@ export default function LearnCourse() {
     }
 
     return (
+        <>
+        {viewingMaterial && (
+            <PDFViewerModal material={viewingMaterial} onClose={() => setViewingMaterial(null)} />
+        )}
         <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--txt)' }}>
             {/* Header Navbar */}
             <nav style={{ 
@@ -222,14 +229,27 @@ export default function LearnCourse() {
                                                 <span>{formatBytes(mat.size)}</span>
                                             </div>
                                         </div>
-                                        <a 
-                                            href={mat.url} target="_blank" rel="noreferrer"
-                                            style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.2)', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}
-                                            onMouseEnter={e => {e.currentTarget.style.background='#3b82f6'; e.currentTarget.style.color='#fff'}} 
-                                            onMouseLeave={e => {e.currentTarget.style.background='rgba(59,130,246,0.1)'; e.currentTarget.style.color='#3b82f6'}}
-                                        >
-                                            <Download size={16} /> Open
-                                        </a>
+                                        {/* View + Download buttons */}
+                                        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                                            <button
+                                                onClick={() => setViewingMaterial(mat)}
+                                                title="View"
+                                                style={{ background: 'rgba(168,85,247,0.12)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.25)', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.85rem', fontWeight: 600, transition: 'all 0.2s' }}
+                                                onMouseEnter={e => { e.currentTarget.style.background='rgba(168,85,247,0.3)'; e.currentTarget.style.color='#fff'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.background='rgba(168,85,247,0.12)'; e.currentTarget.style.color='#c084fc'; }}
+                                            >
+                                                <Eye size={15} /> View
+                                            </button>
+                                            <a
+                                                href={mat.url} download={mat.name} target="_blank" rel="noreferrer"
+                                                title="Download"
+                                                style={{ background: 'rgba(59,130,246,0.08)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)', padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', transition: 'all 0.2s' }}
+                                                onMouseEnter={e => { e.currentTarget.style.background='rgba(59,130,246,0.2)'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.background='rgba(59,130,246,0.08)'; }}
+                                            >
+                                                <Download size={15} />
+                                            </a>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -264,5 +284,6 @@ export default function LearnCourse() {
                 </div>
             </main>
         </div>
+        </>
     );
 }

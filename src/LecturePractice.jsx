@@ -35,11 +35,6 @@ export default function LecturePractice({ videoTitle }) {
         if (open && !selectedProblem) setTimeout(() => searchRef.current?.focus(), 120);
     }, [open, selectedProblem]);
 
-    // Reset on close
-    useEffect(() => {
-        if (!open) setSelectedProblem(null);
-    }, [open]);
-
     const handleSearch = useCallback(async () => {
         if (!searchQuery.trim()) return;
         setSearching(true);
@@ -99,16 +94,16 @@ export default function LecturePractice({ videoTitle }) {
             </button>
 
             {/* ── Panel ── */}
-            {open && (
-                <div style={{
-                    marginTop: '10px',
-                    background: '#050508',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: '14px',
-                    overflow: 'hidden',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                    fontFamily: "'Inter', sans-serif",
-                }}>
+            <div style={{
+                display: open ? 'block' : 'none',
+                marginTop: '10px',
+                background: '#050508',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '14px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                fontFamily: "'Inter', sans-serif",
+            }}>
 
                     {/* ── Search View ── */}
                     {!selectedProblem && (
@@ -242,7 +237,6 @@ export default function LecturePractice({ videoTitle }) {
                         </div>
                     )}
                 </div>
-            )}
         </div>
     );
 }

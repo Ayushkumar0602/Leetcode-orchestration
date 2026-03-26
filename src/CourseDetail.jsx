@@ -138,12 +138,37 @@ export default function CourseDetail() {
             </nav>
 
             <main style={{ flex: 1, position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '500px', background: 'radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.15) 0%, rgba(5,5,5,0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
+                <style>{`
+                    .course-detail-layout {
+                        display: flex;
+                        gap: 50px;
+                        flex-wrap: wrap;
+                        align-items: flex-start;
+                    }
+                    @media (max-width: 900px) {
+                        .course-detail-layout {
+                            flex-direction: column-reverse !important;
+                            gap: 30px !important;
+                            padding: 20px 1.5rem 60px !important;
+                        }
+                        .course-main-content, .course-sidebar {
+                            flex: none !important;
+                            width: 100% !important;
+                        }
+                        .course-sidebar {
+                            position: relative !important;
+                            top: 0 !important;
+                        }
+                        .course-title-text {
+                            font-size: 2.2rem !important;
+                        }
+                    }
+                `}</style>
 
-                <div style={{ maxWidth: '1250px', margin: '0 auto', padding: '40px 2rem 80px', display: 'flex', gap: '50px', position: 'relative', zIndex: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <div className="course-detail-layout" style={{ maxWidth: '1250px', margin: '0 auto', padding: '40px 2rem 80px', position: 'relative', zIndex: 1 }}>
 
-                    {/* Left Column */}
-                    <div style={{ flex: '1 1 650px', display: 'flex', flexDirection: 'column' }}>
+                    {/* Left Column (Main Content) */}
+                    <div className="course-main-content" style={{ flex: '1 1 650px', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ marginBottom: '40px' }}>
                             <button
                                 onClick={() => navigate('/courses')}
@@ -154,7 +179,7 @@ export default function CourseDetail() {
                                 <ArrowLeft size={16} /> Back to Courses
                             </button>
 
-                            <h1 style={{ fontSize: '3rem', fontWeight: 800, margin: '0 0 20px 0', lineHeight: 1.15, letterSpacing: '-1px' }}>{course.title}</h1>
+                            <h1 className="course-title-text" style={{ fontSize: '3rem', fontWeight: 800, margin: '0 0 20px 0', lineHeight: 1.15, letterSpacing: '-1px' }}>{course.title}</h1>
 
                             <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '30px' }}>
                                 {course.timeline && (
@@ -219,8 +244,8 @@ export default function CourseDetail() {
                         </div>
                     </div>
 
-                    {/* Right Column: Sticky Sidebar */}
-                    <div style={{ flex: '1 1 350px', position: 'sticky', top: '100px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {/* Right Column: Sticky Sidebar (Enrollment Box) */}
+                    <div className="course-sidebar" style={{ flex: '1 1 350px', position: 'sticky', top: '100px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div style={{ background: '#0a0a0f', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column' }}>
                             {course.thumbnailUrl ? (
                                 <div style={{ width: '100%', height: '220px', background: `url(${course.thumbnailUrl}) center/cover`, borderBottom: '1px solid rgba(255,255,255,0.05)' }} />

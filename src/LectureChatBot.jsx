@@ -76,6 +76,7 @@ function extractCodeBlock(text) {
  */
 export default function LectureChatBot({
     videoTitle,
+    currentTime = 0,
     getEditorCode,
     applyEditorCode,
     highlightLines,
@@ -167,12 +168,20 @@ export default function LectureChatBot({
         }
 
         try {
+            const apiMessages = [...messages, userMsg].map(m => ({ role: m.role, content: m.content }));
+            
+            if (currentTime > 0) {
+                const mins = Math.floor(currentTime / 60);
+                const secs = Math.floor(currentTime % 60).toString().padStart(2, '0');
+                apiMessages[apiMessages.length - 1].content += `\n\n[System Context: The user is currently watching the video at timestamp ${mins}:${secs}. Please tailor your response using this context if relevant. Do not mention the timestamp explicitly unless asked.]`;
+            }
+
             const res = await fetch(`${API_BASE}/api/lecture-chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     videoTitle,
-                    messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+                    messages: apiMessages,
                     userCode,
                     language,
                     codePermissionGranted: codePermission,

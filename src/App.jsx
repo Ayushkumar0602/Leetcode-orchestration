@@ -25,6 +25,7 @@ import Courses from './Courses';
 import CourseDetail from './CourseDetail';
 import LearnCourse from './LearnCourse';
 import LearnCourseLecture from './LearnCourseLecture';
+import { TelemetryProvider } from './contexts/TelemetryContext';
 
 // System Design Features
 import SystemDesignReviseHLD from './SystemDesignReviseHLD';
@@ -110,7 +111,11 @@ function App() {
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />
             <Route path="/learn/:slug" element={<LearnCourse />} />
-            <Route path="/learn/:slug/lecture" element={<LearnCourseLecture />} />
+            <Route path="/learn/:slug/lecture" element={
+              <TelemetryProvider>
+                <LearnCourseLecture />
+              </TelemetryProvider>
+            } />
             
             <Route path="/" element={<LandingPage />} />
             

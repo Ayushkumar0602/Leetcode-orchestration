@@ -9,7 +9,7 @@ import {
     Brain, Code2, Server, Zap, Shield, MessageSquare, Terminal,
     ChevronRight, ArrowRight, Play, Mic, Star, Clock, TrendingUp,
     CheckCircle, Circle, Sparkles, Users, Container, GitBranch,
-    Bot, Cpu, Database, Globe, Lock, BarChart3, Layers, Award
+    Bot, Cpu, Database, Globe, Lock, BarChart3, Layers, Award, BookOpen
 } from 'lucide-react';
 import './LandingPage.css';
 import { useSEO } from './hooks/useSEO';
@@ -77,6 +77,36 @@ const FEATURES = [
         subtitle: '6-dimension analysis',
         desc: 'At the end of every interview, get a detailed hire/no-hire report with skill scores, strengths, red flags, and areas to improve.',
         bullets: ['6-skill evaluation matrix', 'Hire / No-Hire verdict', 'Full transcript replay'],
+    },
+    {
+        icon: BookOpen,
+        color: '#eab308',
+        bg: 'rgba(234,179,8,0.1)',
+        border: 'rgba(234,179,8,0.3)',
+        title: 'Interactive Courses',
+        subtitle: 'LMS & AI Tutor',
+        desc: 'A comprehensive learning hub with integrated video editors, lazy-loading PDF viewers, and a context-aware AI tutor to guide your studies.',
+        bullets: ['Integrated code editors', 'Context-aware AI lecture tutor', 'Lazy-loading PDF viewers'],
+    },
+    {
+        icon: Globe,
+        color: '#0ea5e9',
+        bg: 'rgba(14,165,233,0.1)',
+        border: 'rgba(14,165,233,0.3)',
+        title: 'Developer Portfolios',
+        subtitle: 'Showcase your skills',
+        desc: 'Build your public developer identity. Host your code, display a GitHub-style contribution tracking calendar, and showcase your best projects.',
+        bullets: ['Public-facing profile URLs', 'Project & code showcases', 'GitHub-style activity heatmaps'],
+    },
+    {
+        icon: MessageSquare,
+        color: '#ec4899',
+        bg: 'rgba(236,72,153,0.1)',
+        border: 'rgba(236,72,153,0.3)',
+        title: 'Tech Blogs & Social',
+        subtitle: 'Community learning',
+        desc: 'Stay connected with a native blogging engine, real-time messaging, and an instant push notification center via Firebase & LiveKit.',
+        bullets: ['Native technical blogs', 'Real-time user chat', 'Push notification manager'],
     },
 ];
 
@@ -211,18 +241,19 @@ export default function LandingPage() {
     const [activeProblem, setActiveProblem] = useState(null);
 
     useSEO({
-        title: 'AI Coding Interview Simulator for Engineers | Whizan AI',
-        description: 'Practice AI-powered mock coding and system design interviews with real-time AI code review, voice conversations, and detailed hire/no-hire score reports. Free for software engineers preparing for FAANG.',
-        canonical: '/',
+        title: 'AI Coding Interview Simulator & Developer Portfolio | Whizan AI',
+        description: 'Practice AI-powered mock coding & system design interviews, take interactive tech courses, and build your developer portfolio. The ultimate hub for software engineers.',
+        canonical: 'https://whizan.xyz/',
         jsonLd: {
             '@context': 'https://schema.org',
-            '@type': 'SoftwareApplication',
+            '@type': 'EducationalOrganization',
             name: 'Whizan AI',
             url: 'https://whizan.xyz',
-            applicationCategory: 'EducationalApplication',
-            operatingSystem: 'Web',
-            description: 'AI coding interview simulator for engineers. Practice DSA problems, mock interviews with voice AI, and system design with real-time code review.',
-            offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+            description: 'AI coding interview simulator, interactive LMS courses, and developer portfolio hub for software engineers.',
+            sameAs: [
+                'https://twitter.com/whizanHQ',
+                'https://www.linkedin.com/company/whizan-ai'
+            ]
         },
     });
 
@@ -255,15 +286,17 @@ export default function LandingPage() {
                     </div>
                     <div className="lp-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {currentUser ? (
-                            <button className="lp-btn-outline" onClick={() => navigate('/dashboard')}>Dashboard →</button>
+                            <button className="lp-btn-outline" onClick={() => navigate('/dashboard')} aria-label="Go to Dashboard">Dashboard →</button>
                         ) : (
-                            <button className="lp-btn-primary" onClick={() => navigate(buildLoginUrl({ ref: 'navbar_cta' }))}>Get started</button>
+                            <button className="lp-btn-primary" onClick={() => navigate(buildLoginUrl({ ref: 'navbar_cta' }))} aria-label="Get started with Whizan AI">Get started</button>
                         )}
                         <NavProfile />
                     </div>
                 </div>
             </nav>
 
+            {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
+            <main>
             {/* ── HERO ────────────────────────────────────────────────────────── */}
             <section className="lp-hero">
                 <div className="lp-hero-glow glow-purple" />
@@ -307,11 +340,11 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.3 }}
                     >
-                        <button className="lp-btn-glow" onClick={goToInterview}>
-                            <Brain size={18} /> Start Mock Interview
+                        <button className="lp-btn-glow" onClick={goToInterview} aria-label="Start AI Mock Interview">
+                            <Brain size={18} aria-hidden="true" /> Start Mock Interview
                         </button>
-                        <button className="lp-btn-outline" onClick={goToProblems}>
-                            <Code2 size={18} /> Practice Problems
+                        <button className="lp-btn-outline" onClick={goToProblems} aria-label="Practice DSA Problems">
+                            <Code2 size={18} aria-hidden="true" /> Practice Problems
                         </button>
                     </motion.div>
 
@@ -518,6 +551,7 @@ export default function LandingPage() {
             </section>
 
             {/* ── FOOTER ────────────────────────────────────────────────────────── */}
+            </main>
             <footer className="lp-footer">
                 <div className="lp-footer-inner">
                     <div className="lp-footer-brand">

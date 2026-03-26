@@ -29,8 +29,10 @@
     "react-avatar-editor": "^14.0.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
+    "react-pdf": "^10.4.1",
     "react-router-dom": "^7.13.1",
     "react-select": "^5.10.2",
+    "react-youtube": "^10.1.0",
     "speak-tts": "^2.0.8",
     "uuid": "^13.0.0"
   },
