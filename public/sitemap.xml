@@ -153,4 +153,74 @@
     <priority>0.4</priority>
   </url>
 
+  <!-- Courses Index -->
+  <url>
+    <loc>https://whizan.xyz/courses</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Terms and Conditions -->
+  <url>
+    <loc>https://whizan.xyz/terms</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- System Design HLD Revise: Foundations -->
+  <url>
+    <loc>https://whizan.xyz/revise/systemdesign/hld/foundations</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- System Design HLD Revise: Traffic & Scale Estimation -->
+  <url>
+    <loc>https://whizan.xyz/revise/systemdesign/hld/traffic-scale-estimation</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Course Details -->
+  <url>
+    <loc>https://whizan.xyz/courses/object-oriented-programming-oop-in-java-course</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/courses/operating-system-full-course</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/courses/system-design-concepts-course-and-interview-prep</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/courses/python-beginner-to-pro</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/courses/introduction-to-computer-science</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/courses/dsa-playlist-in-c</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>

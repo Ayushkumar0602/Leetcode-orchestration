@@ -286,6 +286,76 @@ app.get('/api/public/courses/:slug', async (req, res) => {
     }
 });
 
+app.get('/api/share/courses/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        let courseData = null;
+
+        const q = query(collection(db, 'youtubecourses'), where('slug', '==', slug));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+            courseData = snapshot.docs[0].data();
+        } else {
+            const docSnap = await getDoc(doc(db, 'youtubecourses', slug));
+            if (docSnap.exists()) {
+                courseData = docSnap.data();
+            } else {
+                const allSnap = await getDocs(collection(db, 'youtubecourses'));
+                for (const d of allSnap.docs) {
+                    const data = d.data();
+                    if (data.title) {
+                        const generatedSlug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                        if (generatedSlug === slug) {
+                            courseData = data;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!courseData) {
+            return res.status(404).send('Course not found');
+        }
+
+        const title = `${courseData.title} | Whizan AI`;
+        const description = (courseData.shortDescription || courseData.description || '').replace(/"/g, '&quot;');
+        const image = courseData.thumbnailUrl || 'https://whizan.xyz/og-image.png';
+        const targetUrl = `https://whizan.xyz/courses/${slug}`;
+
+        const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>${title}</title>
+    <meta name="description" content="${description}" />
+    <meta property="og:title" content="${title}" />
+    <meta property="og:description" content="${description}" />
+    <meta property="og:image" content="${image}" />
+    <meta property="og:url" content="${targetUrl}" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${title}" />
+    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:image" content="${image}" />
+    <meta http-equiv="refresh" content="0; url=${targetUrl}" />
+</head>
+<body>
+    <p>Redirecting to course... <a href="${targetUrl}">Click here if not redirected.</a></p>
+    <script>window.location.replace("${targetUrl}");</script>
+</body>
+</html>
+        `.trim();
+
+        res.send(html);
+    } catch (error) {
+        console.error('Error generating share HTML:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // --- Protected Enrollment Routes ---
 app.post('/api/courses/:slug/enroll', async (req, res) => {
     try {

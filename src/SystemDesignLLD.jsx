@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { LogOut, ArrowLeft, Cpu, Layout, Layers, Box, Terminal, Database, Shield, Settings, GitBranch, Code } from 'lucide-react';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 const LLD_SYLLABUS = [
     {
@@ -96,6 +97,13 @@ const LLD_SYLLABUS = [
 export default function SystemDesignLLD() {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
+
+    useSEO({
+        title: 'System Design LLD (Low-Level Design) Course | Whizan AI',
+        description: 'Master Object-Oriented Design, Design Patterns, API architecture, and machine coding with our comprehensive Low-Level Design syllabus.',
+        canonical: '/systemdesign/lld',
+        keywords: 'low level design, LLD, object oriented design, design patterns, machine coding, system design interview',
+    });
 
     const handlePracticeClick = (topicName) => {
         if (!currentUser) {

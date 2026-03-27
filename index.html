@@ -14,6 +14,23 @@
   <meta name="author" content="Whizan AI" />
   <meta name="robots" content="index, follow" />
 
+  <!-- SPA Canonical Injection: Set before React loads to prevent false Google duplicates -->
+  <script>
+    (function() {
+      var link = document.createElement('link');
+      link.rel = 'canonical';
+      var url = new URL(window.location.href);
+      // Ensure absolute consistency (e.g. drop query params if needed, or keep path)
+      var cleanUrl = url.origin + url.pathname;
+      // Strip trailing slash if not root
+      if (cleanUrl.length > url.origin.length + 1 && cleanUrl.endsWith('/')) {
+        cleanUrl = cleanUrl.slice(0, -1);
+      }
+      link.href = cleanUrl;
+      document.head.appendChild(link);
+    })();
+  </script>
+
   <!-- ── Open Graph / Facebook ── -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Whizan AI" />

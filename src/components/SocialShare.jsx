@@ -6,8 +6,13 @@ export default function SocialShare() {
     const [isOpen, setIsOpen] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://whizan.xyz';
+    let shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://whizan.xyz';
     const title = typeof window !== 'undefined' ? document.title : 'Whizan AI';
+
+    // Intercept course URLs to use the dynamic backend redirect for social media crawling without rebuilds
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/courses/')) {
+        shareUrl = `https://leetcode-orchestration.onrender.com/api/share${window.location.pathname}`;
+    }
 
     const handleCopy = () => {
         navigator.clipboard.writeText(shareUrl);

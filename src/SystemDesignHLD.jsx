@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { LogOut, ArrowLeft, Server, Activity, Globe, Database, Cpu, Zap, Lock, Eye, Cloud, BookOpen } from 'lucide-react';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 const HLD_SYLLABUS = [
     {
@@ -119,6 +120,14 @@ const HLD_SYLLABUS = [
 export default function SystemDesignHLD() {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
+
+    useSEO({
+        title: 'System Design HLD (High-Level Design) Course | Whizan AI',
+        description: 'Master scalable distributed systems, microservices, databases, and large-scale architecture with our comprehensive High-Level Design syllabus.',
+        canonical: '/systemdesign/hld',
+        keywords: 'high level design, HLD, system design, distributed systems, microservices architecture, system design interview',
+    });
+
     const handlePracticeClick = (topicName) => {
         if (!currentUser) {
             alert('Only authenticated users can take interviews. Please log in first.');
