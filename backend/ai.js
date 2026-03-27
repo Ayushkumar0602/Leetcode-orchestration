@@ -517,7 +517,7 @@ ${text}
  * Global AI Agent Chat
  * Allows the user to chat with the Whizan AI agent with context of their current page.
  */
-async function chatWithAgent(messages, contextUrl) {
+async function chatWithAgent(messages, contextUrl, pageActions = []) {
   const keys = getApiKeys();
   if (keys.length === 0) throw new Error("No Gemini API keys found");
 
@@ -528,7 +528,42 @@ The user is currently viewing this URL path: "${contextUrl}".
 Use this context to understand what they might be asking about.
 Be extremely helpful, concise, and friendly.
 Always respond in beautifully formatted Markdown.
+
+If the user explicitly asks to go to a page or you determine the best way to help them is by navigating, you MUST use the navigate_to_page tool.
+Available routes on Whizan AI include:
+- /dashboard (Dashboard Home)
+- /dsaquestion (DSA / Leetcode Practice)
+- /aiinterviewselect (AI Mock Interview setup)
+- /courses (Learn Courses)
+- /profile (User Profile)
+- /systemdesign (System Design Home)
+- /systemdesign/hld (System Design High Level)
+- /systemdesign/lld (System Design Low Level)
+- /scraper (Medical Scraper)
+- /blog (Blogs)
+- /chat (Global chat)
+- /submissions (My Submissions)
 `.trim();
+
+  const navigateTool = {
+    name: "navigate_to_page",
+    description: "Navigate the user to a specific page or route in the application.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        path: {
+          type: "STRING",
+          description: "The exact URL path to navigate to, e.g. /profile, /courses, /systemdesign/hld",
+        },
+      },
+      required: ["path"],
+    },
+  };
+
+  const allFunctionDeclarations = [navigateTool];
+  if (Array.isArray(pageActions) && pageActions.length > 0) {
+      allFunctionDeclarations.push(...pageActions);
+  }
 
   let lastError;
   for (let i = 0; i < keys.length; i++) {
@@ -536,7 +571,8 @@ Always respond in beautifully formatted Markdown.
       const genAI = new GoogleGenerativeAI(keys[i]);
       const model = genAI.getGenerativeModel({
         model: 'gemini-3.1-flash-lite-preview',
-        systemInstruction: systemInstruction
+        systemInstruction: systemInstruction,
+        tools: [{ functionDeclarations: allFunctionDeclarations }]
       });
 
       // Gemini expects format: { role: "user" | "model", parts: [{text: "..."}] }
@@ -552,6 +588,29 @@ Always respond in beautifully formatted Markdown.
       });
 
       const result = await chat.sendMessage(latestMessage);
+      
+      const functionCalls = result.response.functionCalls();
+      if (functionCalls && functionCalls.length > 0) {
+          const call = functionCalls[0];
+          if (call.name === 'navigate_to_page') {
+              return {
+                  type: 'action',
+                  action: 'navigate',
+                  path: call.args.path,
+                  message: `Taking you to ${call.args.path}...`
+              };
+          } else {
+              // It's a dynamic page action execution
+              return {
+                  type: 'action',
+                  action: 'page_action',
+                  functionName: call.name,
+                  args: call.args,
+                  message: `Executing action: ${call.name.split('_').join(' ')}...`
+              };
+          }
+      }
+
       return result.response.text();
       
     } catch (error) {

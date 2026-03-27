@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { useAgent } from './contexts/AgentContext';
 import {
     Brain, Code2, Layers, TrendingUp,
     Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube, BookOpen
@@ -242,6 +243,7 @@ const styles = `
 export default function DashboardHome() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
+    const { registerAction, unregisterAction } = useAgent();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useSEO({
@@ -250,6 +252,17 @@ export default function DashboardHome() {
         canonical: '/dashboard',
         robots: 'noindex, nofollow',
     });
+
+    useEffect(() => {
+        const greetSchema = {
+            name: "greet_dashboard_user",
+            description: "Greets the user by showing a browser alert. Use this if the user asks to be greeted or wants a test on the dashboard.",
+            parameters: { type: "OBJECT", properties: {} },
+        };
+        const handleGreet = () => alert("Hello from Jarvis! Your page-specific action execution worked perfectly.");
+        registerAction(greetSchema, handleGreet);
+        return () => unregisterAction("greet_dashboard_user");
+    }, [registerAction, unregisterAction]);
 
     const uid = currentUser?.uid;
 
