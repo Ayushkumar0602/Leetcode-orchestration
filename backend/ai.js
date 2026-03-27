@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { db } = require('./firebase');
-const { doc, getDoc, setDoc } = require('firebase/firestore');
+const { doc, getDoc, setDoc, collection, getDocs, query, where } = require('firebase/firestore');
 
 // Get all API keys from environment variables
 const getApiKeys = () => {
@@ -517,7 +517,7 @@ ${text}
  * Global AI Agent Chat
  * Allows the user to chat with the Whizan AI agent with context of their current page.
  */
-async function chatWithAgent(messages, contextUrl, pageActions = []) {
+async function chatWithAgent(messages, contextUrl, pageActions = [], pageContent = null) {
   const keys = getApiKeys();
   if (keys.length === 0) throw new Error("No Gemini API keys found");
 
@@ -525,6 +525,17 @@ async function chatWithAgent(messages, contextUrl, pageActions = []) {
 You are Jarvis, the global omniscient AI agent for Whizan AI.
 Your purpose is to help the user with anything they need inside the platform.
 The user is currently viewing this URL path: "${contextUrl}".
+${pageContent ? `
+--- CURRENT PAGE VISION ---
+Here is a text snapshot of what the user is currently seeing on their screen:
+"""
+${pageContent.text || "No text available"}
+"""
+
+And here are some clickable links currently visible to them:
+${JSON.stringify(pageContent.links || [])}
+---------------------------
+` : ""}
 Use this context to understand what they might be asking about.
 Be extremely helpful, concise, and friendly.
 Always respond in beautifully formatted Markdown.
@@ -560,7 +571,22 @@ Available routes on Whizan AI include:
     },
   };
 
-  const allFunctionDeclarations = [navigateTool];
+  const searchCoursesTool = {
+    name: "search_courses",
+    description: "Search for available courses in the database by keyword or topic.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        keyword: {
+          type: "STRING",
+          description: "The search keyword, e.g. 'system design', 'react', 'algorithms'."
+        }
+      },
+      required: ["keyword"]
+    }
+  };
+
+  const allFunctionDeclarations = [navigateTool, searchCoursesTool];
   if (Array.isArray(pageActions) && pageActions.length > 0) {
       allFunctionDeclarations.push(...pageActions);
   }
@@ -587,30 +613,73 @@ Available routes on Whizan AI include:
         history: formattedHistory,
       });
 
-      const result = await chat.sendMessage(latestMessage);
+      let result = await chat.sendMessage(latestMessage);
       
-      const functionCalls = result.response.functionCalls();
-      if (functionCalls && functionCalls.length > 0) {
-          const call = functionCalls[0];
-          if (call.name === 'navigate_to_page') {
-              return {
-                  type: 'action',
-                  action: 'navigate',
-                  path: call.args.path,
-                  message: `Taking you to ${call.args.path}...`
-              };
-          } else {
-              // It's a dynamic page action execution
-              return {
-                  type: 'action',
-                  action: 'page_action',
-                  functionName: call.name,
-                  args: call.args,
-                  message: `Executing action: ${call.name.split('_').join(' ')}...`
-              };
-          }
-      }
+      let maxLoops = 5;
+      while (maxLoops > 0) {
+        maxLoops--;
+        const functionCalls = result.response.functionCalls();
+        
+        if (functionCalls && functionCalls.length > 0) {
+            const call = functionCalls[0];
+            
+            if (call.name === 'navigate_to_page') {
+                return {
+                    type: 'action',
+                    action: 'navigate',
+                    path: call.args.path,
+                    message: `Taking you to ${call.args.path}...`
+                };
+            } else if (call.name === 'search_courses') {
+                // Execute backend tool natively
+                try {
+                    const snap = await getDocs(collection(db, 'youtubecourses'));
+                    const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    const kw = (call.args.keyword || "").toLowerCase();
+                    const matches = courses.filter(c => 
+                        (c.title && c.title.toLowerCase().includes(kw)) || 
+                        (c.description && c.description.toLowerCase().includes(kw)) ||
+                        (c.category && c.category.toLowerCase().includes(kw))
+                    ).slice(0, 5); // Return top 5 matches
+                    
+                    const simplifiedResponse = matches.map(c => ({
+                        title: c.title,
+                        description: c.description,
+                        instructor: c.instructor,
+                        url: `/learn/${c.slug || c.id}`
+                    }));
 
+                    // Send the result back to Gemini implicitly
+                    result = await chat.sendMessage([{
+                        functionResponse: {
+                            name: 'search_courses',
+                            response: { courses: simplifiedResponse }
+                        }
+                    }]);
+                } catch (err) {
+                    result = await chat.sendMessage([{
+                        functionResponse: {
+                            name: 'search_courses',
+                            response: { error: err.message }
+                        }
+                    }]);
+                }
+            } else {
+                // It's a dynamic page action execution (frontend)
+                return {
+                    type: 'action',
+                    action: 'page_action',
+                    functionName: call.name,
+                    args: call.args,
+                    message: `Executing action: ${call.name.split('_').join(' ')}...`
+                };
+            }
+        } else {
+            // No function calls, just text
+            return result.response.text();
+        }
+      }
+      
       return result.response.text();
       
     } catch (error) {

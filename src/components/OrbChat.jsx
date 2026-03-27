@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -22,54 +22,87 @@ export default function OrbChat({ isOpen, onClose }) {
     }
   }, [messages, isOpen]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const sendToAgent = useCallback(async (messagesToSend) => {
+    setIsLoading(true);
+
+    try {
+      const pageActions = getActionSchemas();
+      
+      let pageContent = null;
+      try {
+        const text = document.body.innerText.substring(0, 3000);
+        const allLinks = Array.from(document.querySelectorAll('a'))
+          .map(a => ({ text: a.innerText.trim(), href: a.getAttribute('href') }))
+          .filter(a => a.text && a.href && !a.href.startsWith('javascript'));
+        const uniqueLinks = Array.from(new Set(allLinks.map(l => JSON.stringify(l)))).map(JSON.parse).slice(0, 20);
+        pageContent = { text, links: uniqueLinks };
+      } catch(err) {
+        console.warn('Could not scrape page content', err);
+      }
+
+      const response = await fetch(`${API_BASE}/api/agent/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: messagesToSend,
+          contextUrl: window.location.pathname + window.location.search,
+          pageActions: pageActions,
+          pageContent: pageContent
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const appendedMessages = [...messagesToSend, { role: 'assistant', content: data.response }];
+        setMessages(appendedMessages);
+        
+        // Execute Agent Action
+        if (data.type === 'action') {
+          const executeFollowUp = (resultStatus) => {
+            const followUp = {
+              role: 'user',
+              content: `[System Update]: Action '${data.action === 'page_action' ? data.functionName : data.action}' was executed. Status: ${resultStatus}. Current URL is: ${window.location.pathname}. Please continue fulfilling the request based on this new context.`
+            };
+            const nextMessages = [...appendedMessages, followUp];
+            setMessages(nextMessages);
+            sendToAgent(nextMessages);
+          };
+
+          if (data.action === 'navigate' && data.path) {
+            setTimeout(() => {
+              navigate(data.path);
+              // Do NOT close chat, allow reasoning to continue
+              setTimeout(() => {
+                executeFollowUp(`Navigated successfully to ${data.path}`);
+              }, 500);
+            }, 1000);
+          } else if (data.action === 'page_action' && data.functionName) {
+            // Execute the dynamic action mapped in the AgentContext
+            executeAction(data.functionName, data.args).then((res) => {
+              executeFollowUp(res ? 'Success' : 'Failed to execute action');
+            });
+          }
+        }
+      } else {
+        setMessages([...messagesToSend, { role: 'assistant', content: '❌ Sorry, I encountered an error.' }]);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessages([...messagesToSend, { role: 'assistant', content: '❌ Could not connect to the agent.' }]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [API_BASE, getActionSchemas, navigate, executeAction]);
+
+  const handleSend = () => {
+    if (!input.trim() || isLoading) return;
     
     const userMessage = { role: 'user', content: input.trim() };
     const newMessages = [...messages, userMessage];
     
     setMessages(newMessages);
     setInput('');
-    setIsLoading(true);
-
-    try {
-      const pageActions = getActionSchemas();
-
-      const response = await fetch(`${API_BASE}/api/agent/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: newMessages,
-          contextUrl: window.location.pathname + window.location.search,
-          pageActions: pageActions
-        })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setMessages([...newMessages, { role: 'assistant', content: data.response }]);
-        
-        // Execute Agent Action
-        if (data.type === 'action') {
-          if (data.action === 'navigate' && data.path) {
-            setTimeout(() => {
-              navigate(data.path);
-              onClose(); // Close the chat overlay smoothly after navigation
-            }, 1500);
-          } else if (data.action === 'page_action' && data.functionName) {
-            // Execute the dynamic action mapped in the AgentContext
-            executeAction(data.functionName, data.args);
-          }
-        }
-      } else {
-        setMessages([...newMessages, { role: 'assistant', content: '❌ Sorry, I encountered an error.' }]);
-      }
-    } catch (err) {
-      console.error(err);
-      setMessages([...newMessages, { role: 'assistant', content: '❌ Could not connect to the agent.' }]);
-    } finally {
-      setIsLoading(false);
-    }
+    sendToAgent(newMessages);
   };
 
   return (
@@ -100,19 +133,29 @@ export default function OrbChat({ isOpen, onClose }) {
                 <p>How can I help you with this page?</p>
               </div>
             ) : (
-              messages.map((msg, idx) => (
-                <div key={idx} className={`orb-chat-bubble-wrapper ${msg.role === 'user' ? 'user' : 'assistant'}`}>
-                  <div className={`orb-chat-bubble ${msg.role}`}>
-                    {msg.role === 'assistant' ? (
-                      <div className="markdown-body">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      <p>{msg.content}</p>
-                    )}
+              messages.map((msg, idx) => {
+                if (msg.role === 'user' && msg.content.startsWith('[System Update]')) {
+                  return (
+                    <div key={idx} className="orb-chat-system-message">
+                      <p>{msg.content.replace('[System Update]: ', '')}</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={idx} className={`orb-chat-bubble-wrapper ${msg.role === 'user' ? 'user' : 'assistant'}`}>
+                    <div className={`orb-chat-bubble ${msg.role}`}>
+                      {msg.role === 'assistant' ? (
+                        <div className="markdown-body">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p>{msg.content}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
             {isLoading && (
               <div className="orb-chat-bubble-wrapper assistant">
