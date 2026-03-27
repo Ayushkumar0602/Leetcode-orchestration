@@ -542,18 +542,29 @@ Always respond in beautifully formatted Markdown.
 
 If the user explicitly asks to go to a page or you determine the best way to help them is by navigating, you MUST use the navigate_to_page tool.
 Available routes on Whizan AI include:
-- /dashboard (Dashboard Home)
-- /dsaquestion (DSA / Leetcode Practice)
-- /aiinterviewselect (AI Mock Interview setup)
-- /courses (Learn Courses)
-- /profile (User Profile)
-- /systemdesign (System Design Home)
-- /systemdesign/hld (System Design High Level)
-- /systemdesign/lld (System Design Low Level)
-- /scraper (Medical Scraper)
-- /blog (Blogs)
-- /chat (Global chat)
-- /submissions (My Submissions)
+- /: Landing Page
+- /login: Login & Signup
+- /dashboard: User Dashboard (Stats/Progress)
+- /profile: Settings & Profile Management
+- /chat: Global Chat
+- /dsaquestion: DSA Problem Directory
+- /solvingpage/:id: DSA Code Editor
+- /submissions: Previous Code Submissions
+- /aiinterviewselect: Setup Mock AI Interview
+- /aiinterview/:id: AI Mock Interview Room
+- /infoaiinterview: Past Interview History
+- /evaluation/:interviewId: Interview Score Report
+- /systemdesign: System Design Homepage
+- /systemdesign/hld: High-Level Design Topics
+- /systemdesign/lld: Low-Level Design Topics
+- /revise/systemdesign/hld/:topicId: HLD Study Content
+- /aisystemdesigninterview/:id: AI System Design Mock
+- /courses: Full Course Catalog
+- /courses/:slug: Course Info Page
+- /learn/:slug: Course Dash / Video Viewer
+- /portfolio: Public Portfolio Landing
+- /public/:uid: User Public Profile
+- /blog: Blog List Feed
 `.trim();
 
   const navigateTool = {
