@@ -513,4 +513,54 @@ ${text}
   throw new Error(`AI Optimization failed: ${lastError?.message}`);
 }
 
-module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData, optimizeCourseContent };
+/**
+ * Global AI Agent Chat
+ * Allows the user to chat with the Whizan AI agent with context of their current page.
+ */
+async function chatWithAgent(messages, contextUrl) {
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys found");
+
+  const systemInstruction = `
+You are Jarvis, the global omniscient AI agent for Whizan AI.
+Your purpose is to help the user with anything they need inside the platform.
+The user is currently viewing this URL path: "${contextUrl}".
+Use this context to understand what they might be asking about.
+Be extremely helpful, concise, and friendly.
+Always respond in beautifully formatted Markdown.
+`.trim();
+
+  let lastError;
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      const genAI = new GoogleGenerativeAI(keys[i]);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.1-flash-lite-preview',
+        systemInstruction: systemInstruction
+      });
+
+      // Gemini expects format: { role: "user" | "model", parts: [{text: "..."}] }
+      const formattedHistory = messages.slice(0, -1).map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      }));
+      
+      const latestMessage = messages[messages.length - 1]?.content || "";
+
+      const chat = model.startChat({
+        history: formattedHistory,
+      });
+
+      const result = await chat.sendMessage(latestMessage);
+      return result.response.text();
+      
+    } catch (error) {
+      lastError = error;
+      console.warn(`[AI Agent Chat] Key ${i + 1} failed:`, error.message);
+      continue;
+    }
+  }
+  throw new Error(`AI Agent Chat failed: ${lastError?.message}`);
+}
+
+module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData, optimizeCourseContent, chatWithAgent };

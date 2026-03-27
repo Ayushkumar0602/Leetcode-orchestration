@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { LogOut, ArrowLeft, Cpu, Layout, Layers, Box, Terminal, Database, Shield, Settings, GitBranch, Code } from 'lucide-react';
+import { LogOut, ArrowLeft, ArrowRight, Cpu, Layout, Layers, Box, Terminal, Database, Shield, Settings, GitBranch, Code } from 'lucide-react';
 import NavProfile from './NavProfile';
 import { useSEO } from './hooks/useSEO';
+import CourseRecommendations from './components/CourseRecommendations';
 
 const LLD_SYLLABUS = [
     {
@@ -149,23 +150,77 @@ export default function SystemDesignLLD() {
                 </div>
             </nav>
 
-            <div className="sd-lld-content" style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem 2rem 6rem' }}>
-                <button
-                    onClick={() => navigate('/systemdesign')}
-                    style={{ background: 'transparent', border: 'none', color: 'var(--txt3)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem', marginBottom: '2rem', padding: 0 }}
-                >
-                    <ArrowLeft size={16} /> Back to System Design
-                </button>
-
-                <div style={{ marginBottom: '3rem' }}>
-                    <div style={{ display: 'inline-block', background: 'rgba(168,85,247,0.15)', color: '#c084fc', padding: '6px 14px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '1rem' }}>CODE STRUCTURE</div>
-                    <h1 className="sd-lld-page-title" style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '1rem', letterSpacing: '-0.5px' }}>Low-Level Design Syllabus</h1>
-                    <p style={{ fontSize: '1.05rem', color: 'var(--txt2)', lineHeight: 1.6 }}>
-                        Dive deep into Object-Oriented Design, Design Patterns, API architecture, and machine coding. Master the building blocks of clean, robust software.
-                    </p>
+            <div className="sd-lld-content sd-page-container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '3rem 2rem 6rem' }}>
+                <style>
+                {`
+                .sd-page-layout {
+                    display: grid;
+                    grid-template-columns: 1fr 340px;
+                    gap: 3rem;
+                    align-items: start;
+                }
+                .sd-side-col {
+                    position: sticky;
+                    top: 24px;
+                    margin-top: 42px; /* Perfect alignment exactly matching the height of pill + margins */
+                    height: calc(100vh - 48px);
+                    overflow-y: auto;
+                    padding-right: 12px;
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(255,255,255,0.1) transparent;
+                }
+                .sd-side-col::-webkit-scrollbar {
+                    width: 4px;
+                }
+                .sd-side-col::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .sd-side-col::-webkit-scrollbar-thumb {
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                }
+                @media (max-width: 1024px) {
+                    .sd-page-layout {
+                        grid-template-columns: 1fr;
+                    }
+                    .sd-side-col {
+                        position: static;
+                        margin-top: 2rem;
+                        height: auto;
+                        overflow-y: visible;
+                    }
+                }
+                `}
+                </style>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <button
+                        onClick={() => navigate('/systemdesign')}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--txt3)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}
+                    >
+                        <ArrowLeft size={16} /> Back to System Design
+                    </button>
+                    <button
+                        onClick={() => navigate('/courses')}
+                        style={{ background: 'rgba(192,132,252,0.1)', border: '1px solid rgba(192,132,252,0.3)', color: '#c084fc', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(192,132,252,0.5)' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(192,132,252,0.1)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(192,132,252,0.3)' }}
+                    >
+                        Explore All Courses <ArrowRight size={16} />
+                    </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="sd-page-layout">
+                    <div className="sd-main-col">
+
+                        <div style={{ marginBottom: '3rem' }}>
+                            <div style={{ display: 'inline-block', background: 'rgba(168,85,247,0.15)', color: '#c084fc', padding: '6px 14px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '1rem' }}>CODE STRUCTURE</div>
+                            <h1 className="sd-lld-page-title" style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '1rem', letterSpacing: '-0.5px' }}>Low-Level Design Syllabus</h1>
+                            <p style={{ fontSize: '1.05rem', color: 'var(--txt2)', lineHeight: 1.6 }}>
+                                Dive deep into Object-Oriented Design, Design Patterns, API architecture, and machine coding. Master the building blocks of clean, robust software.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {LLD_SYLLABUS.map((section, idx) => (
                         <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden' }}>
                             <div className="sd-lld-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -224,9 +279,18 @@ export default function SystemDesignLLD() {
                                         ))}
                                     </div>
                                 )}
-                            </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
+
+                    <div className="sd-side-col">
+                        <CourseRecommendations 
+                            title="Recommended LLD Courses" 
+                            keywords={['lld', 'object oriented', 'design patterns', 'java', 'c++', 'oop']} 
+                        />
+                    </div>
                 </div>
             </div>
         </div>

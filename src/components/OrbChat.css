@@ -1,0 +1,215 @@
+.orb-chat-container {
+  position: absolute;
+  bottom: 60px; /* Right above the orb if orb is at 0px locally inside container */
+  right: 0;
+  width: 350px;
+  height: 500px;
+  max-height: 70vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.8), 0 0 20px rgba(168, 85, 247, 0.15);
+  overflow: hidden;
+  z-index: 10000;
+  cursor: default;
+}
+
+.orb-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.orb-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.orb-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.orb-chat-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.orb-chat-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.orb-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.orb-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+.orb-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+.orb-chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.orb-chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-size: 0.9rem;
+  gap: 0.5rem;
+}
+
+.orb-chat-bubble-wrapper {
+  display: flex;
+  width: 100%;
+}
+
+.orb-chat-bubble-wrapper.user {
+  justify-content: flex-end;
+}
+
+.orb-chat-bubble-wrapper.assistant {
+  justify-content: flex-start;
+}
+
+.orb-chat-bubble {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #fff;
+}
+
+.orb-chat-bubble.user {
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  border-bottom-right-radius: 4px;
+}
+
+.orb-chat-bubble.assistant {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-left-radius: 4px;
+}
+
+.orb-chat-bubble.typing {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+.spinner {
+  animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+  100% { transform: rotate(360deg); }
+}
+
+.orb-chat-input-area {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.orb-chat-input-area input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.orb-chat-input-area input:focus {
+  border-color: #a855f7;
+}
+
+.orb-chat-send {
+  background: #a855f7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.orb-chat-send:hover:not(:disabled) {
+  background: #9333ea;
+  transform: translateY(-1px);
+}
+
+.orb-chat-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.markdown-body p { margin-bottom: 0.5em; }
+.markdown-body p:last-child { margin-bottom: 0; }
+.markdown-body code {
+  background: rgba(0,0,0,0.3);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+.markdown-body pre {
+  background: rgba(0,0,0,0.4);
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+.markdown-body pre code { background: none; padding: 0; }
+.markdown-body ul, .markdown-body ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-body a { color: #818cf8; text-decoration: none; }
+.markdown-body a:hover { text-decoration: underline; }

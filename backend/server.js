@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { executeCode } = require('./executor');
-const { generateCodeAndTests, extractProjectDetails } = require('./ai');
+const { generateCodeAndTests, extractProjectDetails, chatWithAgent } = require('./ai');
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
 const { parseResumeWithAI } = require('./resumeParser');
@@ -1727,6 +1727,22 @@ app.get('/api/cron/check-expiry', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+
+// --- AI Agent Chat Route ---
+app.post('/api/agent/chat', async (req, res) => {
+    try {
+        const { messages, contextUrl } = req.body;
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            return res.status(400).json({ error: 'Messages array is required' });
+        }
+        
+        const responseText = await chatWithAgent(messages, contextUrl || '/');
+        res.json({ success: true, response: responseText });
+    } catch (error) {
+        console.error('Agent Chat Error:', error);
+        res.status(500).json({ error: 'Failed to process chat with agent' });
+    }
+});
 
 // Start loading the dataset
 loadDataset();

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { BookOpen, CheckCircle, Loader2, Youtube } from 'lucide-react';
+import { BookOpen, CheckCircle, Loader2, Youtube, Search } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import NavProfile from './NavProfile';
 import { useSEO } from './hooks/useSEO';
@@ -41,6 +41,15 @@ async function enrollInCourse({ slug, currentUser }) {
     return res.json();
 }
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const CATEGORIES = [
+    { id: 'all', label: 'All Topics' },
+    { id: 'system-design', label: 'System Design', keywords: ['system design', 'hld', 'lld', 'architecture'] },
+    { id: 'dsa', label: 'Data Structures & Algorithms', keywords: ['dsa', 'algorithm', 'data structure', 'leetcode', 'c++'] },
+    { id: 'programming', label: 'Programming & CS', keywords: ['python', 'java', 'c++', 'oop', 'computer science', 'operating system'] },
+];
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Courses() {
@@ -48,6 +57,9 @@ export default function Courses() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const queryClient = useQueryClient();
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
 
     const filter = searchParams.get('filter') || 'all';
 
@@ -91,11 +103,33 @@ export default function Courses() {
         enrollMutation.mutate({ slug, currentUser });
     };
 
-    const filteredCourses = courses.filter(course => {
-        if (filter === 'enrolled') return isEnrolled(course.id);
-        if (filter === 'not-enrolled') return !isEnrolled(course.id);
-        return true;
-    });
+    const filteredCourses = useMemo(() => {
+        return courses.filter(course => {
+            // 1. Status Filter
+            if (filter === 'enrolled' && !isEnrolled(course.id)) return false;
+            if (filter === 'not-enrolled' && isEnrolled(course.id)) return false;
+
+            // 2. Search Query
+            if (searchQuery.trim()) {
+                const query = searchQuery.toLowerCase();
+                const titleMatch = course.title?.toLowerCase().includes(query);
+                const descMatch = course.description?.toLowerCase().includes(query);
+                if (!titleMatch && !descMatch) return false;
+            }
+
+            // 3. Category Filter
+            if (categoryFilter !== 'all') {
+                const cat = CATEGORIES.find(c => c.id === categoryFilter);
+                if (cat && cat.keywords) {
+                    const textToSearch = `${course.title || ''} ${course.description || ''}`.toLowerCase();
+                    const matchesCategory = cat.keywords.some(kw => textToSearch.includes(kw));
+                    if (!matchesCategory) return false;
+                }
+            }
+
+            return true;
+        });
+    }, [courses, filter, searchQuery, categoryFilter, enrolledIds]);
 
     const loading = loadingCourses;
 
@@ -123,23 +157,57 @@ export default function Courses() {
                     </p>
                 </div>
 
-                {/* Filters */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {['all', 'enrolled', 'not-enrolled'].map(f => (
-                            <button
-                                key={f}
-                                onClick={() => setSearchParams({ filter: f })}
-                                style={{
-                                    background: filter === f ? 'rgba(59,130,246,0.1)' : 'transparent',
-                                    border: filter === f ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(255,255,255,0.1)',
-                                    color: filter === f ? '#60a5fa' : '#999',
-                                    padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
-                                }}
-                            >
-                                {f.replace('-', ' ')}
-                            </button>
-                        ))}
+                {/* Search and Filters */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1.5rem' }}>
+                    {/* Search Bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0 16px', height: '48px', transition: 'all 0.2s', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+                        <Search size={20} color="#666" style={{ marginRight: '12px', flexShrink: 0 }} />
+                        <input
+                            type="text"
+                            placeholder="Search courses by title or description..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: '1rem', outline: 'none' }}
+                        />
+                    </div>
+
+                    {/* Filter Pills */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                        {/* Categories */}
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            {CATEGORIES.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setCategoryFilter(cat.id)}
+                                    style={{
+                                        background: categoryFilter === cat.id ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.03)',
+                                        border: categoryFilter === cat.id ? '1px solid rgba(168,85,247,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                                        color: categoryFilter === cat.id ? '#c084fc' : '#aaa',
+                                        padding: '6px 16px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {cat.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Status Filter */}
+                        <div style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            {['all', 'enrolled', 'not-enrolled'].map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setSearchParams({ filter: f })}
+                                    style={{
+                                        background: filter === f ? 'rgba(59,130,246,0.15)' : 'transparent',
+                                        border: filter === f ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+                                        color: filter === f ? '#60a5fa' : '#888',
+                                        padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
+                                    }}
+                                >
+                                    {f.replace('-', ' ')}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 

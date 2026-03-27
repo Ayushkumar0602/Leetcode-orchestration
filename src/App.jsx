@@ -50,6 +50,7 @@ import PortfolioLanding from './PortfolioLanding';
 import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
 import TermsAndConditions from './TermsAndConditions';
+import FloatingOrb from './components/FloatingOrb';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,6 +128,7 @@ function App() {
             } />
           </Routes>
           <SocialShare />
+          <FloatingOrb />
         </div>
       </AuthProvider>
     </BrowserRouter>
