@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trash2, FileText, Image as ImageIcon, File, Loader2, X, AlertCircle, PlayCircle, FolderArchive, CheckCircle2, XCircle, Zap, Eye } from 'lucide-react';
+import { Upload, Trash2, FileText, Image as ImageIcon, File, Loader2, X, AlertCircle, PlayCircle, FolderArchive, CheckCircle2, XCircle, Zap, Eye, Link, Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { uploadFile } from '../lib/s3';
 import PDFViewerModal from '../components/PDFViewerModal';
@@ -159,7 +159,29 @@ export default function AdminCourseMaterials({ course, onClose }) {
     const [queue, setQueue] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
 
+    // Reuse mode state
+    const [isReuseMode, setIsReuseMode] = useState(false);
+    const [allMaterials, setAllMaterials] = useState([]);
+    const [allMaterialsLoading, setAllMaterialsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
     useEffect(() => { fetchMaterials(); }, [course.id]);
+
+    useEffect(() => {
+        if (isReuseMode) fetchAllMaterials();
+    }, [isReuseMode]);
+
+    const fetchAllMaterials = async () => {
+        setAllMaterialsLoading(true);
+        try {
+            const res = await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/materials-all`);
+            setAllMaterials(res.materials || []);
+        } catch (e) {
+            setErrorMsg('Failed to load all materials: ' + e.message);
+        } finally {
+            setAllMaterialsLoading(false);
+        }
+    };
 
     const fetchMaterials = async () => {
         setLoading(true);
@@ -251,6 +273,28 @@ export default function AdminCourseMaterials({ course, onClose }) {
         fetchMaterials();
     };
 
+    const handleReuseReference = async (existingMaterial) => {
+        try {
+            setIsUploading(true);
+            await adminFetch(currentUser, `${VITE_API_BASE_URL}/api/admin/courses/${course.id}/materials`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: existingMaterial.name,
+                    category: existingMaterial.category,
+                    size: existingMaterial.size,
+                    type: existingMaterial.type,
+                    url: existingMaterial.url
+                })
+            });
+            setIsReuseMode(false);
+            fetchMaterials();
+        } catch (err) {
+            setErrorMsg('Reference error: ' + err.message);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const clearDone = () => setQueue(prev => prev.filter(q => q.status !== 'done'));
     const removeFromQueue = (id) => setQueue(prev => prev.filter(q => q.id !== id));
 
@@ -307,6 +351,23 @@ export default function AdminCourseMaterials({ course, onClose }) {
                                 <option value="Video">Video Material</option>
                                 <option value="Dataset">Dataset / ZIP</option>
                             </select>
+
+                            <button
+                                onClick={() => setIsReuseMode(!isReuseMode)}
+                                disabled={isUploading}
+                                style={{
+                                    background: isReuseMode ? 'rgba(255,255,255,0.1)' : 'rgba(34,197,94,0.15)',
+                                    color: isReuseMode ? '#fff' : '#4ade80',
+                                    border: `1px solid ${isReuseMode ? 'rgba(255,255,255,0.2)' : 'rgba(34,197,94,0.3)'}`,
+                                    padding: '10px 18px', borderRadius: '8px',
+                                    cursor: isUploading ? 'wait' : 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s'
+                                }}
+                            >
+                                <Link size={16} />
+                                {isReuseMode ? 'Cancel Reuse' : 'Reuse Existing'}
+                            </button>
 
                             {/* Hidden multi-file input */}
                             <input
@@ -394,10 +455,60 @@ export default function AdminCourseMaterials({ course, onClose }) {
                             </div>
                         )}
 
-                        {queue.length === 0 && (
+                        {queue.length === 0 && !isReuseMode && (
                             <p style={{ margin: 0, color: '#475569', fontSize: '0.85rem', textAlign: 'center', paddingTop: '6px' }}>
-                                Click <strong style={{ color: '#818cf8' }}>Add Files</strong> to select one or more files (PDF, ZIP, Images, MP4…)
+                                Click <strong style={{ color: '#818cf8' }}>Add Files</strong> or <strong style={{ color: '#4ade80' }}>Reuse Existing</strong>
                             </p>
+                        )}
+
+                        {/* Reuse Selection View */}
+                        {isReuseMode && (
+                            <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px', background: 'rgba(0,0,0,0.3)', padding: '10px 15px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <Search size={18} color="#64748b" />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search existing materials..." 
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
+                                        style={{ background: 'none', border: 'none', color: '#fff', flex: 1, outline: 'none', fontSize: '0.9rem' }}
+                                    />
+                                </div>
+                                
+                                {allMaterialsLoading ? (
+                                    <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                                        <Loader2 className="animate-spin" size={24} color="#666" />
+                                    </div>
+                                ) : (
+                                    <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '5px' }}>
+                                        {allMaterials
+                                            .filter(m => !materials.some(exist => exist.url === m.url)) // Don't show already reused in THIS course
+                                            .filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()) || m.category.toLowerCase().includes(searchTerm.toLowerCase()))
+                                            .map(m => (
+                                                <div key={m.id} style={{
+                                                    display: 'flex', alignItems: 'center', gap: '12px',
+                                                    padding: '10px 14px', borderRadius: '10px',
+                                                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
+                                                    transition: 'background 0.2s'
+                                                }}>
+                                                    <div style={{ flexShrink: 0 }}>{getFileIcon(m.type, 18)}</div>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ fontSize: '0.88rem', color: '#e2e8f0', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{m.category} · {formatBytes(m.size)}</div>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => handleReuseReference(m)}
+                                                        disabled={isUploading}
+                                                        style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
+                                                    >
+                                                        Reference
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        {allMaterials.length === 0 && <p style={{ textAlign: 'center', color: '#475569', fontSize: '0.85rem' }}>No materials found to reuse.</p>}
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
 

@@ -283,6 +283,34 @@ router.get('/courses/:id/materials', verifyAdmin, async (req, res) => {
     }
 });
 
+// Fetch ALL materials across all courses (for reuse)
+router.get('/materials-all', verifyAdmin, async (req, res) => {
+    try {
+        let docs = [];
+        if (admin.apps.length) {
+            const snapshot = await admin.firestore().collection('course_materials').orderBy('uploadedAt', 'desc').get();
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        } else {
+            const snapshot = await getDocs(query(collection(db, 'course_materials')));
+            docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+        }
+        
+        // Return unique materials by URL to avoid duplicates in the selection list
+        const uniqueMaterials = [];
+        const seenUrls = new Set();
+        for (const mat of docs) {
+            if (mat.url && !seenUrls.has(mat.url)) {
+                uniqueMaterials.push(mat);
+                seenUrls.add(mat.url);
+            }
+        }
+
+        res.json({ materials: uniqueMaterials });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch all materials: ' + error.message });
+    }
+});
+
 router.post('/courses/:id/materials', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
@@ -322,40 +350,53 @@ router.delete('/courses/:id/materials/:materialId', verifyAdmin, async (req, res
             console.warn('Could not fetch material before delete:', fetchErr.message);
         }
 
-        // ── Step 2: Delete from Supabase Storage bucket ────────────────────────
+        // ── Step 2: Delete from Supabase Storage bucket IF no other references exist ──
         if (materialData?.url) {
             try {
-                const SUPABASE_URL    = 'https://vnnkhcqswoeqnghztpvh.supabase.co';
-                const SUPABASE_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZubmtoY3Fzd29lcW5naHp0cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MzA5NzQxNiwiZXhwIjoyMDU4NjczNDE2fQ.oB12xaGIBkJEX1fwWaaxhzZKPHTJdFt1b5BaRIWBF2c'; // service_role key
-                const BUCKET          = 'course_material';
-                const storageBase     = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/`;
-
-                // Extract the storage key from the public URL
-                let rawUrl = materialData.url.split('?')[0]; // strip query params
-                let objectKey = null;
-                if (rawUrl.includes(`/object/public/${BUCKET}/`)) {
-                    objectKey = decodeURIComponent(rawUrl.split(`/object/public/${BUCKET}/`)[1]);
+                // Check if any other course material uses this same URL
+                let otherRefs = [];
+                if (admin.apps.length) {
+                    const snap = await admin.firestore().collection('course_materials')
+                        .where('url', '==', materialData.url)
+                        .get();
+                    otherRefs = snap.docs.filter(d => d.id !== materialId);
+                } else {
+                    const snap = await getDocs(query(collection(db, 'course_materials'), where('url', '==', materialData.url)));
+                    otherRefs = snap.docs.filter(d => d.id !== materialId);
                 }
 
-                if (objectKey) {
-                    const deleteRes = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${encodeURIComponent(objectKey).replace(/%2F/g, '/')}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Content-Type': 'application/json',
-                        }
-                    });
-                    if (!deleteRes.ok) {
-                        const errBody = await deleteRes.text().catch(() => '');
-                        console.warn(`Supabase storage delete warning (${deleteRes.status}):`, errBody);
-                        // Non-fatal — proceed to delete Firestore doc anyway
-                    } else {
-                        console.log(`Deleted from Supabase bucket: ${objectKey}`);
+                if (otherRefs.length === 0) {
+                    const SUPABASE_URL    = 'https://vnnkhcqswoeqnghztpvh.supabase.co';
+                    const SUPABASE_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZubmtoY3Fzd29lcW5naHp0cHZoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MzA5NzQxNiwiZXhwIjoyMDU4NjczNDE2fQ.oB12xaGIBkJEX1fwWaaxhzZKPHTJdFt1b5BaRIWBF2c'; // service_role key
+                    const BUCKET          = 'course_material';
+                    
+                    // Extract the storage key from the public URL
+                    let rawUrl = materialData.url.split('?')[0]; // strip query params
+                    let objectKey = null;
+                    if (rawUrl.includes(`/object/public/${BUCKET}/`)) {
+                        objectKey = decodeURIComponent(rawUrl.split(`/object/public/${BUCKET}/`)[1]);
                     }
+
+                    if (objectKey) {
+                        const deleteRes = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${encodeURIComponent(objectKey).replace(/%2F/g, '/')}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        if (!deleteRes.ok) {
+                            const errBody = await deleteRes.text().catch(() => '');
+                            console.warn(`Supabase storage delete warning (${deleteRes.status}):`, errBody);
+                        } else {
+                            console.log(`Deleted from Supabase bucket (last reference): ${objectKey}`);
+                        }
+                    }
+                } else {
+                    console.log(`Skipping Supabase delete: ${otherRefs.length} other references still exist for this URL.`);
                 }
             } catch (storageErr) {
                 console.warn('Supabase storage delete failed (non-fatal):', storageErr.message);
-                // Non-fatal — still delete the Firestore record
             }
         }
 
