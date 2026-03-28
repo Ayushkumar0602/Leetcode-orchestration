@@ -48,12 +48,14 @@ export default function InfoAIInterview() {
     });
 
     const interviews = interviewsData || [];
+    const scheduledInterviews = interviews.filter(i => i.status === 'scheduled');
+    const pastInterviews = interviews.filter(i => i.status !== 'scheduled');
 
     // Format date nicely
     const formatDate = (ds) => {
         if (!ds) return 'Unknown Date';
         const d = new Date(ds);
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 
     return (
@@ -188,6 +190,39 @@ export default function InfoAIInterview() {
                     </div>
                 </div>
 
+                {/* ── Scheduled Interviews ── */}
+                {scheduledInterviews.length > 0 && (
+                  <div style={{ animation: 'slideUpFade 0.5s ease-out 0.2s both', marginBottom: '4rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                          <Calendar size={20} color="#a855f7" />
+                          <h2 style={{ fontSize: '1.3rem', fontWeight: 700, margin: 0, color: '#fff' }}>Upcoming Scheduled Interviews</h2>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                          {scheduledInterviews.map(inv => (
+                              <div key={inv.id} style={{
+                                  background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(168,85,247,0.02))',
+                                  border: '1px solid rgba(168,85,247,0.2)',
+                                  borderRadius: '16px', padding: '1.5rem',
+                                  display: 'flex', flexDirection: 'column', gap: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                              }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.4)'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.2)'; }}
+                                  onClick={() => navigate(inv.topic === 'System Design' ? '/systemdesign' : '/aiinterviewselect')}
+                              >
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                      <h4 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#fff' }}>{inv.role || 'Mock Interview'}</h4>
+                                      <span style={{ fontSize: '0.75rem', background: 'rgba(168,85,247,0.2)', color: '#d8b4fe', padding: '4px 8px', borderRadius: '12px', fontWeight: 600 }}>Scheduled</span>
+                                  </div>
+                                  <p style={{ color: 'var(--txt2)', margin: 0, fontSize: '0.9rem' }}>{inv.topic}</p>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--txt3)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                                      <Clock size={14} /> {formatDate(inv.scheduledFor)}
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+                )}
+
                 {/* ── Past Interviews ── */}
                 <div style={{ animation: 'slideUpFade 0.5s ease-out 0.2s both' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
@@ -202,7 +237,7 @@ export default function InfoAIInterview() {
                         </div>
                     ) : loading ? (
                         <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--txt3)' }}>Loading interview history...</div>
-                    ) : interviews.length === 0 ? (
+                    ) : pastInterviews.length === 0 ? (
                         <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                             <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--txt3)' }}>
                                 <FileText size={20} />
@@ -226,7 +261,7 @@ export default function InfoAIInterview() {
                         }}
                             className="custom-scrollbar"
                         >
-                            {interviews.map(inv => (
+                            {pastInterviews.map(inv => (
                                 <div
                                     key={inv.id}
                                     onClick={() => navigate(`/aiinterview/${inv.id}`)}

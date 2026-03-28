@@ -1731,12 +1731,12 @@ app.get('/api/cron/check-expiry', async (req, res) => {
 // --- AI Agent Chat Route ---
 app.post('/api/agent/chat', async (req, res) => {
     try {
-        const { messages, contextUrl, pageActions, pageContent } = req.body;
+        const { messages, contextUrl, pageActions, pageContent, userProfile } = req.body;
         if (!messages || !Array.isArray(messages) || messages.length === 0) {
             return res.status(400).json({ error: 'Messages array is required' });
         }
         
-        const agentResponse = await chatWithAgent(messages, contextUrl || '/', pageActions || [], pageContent);
+        const agentResponse = await chatWithAgent(messages, contextUrl || '/', pageActions || [], pageContent, userProfile);
         if (typeof agentResponse === 'object' && agentResponse.type === 'action') {
             res.json({ success: true, ...agentResponse, response: agentResponse.message });
         } else {

@@ -4,6 +4,9 @@ import { Send, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useAgent } from '../contexts/AgentContext';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import './OrbChat.css';
 
 export default function OrbChat({ isOpen, onClose }) {
@@ -12,6 +15,8 @@ export default function OrbChat({ isOpen, onClose }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { currentUser } = useAuth();
+  const [userProfileData, setUserProfileData] = useState(null);
   const messagesEndRef = useRef(null);
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
@@ -21,6 +26,26 @@ export default function OrbChat({ isOpen, onClose }) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
+
+  useEffect(() => {
+    if (currentUser?.uid) {
+      getDoc(doc(db, 'users', currentUser.uid))
+        .then(snap => {
+          if (snap.exists()) {
+            const d = snap.data();
+            setUserProfileData({
+              displayName: d.displayName,
+              bio: d.bio,
+              preferredRole: d.preferredRole,
+              skills: d.skills?.slice(0, 10),
+              experience: d.experience?.slice(0, 2).map(ex => ({ role: ex.role, company: ex.company })),
+              projects: d.projects?.slice(0, 3).map(p => ({ title: p.title, techStack: p.techStack || p.tools, summary: p.description?.substring(0, 150) }))
+            });
+          }
+        })
+        .catch(console.error);
+    }
+  }, [currentUser]);
 
   const sendToAgent = useCallback(async (messagesToSend) => {
     setIsLoading(true);
@@ -47,7 +72,8 @@ export default function OrbChat({ isOpen, onClose }) {
           messages: messagesToSend,
           contextUrl: window.location.pathname + window.location.search,
           pageActions: pageActions,
-          pageContent: pageContent
+          pageContent: pageContent,
+          userProfile: userProfileData
         })
       });
 
@@ -76,6 +102,33 @@ export default function OrbChat({ isOpen, onClose }) {
                 executeFollowUp(`Navigated successfully to ${data.path}`);
               }, 500);
             }, 1000);
+          } else if (data.action === 'start_interview') {
+            const uuid = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 12);
+            setTimeout(() => {
+              if (data.params?.topic === 'System Design') {
+                navigate(`/aisystemdesigninterview/${uuid}?topic=${encodeURIComponent(data.params.role || 'General')} System Design`);
+              } else {
+                navigate(`/aiinterview/${uuid}`, {
+                  state: {
+                    setupParams: {
+                      role: data.params?.role || 'Software Engineer',
+                      company: data.params?.company || 'Tech Company',
+                      language: (data.params?.language || 'python').toLowerCase(),
+                      selectedProblem: null,
+                      selectedVoice: null
+                    }
+                  }
+                });
+              }
+              setTimeout(() => {
+                executeFollowUp(`Successfully started the mock interview. User is now in the interview room.`);
+              }, 500);
+            }, 1000);
+          } else if (data.action === 'schedule_interview') {
+            // Document already created by backend. Just return success.
+            setTimeout(() => {
+               executeFollowUp(`Successfully scheduled the interview.`);
+            }, 500);
           } else if (data.action === 'page_action' && data.functionName) {
             // Execute the dynamic action mapped in the AgentContext
             executeAction(data.functionName, data.args).then((res) => {

@@ -523,7 +523,7 @@ ${text}
  * Global AI Agent Chat
  * Allows the user to chat with the Whizan AI agent with context of their current page.
  */
-async function chatWithAgent(messages, contextUrl, pageActions = [], pageContent = null) {
+async function chatWithAgent(messages, contextUrl, pageActions = [], pageContent = null, userProfile = null) {
   const keys = getApiKeys();
   if (keys.length === 0) throw new Error("No Gemini API keys found");
 
@@ -573,6 +573,22 @@ Available routes on Whizan AI include:
 - /blog: Blog List Feed
 `.trim();
 
+  let finalSystemInstruction = systemInstruction;
+  if (userProfile) {
+    let dossier = `\n\n--- USER DOSSIER ---\nJarvis, you are speaking directly with ${userProfile.displayName || "a user"}. `;
+    if (userProfile.preferredRole) dossier += `They are targeting roles like: ${userProfile.preferredRole}. `;
+    if (userProfile.bio) dossier += `Bio: ${userProfile.bio}. `;
+    if (userProfile.skills && userProfile.skills.length > 0) dossier += `Skills: ${userProfile.skills.join(', ')}. `;
+    if (userProfile.experience && userProfile.experience.length > 0) {
+      dossier += `Recent Experience: ${userProfile.experience.map(e => `${e.role} at ${e.company}`).join(', ')}. `;
+    }
+    if (userProfile.projects && userProfile.projects.length > 0) {
+      dossier += `\nTop Projects:\n${userProfile.projects.map(p => `- ${p.title} (Tech: ${p.techStack}): ${p.summary}`).join('\n')}\n`;
+    }
+    dossier += `Use this context to personalize your advice. If you start or schedule an interview, you may use this data to auto-fill their role. If they ask about their projects, use this data to answer accurately.\n---------------------\n`;
+    finalSystemInstruction += dossier;
+  }
+
   const navigateTool = {
     name: "navigate_to_page",
     description: "Navigate the user to a specific page or route in the application.",
@@ -603,7 +619,36 @@ Available routes on Whizan AI include:
     }
   };
 
-  const allFunctionDeclarations = [navigateTool, searchCoursesTool];
+  const startMockInterviewTool = {
+    name: "start_mock_interview",
+    description: "Start a mock interview for the user. Opens the interview screen immediately.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        role: { type: "STRING", description: "The job role, e.g. Frontend Engineer, SDE II." },
+        company: { type: "STRING", description: "Target company name, e.g. Google, Meta." },
+        language: { type: "STRING", description: "Programming language to use, e.g. python, javascript, cpp, java." },
+        topic: { type: "STRING", description: "Interview topic: 'DSA' or 'System Design'." }
+      },
+      required: ["role", "company", "language", "topic"]
+    }
+  };
+
+  const scheduleInterviewTool = {
+    name: "schedule_interview",
+    description: "Schedule a mock interview for the user for a future date.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        role: { type: "STRING", description: "The job role." },
+        topic: { type: "STRING", description: "Interview topic: 'DSA' or 'System Design'." },
+        targetDate: { type: "STRING", description: "ISO 8601 date string for the scheduled time." }
+      },
+      required: ["role", "topic", "targetDate"]
+    }
+  };
+
+  const allFunctionDeclarations = [navigateTool, searchCoursesTool, startMockInterviewTool, scheduleInterviewTool];
   if (Array.isArray(pageActions) && pageActions.length > 0) {
     allFunctionDeclarations.push(...pageActions);
   }
@@ -615,7 +660,7 @@ Available routes on Whizan AI include:
     try {
       const genAI = new GoogleGenerativeAI(keys[i]);
       
-      let dynamicSystemInstruction = systemInstruction;
+      let dynamicSystemInstruction = finalSystemInstruction;
 
       // ---- RAG PIPELINE EXECUTION ----
       if (supabase && latestMessage.trim() !== '') {
@@ -680,6 +725,32 @@ Available routes on Whizan AI include:
               action: 'navigate',
               path: call.args.path,
               message: `Taking you to ${call.args.path}...`
+            };
+          } else if (call.name === 'start_mock_interview') {
+            return {
+              type: 'action',
+              action: 'start_interview',
+              params: call.args,
+              message: `Starting your ${call.args.role} mock interview now...`
+            };
+          } else if (call.name === 'schedule_interview') {
+            // Write to Firestore here since backend has access to 'db'
+            try {
+               await setDoc(doc(collection(db, 'interviews')), {
+                   userId: userProfile ? (userProfile.uid || 'unknown') : 'unknown',
+                   role: call.args.role,
+                   topic: call.args.topic,
+                   scheduledFor: call.args.targetDate,
+                   status: 'scheduled',
+                   createdAt: new Date().toISOString()
+               });
+            } catch (err) { console.error('Error scheduling interview:', err); }
+
+            return {
+              type: 'action',
+              action: 'schedule_interview',
+              params: call.args,
+              message: `I have scheduled your ${call.args.role} mock interview for ${new Date(call.args.targetDate).toLocaleString()}. It will appear in your Interview History soon!`
             };
           } else if (call.name === 'search_courses') {
             // Execute backend tool natively
