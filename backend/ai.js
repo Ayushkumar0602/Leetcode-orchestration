@@ -2,6 +2,12 @@ require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { db } = require('./firebase');
 const { doc, getDoc, setDoc, collection, getDocs, query, where } = require('firebase/firestore');
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase for RAG Vector Database queries
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vnnkhcqswoeqnghztpvh.supabase.co';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const supabase = SUPABASE_SERVICE_KEY ? createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY) : null;
 
 // Get all API keys from environment variables
 const getApiKeys = () => {
@@ -602,13 +608,49 @@ Available routes on Whizan AI include:
     allFunctionDeclarations.push(...pageActions);
   }
 
+  const latestMessage = messages[messages.length - 1]?.content || "";
+
   let lastError;
   for (let i = 0; i < keys.length; i++) {
     try {
       const genAI = new GoogleGenerativeAI(keys[i]);
+      
+      let dynamicSystemInstruction = systemInstruction;
+
+      // ---- RAG PIPELINE EXECUTION ----
+      if (supabase && latestMessage.trim() !== '') {
+          try {
+              // 1. Embed the user's latest message
+              const embedModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+              const embedResult = await embedModel.embedContent(latestMessage);
+              const queryEmbedding = embedResult.embedding.values;
+
+              // 2. Query Supabase pgvector for top matches
+              const { data: matchedDocs, error } = await supabase.rpc('match_knowledge', {
+                  query_embedding: queryEmbedding,
+                  match_threshold: 0.60,
+                  match_count: 5
+              });
+
+              // 3. Inject context into system instructions
+              if (!error && matchedDocs && matchedDocs.length > 0) {
+                  let ragContext = `\n\n--- PLATFORM KNOWLEDGE BASE (RAG RESULTS) ---\nUse the retrieved platform data below to answer the user's question accurately. If they ask about a course or problem, provide the appended URL so they can navigate to it.\n\n`;
+                  matchedDocs.forEach(doc => {
+                      ragContext += `[${doc.type.toUpperCase()}] ${doc.title}\n`;
+                      if (doc.url) ragContext += `URL: ${doc.url}\n`;
+                      ragContext += `Content: ${doc.content}\n\n`;
+                  });
+                  ragContext += `----------------------------------------------\n`;
+                  dynamicSystemInstruction += ragContext;
+              }
+          } catch (ragErr) {
+              console.warn(`[RAG] Semantic search failed on key ${i+1}:`, ragErr.message);
+          }
+      }
+      
       const model = genAI.getGenerativeModel({
         model: 'gemini-3.1-flash-lite-preview',
-        systemInstruction: systemInstruction,
+        systemInstruction: dynamicSystemInstruction,
         tools: [{ functionDeclarations: allFunctionDeclarations }]
       });
 
@@ -617,8 +659,6 @@ Available routes on Whizan AI include:
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }]
       }));
-
-      const latestMessage = messages[messages.length - 1]?.content || "";
 
       const chat = model.startChat({
         history: formattedHistory,
