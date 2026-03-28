@@ -431,20 +431,20 @@ Do NOT include any markdown blocks or explanation. ONLY return valid JSON.
 
       // Map displayInput explicitly just like generation
       if (parsed.primaryTestCases) {
-          parsed.primaryTestCases = parsed.primaryTestCases.map(tc => ({
-              label: tc.label || 'Example',
-              input: String(tc.input),
-              expectedOutput: String(tc.expectedOutput),
-              displayInput: tc.displayInput ? String(tc.displayInput) : undefined
-          }));
+        parsed.primaryTestCases = parsed.primaryTestCases.map(tc => ({
+          label: tc.label || 'Example',
+          input: String(tc.input),
+          expectedOutput: String(tc.expectedOutput),
+          displayInput: tc.displayInput ? String(tc.displayInput) : undefined
+        }));
       }
       if (parsed.submitTestCases) {
-          parsed.submitTestCases = parsed.submitTestCases.map(tc => ({
-              label: tc.label || 'Submit Test',
-              input: String(tc.input),
-              expectedOutput: String(tc.expectedOutput),
-              displayInput: tc.displayInput ? String(tc.displayInput) : undefined
-          }));
+        parsed.submitTestCases = parsed.submitTestCases.map(tc => ({
+          label: tc.label || 'Submit Test',
+          input: String(tc.input),
+          expectedOutput: String(tc.expectedOutput),
+          displayInput: tc.displayInput ? String(tc.displayInput) : undefined
+        }));
       }
 
       return parsed;
@@ -499,7 +499,7 @@ ${text}
       const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' });
       const result = await model.generateContent(prompt);
       let optimizedText = result.response.text().trim();
-      
+
       // Remove generic markdown code wrappers if ai includes them 
       optimizedText = optimizedText.replace(/^```[a-zA-Z]*\n/i, '').replace(/\n```$/i, '').trim();
 
@@ -548,7 +548,7 @@ Available routes on Whizan AI include:
 - /profile: Settings & Profile Management
 - /chat: Global Chat
 - /dsaquestion: DSA Problem Directory
-- /solvingpage/:id: DSA Code Editor
+- /solvingpage/:id: DSA Code Editor(ex -/solvingpage/1)(1-twosum , 2- add two numbers , and similary like leetcode numbering )
 - /submissions: Previous Code Submissions
 - /aiinterviewselect: Setup Mock AI Interview
 - /aiinterview/:id: AI Mock Interview Room
@@ -561,7 +561,7 @@ Available routes on Whizan AI include:
 - /aisystemdesigninterview/:id: AI System Design Mock
 - /courses: Full Course Catalog
 - /courses/:slug: Course Info Page
-- /learn/:slug: Course Dash / Video Viewer
+- /learn/:slug:/lecture: lecture page(where course lectures comes )->only enrolled user 
 - /portfolio: Public Portfolio Landing
 - /public/:uid: User Public Profile
 - /blog: Blog List Feed
@@ -599,7 +599,7 @@ Available routes on Whizan AI include:
 
   const allFunctionDeclarations = [navigateTool, searchCoursesTool];
   if (Array.isArray(pageActions) && pageActions.length > 0) {
-      allFunctionDeclarations.push(...pageActions);
+    allFunctionDeclarations.push(...pageActions);
   }
 
   let lastError;
@@ -617,7 +617,7 @@ Available routes on Whizan AI include:
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }]
       }));
-      
+
       const latestMessage = messages[messages.length - 1]?.content || "";
 
       const chat = model.startChat({
@@ -625,74 +625,74 @@ Available routes on Whizan AI include:
       });
 
       let result = await chat.sendMessage(latestMessage);
-      
+
       let maxLoops = 5;
       while (maxLoops > 0) {
         maxLoops--;
         const functionCalls = result.response.functionCalls();
-        
-        if (functionCalls && functionCalls.length > 0) {
-            const call = functionCalls[0];
-            
-            if (call.name === 'navigate_to_page') {
-                return {
-                    type: 'action',
-                    action: 'navigate',
-                    path: call.args.path,
-                    message: `Taking you to ${call.args.path}...`
-                };
-            } else if (call.name === 'search_courses') {
-                // Execute backend tool natively
-                try {
-                    const snap = await getDocs(collection(db, 'youtubecourses'));
-                    const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    const kw = (call.args.keyword || "").toLowerCase();
-                    const matches = courses.filter(c => 
-                        (c.title && c.title.toLowerCase().includes(kw)) || 
-                        (c.description && c.description.toLowerCase().includes(kw)) ||
-                        (c.category && c.category.toLowerCase().includes(kw))
-                    ).slice(0, 5); // Return top 5 matches
-                    
-                    const simplifiedResponse = matches.map(c => ({
-                        title: c.title,
-                        description: c.description,
-                        instructor: c.instructor,
-                        url: `/learn/${c.slug || c.id}`
-                    }));
 
-                    // Send the result back to Gemini implicitly
-                    result = await chat.sendMessage([{
-                        functionResponse: {
-                            name: 'search_courses',
-                            response: { courses: simplifiedResponse }
-                        }
-                    }]);
-                } catch (err) {
-                    result = await chat.sendMessage([{
-                        functionResponse: {
-                            name: 'search_courses',
-                            response: { error: err.message }
-                        }
-                    }]);
+        if (functionCalls && functionCalls.length > 0) {
+          const call = functionCalls[0];
+
+          if (call.name === 'navigate_to_page') {
+            return {
+              type: 'action',
+              action: 'navigate',
+              path: call.args.path,
+              message: `Taking you to ${call.args.path}...`
+            };
+          } else if (call.name === 'search_courses') {
+            // Execute backend tool natively
+            try {
+              const snap = await getDocs(collection(db, 'youtubecourses'));
+              const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+              const kw = (call.args.keyword || "").toLowerCase();
+              const matches = courses.filter(c =>
+                (c.title && c.title.toLowerCase().includes(kw)) ||
+                (c.description && c.description.toLowerCase().includes(kw)) ||
+                (c.category && c.category.toLowerCase().includes(kw))
+              ).slice(0, 5); // Return top 5 matches
+
+              const simplifiedResponse = matches.map(c => ({
+                title: c.title,
+                description: c.description,
+                instructor: c.instructor,
+                url: `/learn/${c.slug || c.id}`
+              }));
+
+              // Send the result back to Gemini implicitly
+              result = await chat.sendMessage([{
+                functionResponse: {
+                  name: 'search_courses',
+                  response: { courses: simplifiedResponse }
                 }
-            } else {
-                // It's a dynamic page action execution (frontend)
-                return {
-                    type: 'action',
-                    action: 'page_action',
-                    functionName: call.name,
-                    args: call.args,
-                    message: `Executing action: ${call.name.split('_').join(' ')}...`
-                };
+              }]);
+            } catch (err) {
+              result = await chat.sendMessage([{
+                functionResponse: {
+                  name: 'search_courses',
+                  response: { error: err.message }
+                }
+              }]);
             }
+          } else {
+            // It's a dynamic page action execution (frontend)
+            return {
+              type: 'action',
+              action: 'page_action',
+              functionName: call.name,
+              args: call.args,
+              message: `Executing action: ${call.name.split('_').join(' ')}...`
+            };
+          }
         } else {
-            // No function calls, just text
-            return result.response.text();
+          // No function calls, just text
+          return result.response.text();
         }
       }
-      
+
       return result.response.text();
-      
+
     } catch (error) {
       lastError = error;
       console.warn(`[AI Agent Chat] Key ${i + 1} failed:`, error.message);
