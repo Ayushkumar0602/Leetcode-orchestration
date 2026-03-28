@@ -146,7 +146,7 @@ export default function AIInterview() {
             setCompany(p.company);
             setLanguage(p.language);
             setSelectedProblem(p.selectedProblem);
-            setSelectedVoice(p.selectedVoice);
+            setSelectedVoice(p.selectedVoice || VOICE_TEMPLATES[0]);
             setAutoStart(true);
             window.history.replaceState({}, document.title);
         }
@@ -1377,7 +1377,7 @@ export default function AIInterview() {
                                 </div>
                                 <div className="ai-voice-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
                                     {VOICE_TEMPLATES.map(voice => {
-                                        const isSelected = selectedVoice.id === voice.id;
+                                        const isSelected = selectedVoice?.id === voice.id;
                                         const isPreviewing = previewLoading === voice.id;
                                         return (
                                             <div

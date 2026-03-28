@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, X, Loader2 } from 'lucide-react';
+import { Send, X, Loader2, RotateCcw, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useAgent } from '../contexts/AgentContext';
@@ -34,6 +34,7 @@ export default function OrbChat({ isOpen, onClose }) {
           if (snap.exists()) {
             const d = snap.data();
             setUserProfileData({
+              uid: currentUser.uid,
               displayName: d.displayName,
               bio: d.bio,
               preferredRole: d.preferredRole,
@@ -108,13 +109,18 @@ export default function OrbChat({ isOpen, onClose }) {
               if (data.params?.topic === 'System Design') {
                 navigate(`/aisystemdesigninterview/${uuid}?topic=${encodeURIComponent(data.params.role || 'General')} System Design`);
               } else {
-                navigate(`/aiinterview/${uuid}`, {
+                navigate(`/aiinterview`, {
                   state: {
                     setupParams: {
                       role: data.params?.role || 'Software Engineer',
                       company: data.params?.company || 'Tech Company',
                       language: (data.params?.language || 'python').toLowerCase(),
-                      selectedProblem: null,
+                      selectedProblem: {
+                          id: 'auto_generated_ai',
+                          title: 'AI Curated Mock Problem',
+                          difficulty: 'Medium',
+                          description: `Please generate a comprehensive DSA coding problem specifically tailored for a ${data.params?.role || 'Software Engineer'} role at ${data.params?.company || 'a Tech Company'}. Include constraints and at least two test cases.`
+                      },
                       selectedVoice: null
                     }
                   }
@@ -162,28 +168,53 @@ export default function OrbChat({ isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          transition={{ duration: 0.2 }}
+          exit={{ opacity: 0, y: 30, scale: 0.95 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="orb-chat-container"
           onClick={(e) => e.stopPropagation()} // Prevent closing via outer clicks if added
         >
           <div className="orb-chat-header">
             <div className="orb-chat-title">
               <div className="orb-status-indicator"></div>
-              <span>Jarvis AI</span>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', letterSpacing: '-0.01em' }}>Jarvis</div>
+                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>AI Assistant · Online</div>
+              </div>
             </div>
-            <button onClick={onClose} className="orb-chat-close">
-              <X size={18} />
-            </button>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              {messages.length > 0 && (
+                <button
+                  onClick={() => setMessages([])}
+                  className="orb-chat-action-btn"
+                  title="New Chat"
+                >
+                  <RotateCcw size={14} />
+                  <span>New</span>
+                </button>
+              )}
+              <button onClick={onClose} className="orb-chat-close" title="Close">
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           <div className="orb-chat-messages">
             {messages.length === 0 ? (
               <div className="orb-chat-empty">
-                <p>Hello! I am Jarvis, your global AI agent.</p>
-                <p>How can I help you with this page?</p>
+                <div className="orb-chat-empty-icon">
+                  <Sparkles size={24} />
+                </div>
+                <p style={{ fontWeight: 700, fontSize: '1rem', margin: 0 }}>Hey, I'm Jarvis!</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', margin: 0, lineHeight: 1.5, maxWidth: '220px' }}>Your AI assistant. Ask me anything about this page or the platform.</p>
+                <div className="orb-chat-suggestions">
+                  {['Start a mock interview', 'Find DSA courses', 'Navigate to my profile'].map(s => (
+                    <button key={s} className="orb-suggestion-chip" onClick={() => { setInput(s); }}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : (
               messages.map((msg, idx) => {
@@ -213,8 +244,9 @@ export default function OrbChat({ isOpen, onClose }) {
             {isLoading && (
               <div className="orb-chat-bubble-wrapper assistant">
                 <div className="orb-chat-bubble assistant typing">
-                  <Loader2 className="spinner" size={16} />
-                  <span>Agent is thinking...</span>
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
                 </div>
               </div>
             )}
