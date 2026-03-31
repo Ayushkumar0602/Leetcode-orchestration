@@ -1198,6 +1198,52 @@ Respond as the AI Tutor now (do NOT prefix with "AI Tutor:"):`;
     }
 });
 
+// --- SQL AI Fix Route ---
+// Fixes broken SQLite SQL queries using the user's current DB schema as context.
+app.post('/api/sql-ai-fix', async (req, res) => {
+    const { query, errorMessage, schema, activeDb } = req.body;
+
+    if (!query) {
+        return res.status(400).json({ error: 'query is required.' });
+    }
+
+    const schemaContext = (schema && schema.length > 0)
+        ? schema.map(t => `Table: ${t.name}(${(t.columns || []).map(c => `${c.name} ${c.type}`).join(', ')})`).join('\n')
+        : 'No tables exist yet.';
+
+    const prompt = `You are a SQLite SQL expert. Fix the following SQL query.
+
+Active database: ${activeDb || 'main'}
+Schema of existing tables:
+${schemaContext}
+
+SQL Query:
+\`\`\`sql
+${query}
+\`\`\`
+${errorMessage ? `\nError message:\n${errorMessage}` : ''}
+
+Rules:
+- Return ONLY the corrected SQL — no explanations, no markdown fences, no extra text
+- Keep the original intent of the query  
+- Use only SQLite-compatible syntax
+- If CREATE DATABASE / USE / SHOW DATABASES commands are present, leave them as-is`;
+
+    try {
+        const fixed = await callGemini(prompt);
+        // Strip any accidental markdown fences the model may add
+        const cleaned = fixed
+            .replace(/^```sql\s*/i, '')
+            .replace(/^```\s*/i, '')
+            .replace(/```\s*$/i, '')
+            .trim();
+        res.json({ fixedQuery: cleaned });
+    } catch (error) {
+        console.error('[SQL AI Fix Error]', error.message);
+        res.status(500).json({ error: error.message || 'AI fix failed.' });
+    }
+});
+
 
 // --- Project AI Extraction Route ---
 app.post('/api/project/extract-readme', async (req, res) => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2, PenLine } from 'lucide-react';
+import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2, PenLine, Database } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
@@ -9,6 +9,7 @@ import NavProfile from './NavProfile';
 import VideoCodeEditor from './VideoCodeEditor';
 import LectureChatBot from './LectureChatBot';
 import LecturePractice from './LecturePractice';
+import LectureSQLEditor from './LectureSQLEditor';
 import SystemDesignBoard from './components/SystemDesignBoard';
 import YouTube from 'react-youtube';
 import { useTelemetry } from './contexts/TelemetryContext';
@@ -541,6 +542,21 @@ export default function LearnCourseLecture() {
                         <div style={{ height: '2px', width: '40px', background: '#3b82f6', borderRadius: '10px', marginBottom: '20px' }}></div>
                         {/* ── Practice Section ── */}
                         <LecturePractice videoTitle={playingTitle} />
+
+                        {/* ── SQL Sandbox Section ── */}
+                        <div style={{ marginTop: '32px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                                <Database size={20} color="#06b6d4" />
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>SQL Sandbox</h3>
+                                <span style={{ fontSize: '0.78rem', color: '#555', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.15)', padding: '2px 8px', borderRadius: '20px' }}>per-course · auto-saved</span>
+                            </div>
+                            <div style={{ height: '520px', borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(6,182,212,0.15)', boxShadow: '0 0 40px rgba(6,182,212,0.05)' }}>
+                                <LectureSQLEditor
+                                    userId={currentUser?.uid}
+                                    courseId={course?.id}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -588,6 +604,7 @@ export default function LearnCourseLecture() {
                         >
                             <Code2 size={15} /> Code
                         </button>
+
                         <button
                             onClick={() => setActivePanel('notes')}
                             style={{
@@ -731,6 +748,8 @@ export default function LearnCourseLecture() {
                             videoId={playlistVideos[currentVideoIndex]?.snippet?.resourceId?.videoId || 'default'}
                         />
                     </div>
+
+
 
                     {/* ── Notes Panel ── */}
                     <div style={{ flex: 1, display: activePanel === 'notes' ? 'flex' : 'none', flexDirection: 'column', minHeight: 0, background: '#0a0a0f' }}>

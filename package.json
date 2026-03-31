@@ -34,6 +34,7 @@
     "react-select": "^5.10.2",
     "react-youtube": "^10.1.0",
     "speak-tts": "^2.0.8",
+    "sql.js": "^1.14.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

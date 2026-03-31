@@ -7,6 +7,12 @@ import NavProfile from './NavProfile';
 const topicMapping = {
     'foundations': lazy(() => import('./learn/systemdesign/hld/Foundationscontent')),
     'traffic-scale-estimation': lazy(() => import('./learn/systemdesign/hld/TrafficScaleContent')),
+    'system-architecture-patterns': lazy(() => import('./learn/systemdesign/hld/SystemArchitecturePatterns')),
+    'networking-communication': lazy(() => import('./learn/systemdesign/hld/NetworkingCommunication')),
+    'scalability-strategies': lazy(() => import('./learn/systemdesign/hld/ScalabilityStrategies')),
+    'databases-hld-view': lazy(() => import('./learn/systemdesign/hld/DatabasesHLD')),
+    'caching': lazy(() => import('./learn/systemdesign/hld/CachingPage')),
+    'messaging-async-processing': lazy(() => import('./learn/systemdesign/hld/MessagingPage')),
     // Other topics will be wired up here progressively. For now, fallback to "coming soon" if not mapped.
 };
 
@@ -14,8 +20,10 @@ export default function SystemDesignReviseHLD() {
     const { topicId } = useParams();
     const navigate = useNavigate();
 
-    const normalizedTopicId = topicId?.toLowerCase();
+    const normalizedTopicId = topicId?.toLowerCase().replace(/-+$/, '');
     const ContentComponent = topicMapping[normalizedTopicId];
+    
+    console.log("SystemDesignReviseHLD Routing:", { topicId, normalizedTopicId, found: !!ContentComponent });
 
     if (!ContentComponent) {
         return (
