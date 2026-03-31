@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { getMessaging, isSupported as isMessagingSupported } from "firebase/messaging";
 import { getAnalytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
@@ -22,6 +23,7 @@ const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 const rtdb = getDatabase(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // Initialize analytics only if in browser
 let analytics;
@@ -36,4 +38,4 @@ async function getMessagingIfSupported() {
     return getMessaging(app);
 }
 
-export { auth, googleProvider, githubProvider, rtdb, db, analytics, getMessagingIfSupported };
+export { auth, googleProvider, githubProvider, rtdb, db, storage, analytics, getMessagingIfSupported };

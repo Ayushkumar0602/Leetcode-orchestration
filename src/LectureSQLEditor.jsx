@@ -14,22 +14,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestr
 // ── Starter SQL ─────────────────────────────────────────────────────────────
 const STARTER_SQL = `-- Welcome to the SQL Sandbox!
 -- Supports: CREATE DATABASE db1, USE db1, SHOW DATABASES
--- Your databases & data are auto-saved per course.
-
-CREATE TABLE IF NOT EXISTS employees (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    department TEXT,
-    salary REAL
-);
-
-INSERT OR IGNORE INTO employees (name, department, salary) VALUES
-    ('Alice Johnson', 'Engineering', 95000),
-    ('Bob Smith',     'Marketing',   72000),
-    ('Carol White',   'Engineering', 105000),
-    ('David Lee',     'HR',          65000);
-
-SELECT * FROM employees;`;
+-- Your databases & data are auto-saved per course.`;
 
 // ── Firestore key ────────────────────────────────────────────────────────────
 // Shape: { databases: { [dbName]: Base64 }, activeDb: string, savedAt: string }
@@ -305,7 +290,13 @@ export default function LectureSQLEditor({ userId, courseId }) {
                     activeDb,
                 }),
             });
-            if (!res.ok) throw new Error((await res.json()).error || 'AI fix request failed');
+            if (!res.ok) {
+                let errMsg = 'AI fix request failed';
+                try { errMsg = (await res.json()).error || errMsg; } catch (_) {
+                    errMsg = res.status === 404 ? 'Backend not deployed yet — push server.js to Render first.' : `Server error ${res.status}`;
+                }
+                throw new Error(errMsg);
+            }
             const data = await res.json();
             setQuery(data.fixedQuery);
             setAiMsg('✓ AI fixed your query. Review and click Run.');

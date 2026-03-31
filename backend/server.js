@@ -1245,6 +1245,44 @@ Rules:
 });
 
 
+// --- ML Notebook AI Optimize Route ---
+// Fixes or optimizes Python ML code using Pyodide environment context
+app.post('/api/ml-ai-optimize', async (req, res) => {
+    const { code, error } = req.body;
+
+    if (!code) {
+        return res.status(400).json({ error: 'code is required.' });
+    }
+
+    const prompt = `You are a Python Data Science & Machine Learning expert.
+Optimize or fix the following Python code cell which is running in a Pyodide (browser) environment.
+
+Python Code:
+\`\`\`python
+${code}
+\`\`\`
+${error ? `\nThe code produced this error when run:\n${error}` : '\nThere is no error, just optimize it for readability or performance, and add helpful comments if necessary.'}
+
+Rules:
+- Return ONLY the corrected/optimized Python code — no explanations, no markdown fences, no extra text.
+- Do not import libraries that aren't available in Pyodide (assume pandas, numpy, scikit-learn, matplotlib are available).
+- Fix any obvious logic or syntax bugs.`;
+
+    try {
+        const fixed = await callGemini(prompt);
+        const cleaned = fixed
+            .replace(/^```python\s*/i, '')
+            .replace(/^```\s*/i, '')
+            .replace(/```\s*$/i, '')
+            .trim();
+        res.json({ optimizedCode: cleaned });
+    } catch (err) {
+        console.error('[ML AI Optimize Error]', err.message);
+        res.status(500).json({ error: err.message || 'AI optimize failed.' });
+    }
+});
+
+
 // --- Project AI Extraction Route ---
 app.post('/api/project/extract-readme', async (req, res) => {
     const { githubUrl, readmeContent } = req.body;

@@ -10,6 +10,7 @@ import VideoCodeEditor from './VideoCodeEditor';
 import LectureChatBot from './LectureChatBot';
 import LecturePractice from './LecturePractice';
 import LectureSQLEditor from './LectureSQLEditor';
+import MLNotebook from './MLNotebook';
 import SystemDesignBoard from './components/SystemDesignBoard';
 import YouTube from 'react-youtube';
 import { useTelemetry } from './contexts/TelemetryContext';
@@ -172,6 +173,8 @@ export default function LearnCourseLecture() {
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState('');
     const [isSavingNote, setIsSavingNote] = useState(false);
+    const [sqlOpen, setSqlOpen] = useState(false);
+    const [mlOpen, setMlOpen] = useState(false);
 
     useEffect(() => {
         if (!playingVideoId || !currentUser) return;
@@ -544,19 +547,105 @@ export default function LearnCourseLecture() {
                         <LecturePractice videoTitle={playingTitle} />
 
                         {/* ── SQL Sandbox Section ── */}
-                        <div style={{ marginTop: '32px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-                                <Database size={20} color="#06b6d4" />
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>SQL Sandbox</h3>
-                                <span style={{ fontSize: '0.78rem', color: '#555', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.15)', padding: '2px 8px', borderRadius: '20px' }}>per-course · auto-saved</span>
+                        <div style={{ margin: '0 0 20px 0' }}>
+                            <button
+                                onClick={() => setSqlOpen(o => !o)}
+                                style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                                    background: sqlOpen
+                                        ? 'linear-gradient(90deg, rgba(6,182,212,0.12), rgba(8,145,178,0.08))'
+                                        : 'rgba(255,255,255,0.03)',
+                                    border: `1px solid ${sqlOpen ? 'rgba(6,182,212,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                                    borderRadius: '14px', padding: '14px 20px',
+                                    color: '#e2e8f0', cursor: 'pointer',
+                                    transition: 'all 0.25s', fontFamily: "'Inter', sans-serif",
+                                    boxShadow: sqlOpen ? '0 4px 20px rgba(6,182,212,0.1)' : 'none',
+                                }}
+                            >
+                                <div style={{
+                                    width: 36, height: 36, borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: '0 0 12px rgba(6,182,212,0.3)', flexShrink: 0,
+                                }}>
+                                    <Database size={18} color="#fff" />
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>SQL Sandbox</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                        Per-course · Auto-saved
+                                    </div>
+                                </div>
+                                {sqlOpen ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+                            </button>
+
+                            <div style={{
+                                display: sqlOpen ? 'block' : 'none',
+                                marginTop: '10px',
+                                background: '#050508',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                borderRadius: '14px',
+                                overflow: 'hidden',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            }}>
+                                <div style={{ height: '520px' }}>
+                                    <LectureSQLEditor
+                                        userId={currentUser?.uid}
+                                        courseId={course?.id}
+                                    />
+                                </div>
                             </div>
-                            <div style={{ height: '520px', borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(6,182,212,0.15)', boxShadow: '0 0 40px rgba(6,182,212,0.05)' }}>
-                                <LectureSQLEditor
+                        </div>
+
+                        {/* ── ML Notebook Section ── */}
+                        <div style={{ margin: '0 0 20px 0' }}>
+                            <button
+                                onClick={() => setMlOpen(o => !o)}
+                                style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                                    background: mlOpen
+                                        ? 'linear-gradient(90deg, rgba(168,85,247,0.12), rgba(126,34,206,0.08))'
+                                        : 'rgba(255,255,255,0.03)',
+                                    border: `1px solid ${mlOpen ? 'rgba(168,85,247,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                                    borderRadius: '14px', padding: '14px 20px',
+                                    color: '#e2e8f0', cursor: 'pointer',
+                                    transition: 'all 0.25s', fontFamily: "'Inter', sans-serif",
+                                    boxShadow: mlOpen ? '0 4px 20px rgba(168,85,247,0.1)' : 'none',
+                                }}
+                            >
+                                <div style={{
+                                    width: 36, height: 36, borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #a855f7, #7e22ce)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: '0 0 12px rgba(168,85,247,0.3)', flexShrink: 0,
+                                }}>
+                                    <Layers size={18} color="#fff" />
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>ML Sandbox (Mini Jupyter)</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                        Train models · Plot Datasets · Python in browser
+                                    </div>
+                                </div>
+                                {mlOpen ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+                            </button>
+
+                            <div style={{
+                                display: mlOpen ? 'block' : 'none',
+                                marginTop: '10px',
+                                background: '#050508',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                borderRadius: '14px',
+                                overflow: 'hidden',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            }}>
+                                <MLNotebook
                                     userId={currentUser?.uid}
                                     courseId={course?.id}
                                 />
                             </div>
                         </div>
+
                     </div>
                 </div>
 
