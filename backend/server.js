@@ -1283,6 +1283,64 @@ Rules:
 });
 
 
+// --- Web Dev Sandbox AI Co-pilot Route ---
+app.post('/api/web-ai-assist', async (req, res) => {
+    const { prompt, template, currentFiles } = req.body;
+
+    if (!prompt) return res.status(400).json({ error: 'prompt is required.' });
+
+    const aiPrompt = `
+You are an expert Autonomous Web Developer AI assisting a student in a "${template}" StackBlitz environment.
+The user's sandbox currently contains the following files (keys are file paths, values are file contents):
+${JSON.stringify(currentFiles)}
+
+The user's request: "${prompt}"
+
+Your job is to write or rewrite the necessary files to fulfill this request.
+Return your response strictly as a JSON object (without markdown \`\`\` wrappers or extra text) matching this EXACT schema:
+{
+  "message": "A short, friendly message explaining what you did",
+  "operations": [
+    {
+      "type": "create" | "update" | "delete",
+      "path": "src/App.js",
+      "content": "The full exact string content of the file (required for create/update)"
+    }
+  ]
+}
+
+CRITICAL RULES:
+1. ONLY return valid JSON. Do not include \`\`\`json wrappers.
+2. In a "node" template, you CANNOT use native C++ addons (like bcrypt - use bcryptjs). You cannot open raw TCP sockets.
+3. If adding a package, add it directly to "package.json" dependencies. StackBlitz handles automatic package resolution.
+4. "content" MUST be the complete file content, not just a diff snippet.
+5. Provide a helpful "message".
+6. DO NOT prepend paths with './' or '/'. Always start with the relative directory name, e.g., 'src/App.js'.
+`;
+
+    try {
+        const rawRes = await callGemini(aiPrompt);
+        let cleaned = rawRes.trim();
+        // aggressively strip markdown JSON blocks
+        if (cleaned.startsWith('\`\`\`json')) cleaned = cleaned.replace(/^\`\`\`json/, '');
+        if (cleaned.startsWith('\`\`\`')) cleaned = cleaned.replace(/^\`\`\`/, '');
+        if (cleaned.endsWith('\`\`\`')) cleaned = cleaned.replace(/\`\`\`$/, '');
+        cleaned = cleaned.trim();
+        
+        try {
+            const data = JSON.parse(cleaned);
+            res.json(data);
+        } catch (jsonErr) {
+            console.error("[Web AI Assist] JSON parse error:", jsonErr, "Raw output:", cleaned);
+            res.status(500).json({ error: "AI produced invalid JSON output. Please try again." });
+        }
+    } catch (err) {
+        console.error('[Web AI Assist Error]', err.message);
+        res.status(500).json({ error: err.message || 'AI assist failed.' });
+    }
+});
+
+
 // --- Project AI Extraction Route ---
 app.post('/api/project/extract-readme', async (req, res) => {
     const { githubUrl, readmeContent } = req.body;

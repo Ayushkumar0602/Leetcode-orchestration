@@ -11,6 +11,7 @@ import LectureChatBot from './LectureChatBot';
 import LecturePractice from './LecturePractice';
 import LectureSQLEditor from './LectureSQLEditor';
 import MLNotebook from './MLNotebook';
+import WebDevSandbox from './WebDevSandbox';
 import SystemDesignBoard from './components/SystemDesignBoard';
 import YouTube from 'react-youtube';
 import { useTelemetry } from './contexts/TelemetryContext';
@@ -175,6 +176,7 @@ export default function LearnCourseLecture() {
     const [isSavingNote, setIsSavingNote] = useState(false);
     const [sqlOpen, setSqlOpen] = useState(false);
     const [mlOpen, setMlOpen] = useState(false);
+    const [webOpen, setWebOpen] = useState(false);
 
     useEffect(() => {
         if (!playingVideoId || !currentUser) return;
@@ -640,6 +642,55 @@ export default function LearnCourseLecture() {
                                 boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
                             }}>
                                 <MLNotebook
+                                    userId={currentUser?.uid}
+                                    courseId={course?.id}
+                                />
+                            </div>
+                        </div>
+
+                        {/* ── Web Dev Kit Section ── */}
+                        <div style={{ margin: '0 0 20px 0' }}>
+                            <button
+                                onClick={() => setWebOpen(o => !o)}
+                                style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                                    background: webOpen
+                                        ? 'linear-gradient(90deg, rgba(56,189,248,0.12), rgba(14,165,233,0.08))'
+                                        : 'rgba(255,255,255,0.03)',
+                                    border: `1px solid ${webOpen ? 'rgba(56,189,248,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                                    borderRadius: '14px', padding: '14px 20px',
+                                    color: '#e2e8f0', cursor: 'pointer',
+                                    transition: 'all 0.25s', fontFamily: "'Inter', sans-serif",
+                                    boxShadow: webOpen ? '0 4px 20px rgba(56,189,248,0.1)' : 'none',
+                                }}
+                            >
+                                <div style={{
+                                    width: 36, height: 36, borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: '0 0 12px rgba(56,189,248,0.3)', flexShrink: 0,
+                                }}>
+                                    <Code2 size={18} color="#fff" />
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Web Dev Kit (Sandpack)</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                        React, Node.js, and Vanilla environments
+                                    </div>
+                                </div>
+                                {webOpen ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+                            </button>
+
+                            <div style={{
+                                display: webOpen ? 'block' : 'none',
+                                marginTop: '10px',
+                                background: '#050508',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                borderRadius: '14px',
+                                overflow: 'hidden',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            }}>
+                                <WebDevSandbox
                                     userId={currentUser?.uid}
                                     courseId={course?.id}
                                 />
