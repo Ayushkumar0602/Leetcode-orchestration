@@ -4,11 +4,12 @@ import { useAuth } from './contexts/AuthContext';
 import { useAgent } from './contexts/AgentContext';
 import {
     Brain, Code2, Layers, TrendingUp,
-    Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube, BookOpen
+    Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube, BookOpen, Map
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
 import NotificationBell from './components/NotificationBell';
+import DashboardRecommendations from './components/DashboardRecommendations';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStats, fetchInterviews, fetchProfile, queryKeys } from './lib/api';
 import { useSEO } from './hooks/useSEO';
@@ -383,6 +384,7 @@ export default function DashboardHome() {
             {isMenuOpen && (
                 <div className="mobile-nav-overlay">
                     <button className="mobile-nav-link" onClick={() => { navigate('/dsaquestion'); setIsMenuOpen(false); }}>DSA Practice</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/sheets'); setIsMenuOpen(false); }}>DSA Roadmap</button>
                     <button className="mobile-nav-link" onClick={() => { navigate('/aiinterviewselect'); setIsMenuOpen(false); }}>AI Interview</button>
                     <button className="mobile-nav-link" onClick={() => { navigate('/systemdesign'); setIsMenuOpen(false); }}>System Design</button>
                     {currentUser && (
@@ -408,14 +410,24 @@ export default function DashboardHome() {
                         </h1>
                         <p style={{ color: 'var(--txt2)', margin: 0 }}>Here's your interview preparation progress.</p>
                     </div>
-                    <button 
-                        onClick={() => navigate('/courses')}
-                        style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                    >
-                        <BookOpen size={18} /> Course Catalog
-                    </button>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <button 
+                            onClick={() => navigate('/sheets')}
+                            style={{ background: 'rgba(168,85,247,0.1)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                        >
+                            <Map size={18} /> DSA Roadmap
+                        </button>
+                        <button 
+                            onClick={() => navigate('/courses')}
+                            style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                        >
+                            <BookOpen size={18} /> Course Catalog
+                        </button>
+                    </div>
                 </div>
 
                 {/* Metrics Grid */}
@@ -537,6 +549,9 @@ export default function DashboardHome() {
                         containerStyle={{ background: 'transparent', border: 'none', padding: 0 }}
                     />
                 </div>
+
+                {/* Dashboard Recommendations */}
+                <DashboardRecommendations userStats={userStats} interviews={validInterviews} />
 
                 {/* Enrolled Courses Section */}
                 {enrolledData?.enrolledCourses && enrolledData.enrolledCourses.length > 0 && (

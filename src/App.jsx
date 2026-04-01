@@ -20,6 +20,8 @@ import PublicProfile from './PublicProfile';
 import ProjectDetails from './ProjectDetails';
 import NotificationCenter from './NotificationCenter';
 import Chat from './Chat';
+import DSASheets from './DSASheets';
+import SheetDetail from './SheetDetail';
 
 // Course Features
 import Courses from './Courses';
@@ -87,6 +89,8 @@ function App() {
             <Route path="/submissions" element={<MySubmissions />} />
             <Route path="/scraper" element={<ScraperPage />} />
             <Route path="/evaluation/:interviewId" element={<InterviewEvaluation />} />
+            <Route path="/sheets" element={<DSASheets />} />
+            <Route path="/sheets/:sheetId" element={<SheetDetail />} />
 
             {/* System Design Routes */}
             <Route path="/systemdesign" element={<SystemDesign />} />
