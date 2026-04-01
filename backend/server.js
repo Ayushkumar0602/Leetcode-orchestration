@@ -1283,60 +1283,151 @@ Rules:
 });
 
 
-// --- Web Dev Sandbox AI Co-pilot Route ---
+// --- Web Dev Sandbox — Agentic AI Coding Route ---
+// Model: gemini-3.1-flash-lite-preview (via callGemini key-rotation fallback)
+// Pipeline: Phase 0 (AI file selection) → Phase 1 (planning) → Phase 2 (code execution)
 app.post('/api/web-ai-assist', async (req, res) => {
-    const { prompt, template, currentFiles } = req.body;
+    const { messages = [], template, currentFiles = {}, errors = [], openFile } = req.body;
+    const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+    if (!lastUserMessage) return res.status(400).json({ error: 'No user message found.' });
 
-    if (!prompt) return res.status(400).json({ error: 'prompt is required.' });
+    // Strip noise — no node_modules, lock files, or files >15KB
+    const allCleanFiles = Object.entries(currentFiles)
+        .filter(([p, c]) =>
+            !p.startsWith('node_modules/') &&
+            !p.includes('package-lock.json') &&
+            typeof c === 'string' && c.length < 15000
+        )
+        .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {});
 
-    const aiPrompt = `
-You are an expert Autonomous Web Developer AI assisting a student in a "${template}" StackBlitz environment.
-The user's sandbox currently contains the following files (keys are file paths, values are file contents):
-${JSON.stringify(currentFiles)}
+    const alwaysInclude = new Set([openFile, 'package.json'].filter(Boolean));
+    const fullFileTree = Object.keys(allCleanFiles).map(p => `  - ${p}`).join('\n');
+    const errorsBlock = errors.length > 0
+        ? `RUNTIME ERRORS DETECTED:\n${errors.map(e => `- ${e}`).join('\n')}`
+        : 'No runtime errors.';
+    const historyBlock = messages.slice(-10)
+        .map(m => `[${m.role.toUpperCase()}]: ${m.content}`)
+        .join('\n');
 
-The user's request: "${prompt}"
+    // ── PHASE 0: AI picks which files to read (file tree only — zero file contents sent)
+    const selectionPrompt = `
+You are a coding agent working in a StackBlitz "${template}" project.
 
-Your job is to write or rewrite the necessary files to fulfill this request.
-Return your response strictly as a JSON object (without markdown \`\`\` wrappers or extra text) matching this EXACT schema:
-{
-  "message": "A short, friendly message explaining what you did",
-  "operations": [
-    {
-      "type": "create" | "update" | "delete",
-      "path": "src/App.js",
-      "content": "The full exact string content of the file (required for create/update)"
+PROJECT FILE TREE:
+${fullFileTree}
+
+CONVERSATION:
+${historyBlock}
+
+${errorsBlock}
+
+Decide which files you need to READ to complete the task. Be selective. Always include "package.json" if packages may change.
+
+Return ONLY a JSON object:
+{ "files_needed": ["src/App.js", "src/Login.jsx", "package.json"] }
+`;
+
+    let selectedPaths = [...alwaysInclude];
+    try {
+        let selRaw = await callGemini(selectionPrompt);
+        selRaw = selRaw.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+        const selData = JSON.parse(selRaw);
+        if (Array.isArray(selData.files_needed)) {
+            selectedPaths = [...new Set([...alwaysInclude, ...selData.files_needed])];
+        }
+    } catch (_) {
+        // Phase 0 non-fatal — fall back to top 15 clean files
+        selectedPaths = [...alwaysInclude, ...Object.keys(allCleanFiles).slice(0, 15)];
     }
+
+    // Build focused file set from Phase 0 AI selection
+    const focusedFiles = {};
+    for (const p of selectedPaths) {
+        if (allCleanFiles[p]) focusedFiles[p] = allCleanFiles[p];
+    }
+    const fileTree = Object.keys(focusedFiles).map(p => `  - ${p}`).join('\n');
+    const filesJson = JSON.stringify(focusedFiles, null, 2);
+    console.log(`[Web AI Agent] Phase 0: loaded ${Object.keys(focusedFiles).length}/${Object.keys(allCleanFiles).length} files: ${selectedPaths.filter(p => allCleanFiles[p]).join(', ')}`);
+
+    // ── PHASE 1: Planning with selected files
+    const planPrompt = `
+You are a senior full-stack engineer. A student is working in a StackBlitz "${template}" environment.
+
+FILES LOADED (${Object.keys(focusedFiles).length} of ${Object.keys(allCleanFiles).length} total):
+${fileTree}
+
+CONVERSATION:
+${historyBlock}
+
+${errorsBlock}
+
+Produce a concise implementation plan. Return ONLY a JSON object:
+{
+  "plan": "Step-by-step reasoning about what needs to change and why",
+  "files_to_change": ["src/App.js", "src/Login.jsx"],
+  "packages_needed": []
+}
+3-5 sentences max. No code yet.
+`;
+
+    let planData = { plan: '', files_to_change: [], packages_needed: [] };
+    try {
+        let planRaw = await callGemini(planPrompt);
+        planRaw = planRaw.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+        planData = JSON.parse(planRaw);
+    } catch (_) { /* non-fatal */ }
+
+    // ── PHASE 2: Code execution guided by plan + AI-selected files
+    const execPrompt = `
+You are an elite full-stack coding agent in a StackBlitz "${template}" WebContainer.
+
+IMPLEMENTATION PLAN:
+${planData.plan}
+
+FILES TO EDIT: ${planData.files_to_change.join(', ') || 'as needed'}
+
+LOADED FILES:
+${filesJson}
+
+CONVERSATION HISTORY:
+${historyBlock}
+
+${errorsBlock}
+
+Write the actual code. Return ONLY valid JSON (no markdown wrappers):
+{
+  "message": "Friendly 1-2 sentence summary of what you did",
+  "plan": "Brief explanation of reasoning",
+  "operations": [
+    { "type": "create|update|delete", "path": "src/App.js", "content": "FULL file content" }
   ]
 }
 
 CRITICAL RULES:
-1. ONLY return valid JSON. Do not include \`\`\`json wrappers.
-2. In a "node" template, you CANNOT use native C++ addons (like bcrypt - use bcryptjs). You cannot open raw TCP sockets.
-3. If adding a package, add it directly to "package.json" dependencies. StackBlitz handles automatic package resolution.
-4. "content" MUST be the complete file content, not just a diff snippet.
-5. Provide a helpful "message".
-6. DO NOT prepend paths with './' or '/'. Always start with the relative directory name, e.g., 'src/App.js'.
+1. Raw JSON only. No \`\`\`json wrappers.
+2. "content" must be COMPLETE — never truncate with // rest of code.
+3. Paths must NOT start with / or ./
+4. node template: no native C++ addons (bcryptjs not bcrypt). No raw TCP.
+5. If adding packages, include a complete updated "package.json".
+6. Fix ALL runtime errors listed if any.
 `;
 
     try {
-        const rawRes = await callGemini(aiPrompt);
-        let cleaned = rawRes.trim();
-        // aggressively strip markdown JSON blocks
-        if (cleaned.startsWith('\`\`\`json')) cleaned = cleaned.replace(/^\`\`\`json/, '');
-        if (cleaned.startsWith('\`\`\`')) cleaned = cleaned.replace(/^\`\`\`/, '');
-        if (cleaned.endsWith('\`\`\`')) cleaned = cleaned.replace(/\`\`\`$/, '');
-        cleaned = cleaned.trim();
-        
+        let rawRes = await callGemini(execPrompt);
+        let cleaned = rawRes.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
         try {
             const data = JSON.parse(cleaned);
+            data.plan = data.plan || planData.plan;
+            data.filesLoaded = Object.keys(focusedFiles).length;
+            data.filesTotal = Object.keys(allCleanFiles).length;
             res.json(data);
         } catch (jsonErr) {
-            console.error("[Web AI Assist] JSON parse error:", jsonErr, "Raw output:", cleaned);
-            res.status(500).json({ error: "AI produced invalid JSON output. Please try again." });
+            console.error('[Web AI Agent] JSON parse error:', jsonErr.message, '\nRaw:', cleaned.slice(0, 500));
+            res.status(500).json({ error: 'AI produced malformed JSON. Please try again.' });
         }
     } catch (err) {
-        console.error('[Web AI Assist Error]', err.message);
-        res.status(500).json({ error: err.message || 'AI assist failed.' });
+        console.error('[Web AI Agent Error]', err.message);
+        res.status(500).json({ error: err.message || 'AI agent failed.' });
     }
 });
 
