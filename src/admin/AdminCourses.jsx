@@ -41,7 +41,8 @@ export default function AdminCourses() {
         syllabus: '',
         youtubePlaylistLink: '',
         prerequisite: '',
-        thumbnailUrl: ''
+        thumbnailUrl: '',
+        features: []
     });
     const [errorMsg, setErrorMsg] = useState('');
     const [aiLoadingField, setAiLoadingField] = useState(null); // 'description' | 'timeline' | 'flow' | 'syllabus' | 'prerequisite'
@@ -59,6 +60,17 @@ export default function AdminCourses() {
     // ── Mutations ─────────────────────────────────────────────────────────
     const handleInputChange = (e) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const toggleFeature = (featureId) => {
+        setFormData(prev => {
+            const currentFeatures = prev.features || [];
+            if (currentFeatures.includes(featureId)) {
+                return { ...prev, features: currentFeatures.filter(f => f !== featureId) };
+            } else {
+                return { ...prev, features: [...currentFeatures, featureId] };
+            }
+        });
     };
 
     const handleOptimizeText = async (field) => {
@@ -140,7 +152,7 @@ export default function AdminCourses() {
     });
 
     const openCreateModal = () => {
-        setFormData({ title: '', description: '', timeline: '', flow: '', syllabus: '', youtubePlaylistLink: '', prerequisite: '', thumbnailUrl: '' });
+        setFormData({ title: '', description: '', timeline: '', flow: '', syllabus: '', youtubePlaylistLink: '', prerequisite: '', thumbnailUrl: '', features: [] });
         setEditingCourse(null);
         setErrorMsg('');
         setIsModalOpen(true);
@@ -155,7 +167,8 @@ export default function AdminCourses() {
             syllabus: course.syllabus || '',
             youtubePlaylistLink: course.youtubePlaylistLink || '',
             prerequisite: course.prerequisite || '',
-            thumbnailUrl: course.thumbnailUrl || ''
+            thumbnailUrl: course.thumbnailUrl || '',
+            features: course.features || []
         });
         setEditingCourse(course);
         setErrorMsg('');
@@ -371,6 +384,45 @@ export default function AdminCourses() {
                                 <AITextarea label="Course Timeline" name="timeline" rows={4} />
                                 <AITextarea label="Course Flow / Modules" name="flow" rows={4} />
                                 <AITextarea label="Detailed Syllabus" name="syllabus" rows={5} />
+
+                                <div style={{ marginBottom: '20px', marginTop: '20px', padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <label style={{ display: 'block', fontSize: '1rem', color: '#fff', fontWeight: 700, marginBottom: '5px' }}>Enabled Features</label>
+                                    <p style={{ color: '#888', fontSize: '0.8rem', margin: '0 0 15px 0' }}>Select which interactive tools should load on the lecture page for this course.</p>
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+                                        {[
+                                            { id: 'editor', label: 'Code Editor Sandbox' },
+                                            { id: 'webdev', label: 'Web Dev Sandbox' },
+                                            { id: 'sql', label: 'SQL Editor' },
+                                            { id: 'ml', label: 'ML / Python Sandbox' },
+                                            { id: 'git', label: 'Git Playground' },
+                                            { id: 'sysdesign', label: 'System Design Board' },
+                                            { id: 'ai', label: 'Jarvis AI Assistant' },
+                                            { id: 'notes', label: 'Personal Notes' }
+                                        ].map(feat => {
+                                            const isChecked = (formData.features || []).includes(feat.id);
+                                            return (
+                                                <label key={feat.id} style={{
+                                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                                    padding: '10px 15px', borderRadius: '8px', cursor: 'pointer',
+                                                    background: isChecked ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.3)',
+                                                    border: `1px solid ${isChecked ? 'rgba(59,130,246,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                                                    transition: 'all 0.2s'
+                                                }}>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={isChecked} 
+                                                        onChange={() => toggleFeature(feat.id)} 
+                                                        style={{ accentColor: '#3b82f6', width: '16px', height: '16px', cursor: 'pointer' }}
+                                                    />
+                                                    <span style={{ color: isChecked ? '#60a5fa' : '#ccc', fontSize: '0.9rem', fontWeight: isChecked ? 600 : 400 }}>
+                                                        {feat.label}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </form>
                         </div>
                         

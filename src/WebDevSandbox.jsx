@@ -141,6 +141,39 @@ app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));`,
             dependencies: { express: '^4.18.2' },
             scripts: { start: 'node index.js', dev: 'node index.js' }
         }, null, 2)
+    },
+    nextjs: {
+        'app/page.js': `export default function Home() {
+  return (
+    <main style={{ fontFamily: 'Inter, sans-serif', maxWidth: 700, margin: '60px auto', padding: '0 24px', textAlign: 'center' }}>
+      <h1 style={{ fontSize: '2.5rem', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        Next.js AI Sandbox 🚀
+      </h1>
+      <p style={{ color: '#64748b', marginTop: 12 }}>Edit <code>app/page.js</code> to start building.</p>
+    </main>
+  );
+}`,
+        'app/layout.js': `import './globals.css';
+export const metadata = { title: 'AI Sandbox', description: 'Next.js project' };
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}`,
+        'app/globals.css': `* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f8fafc; color: #0f172a; }`,
+        'next.config.js': `/** @type {import('next').NextConfig} */
+const nextConfig = {};
+module.exports = nextConfig;`,
+        'package.json': JSON.stringify({
+            name: 'nextjs-sandbox',
+            version: '0.1.0',
+            private: true,
+            scripts: { dev: 'next dev', build: 'next build', start: 'next start' },
+            dependencies: { next: '14.1.0', react: '^18.0.0', 'react-dom': '^18.0.0' }
+        }, null, 2)
     }
 };
 
@@ -193,6 +226,7 @@ function SandboxToolbar({ userId, courseId, template, onTemplateChange, onReset,
                     <option value="create-react-app">⚛️ React (CRA)</option>
                     <option value="javascript">🌐 Vanilla HTML/JS</option>
                     <option value="node">🟢 Node.js (Express)</option>
+                    <option value="nextjs">▲ Next.js (App Router)</option>
                 </select>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {!vmReady ? (
@@ -591,7 +625,9 @@ export default function WebDevSandbox({ userId, courseId }) {
         const project = {
             title: 'AI Sandbox',
             description: 'Interactive Web Dev Kit',
-            template,
+            // StackBlitz SDK only accepts: create-react-app, javascript, node, typescript, html
+            // Next.js runs inside a 'node' WebContainer — map it here
+            template: template === 'nextjs' ? 'node' : template,
             files: initialFiles || DEFAULT_FILES[template] || DEFAULT_FILES['javascript']
         };
 
@@ -607,11 +643,13 @@ export default function WebDevSandbox({ userId, courseId }) {
                     terminalHeight: 45,
                     openFile: template === 'create-react-app'
                         ? 'src/App.js'
-                        : template === 'node' ? 'index.js' : 'index.html',
+                        : template === 'node' ? 'index.js'
+                        : template === 'nextjs' ? 'app/page.js'
+                        : 'index.html',
                     showSidebar: true,
                     hideNavigation: false,
                     height: '100%',
-                    startScript: template === 'node' ? 'dev' : undefined
+                    startScript: (template === 'node' || template === 'nextjs') ? 'dev' : undefined
                 });
                 vmRef.current = vm;
                 setVmReady(true);

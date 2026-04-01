@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2, PenLine, Database } from 'lucide-react';
+import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2, PenLine, Database, GitBranch } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ import LecturePractice from './LecturePractice';
 import LectureSQLEditor from './LectureSQLEditor';
 import MLNotebook from './MLNotebook';
 import WebDevSandbox from './WebDevSandbox';
+import GitPlayground from './GitPlayground';
 import SystemDesignBoard from './components/SystemDesignBoard';
 import YouTube from 'react-youtube';
 import { useTelemetry } from './contexts/TelemetryContext';
@@ -131,6 +132,12 @@ export default function LearnCourseLecture() {
 
     const isEnrolled = course ? (enrolledIds.includes(course.id) || enrolledIds.includes(slug)) : false;
 
+    const hasFeature = (fId) => {
+        if (!course) return false;
+        if (!course.features || !Array.isArray(course.features)) return true; // Legacy fallback shows everything
+        return course.features.includes(fId);
+    };
+
     const { data: playlistData, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading: loadingPlaylist, error: playlistErrorObj } = useInfiniteQuery({
         queryKey: ['youtube-playlist', course?.youtubePlaylistLink],
         queryFn: ({ pageParam = '' }) => fetchYoutubePlaylistPage(course.youtubePlaylistLink, pageParam),
@@ -177,6 +184,7 @@ export default function LearnCourseLecture() {
     const [sqlOpen, setSqlOpen] = useState(false);
     const [mlOpen, setMlOpen] = useState(false);
     const [webOpen, setWebOpen] = useState(false);
+    const [gitOpen, setGitOpen] = useState(false);
 
     useEffect(() => {
         if (!playingVideoId || !currentUser) return;
@@ -545,10 +553,19 @@ export default function LearnCourseLecture() {
                     <div style={{ padding: '20px 0', maxWidth: '1100px', width: '95%', margin: '0 auto', boxSizing: 'border-box' }}>
                         <h2 style={{ fontSize: '1.6rem', margin: '0 0 10px 0', fontWeight: 800, color: '#fff' }}>{playingTitle}</h2>
                         <div style={{ height: '2px', width: '40px', background: '#3b82f6', borderRadius: '10px', marginBottom: '20px' }}></div>
+                        
+                        {/* ── System Design Board Section ── */}
+                        {hasFeature('sysdesign') && (
+                        <div style={{ margin: '0 0 20px 0' }}>
+                            <SystemDesignBoard courseId={course?.id} />
+                        </div>
+                        )}
+
                         {/* ── Practice Section ── */}
                         <LecturePractice videoTitle={playingTitle} />
 
                         {/* ── SQL Sandbox Section ── */}
+                        {hasFeature('sql') && (
                         <div style={{ margin: '0 0 20px 0' }}>
                             <button
                                 onClick={() => setSqlOpen(o => !o)}
@@ -598,8 +615,10 @@ export default function LearnCourseLecture() {
                                 </div>
                             </div>
                         </div>
+                        )}
 
                         {/* ── ML Notebook Section ── */}
+                        {hasFeature('ml') && (
                         <div style={{ margin: '0 0 20px 0' }}>
                             <button
                                 onClick={() => setMlOpen(o => !o)}
@@ -647,8 +666,10 @@ export default function LearnCourseLecture() {
                                 />
                             </div>
                         </div>
+                        )}
 
                         {/* ── Web Dev Kit Section ── */}
+                        {hasFeature('webdev') && (
                         <div style={{ margin: '0 0 20px 0' }}>
                             <button
                                 onClick={() => setWebOpen(o => !o)}
@@ -696,6 +717,60 @@ export default function LearnCourseLecture() {
                                 />
                             </div>
                         </div>
+                        )}
+
+                        {/* ── Git Playground Section ── */}
+                        {hasFeature('git') && (
+                        <div style={{ margin: '0 0 20px 0' }}>
+                            <button
+                                onClick={() => setGitOpen(o => !o)}
+                                style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                                    background: gitOpen
+                                        ? 'linear-gradient(90deg, rgba(74,222,128,0.12), rgba(34,197,94,0.08))'
+                                        : 'rgba(255,255,255,0.03)',
+                                    border: `1px solid ${gitOpen ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                                    borderRadius: '14px', padding: '14px 20px',
+                                    color: '#e2e8f0', cursor: 'pointer',
+                                    transition: 'all 0.25s', fontFamily: "'Inter', sans-serif",
+                                    boxShadow: gitOpen ? '0 4px 20px rgba(74,222,128,0.1)' : 'none',
+                                }}
+                            >
+                                <div style={{
+                                    width: 36, height: 36, borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #22c55e, #4ade80)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: '0 0 12px rgba(74,222,128,0.3)', flexShrink: 0,
+                                }}>
+                                    <GitBranch size={18} color="#fff" />
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Git Playground</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                        Simulated version control, Commit trees, Staging & Terminal
+                                    </div>
+                                </div>
+                                {gitOpen ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+                            </button>
+
+                            <div style={{
+                                display: gitOpen ? 'block' : 'none',
+                                marginTop: '10px',
+                                background: '#050508',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                borderRadius: '14px',
+                                overflow: 'hidden',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                            }}>
+                                {gitOpen && (
+                                    <GitPlayground
+                                        userId={currentUser?.uid}
+                                        courseId={course?.id || slug}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        )}
 
                     </div>
                 </div>
@@ -704,7 +779,7 @@ export default function LearnCourseLecture() {
                 <div className="lecture-sidebar" style={{ background: '#0a0a0f', display: 'flex', flexDirection: 'column' }}>
 
                     {/* Tab Bar */}
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                         <button
                             onClick={() => setActivePanel('playlist')}
                             style={{
@@ -713,11 +788,12 @@ export default function LearnCourseLecture() {
                                 color: activePanel === 'playlist' ? '#fff' : '#555',
                                 cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s', minWidth: '80px'
                             }}
                         >
                             <Layers size={15} /> Playlist
                         </button>
+                        {hasFeature('ai') && (
                         <button
                             onClick={() => setActivePanel('ai')}
                             style={{
@@ -731,6 +807,8 @@ export default function LearnCourseLecture() {
                         >
                             <img src="/logo.jpeg" alt="" style={{ width: 15, height: 15, borderRadius: '4px', objectFit: 'cover' }} /> AI
                         </button>
+                        )}
+                        {hasFeature('editor') && (
                         <button
                             onClick={() => setActivePanel('editor')}
                             style={{
@@ -739,12 +817,13 @@ export default function LearnCourseLecture() {
                                 color: activePanel === 'editor' ? '#fff' : '#555',
                                 cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s', minWidth: '80px'
                             }}
                         >
                             <Code2 size={15} /> Code
                         </button>
-
+                        )}
+                        {hasFeature('notes') && (
                         <button
                             onClick={() => setActivePanel('notes')}
                             style={{
@@ -753,11 +832,12 @@ export default function LearnCourseLecture() {
                                 color: activePanel === 'notes' ? '#fff' : '#555',
                                 cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s', minWidth: '80px'
                             }}
                         >
                             <PenLine size={15} /> Notes
                         </button>
+                        )}
                     </div>
 
                     {/* ── Playlist Panel ── */}
@@ -942,8 +1022,6 @@ export default function LearnCourseLecture() {
                             </div>
                         </form>
                     </div>
-
-
 
                 </div>
             </div>
