@@ -13,6 +13,7 @@ const UAParser = require('ua-parser-js');
 const cron = require('node-cron');
 const adminRoutes = require('./routes/adminRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const mlRoutes = require('./routes/mlRoutes');
 
 const app = express();
 const allowedOrigins = [
@@ -41,6 +42,22 @@ app.use(express.json({ limit: '10mb' }));
 // Admin Routes (Auth List/Delete, DB Browser, etc)
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
+
+// ML Recommendation Routes
+app.use('/api/ml', mlRoutes);
+
+// Shorthand: GET /api/recommendations/:uid  (proxies to mlRoutes handler)
+app.get('/api/recommendations/:uid', async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const snap = await getDoc(doc(db, 'recommendations', uid));
+        if (!snap.exists()) return res.json({ items: [], updatedAt: null, modelVersion: null, uid });
+        res.json(snap.data());
+    } catch (err) {
+        console.error('[Recs] Failed to fetch recommendations:', err);
+        res.status(500).json({ error: 'Failed to fetch recommendations' });
+    }
+});
 
 // Global stats for Admin Portal Metrics
 global.codeExecStats = {
@@ -1978,6 +1995,37 @@ app.post('/api/agent/chat', async (req, res) => {
     } catch (error) {
         console.error('Agent Chat Error:', error);
         res.status(500).json({ error: 'Failed to process chat with agent' });
+    }
+});
+
+// ─── Weekly ML Recommendation Cron ──────────────────────────────────────────
+// Fires every Sunday at 2:00 AM server time
+cron.schedule('0 2 * * 0', async () => {
+    console.log('[ML Cron] Weekly recommendation job triggered.');
+    try {
+        const jobSnap = await getDoc(doc(db, 'ml_jobs', 'global'));
+        if (jobSnap.exists()) {
+            const { status } = jobSnap.data();
+            if (status === 'paused') {
+                console.log('[ML Cron] ML is paused — skipping weekly run.');
+                return;
+            }
+            if (status === 'running') {
+                console.log('[ML Cron] ML is already running — skipping weekly run.');
+                return;
+            }
+        }
+
+        const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5001';
+        await fetch(`${ML_SERVICE_URL}/ml/recommend-all`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ triggeredBy: 'cron_weekly' }),
+            signal: AbortSignal.timeout(10_000),
+        });
+        console.log('[ML Cron] Batch job started successfully.');
+    } catch (err) {
+        console.error('[ML Cron] Failed to trigger weekly recommendation job:', err);
     }
 });
 

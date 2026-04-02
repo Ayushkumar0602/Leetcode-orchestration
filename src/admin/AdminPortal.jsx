@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, Users, Database, Server, Image as ImageIcon, 
-    Settings, Activity, Shield, Bell, BookOpen, Youtube
+    Settings, Activity, Shield, Bell, BookOpen, Youtube, Brain
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -18,6 +18,7 @@ import AdminNotifications from './AdminNotifications';
 import AdminUserDetail from './AdminUserDetail';
 import AdminQuestions from './AdminQuestions';
 import AdminCourses from './AdminCourses';
+import AdminML from './AdminML';
 
 export default function AdminPortal() {
     const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function AdminPortal() {
         { path: '/admin/users', icon: Users, label: 'User Management' },
         { path: '/admin/questions', icon: BookOpen, label: 'Questions & Tests' },
         { path: '/admin/courses', icon: Youtube, label: 'YouTube Courses' },
+        { path: '/admin/ml', icon: Brain, label: 'ML Recommendations' },
         { path: '/admin/database', icon: Database, label: 'Database Admin' },
         { path: '/admin/infrastructure', icon: Server, label: 'Infrastructure' },
         { path: '/admin/storage', icon: ImageIcon, label: 'Storage & Media' },
@@ -127,6 +129,7 @@ export default function AdminPortal() {
                     <Route path="/users/:uid" element={<AdminUserDetail />} />
                     <Route path="/questions" element={<AdminQuestions />} />
                     <Route path="/courses" element={<AdminCourses />} />
+                    <Route path="/ml" element={<AdminML />} />
                     <Route path="/database" element={<AdminDatabase />} />
                     <Route path="/infrastructure" element={<AdminInfrastructure />} />
                     <Route path="/storage" element={<AdminStorage />} />
