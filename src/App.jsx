@@ -7,6 +7,8 @@ import RouteTracker from './RouteTracker';
 import Dashboard from './Dashboard';
 import DashboardHome from './DashboardHome';
 import ProblemList from './ProblemList';
+import RecommendationPage from './RecommendationPage';
+import UserAnalytics from './UserAnalytics';
 import AIInterview from './AIInterview';
 import AIInterviewSelect from './AIInterviewSelect';
 import InfoAIInterview from './InfoAIInterview';
@@ -82,6 +84,8 @@ function App() {
             <Route path="/dashboard" element={<DashboardHome />} />
             <Route path="/infoaiinterview" element={<InfoAIInterview />} />
             <Route path="/dsaquestion" element={<ProblemList />} />
+            <Route path="/recommendation" element={<RecommendationPage />} />
+            <Route path="/analytics" element={<UserAnalytics />} />
             <Route path="/aiinterviewselect" element={<AIInterviewSelect />} />
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import {
     Brain, Play, Pause, RotateCcw, User, AlertTriangle,
     CheckCircle, Clock, Zap, ChevronRight, Search, X, Activity
 } from 'lucide-react';
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://leetcode-orchestration-55z3.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -38,6 +39,7 @@ function StatusBadge({ status }) {
 // ─── Main Component ────────────────────────────────────────────────────────
 
 export default function AdminML() {
+    const { currentUser } = useAuth();
     const [jobStatus, setJobStatus] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState('');
@@ -47,6 +49,12 @@ export default function AdminML() {
     const [usersLoading, setUsersLoading] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
     const pollRef = useRef(null);
+
+    // Helper: get bearer token
+    const getToken = useCallback(async () => {
+        if (!currentUser) return null;
+        try { return await currentUser.getIdToken(); } catch { return null; }
+    }, [currentUser]);
 
     // Toast helper
     const showToast = (msg, type = 'success') => {
@@ -76,20 +84,28 @@ export default function AdminML() {
         return () => clearInterval(pollRef.current);
     }, [fetchStatus]);
 
-    // Load users for search
+    // Load users for search — uses auth token + ?search= for exact email lookup
     const loadUsers = async (search) => {
         if (!search.trim()) { setUserList([]); return; }
         setUsersLoading(true);
         try {
-            const res = await fetch(`${BASE_URL}/api/admin/users`);
+            const token = await getToken();
+            if (!token) {
+                showToast('Not authenticated — please reload', 'error');
+                setUserList([]);
+                return;
+            }
+            const url = `${BASE_URL}/api/admin/users?search=${encodeURIComponent(search.trim())}`;
+            const res = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (res.status === 401 || res.status === 403) {
+                showToast('Admin access required', 'error');
+                setUserList([]);
+                return;
+            }
             const data = await res.json();
-            const users = data.users || [];
-            const filtered = users.filter(u =>
-                (u.email || '').toLowerCase().includes(search.toLowerCase()) ||
-                (u.uid || '').toLowerCase().includes(search.toLowerCase()) ||
-                (u.displayName || '').toLowerCase().includes(search.toLowerCase())
-            ).slice(0, 8);
-            setUserList(filtered);
+            setUserList(data.users || []);
         } catch (e) {
             setUserList([]);
         } finally {

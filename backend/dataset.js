@@ -151,6 +151,7 @@ module.exports = {
     loadDataset,
     getProblems,
     getProblemById,
+    getProblemsList: () => problemsData,
     getMetadata: () => ({
         topics: Array.from(metadata.topics).sort(),
         companies: Array.from(metadata.companies).sort()

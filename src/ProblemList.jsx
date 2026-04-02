@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
     ChevronRight, Search, Brain, LogOut, CheckCircle2, Trophy,
     Clock, List as ListIcon, Plus, Bookmark, ChevronLeft,
@@ -28,6 +28,7 @@ const DIFF_STYLE = {
 
 export default function ProblemList() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { page: pageParam } = useParams();
     const page = parseInt(pageParam) || 1;
     const { currentUser, logout } = useAuth();
@@ -172,15 +173,28 @@ export default function ProblemList() {
                 <div className="pl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
                     {[
                         { label: 'Problems', path: '/dsaquestion' },
+                        { label: '✦ AI Picks', path: '/recommendation' },
+                        { label: '📊 Analytics', path: '/analytics' },
                         { label: 'DSA Interview', path: '/aiinterview' },
                         { label: 'System Design', path: '/systemdesign' },
                         { label: 'My Submissions', path: '/submissions' },
-                    ].map(item => (
-                        <button key={item.label} onClick={() => navigate(item.path)}
-                            style={{ padding: '6px 14px', borderRadius: '7px', border: 'none', background: item.path === '/dsaquestion' ? 'rgba(255,255,255,0.1)' : 'transparent', color: item.path === '/dsaquestion' ? 'var(--txt)' : 'var(--txt3)', fontSize: '0.82rem', fontWeight: item.path === '/dsaquestion' ? 600 : 400, cursor: 'pointer', transition: 'all 0.15s' }}>
-                            {item.label}
-                        </button>
-                    ))}
+                    ].map(item => {
+                        const isProblems = item.path === '/dsaquestion';
+                        const isActive = isProblems
+                            ? !location.pathname.startsWith('/recommendation') && !location.pathname.startsWith('/analytics')
+                            : location.pathname.startsWith(item.path);
+                        return (
+                            <button key={item.label} onClick={() => navigate(item.path)}
+                                style={{
+                                    padding: '6px 14px', borderRadius: '7px', border: 'none',
+                                    background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
+                                    color: isActive ? 'var(--txt)' : 'var(--txt3)',
+                                    fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                                }}>
+                                {item.label}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
