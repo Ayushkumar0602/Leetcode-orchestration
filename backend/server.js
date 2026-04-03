@@ -2003,25 +2003,12 @@ app.post('/api/agent/chat', async (req, res) => {
 cron.schedule('0 2 * * 0', async () => {
     console.log('[ML Cron] Weekly recommendation job triggered.');
     try {
-        const jobSnap = await getDoc(doc(db, 'ml_jobs', 'global'));
-        if (jobSnap.exists()) {
-            const { status } = jobSnap.data();
-            if (status === 'paused') {
-                console.log('[ML Cron] ML is paused — skipping weekly run.');
-                return;
-            }
-            if (status === 'running') {
-                console.log('[ML Cron] ML is already running — skipping weekly run.');
-                return;
-            }
-        }
-
-        const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5001';
-        await fetch(`${ML_SERVICE_URL}/ml/recommend-all`, {
+        const PORT = process.env.PORT || 3001;
+        // Trigger the native Node.js batch job via internal API call
+        await fetch(`http://localhost:${PORT}/api/ml/trigger-all`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ triggeredBy: 'cron_weekly' }),
-            signal: AbortSignal.timeout(10_000),
         });
         console.log('[ML Cron] Batch job started successfully.');
     } catch (err) {

@@ -4,7 +4,7 @@ import { db } from './firebase'; // Adjust if auth/firebase contexts differ
 import { collection, addDoc, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { uploadFile } from './lib/s3';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
+const API_BASE = 'https://leetcode-orchestration-55z3.onrender.com';
 
 export default function MLNotebook({ userId, courseId }) {
     const [status, setStatus] = useState('Initializing Pyodide...');

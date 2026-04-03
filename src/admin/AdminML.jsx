@@ -5,7 +5,7 @@ import {
     CheckCircle, Clock, Zap, ChevronRight, Search, X, Activity
 } from 'lucide-react';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com';
+const BASE_URL = 'https://leetcode-orchestration-55z3.onrender.com';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 

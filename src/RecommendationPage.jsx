@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useSEO } from './hooks/useSEO';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com';
+const BASE_URL = 'https://leetcode-orchestration-55z3.onrender.com';
 
 const DIFF_COLOR = { Easy: '#10b981', Medium: '#f59e0b', Hard: '#ef4444' };
 const DIFF_BG    = { Easy: 'rgba(16,185,129,0.1)', Medium: 'rgba(245,158,11,0.1)', Hard: 'rgba(239,68,68,0.1)' };

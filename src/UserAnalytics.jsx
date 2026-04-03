@@ -10,7 +10,7 @@ import {
     Minus, Star, Shield
 } from 'lucide-react';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com';
+const BASE_URL = 'https://leetcode-orchestration-55z3.onrender.com';
 
 // ── colour helpers ──────────────────────────────────────────────────────────
 const diffColor = { Easy: '#10b981', Medium: '#f59e0b', Hard: '#ef4444' };
