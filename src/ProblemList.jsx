@@ -71,7 +71,10 @@ export default function ProblemList() {
     const { data: metadata = { topics: [], companies: [] } } = useQuery({
         queryKey: queryKeys.metadata(),
         queryFn: fetchMetadata,
-        staleTime: 1000 * 60 * 30, // 30 min – near-static data
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+        gcTime: 1000 * 60 * 60 * 24,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
     });
 
     const { data: statsResult, isLoading: statsLoading } = useQuery({
@@ -98,7 +101,10 @@ export default function ProblemList() {
     const { data: problemsData, isLoading: loading } = useQuery({
         queryKey: queryKeys.problems(problemParams),
         queryFn: () => fetchProblems(problemParams),
-        staleTime: 1000 * 60 * 2, // 2 min
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+        gcTime: 1000 * 60 * 60 * 24, // 24 hours
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
         keepPreviousData: true, // smoother pagination
     });
 
@@ -173,8 +179,6 @@ export default function ProblemList() {
                 <div className="pl-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
                     {[
                         { label: 'Problems', path: '/dsaquestion' },
-                        { label: '✦ AI Picks', path: '/recommendation' },
-                        { label: '📊 Analytics', path: '/analytics' },
                         { label: 'DSA Interview', path: '/aiinterview' },
                         { label: 'System Design', path: '/systemdesign' },
                         { label: 'My Submissions', path: '/submissions' },
@@ -267,6 +271,23 @@ export default function ProblemList() {
                             </div>
                         )}
                     </div>
+
+                    {/* AI Picks Card */}
+                    {currentUser && (
+                        <div style={{ background: 'linear-gradient(145deg, rgba(168,85,247,0.1), rgba(59,130,246,0.05))', border: '1px solid rgba(168,85,247,0.2)', borderRadius: '16px', padding: '1.25rem', position: 'relative', overflow: 'hidden' }}>
+                            <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '100px', height: '100px', background: 'rgba(168,85,247,0.2)', filter: 'blur(40px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.8rem' }}>
+                                <Brain size={18} color="#a855f7" />
+                                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>ML Recommendations</span>
+                            </div>
+                            <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', marginBottom: '1.2rem', lineHeight: 1.4 }}>
+                                Not sure what to solve next? Let our ML engine analyze your performance and curate a personalized problem set.
+                            </p>
+                            <button onClick={() => navigate('/recommendation')} style={{ width: '100%', background: 'linear-gradient(135deg, #a855f7, #3b82f6)', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 0', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 15px rgba(168,85,247,0.3)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                                <Zap size={15} fill="currentColor" /> Generate AI Picks
+                            </button>
+                        </div>
+                    )}
 
                     {/* My Lists */}
                     {currentUser && (

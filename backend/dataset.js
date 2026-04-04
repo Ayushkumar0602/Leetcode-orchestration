@@ -112,7 +112,9 @@ function getProblems(page = 1, limit = 20, search = '', filterTopics = [], filte
     // Free Text Search
     if (search) {
         const lowerSearch = search.toLowerCase();
+        const searchTrimmed = lowerSearch.trim();
         filtered = filtered.filter(p =>
+            (p.id && String(p.id) === searchTrimmed) ||
             (p.title && p.title.toLowerCase().includes(lowerSearch)) ||
             (p.related_topics && p.related_topics.toLowerCase().includes(lowerSearch)) ||
             (p.companies && p.companies.toLowerCase().includes(lowerSearch))

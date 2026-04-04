@@ -490,6 +490,9 @@ export default function ProfilePage() {
                     <button className="mobile-nav-link" onClick={() => { navigate(`/public/${currentUser?.uid}`); setIsMobileMenuOpen(false); }}>
                         <ExternalLink size={18} /> Public Profile
                     </button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/analytics'); setIsMobileMenuOpen(false); }}>
+                        <BarChart3 size={18} color="#818cf8" /> Performance Analytics
+                    </button>
                     <button className="mobile-nav-link" onClick={() => { navigate('/chat'); setIsMobileMenuOpen(false); }}>
                         <MessageSquare size={18} /> Chat
                     </button>
@@ -565,10 +568,18 @@ export default function ProfilePage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px', justifyContent: window.innerWidth <= 640 ? 'center' : 'flex-start' }}>
                             <h1 style={{ fontSize: window.innerWidth <= 480 ? '1.5rem' : '1.9rem', fontWeight: 900, margin: 0, letterSpacing: '-0.04em' }}>{currentUser?.displayName || 'Developer'}</h1>
                             <div style={{ background: 'linear-gradient(135deg,#a855f7,#3b82f6)', borderRadius: '8px', padding: '3px 10px', fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>PRO</div>
+                            
+                            <button onClick={() => navigate('/analytics')} style={{
+                                display: window.innerWidth <= 768 ? 'none' : 'flex', alignItems: 'center', gap: '6px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
+                                borderRadius: '8px', padding: '5px 12px', color: '#818cf8', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s'
+                            }} onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; e.currentTarget.style.transform = 'translateY(-1px)'; }} onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; e.currentTarget.style.transform = 'none'; }}>
+                                <BarChart3 size={13} /> Performance Analytics
+                            </button>
+
                             <button onClick={() => navigate(`/public/${currentUser?.uid}`)} style={{
                                 display: window.innerWidth <= 768 ? 'none' : 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
                                 borderRadius: '8px', padding: '5px 12px', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
-                            }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}>
+                            }} onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.transform = 'translateY(-1px)'; }} onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'none'; }}>
                                 <ExternalLink size={13} /> View Public Profile
                             </button>
                         </div>

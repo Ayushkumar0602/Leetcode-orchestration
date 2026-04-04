@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Flame, Trophy, Calendar, BarChart3, Zap, Code2, ChevronRight, Target } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchActivity, queryKeys } from './lib/api';
 
 /* ── helpers ─────────────────────────────────────────────────── */
 function toDateStr(date) {
@@ -324,19 +326,16 @@ function StatsTab({ activityData, userStats, totalCounts }) {
 
 /* ── main component ──────────────────────────────────────────── */
 export default function ActivityCalendar({ uid, userStats, totalCounts, containerStyle }) {
-    const [activityData, setActivityData] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('heatmap');
 
-    useEffect(() => {
-        if (!uid) { setLoading(false); return; }
-        setLoading(true);
-        fetch(`https://leetcode-orchestration.onrender.com/api/activity/${uid}`)
-            .then(r => r.json())
-            .then(data => { if (!data.error) setActivityData(data); })
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, [uid]);
+    const { data: activityData, isLoading: loading } = useQuery({
+        queryKey: queryKeys.activity(uid),
+        queryFn: () => fetchActivity(uid),
+        enabled: !!uid,
+        staleTime: 1000 * 60 * 5, // 5 minute cache
+        gcTime: 1000 * 60 * 30, // 30 mins footprint
+        refetchOnWindowFocus: false, // Prevents loading spins randomly
+    });
 
     const TABS = [
         { id: 'heatmap', label: 'Activity', icon: <Flame size={12} /> },

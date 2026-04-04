@@ -236,6 +236,43 @@ app.get('/api/metadata', (req, res) => {
     res.json(getMetadata());
 });
 
+// --- Resume Optimization Route ---
+app.post('/api/optimize-resume', async (req, res) => {
+    try {
+        const { resumeText, jobDescription } = req.body;
+        if (!resumeText || !jobDescription) {
+            return res.status(400).json({ error: 'resumeText and jobDescription are required.' });
+        }
+        const { callGemini } = require('./interview'); // using existing initialized gemini helper
+
+        const prompt = `You are an elite executive resume writer and ATS optimization expert. 
+Your task is to take a candidate's Master Resume text and rewrite it perfectly for maximum ATS score and human readability against a specific Target Job Description.
+Do NOT invent fake experience or alter factual constraints. Instead, reframe, rephrase, and highlight their existing experience using the exact keywords, verbs, and phrasing style expected by the target job.
+Please return your output broken down cleanly into three markdown sections: 
+### 1. Optimized Professional Summary
+### 2. Optimized Experience Bullet Points
+### 3. Missing ATS Keywords & Suggested Skills
+
+Candidate's Master Resume:
+"""
+${resumeText}
+"""
+
+Target Job Description:
+"""
+${jobDescription}
+"""
+
+Write your response solely as the finalized optimized markdown content. Do not include introductory conversational text.`;
+
+        const generatedMarkdown = await callGemini(prompt);
+        res.json({ optimizedContent: generatedMarkdown });
+    } catch (error) {
+        console.error('Error optimizing resume:', error);
+        res.status(500).json({ error: 'Failed to optimize resume' });
+    }
+});
+
 // --- Public Course Routes ---
 app.get('/api/public/courses', async (req, res) => {
     try {

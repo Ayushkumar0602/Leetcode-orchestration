@@ -37,97 +37,123 @@ function RecCard({ item, rank, onSolve }) {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-                background: hovered ? 'rgba(99,102,241,0.07)' : 'rgba(255,255,255,0.025)',
-                border: `1px solid ${hovered ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.08)'}`,
-                borderRadius: '18px',
-                padding: '1.25rem 1.5rem',
+                position: 'relative',
+                background: hovered ? 'rgba(99,102,241,0.08)' : 'rgba(15,15,20,0.6)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: `1px solid ${hovered ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.06)'}`,
+                boxShadow: hovered ? '0 12px 40px rgba(99,102,241,0.15)' : '0 4px 20px rgba(0,0,0,0.3)',
+                borderRadius: '20px',
+                padding: '1.5rem',
                 cursor: 'pointer',
-                transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
-                transform: hovered ? 'translateY(-2px)' : 'none',
+                transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
+                transform: hovered ? 'translateY(-4px)' : 'none',
                 display: 'flex',
                 alignItems: 'flex-start',
-                gap: '16px',
+                gap: '20px',
+                overflow: 'hidden'
             }}
             onClick={() => onSolve(item)}
         >
+            {/* Subtle glow behind card when hovered */}
+            <div style={{
+                position: 'absolute', top: 0, left: '-10%', width: '120%', height: '100%',
+                background: 'radial-gradient(circle at 10% 50%, rgba(99,102,241,0.15), transparent 50%)',
+                opacity: hovered ? 1 : 0, transition: 'opacity 0.4s', pointerEvents: 'none', zIndex: 0
+            }}/>
+
             {/* Rank badge */}
             <div style={{
-                width: 36, height: 36, borderRadius: '10px', flexShrink: 0,
+                position: 'relative', zIndex: 1,
+                width: 42, height: 42, borderRadius: '12px', flexShrink: 0,
                 background: rank <= 3
-                    ? 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))'
-                    : 'rgba(255,255,255,0.06)',
-                border: `1px solid ${rank <= 3 ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                    ? 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))'
+                    : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${rank <= 3 ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                boxShadow: rank <= 3 ? '0 0 15px rgba(99,102,241,0.2) inset' : 'none',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.85rem', fontWeight: 800,
-                color: rank <= 3 ? '#818cf8' : 'rgba(255,255,255,0.4)',
+                fontSize: '1rem', fontWeight: 800,
+                color: rank <= 3 ? '#a5b4fc' : 'rgba(255,255,255,0.3)',
             }}>
                 {rank}
             </div>
 
             {/* Content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: 700, fontSize: '1rem', color: '#fff' }}>{item.title}</span>
+            <div style={{ flex: 1, minWidth: 0, position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.02em' }}>{item.title}</span>
                     <span style={{
-                        fontSize: '0.72rem', fontWeight: 700, padding: '3px 10px', borderRadius: '999px',
+                        fontSize: '0.75rem', fontWeight: 800, padding: '4px 12px', borderRadius: '999px',
                         background: DIFF_BG[diff], color: DIFF_COLOR[diff],
-                        border: `1px solid ${DIFF_COLOR[diff]}30`,
+                        border: `1px solid ${DIFF_COLOR[diff]}40`,
+                        textTransform: 'uppercase', letterSpacing: '0.05em'
                     }}>{diff}</span>
                 </div>
 
                 {/* Topics */}
                 {item.topics?.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
                         {item.topics.slice(0, 4).map(t => (
                             <span key={t} style={{
-                                fontSize: '0.7rem', padding: '3px 9px', borderRadius: '7px',
-                                background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)',
-                                fontWeight: 500, border: '1px solid rgba(255,255,255,0.08)',
+                                fontSize: '0.72rem', padding: '4px 10px', borderRadius: '8px',
+                                background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.6)',
+                                fontWeight: 600, border: '1px solid rgba(255,255,255,0.05)',
+                                letterSpacing: '0.02em'
                             }}>{t}</span>
                         ))}
                     </div>
                 )}
 
                 {/* AI Reason */}
-                <p style={{
-                    margin: '0 0 10px', fontSize: '0.83rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5,
-                    display: 'flex', alignItems: 'flex-start', gap: '6px',
+                <div style={{
+                    background: 'linear-gradient(90deg, rgba(99,102,241,0.05), transparent)',
+                    borderLeft: '2px solid rgba(99,102,241,0.5)',
+                    padding: '8px 12px', borderRadius: '0 8px 8px 0',
+                    marginBottom: '14px'
                 }}>
-                    <Zap size={12} color="#818cf8" style={{ flexShrink: 0, marginTop: 2 }} />
-                    {item.reason}
-                </p>
+                    <p style={{
+                        margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5,
+                        display: 'flex', alignItems: 'flex-start', gap: '8px',
+                    }}>
+                        <Zap size={14} color="#818cf8" style={{ flexShrink: 0, marginTop: 2, filter: 'drop-shadow(0 0 5px rgba(129,140,248,0.5))' }} />
+                        <span>{item.reason}</span>
+                    </p>
+                </div>
 
                 {/* Confidence bar */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 999 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.04)', borderRadius: 999, overflow: 'hidden' }}>
                         <div style={{
                             width: `${Math.round((item.confidenceScore || 0.5) * 100)}%`,
                             height: '100%', borderRadius: 999,
-                            background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+                            background: 'linear-gradient(90deg, #4f46e5, #8b5cf6, #d946ef)',
+                            boxShadow: '0 0 10px rgba(139,92,246,0.5)',
                             transition: 'width 1s ease',
                         }} />
                     </div>
-                    <span style={{ fontSize: '0.7rem', color: '#818cf8', fontWeight: 700, flexShrink: 0 }}>
-                        {Math.round((item.confidenceScore || 0.5) * 100)}% match
+                    <span style={{ fontSize: '0.75rem', color: '#a5b4fc', fontWeight: 800, flexShrink: 0, letterSpacing: '0.05em' }}>
+                        {Math.round((item.confidenceScore || 0.5) * 100)}% MATCH
                     </span>
                 </div>
             </div>
 
             {/* Solve CTA */}
-            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', position: 'relative', zIndex: 1, alignSelf: 'center' }}>
                 <button
                     onClick={e => { e.stopPropagation(); onSolve(item); }}
                     style={{
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        border: 'none', color: '#fff',
-                        borderRadius: '10px', padding: '8px 18px',
-                        fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '6px',
-                        boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
-                        transition: 'opacity 0.2s',
+                        background: hovered ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${hovered ? 'transparent' : 'rgba(255,255,255,0.1)'}`, 
+                        color: '#fff',
+                        borderRadius: '12px', padding: '10px 20px',
+                        fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        boxShadow: hovered ? '0 8px 20px rgba(99,102,241,0.4)' : 'none',
+                        transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
                     }}
                 >
-                    Solve <ArrowRight size={13} />
+                    Solve 
+                    <ArrowRight size={15} style={{ transform: hovered ? 'translateX(3px)' : 'none', transition: 'transform 0.3s' }}/>
                 </button>
             </div>
         </div>
@@ -344,14 +370,16 @@ function SolvedDonut({ byDiff }) {
 function Skeleton() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {[96, 240, 180, 240].map((h, i) => (
+            {[140, 140, 140, 140].map((h, i) => (
                 <div key={i} style={{
-                    height: h, borderRadius: 18,
-                    background: 'rgba(255,255,255,0.04)',
-                    animation: `shimmer 1.6s ease-in-out ${i*0.12}s infinite`,
+                    height: h, borderRadius: '20px',
+                    background: 'linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(60,60,80,0.1) 50%, rgba(255,255,255,0.02) 75%)',
+                    backgroundSize: '400% 100%',
+                    border: '1px solid rgba(255,255,255,0.03)',
+                    animation: `shimmer 1.8s ease-in-out ${i*0.15}s infinite`,
                 }}/>
             ))}
-            <style>{`@keyframes shimmer{0%,100%{opacity:.45}50%{opacity:.9}}`}</style>
+            <style>{`@keyframes shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}`}</style>
         </div>
     );
 }
@@ -401,6 +429,8 @@ export default function RecommendationPage() {
         },
         enabled: !!currentUser,
         staleTime: 1000 * 60 * 10, // 10 min
+        gcTime: 1000 * 60 * 30, // Keep in cache for 30 mins
+        refetchOnWindowFocus: false,
     });
 
     const analytics = data?.analytics || null;
@@ -422,10 +452,11 @@ export default function RecommendationPage() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#050505',
-            backgroundImage: 'radial-gradient(circle at 30% 0%, rgba(99,102,241,0.12) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 50%)',
+            background: '#030303',
+            backgroundImage: 'radial-gradient(circle at 15% 0%, rgba(99,102,241,0.08) 0%, transparent 40%), radial-gradient(circle at 85% 85%, rgba(139,92,246,0.05) 0%, transparent 40%)',
             color: '#fff',
             fontFamily: "'Inter', sans-serif",
+            position: 'relative',
         }}>
             {/* ── Navbar ── */}
             <nav style={{
@@ -467,25 +498,28 @@ export default function RecommendationPage() {
             </nav>
 
             {/* ── Content ── */}
-            <div style={{ maxWidth: '860px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3.5rem 1.5rem', position: 'relative', zIndex: 1 }}>
 
                 {/* Header */}
-                <div style={{ marginBottom: '2rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
+                <div style={{ marginBottom: '3rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '16px' }}>
                         <div style={{
-                            width: 52, height: 52, borderRadius: '14px', flexShrink: 0,
-                            background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))',
-                            border: '1px solid rgba(99,102,241,0.3)',
+                            width: 64, height: 64, borderRadius: '18px', flexShrink: 0,
+                            background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15))',
+                            border: '1px solid rgba(99,102,241,0.4)',
+                            boxShadow: '0 0 30px rgba(99,102,241,0.15) inset, 0 10px 20px rgba(0,0,0,0.3)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            position: 'relative'
                         }}>
-                            <Brain size={26} color="#818cf8" />
+                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'radial-gradient(circle at top left, rgba(255,255,255,0.2), transparent 60%)', borderRadius: '18px', pointerEvents: 'none' }} />
+                            <Brain size={32} color="#a5b4fc" style={{ filter: 'drop-shadow(0 0 10px rgba(129,140,248,0.7))' }} />
                         </div>
                         <div>
-                            <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>
+                            <h1 style={{ margin: 0, fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                                 AI Picks For You
                             </h1>
-                            <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: 'rgba(255,255,255,0.45)' }}>
-                                Personalized problems based on your interview performance & skill gaps
+                            <p style={{ margin: '6px 0 0', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+                                Personalized problem curation based on your performance profile
                             </p>
                         </div>
                     </div>
@@ -566,31 +600,50 @@ export default function RecommendationPage() {
                 {/* Empty state */}
                 {currentUser && !isLoading && !isError && items.length === 0 && (
                     <div style={{
-                        textAlign: 'center', padding: '4rem 2rem',
-                        background: 'linear-gradient(135deg, rgba(99,102,241,0.04), rgba(139,92,246,0.03))',
-                        border: '1px dashed rgba(99,102,241,0.2)', borderRadius: '24px',
+                        textAlign: 'center', padding: '5rem 2rem', position: 'relative', overflow: 'hidden',
+                        background: 'linear-gradient(135deg, rgba(30,30,40,0.6), rgba(15,15,20,0.8))',
+                        border: '1px solid rgba(99,102,241,0.15)', borderRadius: '24px',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.02)'
                     }}>
+                        {/* Empty state background glow */}
+                        <div style={{ position: 'absolute', top: '-20%', left: '30%', width: '40%', height: '140%', background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.1) 0%, transparent 70%)', transform: 'rotate(20deg)', pointerEvents: 'none' }} />
+
                         <div style={{
-                            width: 64, height: 64, borderRadius: '16px', margin: '0 auto 20px',
-                            background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)',
+                            width: 80, height: 80, borderRadius: '20px', margin: '0 auto 24px',
+                            background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))', 
+                            border: '1px solid rgba(99,102,241,0.3)',
+                            boxShadow: '0 0 30px rgba(99,102,241,0.15) inset, 0 10px 20px rgba(0,0,0,0.2)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            position: 'relative'
                         }}>
-                            <Brain size={30} color="#818cf8" />
+                            <Brain size={36} color="#818cf8" style={{ filter: 'drop-shadow(0 0 8px rgba(129,140,248,0.5))' }} />
                         </div>
-                        <h2 style={{ margin: '0 0 10px', fontWeight: 800, fontSize: '1.2rem' }}>
-                            Your AI picks are being prepared
+                        <h2 style={{ margin: '0 0 12px', fontWeight: 800, fontSize: '1.4rem', letterSpacing: '-0.02em', color: '#fff' }}>
+                            Your AI Core is Booting Up
                         </h2>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', maxWidth: '420px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
-                            Complete a mock DSA interview and the AI will generate your personalized problem list. An admin can also trigger recommendations manually.
+                        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem', maxWidth: '460px', margin: '0 auto 2rem', lineHeight: 1.6, fontWeight: 500 }}>
+                            Complete a mock DSA interview to calibrate our models. The AI will then generate a highly targeted problem roadmap tailored to your exact skill gaps.
                         </p>
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
                             <button onClick={() => navigate('/aiinterview')}
-                                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', border: 'none', borderRadius: '12px', padding: '11px 24px', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Zap size={15} /> Start Mock Interview
+                                style={{ 
+                                    background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#fff', border: 'none', 
+                                    borderRadius: '12px', padding: '12px 28px', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', 
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    boxShadow: '0 8px 20px rgba(99,102,241,0.3)',
+                                    transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)'
+                                }}
+                            >
+                                <Zap size={16} fill="#fff" /> Initialize Interview
                             </button>
                             <button onClick={() => navigate('/dsaquestion')}
-                                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '11px 24px', fontWeight: 600, cursor: 'pointer', fontSize: '0.88rem' }}>
-                                Browse All Problems
+                                style={{ 
+                                    background: 'rgba(255,255,255,0.03)', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)', 
+                                    borderRadius: '12px', padding: '12px 28px', fontWeight: 600, cursor: 'pointer', fontSize: '0.95rem',
+                                    backdropFilter: 'blur(10px)', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)'
+                                }}
+                            >
+                                Browse Directory
                             </button>
                         </div>
                     </div>
@@ -598,18 +651,90 @@ export default function RecommendationPage() {
 
                 
 
-                {/* Problem list */}
+                {/* Problem list & Sidebar layout */}
                 {items.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {items.map((item, i) => (
-                            <RecCard key={item.problemId || i} item={item} rank={i + 1} onSolve={handleSolve} />
-                        ))}
+                    <div className="rec-layout">
+                        {/* LEFT COLUMN: RECOMMENDATIONS */}
+                        <div className="rec-problems-col" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {items.map((item, i) => (
+                                <RecCard key={item.problemId || i} item={item} rank={i + 1} onSolve={handleSolve} />
+                            ))}
+                        </div>
+
+                        {/* RIGHT COLUMN: ANALYTICS SIDEBAR */}
+                        <div className="rec-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            {/* Readiness Gauge */}
+                            <ReadinessGauge score={analytics?.readinessScore || 0} />
+                            
+                            {/* Growth Trajectory */}
+                            {analytics?.scoreTrend?.length > 0 && (
+                                <div style={{
+                                    background: 'rgba(15,15,20,0.6)', backdropFilter: 'blur(12px)',
+                                    WebkitBackdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px',
+                                    padding: '1.25rem 1.5rem',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                                }}>
+                                    <h3 style={{ margin: '0 0 16px', fontSize: '1.05rem', letterSpacing: '-0.02em', fontWeight: 800, color: '#fff' }}>Growth Trajectory</h3>
+                                    <ScoreTrendChart trend={analytics.scoreTrend} />
+                                </div>
+                            )}
+
+                            {/* Cognitive Profiling */}
+                            {(analytics?.topicStrengths?.length > 0 || analytics?.topicWeaknesses?.length > 0) && (
+                                <div style={{
+                                    background: 'rgba(15,15,20,0.6)', backdropFilter: 'blur(12px)',
+                                    WebkitBackdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px',
+                                    padding: '1.25rem 1.5rem',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                                }}>
+                                    <h3 style={{ margin: '0 0 16px', fontSize: '1.05rem', letterSpacing: '-0.02em', fontWeight: 800, color: '#fff' }}>Cognitive Profiling</h3>
+                                    
+                                    {analytics?.topicStrengths?.length > 0 && (
+                                        <div style={{ marginBottom: '20px' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 800, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Strengths</div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                {analytics.topicStrengths.map(t => (
+                                                    <TopicBar key={t.topic} topic={t.topic} score={t.score} max={Math.max(...analytics.topicStrengths.map(s => s.score), 1)} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {analytics?.topicWeaknesses?.length > 0 && (
+                                        <div>
+                                            <div style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 800, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Weaknesses</div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                {analytics.topicWeaknesses.map(t => (
+                                                    <TopicBar key={t.topic} topic={t.topic} score={t.score} max={Math.max(...analytics.topicWeaknesses.map(s => s.score), 1)} isWeak />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
 
             <style>{`
                 @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                .rec-layout {
+                    display: grid;
+                    grid-template-columns: 2fr 1fr;
+                    gap: 32px;
+                    align-items: start;
+                }
+                @media (max-width: 960px) {
+                    .rec-layout {
+                        grid-template-columns: 1fr;
+                    }
+                    .rec-sidebar {
+                        order: -1; /* Pushes the analytics gauges above recommendations on mobile */
+                    }
+                }
             `}</style>
         </div>
     );

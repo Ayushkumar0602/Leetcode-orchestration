@@ -13,6 +13,7 @@ export const queryKeys = {
     problems: (params) => ['problems', params],
     metadata: () => ['metadata'],
     lists:   (uid) => ['lists', uid],
+    activity: (uid) => ['activity', uid],
 };
 
 // ─── API Functions ───────────────────────────────────────────────────────────
@@ -36,6 +37,13 @@ export const fetchInterviews = async (uid) => {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     return data.interviews || [];
+};
+
+export const fetchActivity = async (uid) => {
+    const res = await fetch(`${BASE}/api/activity/${uid}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data;
 };
 
 export const fetchInterviewDetail = async (id) => {

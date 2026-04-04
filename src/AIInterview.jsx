@@ -7,7 +7,7 @@ import {
     Code2, Shield, Lightbulb, BarChart3, ArrowLeft, Sparkles, Volume2, VolumeX,
     Send, Terminal, ChevronDown, ChevronUp, LogOut, Clock, History, User, Building,
     MessageCircle, AlertCircle, Info, Navigation, Trash2, RefreshCcw, LayoutTemplate,
-    Maximize2, Minimize2, StickyNote
+    Maximize2, Minimize2, StickyNote, BookOpen
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,8 +15,10 @@ import { useInterviewSession } from './useInterviewSession';
 import SystemDesignBoard from './components/SystemDesignBoard';
 import NavProfile from './NavProfile';
 import { useSEO } from './hooks/useSEO';
-
-// ─── Constants ───────────────────────────────────────────────────────────────
+import { useQuery } from '@tanstack/react-query';
+import { fetchMetadata, fetchProblems, queryKeys } from './lib/api';
+import Select from 'react-select';
+import { useDebounce } from './hooks/useDebounce';// ─── Constants ───────────────────────────────────────────────────────────────
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
 const LANGUAGE_TEMPLATES = {
     python: 'class Solution:\n    def solve(self):\n        # Your code here\n        pass',
@@ -117,9 +119,38 @@ export default function AIInterview() {
     // ── Setup state ──
     const [role, setRole] = useState('');
     const [company, setCompany] = useState('');
-    const [problems, setProblems] = useState([]);
     const [problemSearch, setProblemSearch] = useState('');
-    const [problemsLoading, setProblemsLoading] = useState(true);
+    const [selectedTopics, setSelectedTopics] = useState([]);
+    const [selectedCompanies, setSelectedCompanies] = useState([]);
+    
+    const debouncedSearch = useDebounce(problemSearch, 300);
+
+    const { data: metadata = { topics: [], companies: [] } } = useQuery({
+        queryKey: queryKeys.metadata(),
+        queryFn: fetchMetadata,
+        staleTime: 1000 * 60 * 60 * 24,
+        gcTime: 1000 * 60 * 60 * 24,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+    });
+
+    const problemParams = {
+        page: 1,
+        search: debouncedSearch,
+        topics: selectedTopics.map(t => t.value),
+        companies: selectedCompanies.map(c => c.value),
+    };
+
+    const { data: problemsData, isLoading: problemsLoading } = useQuery({
+        queryKey: queryKeys.problems(problemParams),
+        queryFn: () => fetchProblems(problemParams),
+        staleTime: 1000 * 60 * 60 * 24,
+        gcTime: 1000 * 60 * 60 * 24,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+    });
+
+    const problems = problemsData?.problems || [];
     const [selectedProblem, setSelectedProblem] = useState(null);
     const [setupError, setSetupError] = useState('');
     const [selectedVoice, setSelectedVoice] = useState(VOICE_TEMPLATES[0]); // Will by default
@@ -340,14 +371,7 @@ export default function AIInterview() {
     const [rightPanelTab, setRightPanelTab] = useState('chat'); // 'chat' | 'notes'
 
     // ─── Load problems ──────────────────────────────────────────────────────
-    useEffect(() => {
-        setProblemsLoading(true);
-        fetch('https://leetcode-orchestration.onrender.com/api/problems?page=1&limit=50')
-            .then(r => r.json())
-            .then(d => { if (d.data) setProblems(d.data); })
-            .catch(console.error)
-            .finally(() => setProblemsLoading(false));
-    }, []);
+    // (TanStack Query handles problem fetching)
 
     // ─── Resume Existing Interview Initialization ──────────────────────────
     useEffect(() => {
@@ -401,15 +425,7 @@ export default function AIInterview() {
     }, [urlId, currentUser, appPhase]);
 
     // Refetch when search changes
-    useEffect(() => {
-        const t = setTimeout(() => {
-            fetch(`https://leetcode-orchestration.onrender.com/api/problems?page=1&limit=50&search=${encodeURIComponent(problemSearch)}`)
-                .then(r => r.json())
-                .then(d => { if (d.data) setProblems(d.data); })
-                .catch(console.error);
-        }, 300);
-        return () => clearTimeout(t);
-    }, [problemSearch]);
+    // (TanStack Query handles search refetching via problemParams dependency)
 
     // Keep transcriptRef in sync
     useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
@@ -1139,12 +1155,8 @@ export default function AIInterview() {
         }
     };
 
-    // ─── Filtered problems for setup ──────────────────────────────────────────
-    const filteredProblems = problems.filter(p =>
-        !problemSearch ||
-        p.title?.toLowerCase().includes(problemSearch.toLowerCase()) ||
-        p.related_topics?.toLowerCase().includes(problemSearch.toLowerCase())
-    );
+    // ─── Filtered problems for setup (Now handled by API) ─────────────────────
+    const filteredProblems = problems;
 
     // ─── Delete & Restart ───────────────────────────────────────────────────
     const handleDeleteInterview = async (id, e) => {
@@ -1175,7 +1187,8 @@ export default function AIInterview() {
     if (appPhase === 'setup') {
         return (
             <div style={{
-                minHeight: '100vh',
+                height: '100vh',
+                overflow: 'hidden',
                 background: '#050505',
                 backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
                 display: 'flex',
@@ -1209,10 +1222,10 @@ export default function AIInterview() {
                     <NavProfile />
                 </nav>
 
-                <div className="setup-container" style={{ flex: 1, display: 'flex' }}>
+                <div className="setup-container" style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
                     {/* LEFT SIDEBAR: Past Interviews (Desktop only, hides or stacks on mobile) */}
                     {currentUser && (
-                        <div className="setup-sidebar" style={{ width: '300px', flexShrink: 0, borderRight: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column' }}>
+                        <div className="setup-sidebar" style={{ width: '300px', flexShrink: 0, borderRight: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column', height: '100%' }}>
                             <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <History size={18} color="var(--ai)" />
@@ -1311,8 +1324,20 @@ export default function AIInterview() {
                     {/* MAIN CONTENT: Setup Form */}
                     <div className="setup-main" style={{ flex: 1, padding: '2.5rem', display: 'flex', flexDirection: 'column', width: '100%', overflowY: 'auto' }}>
                         <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-                            <h1 className="ai-setup-page-title" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '0.5rem', textAlign: 'center', letterSpacing: '-0.02em' }}>AI Interview Setup</h1>
-                            <p style={{ textAlign: 'center', color: 'var(--txt2)', fontSize: '0.95rem', marginBottom: '3rem' }}>Select a problem and tell us about your target role.</p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '20px' }}>
+                                <div>
+                                    <h1 className="ai-setup-page-title" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '0.5rem', letterSpacing: '-0.02em', textAlign: 'left' }}>AI Interview Setup</h1>
+                                    <p style={{ color: 'var(--txt2)', fontSize: '0.95rem', margin: 0, textAlign: 'left' }}>Select a problem and tell us about your target role.</p>
+                                </div>
+                                <button 
+                                    onClick={() => navigate('/courses')}
+                                    style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                                >
+                                    <BookOpen size={18} /> Course Catalog
+                                </button>
+                            </div>
 
                             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem', marginBottom: '2.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
                                 <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--txt)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1333,6 +1358,41 @@ export default function AIInterview() {
                                         }}
                                         onFocus={e => e.target.style.borderColor = 'var(--ai)'}
                                         onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                                    />
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+                                    <Select
+                                        isMulti
+                                        options={metadata.topics}
+                                        value={selectedTopics}
+                                        onChange={setSelectedTopics}
+                                        placeholder="Filter by Topics..."
+                                        styles={{
+                                            control: (base, state) => ({ ...base, background: 'var(--bg)', borderColor: state.isFocused ? 'var(--ai)' : 'var(--border)', minHeight: '42px', boxShadow: 'none', '&:hover': { borderColor: 'var(--ai)' } }),
+                                            menu: (base) => ({ ...base, background: 'var(--surface)', zIndex: 100 }),
+                                            option: (base, state) => ({ ...base, background: state.isFocused ? 'var(--ai-dim)' : 'transparent', color: state.isFocused ? 'var(--ai)' : 'var(--txt)', cursor: 'pointer', '&:active': { background: 'var(--ai)' } }),
+                                            multiValue: (base) => ({ ...base, background: 'var(--ai-dim)', borderRadius: '4px' }),
+                                            multiValueLabel: (base) => ({ ...base, color: 'var(--ai)' }),
+                                            multiValueRemove: (base) => ({ ...base, color: 'var(--ai)', ':hover': { background: 'var(--ai)', color: '#fff' } }),
+                                            input: (base) => ({ ...base, color: 'var(--txt)' })
+                                        }}
+                                    />
+                                    <Select
+                                        isMulti
+                                        options={metadata.companies}
+                                        value={selectedCompanies}
+                                        onChange={setSelectedCompanies}
+                                        placeholder="Filter by Companies..."
+                                        styles={{
+                                            control: (base, state) => ({ ...base, background: 'var(--bg)', borderColor: state.isFocused ? 'var(--ai)' : 'var(--border)', minHeight: '42px', boxShadow: 'none', '&:hover': { borderColor: 'var(--ai)' } }),
+                                            menu: (base) => ({ ...base, background: 'var(--surface)', zIndex: 100 }),
+                                            option: (base, state) => ({ ...base, background: state.isFocused ? 'var(--ai-dim)' : 'transparent', color: state.isFocused ? 'var(--ai)' : 'var(--txt)', cursor: 'pointer', '&:active': { background: 'var(--ai)' } }),
+                                            multiValue: (base) => ({ ...base, background: 'var(--ai-dim)', borderRadius: '4px' }),
+                                            multiValueLabel: (base) => ({ ...base, color: 'var(--ai)' }),
+                                            multiValueRemove: (base) => ({ ...base, color: 'var(--ai)', ':hover': { background: 'var(--ai)', color: '#fff' } }),
+                                            input: (base) => ({ ...base, color: 'var(--txt)' })
+                                        }}
                                     />
                                 </div>
 
