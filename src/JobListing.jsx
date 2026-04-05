@@ -43,7 +43,8 @@ export default function JobListing() {
     setSearchError('');
     setJobResults([]);
     try {
-      const res = await fetch(`http://localhost:3001/api/jobs?role=${encodeURIComponent(jobQuery)}`);
+      const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
+      const res = await fetch(`${API_BASE}/api/jobs?role=${encodeURIComponent(jobQuery)}`);
       const data = await res.json();
       if(!res.ok || data.error) throw new Error(data.error || "Failed to fetch jobs via SerpApi");
       const fetchedJobs = data.jobs || [];

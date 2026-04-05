@@ -120,7 +120,8 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
     setSearchError('');
     setJobResults([]);
     try {
-      const res = await fetch(`http://localhost:3001/api/jobs?role=${encodeURIComponent(jobQuery)}`);
+      const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
+      const res = await fetch(`${API_BASE}/api/jobs?role=${encodeURIComponent(jobQuery)}`);
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || "Failed to fetch jobs via SerpApi");
       setJobResults(data.jobs || []);
@@ -206,7 +207,8 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
         attemptsLog.push({ attempt: attemptCount, status: 'Generating AI Resume...', score: null });
         setOptimizationAttempts([...attemptsLog]);
 
-        const res = await fetch("http://localhost:3001/api/optimize-resume", {
+        const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
+        const res = await fetch(`${API_BASE}/api/optimize-resume`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ resumeText, jobDescription, previousAttempt: currentAttempt, feedback })

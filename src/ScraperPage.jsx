@@ -47,7 +47,8 @@ export default function ScraperPage() {
             body.csrfToken = csrfToken.trim();
         }
 
-        fetch('https://leetcode-orchestration.onrender.com/api/scraper/run', {
+        const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
+        fetch(`${API_BASE}/api/scraper/run`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
@@ -58,7 +59,7 @@ export default function ScraperPage() {
                 try {
                     data = text ? JSON.parse(text) : {};
                 } catch {
-                    throw new Error(r.ok ? 'Invalid response from server' : `Server error (${r.status}). Ensure the backend is running on port 3001.`);
+                    throw new Error(r.ok ? 'Invalid response from server' : `Server error (${r.status}). Ensure the backend is running.`);
                 }
                 if (!r.ok) throw new Error(data.error || 'Scraping failed');
                 return data;
