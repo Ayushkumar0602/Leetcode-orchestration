@@ -25,6 +25,8 @@ import Chat from './Chat';
 import DSASheets from './DSASheets';
 import SheetDetail from './SheetDetail';
 import ResumeOptimiser from './ResumeOptimiser';
+import JobListing from './JobListing';
+import JobApplier from './JobApplier';
 
 // Course Features
 import Courses from './Courses';
@@ -97,6 +99,8 @@ function App() {
             <Route path="/sheets" element={<DSASheets />} />
             <Route path="/sheets/:sheetId" element={<SheetDetail />} />
             <Route path="/resumeoptimiser" element={<ResumeOptimiser />} />
+            <Route path="/joblisting" element={<JobListing />} />
+            <Route path="/jobapplier" element={<JobApplier />} />
 
             {/* System Design Routes */}
             <Route path="/systemdesign" element={<SystemDesign />} />

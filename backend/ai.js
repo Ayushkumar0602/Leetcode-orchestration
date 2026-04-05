@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { db } = require('./firebase');
+const axios = require('axios');
 const { doc, getDoc, setDoc, collection, getDocs, query, where } = require('firebase/firestore');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -610,10 +611,10 @@ Available routes on Whizan AI include:
     parameters: {
       type: "OBJECT",
       properties: {
-        keyword: {
-          type: "STRING",
-          description: "The search keyword, e.g. 'system design', 'react', 'algorithms'."
-        }
+          keyword: {
+            type: "STRING",
+            description: "The search keyword, e.g. 'system design', 'react', 'algorithms'."
+          },
       },
       required: ["keyword"]
     }
@@ -813,4 +814,117 @@ Available routes on Whizan AI include:
   throw new Error(`AI Agent Chat failed: ${lastError?.message}`);
 }
 
-module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData, optimizeCourseContent, chatWithAgent };
+/**
+ * Autonomous Job Applier Agent Evaluator
+
+ * Evaluates the current page snapshot and decides what to do next.
+ */
+async function evaluateJobPageSnapshot(snapshot, previousActions = [], userPrompt = '', selectedModel = 'gemini-3.1-flash-lite-preview') {
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys found");
+
+  const systemInstruction = `
+You are an advanced, completely autonomous AI web browsing agent designed to apply for jobs and navigate career websites.
+Your goal is to successfully navigate, search, and apply to relevant jobs, or do whatever is explicitly commanded by the user.
+
+>>> USER OBJECTIVE: "${userPrompt || 'Apply to relevant jobs.'}" <<<
+
+You have a snapshot of the current DOM with <INTERACTIVE> pseudo-tags for elements you can interact with.
+Example: <%INTERACTIVE id="el-5" type="button" label="Apply Now"> Apply Now </%INTERACTIVE>
+
+Respond ONLY with valid JSON in this schema (no markdown, no extra text):
+{
+  "thought": "Explain what you see and what the batch of actions will accomplish",
+  "actions": [
+    { "action": "click" | "type" | "navigate" | "switch-tab" | "new-tab" | "scroll" | "wait" | "done", "selector": "el-X id from snapshot", "value": "text/url/tab-id/up/down" }
+  ]
+}
+
+CRITICAL RULES:
+1. SMART NAVIGATION: To save API calls, for common platforms (YouTube, Google, Amazon, LinkedIn), skip the home page and navigate directly to search results if possible.
+   Example pattern: https://www.youtube.com/results?search_query=QUERY
+2. TAB AWARENESS: You can switch focus to other open tabs using {"action": "switch-tab", "value": "tab-X"}.
+3. NEW TABS: If the user explicitly asks to "open a new tab", you MUST use {"action": "new-tab", "value": "https://url-to-open.com"} instead of "navigate".
+4. SCROLLING: Use {"action": "scroll", "value": "down 2000 fast"} to move a specific distance. OR use {"action": "scroll-until", "value": "keyword"} to autonomously macro-scroll down a virtual feed until "keyword" loads into the DOM (costing 0 extra API calls).
+5. Return 1-5 actions you can confidently chain WITHOUT needing a new snapshot in between.
+6. "navigate", "switch-tab", "new-tab", "scroll", "scroll-until", and "wait" must be alone in the actions array (triggers a re-snapshot).
+7. "done" must be the last item and only when the full objective is achieved.
+8. Cap actions at what you can see — if unsure, return fewer actions and get a new snapshot.
+  `.trim();
+
+  const activeTab = snapshot.availableTabs ? snapshot.availableTabs.find(t => t.active) : null;
+  const activeTabIdStr = activeTab ? activeTab.id : 'unknown';
+
+  const prompt = `
+PREVIOUS ACTIONS (last 10):
+${JSON.stringify(previousActions.slice(-10), null, 2)}
+
+CURRENT PAGE SNAPSHOT:
+URL: ${snapshot.url}
+Title: ${snapshot.title}
+CURRENT ACTIVE TAB ID: ${activeTabIdStr}
+AVAILABLE TABS:
+${JSON.stringify(snapshot.availableTabs, null, 2)}
+
+Content:
+"""
+${snapshot.snapshotText}
+"""
+
+Output ONLY valid JSON with an "actions" array.
+  `.trim();
+
+  // Branch based on selectedModel parameter
+  if (selectedModel && selectedModel.includes('mistral')) {
+    const invokeUrl = "https://integrate.api.nvidia.com/v1/chat/completions";
+    const headers = {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    };
+    const payload = {
+      "model": "mistralai/mistral-small-4-119b-2603",
+      "reasoning_effort": "high",
+      "messages": [
+        { "role": "system", "content": systemInstruction },
+        { "role": "user", "content": prompt }
+      ],
+      "max_tokens": 8192, // High context
+      "temperature": 0.10,
+      "top_p": 1.00,
+      "stream": false
+    };
+
+    try {
+      const response = await axios.post(invokeUrl, payload, { headers, responseType: 'json' });
+      const text = response.data.choices[0].message.content.trim();
+      const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+      return JSON.parse(cleaned);
+    } catch (error) {
+      throw new Error(`Nvidia Mistral API failed: ${error.response?.data?.message || error.message}`);
+    }
+  }
+
+  let lastError;
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      const genAI = new GoogleGenerativeAI(keys[i]);
+      // The prompt asks for 3.1 flash preview
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview', systemInstruction });
+      const result = await model.generateContent(prompt);
+      
+      const text = result.response.text().trim();
+      const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+      return JSON.parse(cleaned);
+
+    } catch (error) {
+      lastError = error;
+      console.warn(`[AI Job Agent] Key ${i + 1} failed:`, error.message);
+      continue;
+    }
+  }
+  
+  throw new Error(`AI Job Agent failed: ${lastError?.message}`);
+}
+
+module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData, optimizeCourseContent, chatWithAgent, evaluateJobPageSnapshot };

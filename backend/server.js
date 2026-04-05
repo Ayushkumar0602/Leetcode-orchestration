@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
 const { executeCode } = require('./executor');
@@ -11,6 +11,7 @@ const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orde
 const { ref: rtdbRef, push, set, remove, get } = require('firebase/database');
 const UAParser = require('ua-parser-js');
 const cron = require('node-cron');
+const { getJson } = require("serpapi");
 const adminRoutes = require('./routes/adminRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const mlRoutes = require('./routes/mlRoutes');
@@ -98,6 +99,48 @@ setInterval(async () => {
 }, 120000); // 2 minutes interval is plenty for dashboard freshness
 
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
+// SerpApi Job Search Integration
+app.get('/api/jobs', async (req, res) => {
+    try {
+        const { role } = req.query;
+        if (!role) {
+            return res.status(400).json({ error: "Role is required for job search (e.g. ?role=sde+intern)" });
+        }
+
+        const apiKey = process.env.SERPAPI_API_KEY;
+        if (!apiKey) {
+            return res.status(500).json({ error: "SERPAPI_API_KEY is not configured on the server." });
+        }
+
+        getJson({
+            engine: "google_jobs",
+            q: `${role} LinkedIn India`,
+            location: "India",
+            hl: "en",
+            api_key: apiKey
+        }, (json) => {
+            if (json.error) {
+                return res.status(500).json({ error: json.error });
+            }
+
+            const jobs = json.jobs_results?.map(job => ({
+                id: job.job_id,
+                title: job.title,
+                company: job.company_name,
+                location: job.location,
+                description: job.description,
+                time_posted: job.detected_extensions?.posted_at || '',
+                apply_links: job.apply_options?.map(a => a.link) || []
+            })) || [];
+
+            res.json({ jobs });
+        });
+    } catch (err) {
+        console.error('[Jobs] SerpApi fetch failed:', err);
+        res.status(500).json({ error: 'Failed to fetch jobs' });
+    }
+});
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const razorpayParams = {
@@ -239,19 +282,55 @@ app.get('/api/metadata', (req, res) => {
 // --- Resume Optimization Route ---
 app.post('/api/optimize-resume', async (req, res) => {
     try {
-        const { resumeText, jobDescription } = req.body;
+        const { resumeText, jobDescription, previousAttempt, feedback } = req.body;
         if (!resumeText || !jobDescription) {
             return res.status(400).json({ error: 'resumeText and jobDescription are required.' });
         }
         const { callGemini } = require('./interview'); // using existing initialized gemini helper
 
         const prompt = `You are an elite executive resume writer and ATS optimization expert. 
-Your task is to take a candidate's Master Resume text and rewrite it perfectly for maximum ATS score and human readability against a specific Target Job Description.
+Your task is to take a candidate's Master Resume text and perfectly rewrite it for maximum ATS score against a specific Target Job Description.
+${feedback ? `\nPREVIOUS ATTEMPT FEEDBACK:\nThe last optimization did not reach a 95% ATS match. Here is the ATS Feedback:\n"${feedback}"\nPrevious Resume Attempt:\n"${previousAttempt}"\n\nCRITICAL INSTRUCTION: Ensure ALL missing keywords or skills from the feedback are logically and naturally woven into the latest experience bullet points and skills section.` : ''}
+
 Do NOT invent fake experience or alter factual constraints. Instead, reframe, rephrase, and highlight their existing experience using the exact keywords, verbs, and phrasing style expected by the target job.
-Please return your output broken down cleanly into three markdown sections: 
-### 1. Optimized Professional Summary
-### 2. Optimized Experience Bullet Points
-### 3. Missing ATS Keywords & Suggested Skills
+CRITICAL MANDATES:
+1. The target job title MUST be clearly specified either in the summary or clearly associated with the candidate.
+2. You MUST include at least 5 specific achievements or measurable impacts across their experience (e.g., time saved, performance improvement, revenue increase, efficiency gains). Quantify wherever possible even if you must reasonably extrapolate from their duties.
+3. Integrate relevant SOFT SKILLS from the job description seamlessly into the text alongside hard technical skills.
+4. Use DIVERSE ACTIVE VERBS and powerful synonyms. Do NOT use the same words repeatedly, as repetitiveness is heavily penalized.
+5. Ensure perfect spelling, grammar, and a professional narrative tone reading as though carefully proofread.
+
+Return your response STRICTLY as a raw, valid, parseable JSON object with the exact keys below:
+{
+  "name": "Candidate Name (extract from resume or 'John Doe')",
+  "contact": "Email / Phone / LinkedIn (extract or leave blank)",
+  "summary": "Optimized Professional Summary (string)",
+  "experience": [
+    {
+      "title": "Job Title",
+      "company": "Company Name",
+      "date": "Date Range",
+      "points": ["Rewritten Bullet 1", "Rewritten Bullet 2"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "date": "Date Range (if any)",
+      "points": ["Rewritten Bullet 1", "Rewritten Bullet 2"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Degree Info",
+      "institution": "University Name",
+      "date": "Date Range"
+    }
+  ],
+  "skills": ["Skill 1", "Skill 2"]
+}
+
+Do NOT wrap the JSON in markdown blocks (like \`\`\`json). Output ONLY the raw JSON string so it can be unmarshaled safely.
 
 Candidate's Master Resume:
 """
@@ -261,12 +340,26 @@ ${resumeText}
 Target Job Description:
 """
 ${jobDescription}
-"""
+"""`;
 
-Write your response solely as the finalized optimized markdown content. Do not include introductory conversational text.`;
+        const generatedRaw = await callGemini(prompt);
+        // Clean off any potential markdown wrappers if the model misbehaves
+        let cleanJsonStr = generatedRaw.trim();
+        if (cleanJsonStr.startsWith('\`\`\`json')) {
+           cleanJsonStr = cleanJsonStr.replace(/^\`\`\`json/, '').replace(/\`\`\`$/, '').trim();
+        } else if (cleanJsonStr.startsWith('\`\`\`')) {
+           cleanJsonStr = cleanJsonStr.replace(/^\`\`\`/, '').replace(/\`\`\`$/, '').trim();
+        }
 
-        const generatedMarkdown = await callGemini(prompt);
-        res.json({ optimizedContent: generatedMarkdown });
+        let parsedJson;
+        try {
+            parsedJson = JSON.parse(cleanJsonStr);
+        } catch (e) {
+            console.error("JSON parse failed on Gemini output: ", cleanJsonStr);
+            return res.status(500).json({ error: 'LLM failed to format response as pure JSON' });
+        }
+
+        res.json({ optimizedData: parsedJson });
     } catch (error) {
         console.error('Error optimizing resume:', error);
         res.status(500).json({ error: 'Failed to optimize resume' });
@@ -2032,6 +2125,24 @@ app.post('/api/agent/chat', async (req, res) => {
     } catch (error) {
         console.error('Agent Chat Error:', error);
         res.status(500).json({ error: 'Failed to process chat with agent' });
+    }
+});
+
+// --- AI Job Applier Agent Route ---
+app.post('/api/ai/job-agent', async (req, res) => {
+    try {
+        const { snapshot, previousActions, userPrompt, selectedModel } = req.body;
+        if (!snapshot || !snapshot.snapshotText) {
+            return res.status(400).json({ error: 'Snapshot data is required' });
+        }
+        
+        const { evaluateJobPageSnapshot } = require('./ai'); // Lazy load or require at top, assuming it's correctly exported
+        const agentDecision = await evaluateJobPageSnapshot(snapshot, previousActions || [], userPrompt, selectedModel);
+        
+        res.json({ success: true, decision: agentDecision });
+    } catch (error) {
+        console.error('Job Agent Error:', error);
+        res.status(500).json({ error: 'Failed to evaluate job page snapshot' });
     }
 });
 

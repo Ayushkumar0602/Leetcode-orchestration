@@ -1,13 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Upload as S3Upload } from "@aws-sdk/lib-storage";
-import { UploadCloud, FileText, CheckCircle, AlertCircle, Menu, X, ArrowRight, Loader2, Trash2 } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle, AlertCircle, Menu, X, ArrowRight, Loader2, Trash2, Clock } from 'lucide-react';
 import NavProfile from './NavProfile';
 import NotificationBell from './components/NotificationBell';
 import { Client } from "@gradio/client";
 import { pdfjs } from 'react-pdf';
+import ClassicPrintTemplate from './components/ClassicPrintTemplate';
+import SingleColumnTemplate from './components/SingleColumnTemplate';
+import TwoColumnTemplate from './components/TwoColumnTemplate';
+import HeaderFocusedTemplate from './components/HeaderFocusedTemplate';
+import SkillsFirstTemplate from './components/SkillsFirstTemplate';
+import ProjectCentricTemplate from './components/ProjectCentricTemplate';
+import CompactDenseTemplate from './components/CompactDenseTemplate';
+import SectionBoxedTemplate from './components/SectionBoxedTemplate';
+import TimelineBasedTemplate from './components/TimelineBasedTemplate';
+import { useReactToPrint } from 'react-to-print';
+import { db } from './firebase';
+import { collection, addDoc, query, where, getDocs, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import './index.css';
 
 // Configure PDF.js worker
@@ -23,9 +35,13 @@ const s3Client = new S3Client({
   },
 });
 
-const ResumeOptimiser = () => {
+const ResumeOptimiser = ({ injectedJob, hideNav }) => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fileInputRef = useRef(null);
+  const componentRef = useRef(null);
+  const autoTriggered = useRef(false);
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -37,15 +53,31 @@ const ResumeOptimiser = () => {
   const [loadingExisting, setLoadingExisting] = useState(true);
 
   // Job Description state
-  const [jobDescription, setJobDescription] = useState('');
+  const [jobDescription, setJobDescription] = useState(injectedJob || location.state?.targetJob || '');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState('');
 
   // Auto-Optimise state
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [optimizedResult, setOptimizedResult] = useState('');
+  const [optimizedData, setOptimizedData] = useState(null);
+  const [optimizationAttempts, setOptimizationAttempts] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('ClassicPrintTemplate');
+  const [resumeHistory, setResumeHistory] = useState([]);
+  const [isRescanning, setIsRescanning] = useState(false);
+  const [rescanScore, setRescanScore] = useState(null);
 
-  const fileInputRef = useRef(null);
+  // Job Search State
+  const [jobQuery, setJobQuery] = useState('');
+  const [jobResults, setJobResults] = useState([]);
+  const [isSearchingJobs, setIsSearchingJobs] = useState(false);
+  const [searchError, setSearchError] = useState('');
+
+
+
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+    documentTitle: 'Optimised_Resume',
+  });
 
   // Utility to extract text from PDF ArrayBuffer
   const extractTextFromPDF = async (arrayBuffer) => {
@@ -62,6 +94,42 @@ const ResumeOptimiser = () => {
     }
     const textsArray = await Promise.all(countPromises);
     return textsArray.flat().join(' ');
+  };
+
+  // Auto Analyze Hook
+  useEffect(() => {
+    // If injectedJob changes (user selected a new job from the JobListing sidebar), update state
+    if (injectedJob) {
+      setJobDescription(injectedJob);
+    }
+  }, [injectedJob]);
+
+  useEffect(() => {
+    // Trigger analysis if location state has autoAnalyze OR we are injected with an existing resume
+    const shouldAutoAnalyze = location.state?.autoAnalyze || !!injectedJob;
+    if (shouldAutoAnalyze && jobDescription && existingResume && !isAnalyzing && !isOptimizing && !autoTriggered.current) {
+       autoTriggered.current = true;
+       window.history.replaceState({}, document.title)
+       handleAnalyze();
+    }
+  }, [jobDescription, existingResume, isAnalyzing, isOptimizing, location.state, injectedJob]);
+
+  const handleSearchJobs = async () => {
+    if (!jobQuery.trim()) return;
+    setIsSearchingJobs(true);
+    setSearchError('');
+    setJobResults([]);
+    try {
+      const res = await fetch(`http://localhost:3001/api/jobs?role=${encodeURIComponent(jobQuery)}`);
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Failed to fetch jobs via SerpApi");
+      setJobResults(data.jobs || []);
+    } catch(err) {
+      console.error(err);
+      setSearchError(err.message || "Failed to fetch jobs. Verify your API configuration.");
+    } finally {
+      setIsSearchingJobs(false);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -108,7 +176,8 @@ const ResumeOptimiser = () => {
   const handleAutoOptimize = async () => {
     if (!jobDescription.trim() || isOptimizing || !existingResume) return;
     setIsOptimizing(true);
-    setOptimizedResult('');
+    setOptimizedData(null);
+    setOptimizationAttempts([]);
     setStatus({ type: '', message: '' });
 
     try {
@@ -118,29 +187,179 @@ const ResumeOptimiser = () => {
       });
       const s3Response = await s3Client.send(getCommand);
       const arrayBuffer = await s3Response.Body.transformToByteArray();
-      
       const resumeText = await extractTextFromPDF(arrayBuffer);
+      if (!resumeText || resumeText.length < 50) throw new Error("Could not extract sufficient text from the PDF.");
+
+      let currentAttempt = "";
+      let feedback = "";
+      let matchScore = 0;
+      let attemptCount = 0;
+      const maxAttempts = 5;
+      let finalData = null;
+      let attemptsLog = [];
+
+      let bestScore = 0;
+      let bestData = null;
+
+      while (matchScore < 95 && attemptCount < maxAttempts) {
+        attemptCount++;
+        attemptsLog.push({ attempt: attemptCount, status: 'Generating AI Resume...', score: null });
+        setOptimizationAttempts([...attemptsLog]);
+
+        const res = await fetch("http://localhost:3001/api/optimize-resume", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ resumeText, jobDescription, previousAttempt: currentAttempt, feedback })
+        });
+        
+        if (!res.ok) throw new Error("Failed to optimize resume on backend");
+        const data = await res.json();
+        if (!data.optimizedData) throw new Error("Invalid format received from AI");
+        finalData = data.optimizedData;
+        
+        // Convert JSON to text for Gradio's ATS score check
+        const candidateText = `Summary:\n${finalData.summary}\n\nExperience:\n${finalData.experience?.map(e => e.points?.join('\n')).join('\n')}\n\nSkills:\n${finalData.skills?.join(', ')}`;
+
+        attemptsLog[attemptsLog.length - 1].status = 'Evaluating ATS Match...';
+        setOptimizationAttempts([...attemptsLog]);
+
+        const client = await Client.connect("girishwangikar/ResumeATS");
+        const result = await client.predict("/analyze_resume", {
+          resume_text: candidateText,
+          job_description: jobDescription,
+          with_job_description: true,
+          temperature: 0.2, // Strict ATS score evaluation
+          max_tokens: 1024,
+        });
+
+        const atsText = result.data[0];
+        // Robust extraction of any Match Percentage digit pair
+        const textLower = atsText.toLowerCase();
+        // Look for literal 'match percentage' then the closest digit
+        const matchRegex = /match percentage.*?(\d+)/;
+        const match = textLower.match(matchRegex);
+        if (match && match[1]) {
+           matchScore = parseInt(match[1]);
+        } else {
+           // fallback parsing if the string doesn't include the exact phrase
+           const fallbackMatch = atsText.match(/(\d{1,3})%/);
+           matchScore = fallbackMatch && fallbackMatch[1] ? parseInt(fallbackMatch[1]) : 100; // break safe
+        }
+
+        attemptsLog[attemptsLog.length - 1].score = matchScore;
+        
+        if (matchScore > bestScore) {
+           bestScore = matchScore;
+           bestData = finalData;
+           currentAttempt = candidateText;
+           attemptsLog[attemptsLog.length - 1].status = `Scored ${matchScore}% (New Best!)`;
+           feedback = atsText; 
+        } else {
+           // Regression logic: Do NOT update currentAttempt. Revert and use aggressive corrective feedback
+           attemptsLog[attemptsLog.length - 1].status = `Scored ${matchScore}% (Regressed)`;
+           feedback = `CRITICAL FAILURE: Your last rewrite dropped in score to ${matchScore}%. We are reverting back to the ${bestScore}% version. You MUST strictly preserve all keywords existing in the ${bestScore}% version while satisfying the following missing requirements:\n\n${atsText}`;
+        }
+
+        setOptimizationAttempts([...attemptsLog]);
+      }
       
-      if (!resumeText || resumeText.length < 50) {
-         throw new Error("Could not extract sufficient text from the PDF.");
+      // If loop exited without hitting 95, fallback to the best iteration found
+      if (bestScore > matchScore) {
+         finalData = bestData;
+         matchScore = bestScore;
+         attemptsLog.push({ attempt: 'Fallback', status: `Using highest scoring iteration: ${bestScore}%`, score: bestScore });
+         setOptimizationAttempts([...attemptsLog]);
+      }
+      
+      setOptimizedData(finalData);
+      setStatus({ type: 'success', message: `Optimization complete! Final Score: ${matchScore}%` });
+
+      // Save History to Firebase
+      if (currentUser && finalData) {
+         try {
+            await addDoc(collection(db, 'resumeHistory'), {
+               userId: currentUser.uid,
+               jobDescription,
+               optimizedData: finalData,
+               score: matchScore,
+               createdAt: new Date().toISOString()
+            });
+            fetchHistory(); // Refresh history UI
+         } catch (e) {
+            console.error("Failed to save history", e);
+         }
       }
 
-      // Send to local backend Gemini endpoint
-      const res = await fetch("http://localhost:5000/api/optimize-resume", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ resumeText, jobDescription })
-      });
-      
-      if (!res.ok) throw new Error("Failed to optimize resume on backend");
-      
-      const data = await res.json();
-      setOptimizedResult(data.optimizedContent);
     } catch (err) {
       console.error(err);
       setStatus({ type: 'error', message: err.message || 'Optimization failed. Please try again later.' });
     } finally {
       setIsOptimizing(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+     if (!currentUser) return;
+     try {
+       const q = query(collection(db, 'resumeHistory'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+       const snap = await getDocs(q);
+       const h = [];
+       snap.forEach(d => h.push({ id: d.id, ...d.data() }));
+       setResumeHistory(h);
+     } catch (err) {
+       console.error("Fetch history error", err);
+     }
+  };
+
+  const handleDeleteHistory = async (histId) => {
+     if (!window.confirm("Are you sure you want to delete this optimization record?")) return;
+     try {
+        await deleteDoc(doc(db, 'resumeHistory', histId));
+        fetchHistory();
+     } catch (e) {
+        console.error("Failed to delete history item", e);
+     }
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, [currentUser]);
+
+  const handleRescanATS = async () => {
+    if (!optimizedData || !jobDescription) return;
+    setIsRescanning(true);
+    setRescanScore(null);
+    try {
+        const textToScan = `Summary:\n${optimizedData.summary}\n\nExperience:\n${optimizedData.experience?.map(e => e.points?.join('\n')).join('\n')}\n\nSkills:\n${optimizedData.skills?.join(', ')}`;
+        
+        const client = await Client.connect("girishwangikar/ResumeATS");
+        const result = await client.predict("/analyze_resume", {
+          resume_text: textToScan,
+          job_description: jobDescription,
+          with_job_description: true,
+          temperature: 0.2, 
+          max_tokens: 1024,
+        });
+
+        const atsText = result.data[0];
+        const textLower = atsText.toLowerCase();
+        const matchRegex = /match percentage.*?(\d+)/;
+        const match = textLower.match(matchRegex);
+        if (match && match[1]) {
+           setRescanScore(parseInt(match[1]));
+        } else {
+           const fallbackMatch = atsText.match(/(\d{1,3})%/);
+           if (fallbackMatch && fallbackMatch[1]) {
+              setRescanScore(parseInt(fallbackMatch[1]));
+           } else {
+              setRescanScore('N/A');
+           }
+        }
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: 'error', message: 'ATS Scan failed.' });
+    } finally {
+      setIsRescanning(false);
     }
   };
 
@@ -259,6 +478,25 @@ const ResumeOptimiser = () => {
     }
   };
 
+  const handleDeleteUploaded = async () => {
+    if (!window.confirm("Are you sure you want to permanently delete your master resume from the vault?")) return;
+    setLoadingExisting(true);
+    setStatus({ type: '', message: '' });
+    try {
+      if (existingResume && currentUser) {
+        const dCmd = new DeleteObjectCommand({ Bucket: 'resume', Key: existingResume.Key });
+        await s3Client.send(dCmd);
+        setExistingResume(null);
+        setStatus({ type: 'success', message: 'Master resume deleted successfully.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: 'error', message: 'Failed to delete master resume.' });
+    } finally {
+      setLoadingExisting(false);
+    }
+  };
+
   return (
     <div style={{ 
       minHeight: '100vh',
@@ -267,6 +505,7 @@ const ResumeOptimiser = () => {
       color: '#fff', fontFamily: "'Inter', sans-serif"
     }}>
       {/* ── Top Navigation ── */}
+      {!hideNav && (
       <nav style={{
           height: '64px',
           borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -310,9 +549,10 @@ const ResumeOptimiser = () => {
               </button>
           </div>
       </nav>
+      )}
 
       {/* ── Mobile Menu Overlay ── */}
-      {isMenuOpen && (
+      {!hideNav && isMenuOpen && (
           <div style={{
               position: 'fixed', top: '64px', left: 0, right: 0, bottom: 0,
               background: 'rgba(5,5,5,0.95)', backdropFilter: 'blur(20px)', zIndex: 99,
@@ -334,6 +574,7 @@ const ResumeOptimiser = () => {
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '4rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         
         {/* Title Section */}
+        {!hideNav && (
         <div style={{ marginBottom: '3rem', textAlign: 'center', animation: 'fadeIn 0.6s ease-out' }}>
             <div style={{ display: 'inline-block', padding: '6px 12px', borderRadius: '100px', background: 'rgba(99,102,241,0.1)', color: '#818cf8', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '12px' }}>
                 ATS Integration
@@ -345,6 +586,7 @@ const ResumeOptimiser = () => {
                 Securely store your master resume. Our AI models will utilize it to parse your experience and optimize your mock interviews.
             </p>
         </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: existingResume && !file ? '1fr 1fr' : '1fr', gap: '2rem', width: '100%', maxWidth: existingResume && !file ? '1200px' : '700px', transition: 'all 0.5s ease-in-out' }}>
           
@@ -374,18 +616,33 @@ const ResumeOptimiser = () => {
                     Uploaded on {new Date(existingResume.LastModified).toLocaleDateString()} • {(existingResume.Size / 1024 / 1024).toFixed(2)} MB
                   </div>
                   
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{
-                      background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                      padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                  >
-                    Replace Resume
-                  </button>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                        padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                    >
+                      Replace
+                    </button>
+                    <button
+                      onClick={handleDeleteUploaded}
+                      style={{
+                        background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171',
+                        padding: '10px 16px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      title="Delete Master Resume"
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(248,113,113,0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(248,113,113,0.05)'}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -496,6 +753,70 @@ const ResumeOptimiser = () => {
               padding: '3rem', display: 'flex', flexDirection: 'column',
               animation: 'fadeIn 0.5s ease-out'
             }}>
+              
+              {/* Job Search Area */}
+              <div style={{ marginBottom: '30px', background: 'rgba(0,0,0,0.2)', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 12px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    Find LinkedIn Jobs (via SerpApi)
+                  </h3>
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                     <input 
+                       value={jobQuery}
+                       onChange={e => setJobQuery(e.target.value)}
+                       placeholder="e.g. SDE Intern, Frontend Developer"
+                       style={{ 
+                         flex: 1, padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', 
+                         border: '1px solid rgba(255,255,255,0.1)', color: '#fff', outline: 'none'
+                       }}
+                       onKeyDown={(e) => e.key === 'Enter' && handleSearchJobs()}
+                     />
+                     <button
+                       onClick={handleSearchJobs}
+                       disabled={isSearchingJobs || !jobQuery.trim()}
+                       style={{
+                         padding: '0 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                         color: '#fff', border: 'none', fontWeight: 600, cursor: (isSearchingJobs || !jobQuery.trim()) ? 'not-allowed' : 'pointer',
+                         opacity: (isSearchingJobs || !jobQuery.trim()) ? 0.6 : 1
+                       }}
+                     >
+                       {isSearchingJobs ? <Loader2 size={18} className="animate-spin" /> : 'Search'}
+                     </button>
+                  </div>
+                  
+                  {searchError && <div style={{ color: '#f87171', fontSize: '0.9rem', marginBottom: '12px' }}>{searchError}</div>}
+                  
+                  {jobResults.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto', paddingRight: '4px' }} className="custom-scrollbar">
+                       {jobResults.map(job => (
+                         <div key={job.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '16px', transition: 'all 0.2s', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <div>
+                                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>{job.title}</div>
+                                <div style={{ fontSize: '0.9rem', color: '#9ca3af' }}>{job.company} • {job.location}</div>
+                              </div>
+                              {job.time_posted && <div style={{ fontSize: '0.8rem', color: '#6b7280', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '4px' }}>{job.time_posted}</div>}
+                           </div>
+                           <div style={{ fontSize: '0.9rem', color: '#d1d5db', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                              {job.description}
+                           </div>
+                           <div style={{ display: 'flex', gap: '12px', marginTop: '8px', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <a href={job.apply_links[0] || '#'} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', fontSize: '0.9rem', textDecoration: 'none', fontWeight: 600 }}>External Link</a>
+                              <button 
+                                onClick={() => setJobDescription(`${job.title} at ${job.company}\n\n${job.description}`)}
+                                style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)', padding: '6px 16px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: '0.2s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(16,185,129,0.2)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(16,185,129,0.1)'}
+                              >
+                                Select & Edit
+                              </button>
+                           </div>
+                         </div>
+                       ))}
+                    </div>
+                  )}
+              </div>
+
+
               <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 16px', color: '#fff' }}>Target Job Role</h3>
               <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.5)', marginBottom: '24px', lineHeight: 1.5 }}>
                 Paste the specific job description or role requirements you are targeting. Our AI will analyze your master resume against these requirements to test ATS compatibility.
@@ -586,56 +907,197 @@ const ResumeOptimiser = () => {
           </div>
         )}
 
+        {/* Optimization Dashboard / Agentic Loop Status */}
+        {optimizationAttempts.length > 0 && (
+          <div style={{ marginTop: '2rem', width: '100%', maxWidth: '1200px', padding: '2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+             <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem', color: '#fff' }}>Agentic Auto-Optimization Loop</h3>
+             {optimizationAttempts.map(att => (
+                 <div key={att.attempt} style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '12px', fontSize: '0.95rem' }}>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Iteration {att.attempt}:</span>
+                    {att.status.includes('Evaluating') || att.status.includes('Generating') ? (
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#818cf8' }}>
+                          <Loader2 className="animate-spin" size={16} /> {att.status}
+                       </div>
+                    ) : (
+                       <span style={{ color: att.score >= 90 ? '#34d399' : '#fbbf24', fontWeight: 600 }}>{att.status}</span>
+                    )}
+                 </div>
+             ))}
+          </div>
+        )}
+
         {/* Full Width Optimization Feature Board */}
-        {optimizedResult && (
+        {optimizedData && (
           <div style={{ 
             marginTop: '3rem', width: '100%', maxWidth: '1200px', 
             background: 'rgba(20, 22, 30, 0.6)', backdropFilter: 'blur(16px)', 
             border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '24px', 
             padding: '3rem', animation: 'fadeInUp 0.6s ease-out',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05)'
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center'
           }}>
-             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '16px' }}>
-                <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '12px', borderRadius: '12px' }}>
-                   <FileText size={28} color="#10b981" />
+             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '12px', borderRadius: '12px' }}>
+                    <FileText size={28} color="#10b981" />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 4px', color: '#fff' }}>Industry Standard Template Ready</h2>
+                    <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+                        Your resume has achieved ATS perfection. Download your freshly generated PDF below.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                   <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 4px', color: '#fff' }}>100% Optimized Content Map</h2>
-                   <p style={{ color: 'rgba(255,255,255,0.5)', margin: 0 }}>
-                      Copy the rewritten bullet points below and paste them exactly into your existing custom template to preserve its design perfectly.
-                   </p>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={handleRescanATS}
+                    disabled={isRescanning}
+                    style={{
+                      padding: '14px 20px', borderRadius: '12px', fontSize: '0.95rem', fontWeight: 600,
+                      display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s', border: '1px solid rgba(99,102,241,0.5)', cursor: isRescanning ? 'not-allowed' : 'pointer',
+                      background: isRescanning ? 'rgba(99,102,241,0.05)' : 'rgba(99,102,241,0.1)', color: '#818cf8',
+                    }}
+                    onMouseEnter={(e) => { if (!isRescanning) e.currentTarget.style.background = 'rgba(99,102,241,0.2)' }}
+                    onMouseLeave={(e) => { if (!isRescanning) e.currentTarget.style.background = 'rgba(99,102,241,0.1)' }}
+                  >
+                    {isRescanning ? <><Loader2 size={18} className="animate-spin" /> Scanning...</> : <><CheckCircle size={18} /> {rescanScore ? `Match: ${rescanScore}%` : 'Verify ATS Score'}</>}
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    style={{
+                      padding: '14px 28px', borderRadius: '12px', fontSize: '1.05rem', fontWeight: 700,
+                      display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s', border: 'none', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff',
+                      boxShadow: '0 10px 25px rgba(16,185,129,0.3)'
+                    }}
+                  >
+                    <UploadCloud size={20} /> Download PDF
+                  </button>
                 </div>
+             </div>
+
+             {/* Template Selector */}
+             <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                {[
+                  { id: 'ClassicPrintTemplate', label: 'Classic Print' }, 
+                  { id: 'SingleColumnTemplate', label: 'Linear ATS' }, 
+                  { id: 'TwoColumnTemplate', label: 'Sidebar Split' },
+                  { id: 'HeaderFocusedTemplate', label: 'Header Highlight' },
+                  { id: 'SkillsFirstTemplate', label: 'Skills Focus' },
+                  { id: 'ProjectCentricTemplate', label: 'Project Highlights' },
+                  { id: 'CompactDenseTemplate', label: 'Compact Dense' },
+                  { id: 'SectionBoxedTemplate', label: 'Section Boxed' },
+                  { id: 'TimelineBasedTemplate', label: 'Chronological' }
+                ].map(tpl => (
+                   <button 
+                     key={tpl.id}
+                     onClick={() => setSelectedTemplate(tpl.id)}
+                     style={{
+                        padding: '10px 20px', borderRadius: '8px', 
+                        background: selectedTemplate === tpl.id ? '#10b981' : 'rgba(255,255,255,0.05)',
+                        color: selectedTemplate === tpl.id ? '#fff' : 'rgba(255,255,255,0.6)', border: 'none', cursor: 'pointer', transition: '0.2s',
+                        fontSize: '0.95rem', fontWeight: 600,
+                        boxShadow: selectedTemplate === tpl.id ? '0 4px 14px rgba(16,185,129,0.3)' : 'none'
+                     }}
+                   >
+                      {tpl.label}
+                   </button>
+                ))}
              </div>
              
-             {/* Render the markdown block generated by Gemini */}
-             <div 
-                className="prose prose-invert max-w-none"
-                style={{
-                  color: '#fff', fontSize: '1.05rem', lineHeight: 1.8,
-                  whiteSpace: 'pre-wrap', fontFamily: "'Inter', sans-serif"
-                }}
-             >
-                {optimizedResult}
+             {/* Print Component (Off-screen render prevents blank pages) */}
+             <div style={{ position: 'absolute', top: '-10000px', left: '-10000px', width: '850px' }}>
+               <div ref={componentRef}>
+                 {selectedTemplate === 'ClassicPrintTemplate' && <ClassicPrintTemplate data={optimizedData} />}
+                 {selectedTemplate === 'SingleColumnTemplate' && <SingleColumnTemplate data={optimizedData} />}
+                 {selectedTemplate === 'TwoColumnTemplate' && <TwoColumnTemplate data={optimizedData} />}
+                 {selectedTemplate === 'HeaderFocusedTemplate' && <HeaderFocusedTemplate data={optimizedData} />}
+                 {selectedTemplate === 'SkillsFirstTemplate' && <SkillsFirstTemplate data={optimizedData} />}
+                 {selectedTemplate === 'ProjectCentricTemplate' && <ProjectCentricTemplate data={optimizedData} />}
+                 {selectedTemplate === 'CompactDenseTemplate' && <CompactDenseTemplate data={optimizedData} />}
+                 {selectedTemplate === 'SectionBoxedTemplate' && <SectionBoxedTemplate data={optimizedData} />}
+                 {selectedTemplate === 'TimelineBasedTemplate' && <TimelineBasedTemplate data={optimizedData} />}
+               </div>
              </div>
-             
-             <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-start' }}>
-               <button
-                  onClick={() => {
-                      navigator.clipboard.writeText(optimizedResult);
-                      setStatus({ type: 'success', message: 'Optimized content map copied to clipboard!' });
-                  }}
-                  style={{
-                    padding: '12px 24px', borderRadius: '10px', fontSize: '0.95rem', fontWeight: 600,
-                    display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
-                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(16,185,129,0.1)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-                >
-                  <FileText size={18} /> Copy All Content
-               </button>
+
+             {/* UI Preview Shell */}
+             <div style={{ 
+               width: '100%', maxWidth: '850px', background: '#e2e8f0', padding: '20px', 
+               borderRadius: '12px', overflow: 'hidden', pointerEvents: 'auto', userSelect: 'auto',
+               boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+             }}>
+                 <div style={{ background: '#fff', boxShadow: '0 0 20px rgba(0,0,0,0.1)' }}>
+                   {selectedTemplate === 'ClassicPrintTemplate' && <ClassicPrintTemplate data={optimizedData} />}
+                   {selectedTemplate === 'SingleColumnTemplate' && <SingleColumnTemplate data={optimizedData} />}
+                   {selectedTemplate === 'TwoColumnTemplate' && <TwoColumnTemplate data={optimizedData} />}
+                   {selectedTemplate === 'HeaderFocusedTemplate' && <HeaderFocusedTemplate data={optimizedData} />}
+                   {selectedTemplate === 'SkillsFirstTemplate' && <SkillsFirstTemplate data={optimizedData} />}
+                   {selectedTemplate === 'ProjectCentricTemplate' && <ProjectCentricTemplate data={optimizedData} />}
+                   {selectedTemplate === 'CompactDenseTemplate' && <CompactDenseTemplate data={optimizedData} />}
+                   {selectedTemplate === 'SectionBoxedTemplate' && <SectionBoxedTemplate data={optimizedData} />}
+                   {selectedTemplate === 'TimelineBasedTemplate' && <TimelineBasedTemplate data={optimizedData} />}
+                 </div>
              </div>
+          </div>
+        )}
+
+        {/* History Section */}
+        {resumeHistory.length > 0 && (
+          <div style={{ marginTop: '4rem', width: '100%', maxWidth: '1200px' }}>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 24px', color: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
+               <Clock size={28} color="#818cf8" /> Optimization History
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+               {resumeHistory.map(hist => (
+                 <div key={hist.id} style={{ position: 'relative' }}>
+                   <div 
+                        style={{ 
+                          height: '100%', background: 'rgba(20,22,30,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '24px', cursor: 'pointer',
+                          transition: 'all 0.2s', position: 'relative'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(20,22,30,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+                        onClick={() => {
+                            setOptimizedData(hist.optimizedData);
+                            setJobDescription(hist.jobDescription);
+                            setRescanScore(null);
+                            window.scrollTo({ top: 300, behavior: 'smooth' });
+                        }}
+                   >
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDeleteHistory(hist.id); }}
+                        style={{
+                           position: 'absolute', top: '16px', right: '16px', background: 'transparent',
+                           border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '4px'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#f87171'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                        title="Delete record"
+                      >
+                         <Trash2 size={16} />
+                      </button>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', alignItems: 'center', paddingRight: '24px' }}>
+                         <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
+                            {new Date(hist.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                         </span>
+                         <span style={{ 
+                           color: hist.score >= 90 ? '#34d399' : '#facc15', 
+                           fontWeight: 800, background: hist.score >= 90 ? 'rgba(52,211,153,0.1)' : 'rgba(250,204,21,0.1)',
+                           padding: '4px 10px', borderRadius: '100px', fontSize: '0.85rem'
+                         }}>
+                            {hist.score}% ATS
+                         </span>
+                      </div>
+                      <p style={{ 
+                        fontSize: '0.95rem', color: '#e2e8f0', margin: 0, lineHeight: 1.5,
+                        overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' 
+                      }}>
+                         {hist.jobDescription || "No target job description provided."}
+                      </p>
+                   </div>
+                 </div>
+               ))}
+            </div>
           </div>
         )}
       </div>
