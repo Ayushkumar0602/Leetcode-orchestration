@@ -18,10 +18,29 @@ export default function SheetDetail() {
     const uid = currentUser?.uid;
 
     useSEO({
-        title: `${sheetId.charAt(0).toUpperCase() + sheetId.slice(1)} – Whizan AI Sheets`,
-        description: 'Track your Data Structures and Algorithms progress dynamically.',
+        title: `${sheetId.charAt(0).toUpperCase() + sheetId.slice(1)} – Master DSA Problems | Whizan AI`,
+        description: `Master High-Frequency DSA problems with the ${sheetId} roadmap. Track solved questions, analyze patterns, and ace your technical interviews with Whizan AI.`,
         canonical: `/sheets/${sheetId}`,
+        keywords: `${sheetId}, dsa roadmap, leetcode patterns, technical interview prep, data structures, algorithms, whizan ai`,
         robots: 'index, follow',
+        jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "Course",
+            "name": `${sheetId} DSA Roadmap`,
+            "description": `A curated collection of high-impact DSA problems for the ${sheetId} roadmap.`,
+            "provider": {
+                "@type": "Organization",
+                "name": "Whizan AI",
+                "sameAs": "https://whizan.xyz"
+            },
+            "url": `https://whizan.xyz/sheets/${sheetId}`,
+            "offers": {
+                "@type": "Offer",
+                "category": "Free",
+                "price": "0.00",
+                "priceCurrency": "USD"
+            }
+        }
     });
 
     const { data: statsData, isLoading } = useQuery({

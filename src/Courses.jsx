@@ -63,12 +63,6 @@ export default function Courses() {
 
     const filter = searchParams.get('filter') || 'all';
 
-    useSEO({
-        title: 'Tech & Programming Courses - Whizan',
-        description: 'Master system design, algorithms, and real-world engineering with structured interactive courses.',
-        canonical: '/courses',
-        robots: 'index, follow'
-    });
 
     // ── Queries ──────────────────────────────────────────────────────────────
 
@@ -81,6 +75,28 @@ export default function Courses() {
         queryKey: ['enrolled-ids', currentUser?.uid],
         queryFn: () => fetchEnrolledIds(currentUser),
         enabled: !!currentUser,
+    });
+
+    useSEO({
+        title: 'Master System Design & Algorithms - Interactive Engineering Courses | Whizan AI',
+        description: 'Accelerate your engineering career with Whizan AI. Explore structured, project-based courses in System Design, Data Structures, Algorithms, and Software Engineering Essentials.',
+        canonical: '/courses',
+        keywords: 'system design courses, learn algorithms, data structures, software engineering career, technical interview prep, backend development, whizan courses',
+        robots: 'index, follow',
+        jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "Software Engineering & Technical Interview Courses",
+            "description": "A collection of high-quality, interactive courses for senior software engineers.",
+            "url": "https://whizan.xyz/courses",
+            "numberOfItems": courses.length,
+            "itemListElement": courses.slice(0, 10).map((course, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "url": `https://whizan.xyz/courses/${course.slug}`,
+                "name": course.title
+            }))
+        }
     });
 
     // ── Mutation ─────────────────────────────────────────────────────────────

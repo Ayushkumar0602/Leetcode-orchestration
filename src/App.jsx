@@ -27,6 +27,8 @@ import SheetDetail from './SheetDetail';
 import ResumeOptimiser from './ResumeOptimiser';
 import JobListing from './JobListing';
 import JobApplier from './JobApplier';
+import ResumeOptimizerPreview from './previews/ResumeOptimizerPreview';
+import DSAPracticePreview from './previews/DSAPracticePreview';
 
 // Course Features
 import Courses from './Courses';
@@ -53,6 +55,12 @@ import BlogPost from './BlogPost';
 
 // Portfolio Feature
 import PortfolioLanding from './PortfolioLanding';
+
+// Standalone Tools
+import ToolsSandbox from './tools/ToolsSandbox';
+import ToolsSQLEditor from './tools/ToolsSQLEditor';
+import ToolsGitPlayground from './tools/ToolsGitPlayground';
+import ToolsMLSandbox from './tools/ToolsMLSandbox';
 
 // Components
 import SocialShare from './components/SocialShare';
@@ -98,9 +106,17 @@ function App() {
             <Route path="/evaluation/:interviewId" element={<InterviewEvaluation />} />
             <Route path="/sheets" element={<DSASheets />} />
             <Route path="/sheets/:sheetId" element={<SheetDetail />} />
+            <Route path="/resume-optimizer-preview" element={<ResumeOptimizerPreview />} />
+          <Route path="/dsa-practice-preview" element={<DSAPracticePreview />} />
             <Route path="/resumeoptimiser" element={<ResumeOptimiser />} />
             <Route path="/joblisting" element={<JobListing />} />
             <Route path="/jobapplier" element={<JobApplier />} />
+
+            {/* Standalone Tools Routes */}
+            <Route path="/tools/codesandbox" element={<ToolsSandbox />} />
+            <Route path="/tools/sql-editor" element={<ToolsSQLEditor />} />
+            <Route path="/tools/git-playground" element={<ToolsGitPlayground />} />
+            <Route path="/tools/ml-sandbox" element={<ToolsMLSandbox />} />
 
             {/* System Design Routes */}
             <Route path="/systemdesign" element={<SystemDesign />} />

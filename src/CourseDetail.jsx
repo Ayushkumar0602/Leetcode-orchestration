@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import NavProfile from './NavProfile';
@@ -87,11 +87,42 @@ export default function CourseDetail() {
         enrollMutation.mutate({ slug, currentUser });
     };
 
+    const cleanDescription = useMemo(() => {
+        if (!course?.description) return 'Master this comprehensive engineering course with Whizan AI.';
+        // Remove markdown basics and trim
+        return course.description
+            .replace(/[#*`_~]/g, '')
+            .substring(0, 160) + '...';
+    }, [course]);
+
     useSEO({
-        title: course ? `${course.title} | Whizan Courses` : 'Course Details',
-        description: course?.description || 'Learn completely structured engineering courses.',
+        title: course ? `${course.title} - Learn Engineering | Whizan AI` : 'Course Details | Whizan AI',
+        description: cleanDescription,
         canonical: `/courses/${slug}`,
-        robots: 'index, follow'
+        keywords: `learn ${course?.title?.toLowerCase()}, engineering course, ${slug?.replace(/-/g, ', ')}, technical skills, whizan ai`,
+        robots: 'index, follow',
+        jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "Course",
+            "name": course?.title,
+            "description": cleanDescription,
+            "provider": {
+                "@type": "Organization",
+                "name": "Whizan AI",
+                "sameAs": "https://whizan.xyz"
+            },
+            "url": `https://whizan.xyz/courses/${slug}`,
+            "courseCode": slug,
+            "thumbnailUrl": course?.thumbnailUrl || "https://whizan.xyz/logo.jpeg",
+            "educationalLevel": "Intermediate/Advanced",
+            "offers": {
+                "@type": "Offer",
+                "category": "Free",
+                "price": "0.00",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock"
+            }
+        }
     });
 
     // ── Render guards ─────────────────────────────────────────────────────────

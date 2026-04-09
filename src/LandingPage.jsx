@@ -1,570 +1,512 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { buildLoginUrl } from './utils/analytics';
-import Editor from '@monaco-editor/react';
 import NavProfile from './NavProfile';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet';
 import {
-    Brain, Code2, Server, Zap, Shield, MessageSquare, Terminal,
-    ChevronRight, ArrowRight, Play, Mic, Star, Clock, TrendingUp,
-    CheckCircle, Circle, Sparkles, Users, Container, GitBranch,
-    Bot, Cpu, Database, Globe, Lock, BarChart3, Layers, Award, BookOpen
+    Brain, Code2, Server, Zap, Play, Mic, Terminal, 
+    ArrowRight, CheckCircle, Orbit, FileText, Briefcase, 
+    BookOpen, Layers, Bot, MessageSquare, ShieldCheck, 
+    BarChart3, Globe, Users, Trophy
 } from 'lucide-react';
 import './LandingPage.css';
-import { useSEO } from './hooks/useSEO';
 
-// ── Constants ──────────────────────────────────────────────────────────────────
-
-
-const FEATURES = [
-    {
-        icon: Brain,
-        color: '#a855f7',
-        bg: 'rgba(168,85,247,0.1)',
-        border: 'rgba(168,85,247,0.3)',
-        title: 'AI Interviewer',
-        subtitle: 'Sarvam-powered voice',
-        desc: 'A real-time conversational AI interviewer that speaks to you, adapts to your answers, and guides problem-solving through 5 structured phases.',
-        bullets: ['Natural voice conversations', 'Adaptive follow-up questions', 'Multi-phase interview control'],
+// ── SEO JSON-LD ──────────────────────────────────────────────
+const SEO_SCHEMA = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Whizan AI",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web",
+    "description": "An AI-powered technical interview simulator and developer ecosystem offering real-time mock interviews, system design practice, live coding in 7 languages, and autonomous job applications for software engineers.",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Free tier available (Spark), with premium tier (Blaze) starting at competitive prices."
     },
-    {
-        icon: Code2,
-        color: '#00b8a3',
-        bg: 'rgba(0,184,163,0.1)',
-        border: 'rgba(0,184,163,0.3)',
-        title: 'Live Coding',
-        subtitle: 'Monaco Editor',
-        desc: 'Full-featured Monaco code editor with syntax highlighting for 7 languages, boilerplate generation, and real-time execution feedback.',
-        bullets: ['Python, C++, Java, Go, Rust...', 'AI-generated boilerplate', 'Live test case execution'],
-    },
-    {
-        icon: Zap,
-        color: '#ffa116',
-        bg: 'rgba(255,161,22,0.1)',
-        border: 'rgba(255,161,22,0.3)',
-        title: 'Real-time AI Actions',
-        subtitle: 'Firebase RTDB',
-        desc: 'The AI can move a cursor on your code, highlight problematic lines, drop inline comments, and trigger contextual banners — all in real time.',
-        bullets: ['AI cursor movement', 'Line highlighting & annotations', 'Inline code comments'],
-    },
-    {
-        icon: Server,
-        color: '#3b82f6',
-        bg: 'rgba(59,130,246,0.1)',
-        border: 'rgba(59,130,246,0.3)',
-        title: 'Containerized Execution',
-        subtitle: 'Docker sandboxes',
-        desc: 'Every code submission runs in an isolated Docker container, supporting full test-case validation with streaming progress feedback.',
-        bullets: ['Isolated Docker sandbox', 'Streaming SSE results', 'Edge case auto-generation'],
-    },
-    {
-        icon: Layers,
-        color: '#f43f5e',
-        bg: 'rgba(244,63,94,0.1)',
-        border: 'rgba(244,63,94,0.3)',
-        title: 'System Design',
-        subtitle: 'HLD & LLD',
-        desc: 'Dedicated system design interview modes. Discuss scalable architectures, trade-offs, and capacity estimation with an AI Staff Engineer.',
-        bullets: ['HLD architecture discussions', 'LLD class & sequence design', 'Whiteboard-style canvas'],
-    },
-    {
-        icon: BarChart3,
-        color: '#10b981',
-        bg: 'rgba(16,185,129,0.1)',
-        border: 'rgba(16,185,129,0.3)',
-        title: 'Score Reports',
-        subtitle: '6-dimension analysis',
-        desc: 'At the end of every interview, get a detailed hire/no-hire report with skill scores, strengths, red flags, and areas to improve.',
-        bullets: ['6-skill evaluation matrix', 'Hire / No-Hire verdict', 'Full transcript replay'],
-    },
-    {
-        icon: BookOpen,
-        color: '#eab308',
-        bg: 'rgba(234,179,8,0.1)',
-        border: 'rgba(234,179,8,0.3)',
-        title: 'Interactive Courses',
-        subtitle: 'LMS & AI Tutor',
-        desc: 'A comprehensive learning hub with integrated video editors, lazy-loading PDF viewers, and a context-aware AI tutor to guide your studies.',
-        bullets: ['Integrated code editors', 'Context-aware AI lecture tutor', 'Lazy-loading PDF viewers'],
-    },
-    {
-        icon: Globe,
-        color: '#0ea5e9',
-        bg: 'rgba(14,165,233,0.1)',
-        border: 'rgba(14,165,233,0.3)',
-        title: 'Developer Portfolios',
-        subtitle: 'Showcase your skills',
-        desc: 'Build your public developer identity. Host your code, display a GitHub-style contribution tracking calendar, and showcase your best projects.',
-        bullets: ['Public-facing profile URLs', 'Project & code showcases', 'GitHub-style activity heatmaps'],
-    },
-    {
-        icon: MessageSquare,
-        color: '#ec4899',
-        bg: 'rgba(236,72,153,0.1)',
-        border: 'rgba(236,72,153,0.3)',
-        title: 'Tech Blogs & Social',
-        subtitle: 'Community learning',
-        desc: 'Stay connected with a native blogging engine, real-time messaging, and an instant push notification center via Firebase & LiveKit.',
-        bullets: ['Native technical blogs', 'Real-time user chat', 'Push notification manager'],
-    },
-];
-
-const SAMPLE_PROBLEMS = [
-    { id: 1, title: 'Two Sum', diff: 'Easy', topics: ['Array', 'Hash Map'], acceptance: '49.1%' },
-    { id: 2, title: 'Median of Two Sorted Arrays', diff: 'Hard', topics: ['Binary Search'], acceptance: '37.2%' },
-    { id: 3, title: 'LRU Cache', diff: 'Medium', topics: ['Linked List', 'Hash Map'], acceptance: '42.5%' },
-];
-
-
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-const FadeIn = ({ children, delay = 0, y = 30, className = '' }) => {
-    const ref = useRef(null);
-    const inView = useInView(ref, { once: true, margin: '-80px' });
-    return (
-        <motion.div
-            ref={ref}
-            initial={{ opacity: 0, y }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
-            className={className}
-        >
-            {children}
-        </motion.div>
-    );
+    "featureList": [
+        "AI Mock Interviews with Real-Time Feedback",
+        "Code Execution & Testing in 7 Languages",
+        "1000+ Coding Problems Library",
+        "System Design Interview Training",
+        "AI-Powered Resume Parser & Portfolio Builder",
+        "Autonomous Job Application Tool",
+        "Interactive Learning Courses & Tutorials"
+    ]
 };
 
-const DiffBadge = ({ diff }) => {
-    const colors = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' };
-    return (
-        <span style={{ color: colors[diff], background: colors[diff] + '22', border: `1px solid ${colors[diff]}44`, borderRadius: 6, padding: '2px 10px', fontSize: '0.75rem', fontWeight: 700 }}>
-            {diff}
-        </span>
-    );
-};
-
-// ── AI Code Demo ───────────────────────────────────────────────────────────────
-function AICodeDemo() {
-    const [highlightedLines, setHighlightedLines] = useState([]);
-    const [aiComment, setAiComment] = useState(null);
-    const [aiCursorLine, setAiCursorLine] = useState(null);
-    const [step, setStep] = useState(0);
-
-    const steps = [
-        () => { setAiCursorLine(1); setHighlightedLines([]); setAiComment(null); },
-        () => { setAiCursorLine(2); setHighlightedLines([2]); setAiComment({ line: 2, text: '✅ HashMap gives O(1) lookup — great choice!' }); },
-        () => { setAiCursorLine(3); setHighlightedLines([3, 4]); setAiComment({ line: 3, text: '⚡ Complement check in O(1) — this is O(n) overall!' }); },
-        () => { setAiCursorLine(5); setHighlightedLines([5, 6]); setAiComment({ line: 5, text: '✅ Early exit when found — excellent optimization.' }); },
-        () => { setHighlightedLines([]); setAiCursorLine(null); setAiComment(null); },
-    ];
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setStep(s => {
-                const next = (s + 1) % steps.length;
-                steps[next]();
-                return next;
-            });
-        }, 2200);
-        steps[0]();
-        return () => clearInterval(timer);
-    }, []);
-
-    const lines = `def two_sum(nums, target):
-    seen = {}
-    for i, num in enumerate(nums):
-        complement = target - num
-        if complement in seen:
-            return [seen[complement], i]
-        seen[num] = i
-    return []`.split('\n');
-
-    return (
-        <div className="ai-code-demo">
-            <div className="code-demo-header">
-                <div className="dots-row">
-                    <span className="mac-dot r"></span>
-                    <span className="mac-dot y"></span>
-                    <span className="mac-dot g"></span>
-                </div>
-                <span className="code-demo-filename">solution.py</span>
-                <span className="code-demo-lang">Python 3</span>
-            </div>
-            <div className="code-demo-body">
-                {lines.map((line, i) => {
-                    const lineNum = i + 1;
-                    const isHighlighted = highlightedLines.includes(lineNum);
-                    const isCursor = aiCursorLine === lineNum;
-                    return (
-                        <div key={i} className={`code-line ${isHighlighted ? 'highlighted' : ''}`}>
-                            <span className="line-num">{lineNum}</span>
-                            <span className="line-content">{line || ' '}</span>
-                            {isCursor && (
-                                <motion.div
-                                    className="ai-cursor-badge"
-                                    initial={{ opacity: 0, x: -6 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0 }}
-                                >
-                                    <Bot size={10} /> AI
-                                </motion.div>
-                            )}
-                        </div>
-                    );
-                })}
-                <AnimatePresence>
-                    {aiComment && (
-                        <motion.div
-                            className="ai-comment-chip"
-                            key={aiComment.text}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            transition={{ duration: 0.35 }}
-                        >
-                            {aiComment.text}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+// ── Components ────────────────────────────────────────────
+const FeatureCard = ({ icon: Icon, title, desc, tag, tagColor, delay }) => (
+    <motion.div 
+        className="wh-feature-card"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6, delay }}
+        whileHover={{ y: -8, boxShadow: `0 25px 50px -12px ${tagColor}30` }}
+    >
+        <div className="wh-fc-icon-wrapper" style={{ '--icon-accent': tagColor }}>
+            <Icon className="wh-fc-icon" />
+            <div className="wh-fc-glow" style={{ background: tagColor }}/>
         </div>
-    );
-}
+        <div className="wh-fc-tag" style={{ color: tagColor, background: `${tagColor}15`, border: `1px solid ${tagColor}30` }}>
+            {tag}
+        </div>
+        <h3 className="wh-fc-title">{title}</h3>
+        <p className="wh-fc-desc">{desc}</p>
+    </motion.div>
+);
 
-// ── Main Landing Page ─────────────────────────────────────────────────────────
+const SectionHeader = ({ tag, title, desc }) => (
+    <div className="wh-section-header">
+        <motion.div 
+            className="wh-sh-tag"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+        >
+            {tag}
+        </motion.div>
+        <motion.h2 
+            className="wh-sh-title"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+        >
+            {title}
+        </motion.h2>
+        <motion.p 
+            className="wh-sh-desc"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+        >
+            {desc}
+        </motion.p>
+    </div>
+);
+
+// ── Main Page ─────────────────────────────────────────────
 export default function LandingPage() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [scrolled, setScrolled] = useState(false);
-    const [showHeroEditor, setShowHeroEditor] = useState(false);
-    const [activeProblem, setActiveProblem] = useState(null);
-
-    useSEO({
-        title: 'AI Coding Interview Simulator & Developer Portfolio | Whizan AI',
-        description: 'Practice AI-powered mock coding & system design interviews, take interactive tech courses, and build your developer portfolio. The ultimate hub for software engineers.',
-        canonical: 'https://whizan.xyz/',
-        jsonLd: {
-            '@context': 'https://schema.org',
-            '@type': 'EducationalOrganization',
-            name: 'Whizan AI',
-            url: 'https://whizan.xyz',
-            description: 'AI coding interview simulator, interactive LMS courses, and developer portfolio hub for software engineers.',
-            sameAs: [
-                'https://twitter.com/whizanHQ',
-                'https://www.linkedin.com/company/whizan-ai'
-            ]
-        },
-    });
 
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 30);
+        const onScroll = () => setScrolled(window.scrollY > 40);
         window.addEventListener('scroll', onScroll);
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    const goToInterview = () => navigate('/aiinterview');
-    const goToProblems = () => navigate('/dsaquestion/1');
+    const handleCtaClick = (path) => {
+        navigate(path);
+        window.scrollTo(0, 0);
+    };
 
     return (
-        <div className="lp-root">
-            {/* Grid lines BG */}
-            <div className="lp-grid-bg" aria-hidden />
+        <div className="wh-landing-root">
+            <Helmet>
+                <html lang="en" />
+                <title>AI Coding Interview Simulator & Career Ecosystem | Whizan AI</title>
+                <meta name="description" content="Master technical interviews with Whizan AI. Real-time mock interviews, system design practice, live coding in 7 languages, and automated job applications for engineers." />
+                <meta name="keywords" content="AI mock interview, leetcode alternative, system design practice, autonomous job applier, resume parser, live coding interview" />
+                <meta property="og:title" content="Whizan AI - Intelligent Technical Interview Ecosystem" />
+                <meta property="og:description" content="Master technical interviews with Whizan AI. Real-time mock interviews, system design practice, live coding in 7 languages, and automated job applications." />
+                <meta property="og:type" content="website" />
+                <link rel="canonical" href="https://whizan.xyz/" />
+                <script type="application/ld+json">{JSON.stringify(SEO_SCHEMA)}</script>
+            </Helmet>
 
-            {/* ── NAV ─────────────────────────────────────────────────────────── */}
-            <nav className={`lp-nav ${scrolled ? 'lp-nav-scrolled' : ''}`}>
-                <div className="lp-nav-inner">
-                    <div className="lp-brand" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
-                        <img src="/logo.jpeg" alt="Whizan AI" className="lp-logo" />
-                        <span className="lp-brand-name">Whizan AI</span>
+            <div className="wh-bg-mesh" aria-hidden="true" />
+            
+            {/* ── Navbar ────────────────────────────────────────────── */}
+            <nav className={`wh-navbar ${scrolled ? 'scrolled' : ''}`}>
+                <div className="wh-container wh-nav-inner">
+                    <div className="wh-brand" onClick={() => handleCtaClick('/dashboard')} role="button" tabIndex={0}>
+                        <img src="/logo.jpeg" alt="Whizan AI Logo" className="wh-logo" width="36" height="36" />
+                        <span className="wh-brand-text">Whizan AI</span>
                     </div>
-                    <div className="lp-nav-links">
-                        <a href="#features" title="View Whizan AI Features">Features</a>
-                        <a href="#demo" title="Watch Whizan AI Live Demo">Live Demo</a>
-                        <a href="#architecture" title="How Whizan AI Works">How it works</a>
-                        <a href="#problems" title="Practice DSA Problems">Practice</a>
+                    <div className="wh-nav-links">
+                        <a href="#features">Features</a>
+                        <a href="#ecosystem">Ecosystem</a>
+                        <a href="#pricing">Pricing</a>
                     </div>
-                    <div className="lp-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className="wh-nav-cta">
                         {currentUser ? (
-                            <button className="lp-btn-outline" onClick={() => navigate('/dashboard')} aria-label="Go to Dashboard">Dashboard →</button>
+                            <button className="wh-btn-outline" onClick={() => handleCtaClick('/dashboard')}>Dashboard</button>
                         ) : (
-                            <button className="lp-btn-primary" onClick={() => navigate(buildLoginUrl({ ref: 'navbar_cta' }))} aria-label="Get started with Whizan AI">Get started</button>
+                            <button className="wh-btn-glow" onClick={() => handleCtaClick(buildLoginUrl({ ref: 'navbar' }))}>
+                                Get Started
+                            </button>
                         )}
                         <NavProfile />
                     </div>
                 </div>
             </nav>
 
-            {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
             <main>
-            {/* ── HERO ────────────────────────────────────────────────────────── */}
-            <section className="lp-hero">
-                <div className="lp-hero-glow glow-purple" />
-                <div className="lp-hero-glow glow-blue" />
-
-                <div className="lp-hero-content">
-                    <motion.div
-                        className="lp-hero-badge"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        <Sparkles size={13} className="badge-sparkle" />
-                        AI-powered interview simulator
-                    </motion.div>
-
-                    <motion.h1
-                        className="lp-hero-headline"
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.1 }}
-                    >
-                        AI‑powered interview simulator<br />
-                        for{' '}
-                        <span className="lp-gradient-text">software engineers</span>
-                    </motion.h1>
-
-                    <motion.p
-                        className="lp-hero-sub"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
-                    >
-                        Real-time AI code review with cursor annotations, live voice conversations, Docker-sandboxed execution,
-                        and a detailed hire/no-hire score report — all in one free platform.
-                    </motion.p>
-
-                    <motion.div
-                        className="lp-hero-cta"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.3 }}
-                    >
-                        <button className="lp-btn-glow" onClick={goToInterview} aria-label="Start AI Mock Interview">
-                            <Brain size={18} aria-hidden="true" /> Start Mock Interview
-                        </button>
-                        <button className="lp-btn-outline" onClick={goToProblems} aria-label="Practice DSA Problems">
-                            <Code2 size={18} aria-hidden="true" /> Practice Problems
-                        </button>
-                    </motion.div>
-
-                    <motion.div
-                        className="lp-hero-stats"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                    >
-                        {[['7', 'Languages'], ['5', 'Interview Phases'], ['1,000+', 'DSA Problems'], ['6', 'Skill Dimensions']].map(([num, label]) => (
-                            <div className="lp-stat" key={label}>
-                                <span className="lp-stat-num">{num}</span>
-                                <span className="lp-stat-label">{label}</span>
-                            </div>
-                        ))}
-                    </motion.div>
-                </div>
-
-                {/* Hero interactive demo */}
-                <motion.div
-                    className="lp-hero-demo"
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.9, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                >
-                    <div className="hero-video-wrapper">
-                        <video
-                            src="/indexpage_video 1 .mov"
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="hero-demo-video"
-                        />
-                    </div>
-                </motion.div>
-            </section>
-
-            {/* ── LIVE CODE DEMO ───────────────────────────────────────────────── */}
-            <section className="lp-section" id="demo">
-                <div className="lp-demo-split">
-                    <FadeIn className="lp-demo-left">
-                        <div className="lp-section-label">Live Demo</div>
-                        <h2 className="lp-section-title lp-section-title-left">Real-time AI code review with cursor&nbsp;annotations</h2>
-                        <p className="lp-section-sub lp-section-sub-left">
-                            As you type, the AI interviewer moves its cursor through your code,
-                            highlights specific lines, and drops contextual annotations —
-                            all streamed instantly via Firebase Realtime Database.
-                        </p>
-                        <div className="lp-demo-feature-list">
-                            {[
-                                { icon: Bot, color: '#a855f7', text: 'AI cursor moves across your code' },
-                                { icon: Zap, color: '#ffa116', text: 'Line highlighting with severity colors' },
-                                { icon: MessageSquare, color: '#00b8a3', text: 'Inline comment chips on specific lines' },
-                                { icon: Terminal, color: '#3b82f6', text: 'Contextual banners with hints' },
-                            ].map(({ icon: Icon, color, text }) => (
-                                <div className="lp-demo-feature-item" key={text}>
-                                    <div className="lp-demo-feature-icon" style={{ background: color + '20', border: `1px solid ${color}44` }}>
-                                        <Icon size={14} color={color} />
-                                    </div>
-                                    {text}
-                                </div>
-                            ))}
-                        </div>
-                        <button className="lp-btn-glow" style={{ marginTop: '1.5rem' }} onClick={goToInterview}>
-                            Try it yourself <ArrowRight size={16} />
-                        </button>
-                    </FadeIn>
-
-                    <FadeIn delay={0.15} className="lp-demo-right">
-                        <AICodeDemo />
-                    </FadeIn>
-                </div>
-            </section>
-
-            {/* ── FEATURES GRID ────────────────────────────────────────────────── */}
-            <section className="lp-section lp-section-dark" id="features">
-                <FadeIn>
-                    <div className="lp-section-label">Platform Capabilities</div>
-                    <h2 className="lp-section-title">Everything you need to land the offer</h2>
-                    <p className="lp-section-sub">AI interview coach for software engineers — from live voice coding rounds to system design practice, end-to-end.</p>
-                </FadeIn>
-
-                <div className="lp-features-grid">
-                    {FEATURES.map((feat, i) => {
-                        const Icon = feat.icon;
-                        return (
-                            <FadeIn key={feat.title} delay={0.07 * i}>
-                                <motion.div
-                                    className="lp-feature-card"
-                                    style={{ '--card-color': feat.color, '--card-bg': feat.bg, '--card-border': feat.border }}
-                                    whileHover={{ y: -6, boxShadow: `0 20px 40px ${feat.color}18` }}
-                                    transition={{ duration: 0.3 }}
+                {/* ── Hero Section ────────────────────────────────────── */}
+                <section className="wh-hero">
+                    <div className="wh-hero-glow glow-1" />
+                    <div className="wh-hero-glow glow-2" />
+                    <div className="wh-container">
+                        <div className="wh-hero-grid">
+                            <div className="wh-hero-content">
+                                <motion.div 
+                                    className="wh-hero-badge"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6 }}
                                 >
-                                    <div className="lp-feature-icon-wrap">
-                                        <Icon size={22} color={feat.color} />
-                                    </div>
-                                    <div className="lp-feature-tag">{feat.subtitle}</div>
-                                    <h3 className="lp-feature-title">{feat.title}</h3>
-                                    <p className="lp-feature-desc">{feat.desc}</p>
-                                    <ul className="lp-feature-bullets">
-                                        {feat.bullets.map(b => (
-                                            <li key={b}><CheckCircle size={12} color={feat.color} />{b}</li>
-                                        ))}
-                                    </ul>
+                                    <Orbit className="wh-badge-icon" size={16} /> 
+                                    <span>The Ultimate Career Architect for Software Engineers</span>
                                 </motion.div>
-                            </FadeIn>
-                        );
-                    })}
-                </div>
-            </section>
+                                
+                                <motion.h1 
+                                    className="wh-hero-title"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.7, delay: 0.1 }}
+                                >
+                                    Master Interviews.<br />
+                                    <span className="wh-text-gradient">Land Top Offers.</span><br />
+                                    Automated by AI.
+                                </motion.h1>
+                                
+                                <motion.p 
+                                    className="wh-hero-subtitle"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.7, delay: 0.2 }}
+                                >
+                                    Experience the world's most advanced technical interview simulator. Engage in real-time voice conversations, execute code across 7 languages, master system design, and let AI autonomously apply to jobs for you.
+                                </motion.p>
+                                
+                                <motion.div 
+                                    className="wh-hero-actions"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.7, delay: 0.3 }}
+                                >
+                                    <button className="wh-btn-glow large" onClick={() => handleCtaClick('/aiinterview')}>
+                                        <Brain size={20} /> Start Playing Mock
+                                    </button>
+                                    <button className="wh-btn-outline large" onClick={() => handleCtaClick('/dsaquestion/1')}>
+                                        <Code2 size={20} /> Explore 1000+ Problems
+                                    </button>
+                                </motion.div>
 
-            {/* ── PRACTICE PROBLEMS ────────────────────────────────────────────── */}
-            <section className="lp-section lp-section-dark" id="problems">
-                <FadeIn>
-                    <div className="lp-section-label">Practice Mode</div>
-                    <h2 className="lp-section-title">1,800+ LeetCode-style problems with AI hints</h2>
-                    <p className="lp-section-sub">Solve real DSA problems with a Monaco editor, AI-generated hints, and automated test cases in a Docker sandbox.</p>
-                </FadeIn>
-
-                <FadeIn delay={0.15}>
-                    <div className="lp-problems-list">
-                        {SAMPLE_PROBLEMS.map((prob) => (
-                            <motion.div
-                                key={prob.id}
-                                className="lp-problem-row"
-                                whileHover={{ x: 6 }}
-                                transition={{ duration: 0.2 }}
-                                onClick={() => navigate(`/solvingpage/${prob.id}`)}
+                                <motion.div 
+                                    className="wh-hero-metrics"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 1, delay: 0.6 }}
+                                >
+                                    <div className="wh-metric"><strong className="wh-text-gradient-purple">7</strong> Supported Languages</div>
+                                    <div className="wh-metric"><strong className="wh-text-gradient-blue">15+</strong> Sandbox Test Cases</div>
+                                    <div className="wh-metric"><strong className="wh-text-gradient-teal">100%</strong> Autonomous Applications</div>
+                                </motion.div>
+                            </div>
+                            
+                            <motion.div 
+                                className="wh-hero-visual"
+                                initial={{ opacity: 0, x: 40, rotateY: -10 }}
+                                animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                                transition={{ duration: 1, delay: 0.3, type: "spring" }}
                             >
-                                <div className="lp-problem-num">#{prob.id}</div>
-                                <div className="lp-problem-title">{prob.title}</div>
-                                <div className="lp-problem-topics">
-                                    {prob.topics.map(t => <span key={t} className="lp-topic-chip">{t}</span>)}
+                                <div className="wh-visual-card">
+                                    <div className="wh-vc-header">
+                                        <div className="wh-mac-dots">
+                                            <span style={{background: '#ff5f56'}}/>
+                                            <span style={{background: '#ffbd2e'}}/>
+                                            <span style={{background: '#27c93f'}}/>
+                                        </div>
+                                        <span className="wh-vc-title">Live Interview Analysis</span>
+                                        <span className="wh-vc-status"><div className="pulse-dot"/>Recording...</span>
+                                    </div>
+                                    <div className="wh-vc-video-wrap">
+                                        <video src="/indexpage_video 1 .mov" autoPlay loop muted playsInline className="wh-vc-video" />
+                                    </div>
+                                    <div className="wh-vc-footer">
+                                        <div className="wh-ai-comment">
+                                            <Bot size={14} color="#a855f7" />
+                                            <span>"Great use of a HashMap here. What happens if the array contains duplicates?"</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <DiffBadge diff={prob.diff} />
-                                <div className="lp-problem-accept">{prob.acceptance}</div>
-                                <ChevronRight size={16} color="var(--lp-txt3)" />
                             </motion.div>
-                        ))}
-                        <button className="lp-view-all-btn" onClick={goToProblems}>
-                            View all problems <ArrowRight size={15} />
-                        </button>
-                    </div>
-                </FadeIn>
-            </section>
-
-            {/* ── SYSTEM DESIGN CTA ─────────────────────────────────────────────── */}
-            <section className="lp-section">
-                <FadeIn>
-                    <div className="lp-sysdesign-card">
-                        <div className="lp-sysdesign-icon-bg">
-                            <Server size={40} color="#3b82f6" />
                         </div>
-                        <h2 className="lp-sysdesign-title">System Design Interview Practice with AI</h2>
-                        <p className="lp-sysdesign-sub">
-                            Practice HLD and LLD interviews with an AI Staff Engineer. Discuss real architectures,
-                            trade-offs, and scalability decisions the same way top companies evaluate senior candidates.
-                        </p>
-                        <div className="lp-sysdesign-pills">
-                            {['High-Level Design', 'Low-Level Design', 'Capacity Estimation', 'Trade-off Analysis'].map(t => (
-                                <span key={t} className="lp-sysdesign-pill">{t}</span>
-                            ))}
-                        </div>
-                        <button className="lp-btn-outline" onClick={() => navigate('/systemdesign')}>
-                            Explore System Design <ArrowRight size={16} />
-                        </button>
                     </div>
-                </FadeIn>
-            </section>
+                </section>
 
-            {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
-            <section className="lp-cta-section">
-                <div className="lp-cta-glow" />
-                <FadeIn>
-                    <div className="lp-section-label" style={{ justifyContent: 'center', display: 'flex' }}>Start today — it's free</div>
-                    <h2 className="lp-cta-title">Ready to ace your interview?</h2>
-                    <p className="lp-cta-sub">
-                        Join engineers preparing for FAANG and top-tier companies with AI-powered mock interviews that feel remarkably real.
-                    </p>
-                    <div className="lp-cta-btns">
-                        <button className="lp-btn-glow lp-btn-large" onClick={goToInterview}>
-                            <Brain size={20} /> Start AI Interview
-                        </button>
-                        <button className="lp-btn-outline lp-btn-large" onClick={goToProblems}>
-                            <Code2 size={20} /> Explore Problems
-                        </button>
+                {/* ── Core Features ───────────────────────────────────────── */}
+                <section id="features" className="wh-section wh-section-dark">
+                    <div className="wh-container">
+                        <SectionHeader 
+                            tag="Core Capabilities" 
+                            title="Everything You Need to Ace Technical Rounds" 
+                            desc="Whizan AI replaces 5 different tools. Get everything from coding sandboxes to system design drawing boards in one unified, intelligent platform."
+                        />
+                        
+                        <div className="wh-features-grid">
+                            <FeatureCard 
+                                icon={Mic} 
+                                tag="Real-Time Voice" 
+                                tagColor="#a855f7" 
+                                title="Conversational AI Mock Interviews" 
+                                desc="Practice with 6 different voice personalities. The AI uses the Socratic method to provide live hints and perfectly mimics FAANG interview conditions without giving away the answers." 
+                                delay={0.1}
+                            />
+                            <FeatureCard 
+                                icon={Terminal} 
+                                tag="Containerized" 
+                                tagColor="#3b82f6" 
+                                title="7-Language Code Execution" 
+                                desc="Write code directly in the browser using the Monaco editor. Execute instantly against 15+ automated test cases in an isolated Docker sandbox with real-time SSE streaming." 
+                                delay={0.2}
+                            />
+                            <FeatureCard 
+                                icon={Layers} 
+                                tag="Architecture" 
+                                tagColor="#f43f5e" 
+                                title="System Design Interviewing" 
+                                desc="Interactive whiteboard to architect scalable systems (HLD) and clean code patterns (LLD). Get evaluated on your technical decisions, caching strategies, and load balancing insights." 
+                                delay={0.3}
+                            />
+                            <FeatureCard 
+                                icon={Briefcase} 
+                                tag="Automation" 
+                                tagColor="#10b981" 
+                                title="Autonomous Job Application" 
+                                desc="Let our AI agent apply to jobs across LinkedIn, Indeed, and company portals on your behalf. Smartly scrapes roles matching your profile and auto-fills complex applications." 
+                                delay={0.4}
+                            />
+                            <FeatureCard 
+                                icon={FileText} 
+                                tag="Intelligence" 
+                                tagColor="#f59e0b" 
+                                title="Resume Parsing & Portfolio" 
+                                desc="Upload your PDF resume. Gemini Vision automatically parses your skills, fetches your GitHub activity, and builds a stunning, customizable public portfolio website instantly." 
+                                delay={0.5}
+                            />
+                            <FeatureCard 
+                                icon={BarChart3} 
+                                tag="Analytics" 
+                                tagColor="#0ea5e9" 
+                                title="Detailed Performance Reports" 
+                                desc="Receive a comprehensive 6-dimension skill breakdown after every session. See a definitive 'Hire/No-Hire' recommendation, pinpoint strengths, and identify red flags immediately." 
+                                delay={0.6}
+                            />
+                        </div>
                     </div>
-                </FadeIn>
-                {/* Floating code blobs */}
-                <div className="lp-code-floats" aria-hidden>
-                    {['O(log n)', 'HashMap{}', 'DP[i][j]', 'BFS/DFS', 'O(n²)→O(n)', 'setDoc()', 'useEffect()', 'merge:true'].map((t, i) => (
-                        <motion.span
-                            key={t}
-                            className="lp-code-float"
-                            style={{ '--i': i }}
-                            animate={{ y: [0, -18, 0], opacity: [0.18, 0.35, 0.18] }}
-                            transition={{ duration: 4 + (i % 3), repeat: Infinity, delay: i * 0.7 }}
+                </section>
+
+                {/* ── The Ecosystem (Learning & Community) ──────────────── */}
+                <section id="ecosystem" className="wh-section">
+                    <div className="wh-container">
+                        <SectionHeader 
+                            tag="The Ecosystem" 
+                            title="Beyond Just Interviews" 
+                            desc="Whizan AI isn't just for practice. It is a complete educational ecosystem designed to accelerate your engineering career."
+                        />
+                        
+                        <div className="wh-bento-grid">
+                            <motion.div className="wh-bento-box bento-large bento-library"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                            >
+                                <div className="wh-bento-content">
+                                    <div className="wh-bento-icon"><Code2 size={24}/></div>
+                                    <h3>1000+ Problem Library</h3>
+                                    <p>A massive, curated database of coding problems grouped by difficulty, company, and topic. Filter by acceptance rate and track your submission history securely in the cloud.</p>
+                                    <button className="wh-bento-link" onClick={() => handleCtaClick('/dsaquestion/1')}>Browse Library <ArrowRight size={14}/></button>
+                                </div>
+                                <div className="wh-bento-visual bg-mesh-purple"/>
+                            </motion.div>
+
+                            <motion.div className="wh-bento-box bento-medium bento-sandboxes"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                            >
+                                <div className="wh-bento-content">
+                                    <div className="wh-bento-icon"><Server size={24}/></div>
+                                    <h3>Hands-On Sandboxes</h3>
+                                    <p>Practice in real environments. Spin up a full React/Next.js Web Dev Sandbox or jump into the Git Playground to master branching, rebasing, and resolving complex merge conflicts.</p>
+                                    <ul className="wh-bento-list">
+                                        <li><CheckCircle size={14}/> Live Web Editors</li>
+                                        <li><CheckCircle size={14}/> Visual Git Commits</li>
+                                    </ul>
+                                </div>
+                            </motion.div>
+
+                            <motion.div className="wh-bento-box bento-medium bento-courses"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <div className="wh-bento-content">
+                                    <div className="wh-bento-icon"><BookOpen size={24}/></div>
+                                    <h3>Interactive Courses</h3>
+                                    <p>Structured video lectures combined with live code samples. Learn deeply by pausing the video to immediately write and execute code within the same view.</p>
+                                    <button className="wh-bento-link" onClick={() => handleCtaClick('/courses')}>View Courses <ArrowRight size={14}/></button>
+                                </div>
+                            </motion.div>
+                            
+                            <motion.div className="wh-bento-box bento-wide bento-jarvis"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                <div className="wh-bento-split">
+                                    <div className="wh-bento-content">
+                                        <div className="wh-bento-icon"><MessageSquare size={24}/></div>
+                                        <h3>Jarvis: Your AI Co-Pilot</h3>
+                                        <p>A context-aware global AI assistant available on every page. Ask Jarvis to explain binary search, recommend a specific course, or summarize your weak areas based on your past mock interview performances.</p>
+                                    </div>
+                                    <div className="wh-bento-visual jarvis-chat-demo">
+                                        <div className="chat-bubble user">Hey Jarvis, how is my Dynamic Programming?</div>
+                                        <div className="chat-bubble ai">Based on your recent 4 interviews, your DP score averages 62/100. I recommend practicing "Knapsack" next!</div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── Pricing ─────────────────────────────────────────────── */}
+                <section id="pricing" className="wh-section wh-section-dark">
+                    <div className="wh-container">
+                        <SectionHeader 
+                            tag="Pricing" 
+                            title="Affordable Plans for Every Stage" 
+                            desc="Choose the tier that accelerates your success. Jumpstart for free, upgrade when you need uncompromising power."
+                        />
+
+                        <div className="wh-pricing-grid">
+                            <motion.div 
+                                className="wh-price-card spark"
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                            >
+                                <div className="wh-pc-header">
+                                    <h3>Spark Plan</h3>
+                                    <div className="wh-pc-price">Free<span>/forever</span></div>
+                                    <p>Perfect for exploring and occasional practice.</p>
+                                </div>
+                                <div className="wh-pc-body">
+                                    <ul className="wh-pc-features">
+                                        <li><CheckCircle size={16}/> Essential AI Mock Interviews</li>
+                                        <li><CheckCircle size={16}/> 1000+ Problem Library</li>
+                                        <li><CheckCircle size={16}/> 7-Language Code Execution</li>
+                                        <li><CheckCircle size={16}/> Basic Performance Reports</li>
+                                        <li><CheckCircle size={16}/> Standard Chat Coach</li>
+                                    </ul>
+                                </div>
+                                <div className="wh-pc-footer">
+                                    <button className="wh-btn-outline full-width" onClick={() => handleCtaClick(buildLoginUrl({ ref: 'pricing_free' }))}>
+                                        Start for Free
+                                    </button>
+                                </div>
+                            </motion.div>
+
+                            <motion.div 
+                                className="wh-price-card blaze"
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.15 }}
+                            >
+                                <div className="wh-pc-badge">Most Popular</div>
+                                <div className="wh-pc-glow"/>
+                                <div className="wh-pc-header">
+                                    <h3>Blaze Plan</h3>
+                                    <div className="wh-pc-price">₹299<span>/month</span></div>
+                                    <p>For serious engineers ready to land FAANG.</p>
+                                </div>
+                                <div className="wh-pc-body">
+                                    <ul className="wh-pc-features">
+                                        <li><CheckCircle size={16}/> <strong>Everything in Spark, PLUS:</strong></li>
+                                        <li><CheckCircle size={16}/> Unlimited System Design Training</li>
+                                        <li><CheckCircle size={16}/> Autonomous Job Applier Tool</li>
+                                        <li><CheckCircle size={16}/> AI Resume Parser & Portfolio Builder</li>
+                                        <li><CheckCircle size={16}/> Premium Courses & Certifications</li>
+                                        <li><CheckCircle size={16}/> Advanced Analytics & Priority Support</li>
+                                    </ul>
+                                </div>
+                                <div className="wh-pc-footer">
+                                    <button className="wh-btn-glow full-width" onClick={() => handleCtaClick(buildLoginUrl({ ref: 'pricing_premium' }))}>
+                                        Upgrade to Blaze
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── Final CTA ────────────────────────────────────────────── */}
+                <section className="wh-final-cta">
+                    <div className="wh-final-glow"/>
+                    <div className="wh-container">
+                        <motion.div 
+                            className="wh-cta-box"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
                         >
-                            {t}
-                        </motion.span>
-                    ))}
-                </div>
-            </section>
-
-            {/* ── FOOTER ────────────────────────────────────────────────────────── */}
+                            <h2>Ready to Elevate Your Engineering Capabilities?</h2>
+                            <p>Join thousands of software engineers already using Whizan AI to write better code, ace system design rounds, and secure premium tech roles.</p>
+                            <div className="wh-cta-actions">
+                                <button className="wh-btn-glow large" onClick={() => handleCtaClick(buildLoginUrl({ ref: 'bottom_cta' }))}>
+                                    Create Free Account
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                </section>
             </main>
-            <footer className="lp-footer">
-                <div className="lp-footer-inner">
-                    <div className="lp-footer-brand">
-                        <img src="/logo.jpeg" alt="Whizan AI" className="lp-logo" />
-                        <span className="lp-brand-name">Whizan AI</span>
+
+            {/* ── Footer ──────────────────────────────────────────────── */}
+            <footer className="wh-footer">
+                <div className="wh-container">
+                    <div className="wh-footer-grid">
+                        <div className="wh-footer-brand">
+                            <div className="wh-brand">
+                                <img src="/logo.jpeg" alt="Whizan AI" width="32" height="32" className="wh-logo" />
+                                <span className="wh-brand-text">Whizan AI</span>
+                            </div>
+                            <p className="wh-footer-desc">
+                                The ultimate AI ecosystem for software engineers. Practice coding, ace interviews, and accelerate your career.
+                            </p>
+                        </div>
+                        <div className="wh-footer-links-group">
+                            <h4>Platform</h4>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/aiinterview'); }}>Mock Interviews</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/dsaquestion/1'); }}>Coding Library</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/systemdesign'); }}>System Design</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/jobapplier'); }}>Job Applier</a>
+                        </div>
+                        <div className="wh-footer-links-group">
+                            <h4>Resources</h4>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/courses'); }}>Interactive Courses</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/blog'); }}>Tech Blog</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/portfolio'); }}>Portfolio Builder</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/terms'); }}>Terms & Conditions</a>
+                        </div>
                     </div>
-                    <div className="lp-footer-links">
-                        <button onClick={() => navigate('/dsaquestion/1')}>Problems</button>
-                        <button onClick={() => navigate('/aiinterview')}>AI Interview</button>
-                        <button onClick={() => navigate('/systemdesign')}>System Design</button>
-                        <button onClick={() => navigate(buildLoginUrl({ ref: 'footer' }))}>Sign In</button>
+                    <div className="wh-footer-bottom">
+                        <p>© {new Date().getFullYear()} Whizan AI. Built for engineers, by engineers.</p>
                     </div>
-                    <div className="lp-footer-copy">© {new Date().getFullYear()} Whizan AI · Built for engineers, by engineers.</div>
                 </div>
             </footer>
         </div>

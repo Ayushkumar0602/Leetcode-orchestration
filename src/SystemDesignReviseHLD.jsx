@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Loader2 } from 'lucide-react';
 import NavProfile from './NavProfile';
+import { useSEO } from './hooks/useSEO';
 
 // Dynamically map topic IDs to their content files
 const topicMapping = {
@@ -22,6 +23,13 @@ export default function SystemDesignReviseHLD() {
 
     const normalizedTopicId = topicId?.toLowerCase().replace(/-+$/, '');
     const ContentComponent = topicMapping[normalizedTopicId];
+
+    useSEO({
+        title: `${topicId?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} | High-Level Design Revision | Whizan AI`,
+        description: `Explore in-depth High-Level Design (HLD) concepts for ${topicId?.replace(/-/g, ' ')}. Master scalability, distributed systems, and modern architecture patterns for senior engineering roles.`,
+        canonical: `/revise/systemdesign/hld/${normalizedTopicId}`,
+        keywords: `system design, HLD, ${topicId?.replace(/-/g, ', ')}, distributed systems, architecture revision`,
+    });
     
     console.log("SystemDesignReviseHLD Routing:", { topicId, normalizedTopicId, found: !!ContentComponent });
 

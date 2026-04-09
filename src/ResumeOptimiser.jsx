@@ -590,6 +590,31 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
         </div>
         )}
 
+        {!currentUser ? (
+           <div style={{ 
+               padding: '4rem 2rem', background: 'rgba(20,22,30,0.6)', border: '1px solid rgba(255,255,255,0.1)', 
+               borderRadius: '24px', textAlign: 'center', marginTop: '2rem', width: '100%', maxWidth: '600px', backdropFilter: 'blur(10px)'
+           }}>
+              <AlertCircle size={48} color="#f472b6" style={{ margin: '0 auto 20px' }} />
+              <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 16px', color: '#fff' }}>Authentication Required</h2>
+              <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.6)', marginBottom: '30px', lineHeight: 1.6 }}>
+                 You must be logged in to upload a resume to the Vault and generate ATS-optimized versions. We securely store your documents for your sessions.
+              </p>
+              <button 
+                 onClick={() => navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)}
+                 style={{
+                    background: 'linear-gradient(135deg, #4f46e5, #ec4899)', border: 'none', color: '#fff',
+                    padding: '14px 32px', borderRadius: '12px', fontSize: '1.1rem', fontWeight: 700, cursor: 'pointer',
+                    boxShadow: '0 10px 25px rgba(79, 70, 229, 0.4)', transition: 'all 0.3s ease'
+                 }}
+                 onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                 onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+              >
+                 Sign In to Continue
+              </button>
+           </div>
+        ) : (
+          <>
         <div style={{ display: 'grid', gridTemplateColumns: existingResume && !file ? '1fr 1fr' : '1fr', gap: '2rem', width: '100%', maxWidth: existingResume && !file ? '1200px' : '700px', transition: 'all 0.5s ease-in-out' }}>
           
           {/* Left Column / Main Card: Resume Viewer / Upload Card */}
@@ -1101,6 +1126,8 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
                ))}
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
     </div>

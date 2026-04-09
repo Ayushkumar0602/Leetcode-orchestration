@@ -147,7 +147,7 @@ export default function Login() {
     });
 
     const params = new URLSearchParams(location.search);
-    const redirectUrl = params.get('redirect') || '/dashboard';
+    const redirectUrl = location.state?.from || params.get('redirect') || '/dashboard';
 
     const [failedAttempts, setFailedAttempts] = useState(0);
     const [lockoutTime, setLockoutTime] = useState(0);

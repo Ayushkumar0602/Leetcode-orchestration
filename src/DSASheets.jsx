@@ -11,11 +11,6 @@ export default function DSASheets() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
 
-    useSEO({
-        title: 'DSA Sheets Catalog – Whizan AI',
-        description: 'Explore curated roadmaps and lists to master Data Structures and Algorithms.',
-        canonical: '/sheets',
-    });
 
     const sheets = [
         {
@@ -55,6 +50,27 @@ export default function DSASheets() {
             available: false
         }
     ];
+
+    useSEO({
+        title: 'DSA Sheets Catalog – Whizan AI',
+        description: 'Explore curated roadmaps and lists to master Data Structures and Algorithms with Whizan AI. Track your progress globally across Neetcode, Blind 75, and more.',
+        canonical: '/sheets',
+        keywords: 'dsa sheets, neetcode 150, blind 75, dsa roadmap, algorithm practice, data structures, technical interview prep, whizan ai',
+        jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "DSA Sheets & Interview Roadmaps",
+            "description": "Curated collections of high-impact DSA problems for software engineering interviews.",
+            "url": "https://whizan.xyz/sheets",
+            "numberOfItems": sheets.filter(s => s.available).length,
+            "itemListElement": sheets.filter(s => s.available).map((sheet, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "url": `https://whizan.xyz/sheets/${sheet.id}`,
+                "name": sheet.title
+            }))
+        }
+    });
 
     return (
         <div style={{

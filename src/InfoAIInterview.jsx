@@ -38,6 +38,27 @@ export default function InfoAIInterview() {
         title: 'AI Mock Interview Practice – Voice AI Interviewer for Coding Rounds | Whizan AI',
         description: 'Start a 45-minute AI-powered DSA coding interview or system design session on Whizan AI. Voice-based AI interviewer, real-time code review, Docker sandbox, and hire/no-hire score report.',
         canonical: '/infoaiinterview',
+        jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Whizan AI Mock Interviewer",
+            "description": "Professional AI-powered technical interview simulator with voice support and real-time coding evaluation.",
+            "url": "https://whizan.xyz/infoaiinterview",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web",
+            "offers": {
+                "@type": "Offer",
+                "price": "0.00",
+                "priceCurrency": "USD"
+            },
+            "featureList": [
+                "Voice-based AI Interviewer",
+                "Real-time Monaco Code Editor",
+                "Docker Sandbox Execution",
+                "Staff Engineer System Design Evaluation",
+                "Hire/No-Hire Score Reports"
+            ]
+        }
     });
 
     const { data: interviewsData, isLoading: loading } = useQuery({
