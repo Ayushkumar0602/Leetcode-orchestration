@@ -814,18 +814,143 @@ Available routes on Whizan AI include:
   throw new Error(`AI Agent Chat failed: ${lastError?.message}`);
 }
 
-/**
- * Autonomous Job Applier Agent Evaluator
+function toActionSignature(a) {
+  return `${a?.action || ''}|${a?.selector || ''}|${a?.value || ''}`;
+}
 
+function normalizeAndValidateAgentDecision(rawDecision, previousActions = []) {
+  const ALLOWED_ACTIONS = new Set(['click', 'type', 'navigate', 'switch-tab', 'new-tab', 'scroll', 'scroll-until', 'wait', 'done']);
+  const SOLO_ACTIONS = new Set(['navigate', 'switch-tab', 'new-tab', 'scroll', 'scroll-until', 'wait']);
+  const MAX_ACTIONS = 20;
+  const MAX_THOUGHT_LEN = 500;
+
+  if (!rawDecision || typeof rawDecision !== 'object') {
+    throw new Error('Agent returned invalid decision payload');
+  }
+
+  const thought = String(rawDecision.thought || '').slice(0, MAX_THOUGHT_LEN);
+  const rawActions = Array.isArray(rawDecision.actions) ? rawDecision.actions : [];
+  if (rawActions.length === 0) {
+    throw new Error('Agent returned no actions');
+  }
+
+  const actions = rawActions
+    .slice(0, MAX_ACTIONS)
+    .map((a) => ({
+      action: typeof a?.action === 'string' ? a.action.trim() : '',
+      selector: typeof a?.selector === 'string' ? a.selector.trim() : undefined,
+      value: typeof a?.value === 'string' ? a.value.trim() : (a?.value != null ? String(a.value) : undefined),
+    }))
+    .filter((a) => ALLOWED_ACTIONS.has(a.action));
+
+  if (actions.length === 0) {
+    throw new Error('Agent actions are invalid/unsupported');
+  }
+
+  const firstAction = actions[0];
+  if (SOLO_ACTIONS.has(firstAction.action) && actions.length > 1) {
+    return { thought, actions: [firstAction] };
+  }
+
+  // Require grounded selectors for direct DOM actions.
+  for (const a of actions) {
+    if ((a.action === 'click' || a.action === 'type') && (!a.selector || !a.selector.startsWith('el-'))) {
+      throw new Error(`Ungrounded selector for ${a.action}`);
+    }
+  }
+
+  // Anti-loop guard: if the model keeps proposing the same first action repeatedly,
+  // force a re-snapshot cycle instead of repeating a likely-failing action.
+  const recentActionSignatures = previousActions
+    .slice(-8)
+    .filter((a) => a && typeof a === 'object' && typeof a.action === 'string')
+    .map(toActionSignature);
+  const firstSig = toActionSignature(actions[0]);
+  const repeatCount = recentActionSignatures.filter((sig) => sig === firstSig).length;
+  if (repeatCount >= 2 && !SOLO_ACTIONS.has(actions[0].action) && actions[0].action !== 'done') {
+    return {
+      thought: thought || 'Detected repeated action loop; forcing fresh observation.',
+      actions: [{ action: 'wait', value: 're-snapshot' }]
+    };
+  }
+
+  return { thought, actions };
+}
+
+function buildDirectNavigationDecision(userPrompt = '') {
+  const prompt = String(userPrompt || '').trim();
+  if (!prompt) return null;
+  const lower = prompt.toLowerCase();
+
+  const explicitUrlMatch = prompt.match(/https?:\/\/[^\s]+/i);
+  if (explicitUrlMatch) {
+    return {
+      thought: `User gave explicit URL; navigating directly to ${explicitUrlMatch[0]}.`,
+      actions: [{ action: 'navigate', value: explicitUrlMatch[0] }]
+    };
+  }
+
+  const openDomainMatch = prompt.match(/\b(?:open|go to|navigate to|visit)\s+([a-z0-9.-]+\.[a-z]{2,})(?:\b|\/)?/i);
+  if (openDomainMatch) {
+    const domain = openDomainMatch[1];
+    return {
+      thought: `User requested domain navigation to ${domain}.`,
+      actions: [{ action: 'navigate', value: `https://${domain}` }]
+    };
+  }
+
+  // "search X on Y" intent router
+  const searchOnMatch = prompt.match(/\bsearch\s+(.+?)\s+on\s+(google|youtube|linkedin|amazon)\b/i);
+  if (searchOnMatch) {
+    const query = encodeURIComponent(searchOnMatch[1].trim());
+    const platform = searchOnMatch[2].toLowerCase();
+    const map = {
+      google: `https://www.google.com/search?q=${query}`,
+      youtube: `https://www.youtube.com/results?search_query=${query}`,
+      linkedin: `https://www.linkedin.com/search/results/all/?keywords=${query}`,
+      amazon: `https://www.amazon.in/s?k=${query}`
+    };
+    return {
+      thought: `Direct search intent detected for ${platform}; opening results directly.`,
+      actions: [{ action: 'navigate', value: map[platform] }]
+    };
+  }
+
+  // Lightweight heuristic for direct platform opens.
+  if (/\b(open|go to|navigate)\b/.test(lower)) {
+    if (lower.includes('youtube')) {
+      return { thought: 'Direct platform intent: YouTube.', actions: [{ action: 'navigate', value: 'https://www.youtube.com' }] };
+    }
+    if (lower.includes('google')) {
+      return { thought: 'Direct platform intent: Google.', actions: [{ action: 'navigate', value: 'https://www.google.com' }] };
+    }
+    if (lower.includes('linkedin')) {
+      return { thought: 'Direct platform intent: LinkedIn.', actions: [{ action: 'navigate', value: 'https://www.linkedin.com' }] };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Autonomous universal browser agent evaluator.
  * Evaluates the current page snapshot and decides what to do next.
  */
-async function evaluateJobPageSnapshot(snapshot, previousActions = [], userPrompt = '', selectedModel = 'gemini-3.1-flash-lite-preview') {
+async function evaluateBrowserSnapshot(snapshot, previousActions = [], userPrompt = '', selectedModel = 'gemini-3.1-flash-lite-preview') {
   const keys = getApiKeys();
   if (keys.length === 0) throw new Error("No Gemini API keys found");
 
+  // Intent router: short-circuit obvious direct-navigation/search commands.
+  const activeUrl = String(snapshot?.url || '');
+  const isHomeContext = !activeUrl || activeUrl.startsWith('whizan://home') || activeUrl === 'about:blank';
+  if (isHomeContext) {
+    const directDecision = buildDirectNavigationDecision(userPrompt);
+    if (directDecision) return directDecision;
+  }
+
   const systemInstruction = `
-You are an advanced, completely autonomous AI web browsing agent designed to apply for jobs and navigate career websites.
-Your goal is to successfully navigate, search, and apply to relevant jobs, or do whatever is explicitly commanded by the user.
+You are an advanced, autonomous universal web browsing agent.
+Your goal is to complete the user's objective on any website safely and efficiently.
 
 >>> USER OBJECTIVE: "${userPrompt || 'Apply to relevant jobs.'}" <<<
 
@@ -841,23 +966,62 @@ Respond ONLY with valid JSON in this schema (no markdown, no extra text):
 }
 
 CRITICAL RULES:
+0. Grounding first: NEVER invent selectors. For click/type actions, selector must be an existing "el-*" from snapshot.
 1. SMART NAVIGATION: To save API calls, for common platforms (YouTube, Google, Amazon, LinkedIn), skip the home page and navigate directly to search results if possible.
    Example pattern: https://www.youtube.com/results?search_query=QUERY
 2. TAB AWARENESS: You can switch focus to other open tabs using {"action": "switch-tab", "value": "tab-X"}.
 3. NEW TABS: If the user explicitly asks to "open a new tab", you MUST use {"action": "new-tab", "value": "https://url-to-open.com"} instead of "navigate".
 4. SCROLLING: Use {"action": "scroll", "value": "down 2000 fast"} to move a specific distance. OR use {"action": "scroll-until", "value": "keyword"} to autonomously macro-scroll down a virtual feed until "keyword" loads into the DOM (costing 0 extra API calls).
-5. Return 1-5 actions you can confidently chain WITHOUT needing a new snapshot in between.
+5. Return 1-20 actions you can confidently chain WITHOUT needing a new snapshot in between.
 6. "navigate", "switch-tab", "new-tab", "scroll", "scroll-until", and "wait" must be alone in the actions array (triggers a re-snapshot).
 7. "done" must be the last item and only when the full objective is achieved.
 8. Cap actions at what you can see — if unsure, return fewer actions and get a new snapshot.
+9. If no safe grounded action is available, return exactly one action: {"action":"wait","value":"re-snapshot"}.
   `.trim();
+
+  let dynamicSystemInstruction = systemInstruction;
+  if (supabase && userPrompt && userPrompt.trim() !== '') {
+      try {
+          const genAI = new GoogleGenerativeAI(keys[0]);
+          const embedModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+          
+          const queryToEmbed = `${activeUrl} ${userPrompt}`;
+          const embedResult = await embedModel.embedContent(queryToEmbed);
+          const queryEmbedding = embedResult.embedding.values;
+
+          const { data: matchedDocs, error } = await supabase.rpc('match_knowledge', {
+              query_embedding: queryEmbedding,
+              match_threshold: 0.60,
+              match_count: 3
+          });
+
+          if (!error && matchedDocs && matchedDocs.length > 0) {
+              let ragContext = `\n\n--- KNOWN DOMAIN WORKFLOWS (RAG RESULTS) ---\nUse these retrieved workflow steps as authoritative guidance for achieving the user's objective on this specific site to avoid hallucinating steps:\n\n`;
+              matchedDocs.forEach(doc => {
+                  ragContext += `[Workflow] ${doc.title}\n`;
+                  ragContext += `Steps: ${doc.content}\n\n`;
+              });
+              ragContext += `----------------------------------------------\n`;
+              dynamicSystemInstruction += ragContext;
+          }
+      } catch (ragErr) {
+          console.warn(`[RAG] Semantic search failed in evaluateBrowserSnapshot:`, ragErr.message);
+      }
+  }
 
   const activeTab = snapshot.availableTabs ? snapshot.availableTabs.find(t => t.active) : null;
   const activeTabIdStr = activeTab ? activeTab.id : 'unknown';
 
+  const compactPreviousActions = previousActions.slice(-12).map((a) => ({
+    action: a?.action || a?.command || '',
+    selector: a?.selector || undefined,
+    value: a?.value || undefined
+  }));
+  const compactSnapshot = String(snapshot.snapshotText || '').slice(0, 25000);
+
   const prompt = `
 PREVIOUS ACTIONS (last 10):
-${JSON.stringify(previousActions.slice(-10), null, 2)}
+${JSON.stringify(compactPreviousActions, null, 2)}
 
 CURRENT PAGE SNAPSHOT:
 URL: ${snapshot.url}
@@ -868,7 +1032,7 @@ ${JSON.stringify(snapshot.availableTabs, null, 2)}
 
 Content:
 """
-${snapshot.snapshotText}
+${compactSnapshot}
 """
 
 Output ONLY valid JSON with an "actions" array.
@@ -877,31 +1041,36 @@ Output ONLY valid JSON with an "actions" array.
   // Branch based on selectedModel parameter
   if (selectedModel && selectedModel.includes('mistral')) {
     const invokeUrl = "https://integrate.api.nvidia.com/v1/chat/completions";
-    const headers = {
-      "Authorization": "Bearer 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",
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    };
-    const payload = {
-      "model": "mistralai/mistral-small-4-119b-2603",
-      "reasoning_effort": "high",
-      "messages": [
-        { "role": "system", "content": systemInstruction },
-        { "role": "user", "content": prompt }
-      ],
-      "max_tokens": 8192, // High context
-      "temperature": 0.10,
-      "top_p": 1.00,
-      "stream": false
-    };
-
-    try {
-      const response = await axios.post(invokeUrl, payload, { headers, responseType: 'json' });
-      const text = response.data.choices[0].message.content.trim();
-      const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-      return JSON.parse(cleaned);
-    } catch (error) {
-      throw new Error(`Nvidia Mistral API failed: ${error.response?.data?.message || error.message}`);
+    const nvidiaApiKey = process.env.NVIDIA_API_KEY;
+    if (!nvidiaApiKey) {
+      console.warn('NVIDIA_API_KEY is not configured. Falling back to Gemini.');
+    } else {
+      const headers = {
+        "Authorization": `Bearer ${nvidiaApiKey}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      };
+      const payload = {
+        "model": "mistralai/mistral-small-4-119b-2603",
+        "reasoning_effort": "high",
+        "messages": [
+          { "role": "system", "content": dynamicSystemInstruction },
+          { "role": "user", "content": prompt }
+        ],
+        "max_tokens": 8192, // High context
+        "temperature": 0.10,
+        "top_p": 1.00,
+        "stream": false
+      };
+  
+      try {
+        const response = await axios.post(invokeUrl, payload, { headers, responseType: 'json' });
+        const text = response.data.choices[0].message.content.trim();
+        const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+        return normalizeAndValidateAgentDecision(JSON.parse(cleaned), previousActions);
+      } catch (error) {
+        console.warn(`Nvidia Mistral API failed: ${error.response?.data?.message || error.message}. Falling back to Gemini.`);
+      }
     }
   }
 
@@ -910,12 +1079,12 @@ Output ONLY valid JSON with an "actions" array.
     try {
       const genAI = new GoogleGenerativeAI(keys[i]);
       // The prompt asks for 3.1 flash preview
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview', systemInstruction });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview', systemInstruction: dynamicSystemInstruction });
       const result = await model.generateContent(prompt);
       
       const text = result.response.text().trim();
       const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-      return JSON.parse(cleaned);
+      return normalizeAndValidateAgentDecision(JSON.parse(cleaned), previousActions);
 
     } catch (error) {
       lastError = error;
@@ -924,7 +1093,16 @@ Output ONLY valid JSON with an "actions" array.
     }
   }
   
-  throw new Error(`AI Job Agent failed: ${lastError?.message}`);
+  throw new Error(`AI Browser Agent failed: ${lastError?.message}`);
 }
 
-module.exports = { generateCodeAndTests, extractProjectDetails, regenerateProblemData, optimizeCourseContent, chatWithAgent, evaluateJobPageSnapshot };
+module.exports = {
+  generateCodeAndTests,
+  extractProjectDetails,
+  regenerateProblemData,
+  optimizeCourseContent,
+  chatWithAgent,
+  evaluateBrowserSnapshot,
+  // Backward compatibility for existing imports/routes.
+  evaluateJobPageSnapshot: evaluateBrowserSnapshot
+};

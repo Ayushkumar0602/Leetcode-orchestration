@@ -6,7 +6,6 @@ import { Upload as S3Upload } from "@aws-sdk/lib-storage";
 import { UploadCloud, FileText, CheckCircle, AlertCircle, Menu, X, ArrowRight, Loader2, Trash2, Clock } from 'lucide-react';
 import NavProfile from './NavProfile';
 import NotificationBell from './components/NotificationBell';
-import { Client } from "@gradio/client";
 import { pdfjs } from 'react-pdf';
 import ClassicPrintTemplate from './components/ClassicPrintTemplate';
 import SingleColumnTemplate from './components/SingleColumnTemplate';
@@ -96,6 +95,19 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
     return textsArray.flat().join(' ');
   };
 
+  const getApiBase = () =>
+    (import.meta.env.DEV
+      ? 'http://localhost:3001'
+      : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com'));
+
+  const deriveJobRole = (jd) => {
+    const text = String(jd || '').trim();
+    if (!text) return '';
+    const firstLine = text.split('\n').map(l => l.trim()).find(Boolean) || '';
+    if (firstLine.length <= 120) return firstLine;
+    return firstLine.slice(0, 120);
+  };
+
   // Auto Analyze Hook
   useEffect(() => {
     // If injectedJob changes (user selected a new job from the JobListing sidebar), update state
@@ -155,17 +167,21 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
          throw new Error("Could not extract sufficient text from the PDF. Ensure it's a valid text-based PDF.");
       }
 
-      // 3. Send to Gradio Model
-      const client = await Client.connect("girishwangikar/ResumeATS");
-      const result = await client.predict("/analyze_resume", {
-        resume_text: resumeText,
-        job_description: jobDescription,
-        with_job_description: true,
-        temperature: 0.2, // Strict ATS matching
-        max_tokens: 1024,
+      // 3. Send to backend Gemini ATS checker
+      const API_BASE = getApiBase();
+      const res = await fetch(`${API_BASE}/api/resume/ats-check`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resumeText,
+          jobDescription,
+          jobRole: deriveJobRole(jobDescription),
+        })
       });
-      
-      setAnalysisResult(result.data[0]);
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "ATS check failed");
+
+      setAnalysisResult(data.feedbackText || '');
     } catch (err) {
       console.error(err);
       setStatus({ type: 'error', message: err.message || 'Analysis failed. Please try again later.' });
@@ -207,7 +223,7 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
         attemptsLog.push({ attempt: attemptCount, status: 'Generating AI Resume...', score: null });
         setOptimizationAttempts([...attemptsLog]);
 
-        const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
+        const API_BASE = getApiBase();
         const res = await fetch(`${API_BASE}/api/optimize-resume`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -225,28 +241,19 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
         attemptsLog[attemptsLog.length - 1].status = 'Evaluating ATS Match...';
         setOptimizationAttempts([...attemptsLog]);
 
-        const client = await Client.connect("girishwangikar/ResumeATS");
-        const result = await client.predict("/analyze_resume", {
-          resume_text: candidateText,
-          job_description: jobDescription,
-          with_job_description: true,
-          temperature: 0.2, // Strict ATS score evaluation
-          max_tokens: 1024,
+        const atsRes = await fetch(`${API_BASE}/api/resume/ats-check`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            resumeText: candidateText,
+            jobDescription,
+            jobRole: deriveJobRole(jobDescription),
+          })
         });
-
-        const atsText = result.data[0];
-        // Robust extraction of any Match Percentage digit pair
-        const textLower = atsText.toLowerCase();
-        // Look for literal 'match percentage' then the closest digit
-        const matchRegex = /match percentage.*?(\d+)/;
-        const match = textLower.match(matchRegex);
-        if (match && match[1]) {
-           matchScore = parseInt(match[1]);
-        } else {
-           // fallback parsing if the string doesn't include the exact phrase
-           const fallbackMatch = atsText.match(/(\d{1,3})%/);
-           matchScore = fallbackMatch && fallbackMatch[1] ? parseInt(fallbackMatch[1]) : 100; // break safe
-        }
+        const atsData = await atsRes.json();
+        if (!atsRes.ok || atsData.error) throw new Error(atsData.error || "ATS check failed");
+        matchScore = typeof atsData.atsScore === 'number' ? atsData.atsScore : 100; // break-safe
+        const atsText = atsData.feedbackText || '';
 
         attemptsLog[attemptsLog.length - 1].score = matchScore;
         
@@ -334,29 +341,19 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
     try {
         const textToScan = `Summary:\n${optimizedData.summary}\n\nExperience:\n${optimizedData.experience?.map(e => e.points?.join('\n')).join('\n')}\n\nSkills:\n${optimizedData.skills?.join(', ')}`;
         
-        const client = await Client.connect("girishwangikar/ResumeATS");
-        const result = await client.predict("/analyze_resume", {
-          resume_text: textToScan,
-          job_description: jobDescription,
-          with_job_description: true,
-          temperature: 0.2, 
-          max_tokens: 1024,
+        const API_BASE = getApiBase();
+        const res = await fetch(`${API_BASE}/api/resume/ats-check`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            resumeText: textToScan,
+            jobDescription,
+            jobRole: deriveJobRole(jobDescription),
+          })
         });
-
-        const atsText = result.data[0];
-        const textLower = atsText.toLowerCase();
-        const matchRegex = /match percentage.*?(\d+)/;
-        const match = textLower.match(matchRegex);
-        if (match && match[1]) {
-           setRescanScore(parseInt(match[1]));
-        } else {
-           const fallbackMatch = atsText.match(/(\d{1,3})%/);
-           if (fallbackMatch && fallbackMatch[1]) {
-              setRescanScore(parseInt(fallbackMatch[1]));
-           } else {
-              setRescanScore('N/A');
-           }
-        }
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || "ATS check failed");
+        setRescanScore(typeof data.atsScore === 'number' ? data.atsScore : 'N/A');
     } catch (err) {
       console.error(err);
       setStatus({ type: 'error', message: 'ATS Scan failed.' });

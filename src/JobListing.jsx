@@ -1,41 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Briefcase, Clock, Loader2, FileText, ExternalLink, ArrowRight } from 'lucide-react';
-import { useAuth } from './contexts/AuthContext';
+import { Search, Briefcase, Loader2, FileText, ExternalLink, ArrowRight } from 'lucide-react';
 import NavProfile from './NavProfile';
 import NotificationBell from './components/NotificationBell';
 import ResumeOptimiser from './ResumeOptimiser';
 
 export default function JobListing() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
   
   const [jobQuery, setJobQuery] = useState('');
   const [jobResults, setJobResults] = useState([]);
   const [isSearchingJobs, setIsSearchingJobs] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [selectedJobDesc, setSelectedJobDesc] = useState('');
-
-  // Load from cache on first mount
-  useEffect(() => {
-    try {
-      const cached = localStorage.getItem('lastJobSearchCache_INDIA');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const { query, results, timestamp } = parsed;
-        const now = new Date().getTime();
-        // 20 minutes expiration
-        if (now - timestamp < 20 * 60 * 1000) {
-          setJobQuery(query);
-          setJobResults(results);
-        } else {
-          localStorage.removeItem('lastJobSearchCache_INDIA');
-        }
-      }
-    } catch (e) {
-      console.log('Cache parse err', e);
-    }
-  }, []);
+  const [selectedJobId, setSelectedJobId] = useState('');
+  const [hoursOld, setHoursOld] = useState('24');
+  const [postedAfter, setPostedAfter] = useState('');
 
   const handleSearchJobs = async () => {
     if(!jobQuery.trim()) return;
@@ -44,21 +24,16 @@ export default function JobListing() {
     setJobResults([]);
     try {
       const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
-      const res = await fetch(`${API_BASE}/api/jobs?role=${encodeURIComponent(jobQuery)}`);
+      const res = await fetch(
+        `${API_BASE}/api/jobs?role=${encodeURIComponent(jobQuery)}&hours_old=${encodeURIComponent(hoursOld)}`
+      );
       const data = await res.json();
-      if(!res.ok || data.error) throw new Error(data.error || "Failed to fetch jobs via SerpApi");
+      if(!res.ok || data.error) throw new Error(data.error || "Failed to fetch jobs via JobSpy");
       const fetchedJobs = data.jobs || [];
       setJobResults(fetchedJobs);
-
-      // Save to cache
-      localStorage.setItem('lastJobSearchCache_INDIA', JSON.stringify({
-        query: jobQuery,
-        results: fetchedJobs,
-        timestamp: new Date().getTime()
-      }));
     } catch(err) {
       console.error(err);
-      setSearchError(err.message || "Failed to fetch jobs. Verify your API configuration.");
+      setSearchError(err.message || "Failed to fetch jobs. Verify Python JobSpy is configured on the backend.");
     } finally {
       setIsSearchingJobs(false);
     }
@@ -67,7 +42,29 @@ export default function JobListing() {
   const proceedToOptimize = (job) => {
     const combinedDesc = `${job.title} at ${job.company}\n\n${job.description}`;
     setSelectedJobDesc(combinedDesc);
+    setSelectedJobId(job.id || '');
   };
+
+  const formatAmount = (amount) => {
+    if (amount === null || amount === undefined || amount === '') return '-';
+    const n = Number(amount);
+    if (!Number.isFinite(n)) return String(amount);
+    return n.toLocaleString();
+  };
+
+  const displayedJobs = [...jobResults]
+    .filter((job) => {
+      if (!postedAfter) return true;
+      const selectedTs = new Date(postedAfter).getTime();
+      const postedTs = job.posted_at_iso ? new Date(job.posted_at_iso).getTime() : NaN;
+      if (!Number.isFinite(selectedTs) || !Number.isFinite(postedTs)) return true;
+      return postedTs >= selectedTs;
+    })
+    .sort((a, b) => {
+      const tsA = a.posted_at_iso ? new Date(a.posted_at_iso).getTime() : 0;
+      const tsB = b.posted_at_iso ? new Date(b.posted_at_iso).getTime() : 0;
+      return tsB - tsA;
+    });
 
   return (
     <div style={{ 
@@ -103,7 +100,7 @@ export default function JobListing() {
           </div>
       </nav>
       {/* ── Main Content : SPLIT LAYOUT ── */}
-      <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '2rem', display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', height: 'calc(100vh - 64px)' }}>
+      <div style={{ maxWidth: '1700px', margin: '0 auto', padding: '2rem', display: 'grid', gridTemplateColumns: 'minmax(760px, 1.2fr) minmax(520px, 1fr)', gap: '2rem', height: 'calc(100vh - 64px)' }}>
         
         {/* Left Container: Jobs List */}
         <div style={{ 
@@ -114,8 +111,11 @@ export default function JobListing() {
         }} className="custom-scrollbar">
            
            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Briefcase size={20} color="#60a5fa" /> LinkedIn India
+              <Briefcase size={20} color="#60a5fa" /> Multi-board Jobs (JobSpy)
            </h2>
+           <div style={{ color: '#94a3b8', fontSize: '0.86rem', lineHeight: 1.45 }}>
+             Clear detailed cards: source, title, company, city, state, job type, interval, min/max amount, URL, and full description.
+           </div>
 
            <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
                <div style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', left: '20px', color: '#9ca3af' }}>
@@ -145,62 +145,123 @@ export default function JobListing() {
                  {isSearchingJobs ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
                </button>
            </div>
+           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+             <div>
+               <label style={{ display: 'block', fontSize: '0.76rem', color: '#94a3b8', marginBottom: '6px', fontWeight: 700 }}>
+                 Latest jobs (posted within)
+               </label>
+               <select
+                 value={hoursOld}
+                 onChange={(e) => setHoursOld(e.target.value)}
+                 style={{
+                   width: '100%',
+                   padding: '10px',
+                   borderRadius: '10px',
+                   background: 'rgba(0,0,0,0.3)',
+                   border: '1px solid rgba(255,255,255,0.1)',
+                   color: '#fff',
+                   outline: 'none'
+                 }}
+               >
+                 <option value="6">Last 6 hours</option>
+                 <option value="12">Last 12 hours</option>
+                 <option value="24">Last 24 hours</option>
+                 <option value="48">Last 48 hours</option>
+                 <option value="72">Last 72 hours</option>
+                 <option value="168">Last 7 days</option>
+               </select>
+             </div>
+             <div>
+               <label style={{ display: 'block', fontSize: '0.76rem', color: '#94a3b8', marginBottom: '6px', fontWeight: 700 }}>
+                 Filter by post date & time
+               </label>
+               <input
+                 type="datetime-local"
+                 value={postedAfter}
+                 onChange={(e) => setPostedAfter(e.target.value)}
+                 style={{
+                   width: '100%',
+                   padding: '10px',
+                   borderRadius: '10px',
+                   background: 'rgba(0,0,0,0.3)',
+                   border: '1px solid rgba(255,255,255,0.1)',
+                   color: '#fff',
+                   outline: 'none'
+                 }}
+               />
+             </div>
+           </div>
            
            {searchError && <div style={{ background: 'rgba(248,113,113,0.1)', color: '#f87171', padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', border: '1px solid rgba(248,113,113,0.2)' }}>{searchError}</div>}
            
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '1rem' }}>
-              {jobResults.map((job, idx) => (
-                <div key={job.id || idx} style={{ 
-                    background: 'linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)', 
-                    border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '24px', 
-                    transition: 'all 0.2s', display: 'flex', flexDirection: 'column', gap: '16px' 
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                     <div>
-                       <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>{job.title}</div>
-                       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#cbd5e1', fontSize: '0.95rem' }}><Briefcase size={16} color="#94a3b8" /> {job.company}</span>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#cbd5e1', fontSize: '0.95rem' }}><MapPin size={16} color="#94a3b8" /> {job.location}</span>
-                           {job.time_posted && <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#cbd5e1', fontSize: '0.95rem' }}><Clock size={16} color="#94a3b8" /> {job.time_posted}</span>}
-                       </div>
-                     </div>
-                     <div style={{ background: 'rgba(16,185,129,0.1)', padding: '6px 12px', borderRadius: '8px', color: '#34d399', fontSize: '0.8rem', fontWeight: 700, border: '1px solid rgba(16,185,129,0.2)' }}>
-                        ACTIVELY HIRING
-                     </div>
-                  </div>
-                  
-                  <div style={{ 
-                      fontSize: '1rem', color: '#9ca3af', lineHeight: 1.6, 
-                      display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                      background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '12px'
-                  }}>
-                     {job.description}
-                  </div>
-                  
-                  <div style={{ display: 'flex', gap: '16px', marginTop: '8px', alignItems: 'center', justifyContent: 'space-between' }}>
-                     <a href={job.apply_links?.[0] || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#60a5fa', fontSize: '0.95rem', textDecoration: 'none', fontWeight: 600 }}>
-                         <ExternalLink size={16} /> View External Link
-                     </a>
-                     
-                     <button 
-                       onClick={() => proceedToOptimize(job)}
-                       style={{ 
-                         background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.4)', 
-                         padding: '12px 24px', borderRadius: '12px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
-                         display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(16,185,129,0.1)'
-                       }}
-                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                       onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.15)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                     >
-                       <FileText size={18} /> Optimise Resume <ArrowRight size={18} />
-                     </button>
-                  </div>
+           <div style={{ marginTop: '1rem' }}>
+              {displayedJobs.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {displayedJobs.map((job, idx) => (
+                    <div
+                      key={job.id || idx}
+                      style={{
+                        border: selectedJobId && selectedJobId === (job.id || '') ? '1px solid rgba(96,165,250,0.7)' : '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '14px',
+                        padding: '14px',
+                        background: 'rgba(255,255,255,0.02)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' }}>
+                        <div>
+                          <div style={{ color: '#93c5fd', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                            {job.source || 'unknown'}
+                          </div>
+                          <div style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 800, lineHeight: 1.35 }}>{job.title || '-'}</div>
+                          <div style={{ color: '#cbd5e1', marginTop: '4px' }}>{job.company || '-'}</div>
+                        </div>
+                        <button
+                          onClick={() => proceedToOptimize(job)}
+                          style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.4)', padding: '8px 12px', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                        >
+                          <FileText size={15} /> Use <ArrowRight size={15} />
+                        </button>
+                      </div>
+
+                      <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))', gap: '10px' }}>
+                        {[
+                          ['CITY', job.city || '-'],
+                          ['STATE', job.state || '-'],
+                          ['JOB TYPE', job.job_type || '-'],
+                          ['INTERVAL', job.interval || '-'],
+                          ['MIN AMOUNT', formatAmount(job.min_amount)],
+                          ['MAX AMOUNT', formatAmount(job.max_amount)],
+                          ['LOCATION', job.location || '-'],
+                          ['POSTED', job.time_posted || '-']
+                        ].map(([label, value]) => (
+                          <div key={`${job.id || idx}-${label}`} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '8px 10px' }}>
+                            <div style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 700, marginBottom: '4px' }}>{label}</div>
+                            <div style={{ color: '#e5e7eb', fontSize: '0.84rem', lineHeight: 1.35, wordBreak: 'break-word' }}>{value}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 700, marginBottom: '6px' }}>JOB URL</div>
+                        <a href={job.apply_links?.[0] || '#'} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: '5px', wordBreak: 'break-all' }}>
+                          {job.apply_links?.[0] || 'No URL available'} <ExternalLink size={14} />
+                        </a>
+                      </div>
+
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 700, marginBottom: '6px' }}>DESCRIPTION</div>
+                        <div style={{ color: '#d1d5db', fontSize: '0.88rem', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>
+                          {job.description || 'No description available.'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
               
-               {!isSearchingJobs && jobResults.length === 0 && !searchError && (
+               {!isSearchingJobs && displayedJobs.length === 0 && !searchError && (
                    <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: '3rem 0', fontSize: '0.9rem' }}>
-                       Press Scan to search live roles.
+                       {jobResults.length === 0 ? 'Press Scan to search live roles.' : 'No jobs match the selected post date/time filter.'}
                    </div>
                )}
             </div>
@@ -216,7 +277,7 @@ export default function JobListing() {
              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', gap: '16px', padding: '2rem', textAlign: 'center' }}>
                 <FileText size={48} color="rgba(255,255,255,0.2)" />
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: '#fff' }}>Select a Role to Validate</h3>
-                <p style={{ maxWidth: '400px', lineHeight: 1.5 }}>Find a Job from the Indian pipeline on the left, and push it here to instantly parse and generate an optimized resume.</p>
+                <p style={{ maxWidth: '400px', lineHeight: 1.5 }}>Find a role from LinkedIn, Indeed, ZipRecruiter, Google and more, then push it here to instantly parse and generate an optimized resume.</p>
              </div>
            ) : (
              <div style={{ animation: 'fadeIn 0.5s ease-out' }}>

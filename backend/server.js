@@ -1,4 +1,4 @@
-require('dotenv').config(); 
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { executeCode } = require('./executor');
@@ -11,7 +11,7 @@ const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orde
 const { ref: rtdbRef, push, set, remove, get } = require('firebase/database');
 const UAParser = require('ua-parser-js');
 const cron = require('node-cron');
-const { getJson } = require("serpapi");
+const { execFile } = require('child_process');
 const adminRoutes = require('./routes/adminRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const mlRoutes = require('./routes/mlRoutes');
@@ -100,44 +100,56 @@ setInterval(async () => {
 
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-// SerpApi Job Search Integration
+// JobSpy Job Search Integration (Python bridge)
 app.get('/api/jobs', async (req, res) => {
     try {
-        const { role } = req.query;
+        const { role, location = 'India', results_wanted = '20', hours_old = '72' } = req.query;
         if (!role) {
             return res.status(400).json({ error: "Role is required for job search (e.g. ?role=sde+intern)" });
         }
 
-        const apiKey = process.env.SERPAPI_API_KEY;
-        if (!apiKey) {
-            return res.status(500).json({ error: "SERPAPI_API_KEY is not configured on the server." });
-        }
+        const safeResultsWanted = Math.min(Math.max(parseInt(results_wanted, 10) || 20, 1), 100);
+        const safeHoursOld = Math.min(Math.max(parseInt(hours_old, 10) || 72, 1), 720);
+        const scriptPath = require('path').join(__dirname, 'jobspy_scraper.py');
+        const pyCmd = process.env.PYTHON_BIN || 'python3';
 
-        getJson({
-            engine: "google_jobs",
-            q: `${role} LinkedIn India`,
-            location: "India",
-            hl: "en",
-            api_key: apiKey
-        }, (json) => {
-            if (json.error) {
-                return res.status(500).json({ error: json.error });
+        execFile(
+            pyCmd,
+            [
+                scriptPath,
+                '--role', String(role),
+                '--location', String(location),
+                '--results', String(safeResultsWanted),
+                '--hours', String(safeHoursOld),
+            ],
+            { timeout: 90000, maxBuffer: 10 * 1024 * 1024 },
+            (err, stdout, stderr) => {
+                if (err) {
+                    console.error('[Jobs] JobSpy process failed:', err);
+                    if (stderr) console.error('[Jobs] JobSpy stderr:', stderr);
+                    return res.status(500).json({
+                        error: 'Failed to fetch jobs via JobSpy. Ensure Python >= 3.10 and `python-jobspy` are installed on the server.'
+                    });
+                }
+
+                let parsed;
+                try {
+                    parsed = JSON.parse(String(stdout || '{}'));
+                } catch (parseErr) {
+                    console.error('[Jobs] Invalid JobSpy JSON response:', parseErr);
+                    if (stderr) console.error('[Jobs] JobSpy stderr:', stderr);
+                    return res.status(500).json({ error: 'Invalid response from JobSpy scraper.' });
+                }
+
+                if (parsed.error) {
+                    return res.status(500).json({ error: parsed.error });
+                }
+
+                return res.json({ jobs: Array.isArray(parsed.jobs) ? parsed.jobs : [] });
             }
-
-            const jobs = json.jobs_results?.map(job => ({
-                id: job.job_id,
-                title: job.title,
-                company: job.company_name,
-                location: job.location,
-                description: job.description,
-                time_posted: job.detected_extensions?.posted_at || '',
-                apply_links: job.apply_options?.map(a => a.link) || []
-            })) || [];
-
-            res.json({ jobs });
-        });
+        );
     } catch (err) {
-        console.error('[Jobs] SerpApi fetch failed:', err);
+        console.error('[Jobs] JobSpy fetch failed:', err);
         res.status(500).json({ error: 'Failed to fetch jobs' });
     }
 });
@@ -279,6 +291,120 @@ app.get('/api/metadata', (req, res) => {
     res.json(getMetadata());
 });
 
+// --- ATS Checker (Gemini) ---
+app.post('/api/resume/ats-check', async (req, res) => {
+    try {
+        const { resumeText, jobDescription, jobRole } = req.body || {};
+        if (!resumeText || !jobDescription) {
+            return res.status(400).json({ error: 'resumeText and jobDescription are required.' });
+        }
+
+        const safeResumeText = String(resumeText).slice(0, 60000);
+        const safeJobDesc = String(jobDescription).slice(0, 20000);
+        const derivedRole = String(jobRole || '').trim() || safeJobDesc.split('\n').map(l => l.trim()).find(Boolean) || 'Target Role';
+
+        const { callGemini } = require('./interview');
+
+        const prompt = `
+  Please analyze the following resume in the context of the job description provided. Strictly check every single line in the job description and analyze the resume for exact matches. Maintain high ATS standards and give scores only to the correct matches. Focus on missing hard skills and soft skills. Provide the following details:
+    1. The match percentage of the resume to the job description.
+    2. A list of accurate missing keywords.
+    3. Final thoughts on the resume's overall match with the job description in 3 lines.
+    4. Recommendations on how to add the missing keywords and improve the resume in 3-4 points with examples.
+TARGET ROLE:
+"${derivedRole}"
+
+JOB DESCRIPTION:
+"""
+${safeJobDesc}
+"""
+
+RESUME (as plain text):
+"""
+${safeResumeText}
+"""
+
+Return ONLY valid JSON (no markdown, no code fences, no extra text) exactly in this schema:
+{
+  "atsScore": 0,
+  "overallSummary": "2-4 sentences",
+  "strengths": ["...", "..."],
+  "gaps": ["...", "..."],
+  "missingKeywords": ["...", "..."],
+  "sectionFeedback": {
+    "summary": "text",
+    "experience": "text",
+    "skills": "text",
+    "projects": "text",
+    "education": "text",
+    "formattingATS": "text"
+  },
+  "actionItems": [
+    { "title": "short title", "detail": "what to change", "impact": "High|Medium|Low" }
+  ]
+}
+
+Rules:
+- atsScore must be an integer 0-100.
+- missingKeywords should be specific to the JD (tools, skills, responsibilities).
+- Do not hallucinate achievements; advise how to rephrase using existing content.
+- Be concise but actionable.
+        `.trim();
+
+        let raw = await callGemini(prompt);
+        raw = String(raw || '').trim();
+        raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+
+        let parsed;
+        try {
+            parsed = JSON.parse(raw);
+        } catch (e) {
+            console.error('[ATS] JSON parse failed:', raw.slice(0, 400));
+            return res.status(500).json({ error: 'LLM failed to return valid JSON for ATS check.' });
+        }
+
+        const scoreNum = Number(parsed.atsScore);
+        const atsScore = Number.isFinite(scoreNum) ? Math.max(0, Math.min(100, Math.round(scoreNum))) : null;
+
+        // Build a human-readable feedback string for the UI.
+        const lines = [];
+        if (atsScore != null) lines.push(`Match Percentage: ${atsScore}%`);
+        if (parsed.overallSummary) lines.push(`\nOverall:\n${parsed.overallSummary}`);
+        if (Array.isArray(parsed.strengths) && parsed.strengths.length) lines.push(`\nStrengths:\n- ${parsed.strengths.join('\n- ')}`);
+        if (Array.isArray(parsed.gaps) && parsed.gaps.length) lines.push(`\nGaps:\n- ${parsed.gaps.join('\n- ')}`);
+        if (Array.isArray(parsed.missingKeywords) && parsed.missingKeywords.length) lines.push(`\nMissing Keywords:\n- ${parsed.missingKeywords.join('\n- ')}`);
+        if (parsed.sectionFeedback && typeof parsed.sectionFeedback === 'object') {
+            const sf = parsed.sectionFeedback;
+            const addSection = (label, key) => {
+                const v = sf[key];
+                if (typeof v === 'string' && v.trim()) lines.push(`\n${label}:\n${v.trim()}`);
+            };
+            addSection('Summary', 'summary');
+            addSection('Experience', 'experience');
+            addSection('Skills', 'skills');
+            addSection('Projects', 'projects');
+            addSection('Education', 'education');
+            addSection('ATS Formatting', 'formattingATS');
+        }
+        if (Array.isArray(parsed.actionItems) && parsed.actionItems.length) {
+            const items = parsed.actionItems
+                .slice(0, 10)
+                .map(i => `- ${i.title || 'Action'} (${i.impact || 'Medium'}): ${i.detail || ''}`.trim())
+                .filter(Boolean);
+            if (items.length) lines.push(`\nRecommended Fixes:\n${items.join('\n')}`);
+        }
+
+        res.json({
+            atsScore,
+            feedbackText: lines.join('\n'),
+            feedback: parsed
+        });
+    } catch (error) {
+        console.error('[ATS] Error:', error);
+        res.status(500).json({ error: 'Failed to run ATS check' });
+    }
+});
+
 // --- Resume Optimization Route ---
 app.post('/api/optimize-resume', async (req, res) => {
     try {
@@ -346,9 +472,9 @@ ${jobDescription}
         // Clean off any potential markdown wrappers if the model misbehaves
         let cleanJsonStr = generatedRaw.trim();
         if (cleanJsonStr.startsWith('\`\`\`json')) {
-           cleanJsonStr = cleanJsonStr.replace(/^\`\`\`json/, '').replace(/\`\`\`$/, '').trim();
+            cleanJsonStr = cleanJsonStr.replace(/^\`\`\`json/, '').replace(/\`\`\`$/, '').trim();
         } else if (cleanJsonStr.startsWith('\`\`\`')) {
-           cleanJsonStr = cleanJsonStr.replace(/^\`\`\`/, '').replace(/\`\`\`$/, '').trim();
+            cleanJsonStr = cleanJsonStr.replace(/^\`\`\`/, '').replace(/\`\`\`$/, '').trim();
         }
 
         let parsedJson;
@@ -420,7 +546,7 @@ app.get('/api/public/courses/:slug', async (req, res) => {
                     // Opportunistically backfill the slug so future lookups are fast
                     try {
                         await setDoc(doc(db, 'youtubecourses', d.id), { slug: generatedSlug }, { merge: true });
-                    } catch (_) {}
+                    } catch (_) { }
                     return res.json({ id: d.id, slug: generatedSlug, ...data });
                 }
             }
@@ -440,7 +566,7 @@ app.get('/api/share/courses/:slug', async (req, res) => {
 
         const q = query(collection(db, 'youtubecourses'), where('slug', '==', slug));
         const snapshot = await getDocs(q);
-        
+
         if (!snapshot.empty) {
             courseData = snapshot.docs[0].data();
         } else {
@@ -508,7 +634,7 @@ app.post('/api/courses/:slug/enroll', async (req, res) => {
     try {
         const { uid } = req.body;
         if (!uid) return res.status(400).json({ error: 'User ID is required' });
-        
+
         const { slug } = req.params;
         let courseId = slug;
 
@@ -537,10 +663,10 @@ app.get('/api/courses/:uid/enrolled', async (req, res) => {
         const { uid } = req.params;
         const profileSnap = await getDoc(doc(db, 'userProfiles', uid));
         if (!profileSnap.exists()) return res.json({ enrolledCourses: [] });
-        
+
         const data = profileSnap.data();
         const enrolledIds = data.enrolledCourses || [];
-        
+
         if (enrolledIds.length === 0) return res.json({ enrolledCourses: [] });
 
         // Retrieve course metadata for enrolled courses
@@ -572,11 +698,11 @@ app.get('/api/courses/:id/materials', async (req, res) => {
         const { id } = req.params;
         const q = query(collection(db, 'course_materials'), where('courseId', '==', id));
         const snapshot = await getDocs(q);
-        
+
         const materials = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
-        })).sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+        })).sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
 
         res.json({ materials });
     } catch (error) {
@@ -1997,17 +2123,17 @@ app.get('/api/analytics/summary', async (req, res) => {
 
 // ── Subscription Expiry Email Cron ───────────────────────────────────────────
 
-const EMAILJS_REST_URL     = 'https://api.emailjs.com/api/v1.0/email/send';
+const EMAILJS_REST_URL = 'https://api.emailjs.com/api/v1.0/email/send';
 
 // Primary EmailJS Account (Expiry Reminder)
-const PRIMARY_SERVICE_ID   = process.env.EMAILJS_PRIMARY_SERVICE_ID;
-const PRIMARY_PUBLIC_KEY   = process.env.EMAILJS_PRIMARY_PUBLIC_KEY;
-const TEMPLATE_REMINDER    = process.env.EMAILJS_TEMPLATE_REMINDER;
+const PRIMARY_SERVICE_ID = process.env.EMAILJS_PRIMARY_SERVICE_ID;
+const PRIMARY_PUBLIC_KEY = process.env.EMAILJS_PRIMARY_PUBLIC_KEY;
+const TEMPLATE_REMINDER = process.env.EMAILJS_TEMPLATE_REMINDER;
 
 // Secondary EmailJS Account (Subscription Ended)
 const SECONDARY_SERVICE_ID = process.env.EMAILJS_SECONDARY_SERVICE_ID;
 const SECONDARY_PUBLIC_KEY = process.env.EMAILJS_SECONDARY_PUBLIC_KEY;
-const TEMPLATE_EXPIRED     = process.env.EMAILJS_TEMPLATE_EXPIRED;
+const TEMPLATE_EXPIRED = process.env.EMAILJS_TEMPLATE_EXPIRED;
 
 function formatDateNice(iso) {
     return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -2019,9 +2145,9 @@ async function sendEmailViaREST(serviceId, templateId, publicKey, params) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                service_id:  serviceId,
+                service_id: serviceId,
                 template_id: templateId,
-                user_id:     publicKey,
+                user_id: publicKey,
                 template_params: params,
             }),
         });
@@ -2046,8 +2172,8 @@ async function runExpiryCheck() {
             if (data.plan !== 'Blaze' || !data.planExpiresAt) continue;
 
             const expiresAt = new Date(data.planExpiresAt);
-            const name       = data.displayName || data.email?.split('@')[0] || 'there';
-            const email      = data.email;
+            const name = data.displayName || data.email?.split('@')[0] || 'there';
+            const email = data.email;
 
             if (!email) continue;
 
@@ -2056,11 +2182,11 @@ async function runExpiryCheck() {
                 // Only send once: track with `expiredEmailSent` flag
                 if (!data.expiredEmailSent) {
                     await sendEmailViaREST(SECONDARY_SERVICE_ID, TEMPLATE_EXPIRED, SECONDARY_PUBLIC_KEY, {
-                        to_name:    name,
-                        to_email:   email,
+                        to_name: name,
+                        to_email: email,
                         expired_on: formatDateNice(data.planExpiresAt),
-                        from_name:  'Whizan Team',
-                        reply_to:   'whizanai@gmail.com',
+                        from_name: 'Whizan Team',
+                        reply_to: 'whizanai@gmail.com',
                     });
                     await setDoc(doc(db, 'userProfiles', docSnap.id), {
                         plan: 'Spark',
@@ -2074,11 +2200,11 @@ async function runExpiryCheck() {
                 // Only send once: track with `reminderEmailSent` flag
                 if (!data.reminderEmailSent) {
                     await sendEmailViaREST(PRIMARY_SERVICE_ID, TEMPLATE_REMINDER, PRIMARY_PUBLIC_KEY, {
-                        to_name:     name,
-                        to_email:    email,
+                        to_name: name,
+                        to_email: email,
                         expiry_date: formatDateNice(data.planExpiresAt),
-                        from_name:   'Whizan Team',
-                        reply_to:    'whizanai@gmail.com',
+                        from_name: 'Whizan Team',
+                        reply_to: 'whizanai@gmail.com',
                     });
                     await setDoc(doc(db, 'userProfiles', docSnap.id), {
                         reminderEmailSent: true,
@@ -2115,7 +2241,7 @@ app.post('/api/agent/chat', async (req, res) => {
         if (!messages || !Array.isArray(messages) || messages.length === 0) {
             return res.status(400).json({ error: 'Messages array is required' });
         }
-        
+
         const agentResponse = await chatWithAgent(messages, contextUrl || '/', pageActions || [], pageContent, userProfile);
         if (typeof agentResponse === 'object' && agentResponse.type === 'action') {
             res.json({ success: true, ...agentResponse, response: agentResponse.message });
@@ -2128,21 +2254,37 @@ app.post('/api/agent/chat', async (req, res) => {
     }
 });
 
-// --- AI Job Applier Agent Route ---
+// --- AI Browser Agent Route (universal) ---
+app.post('/api/ai/browser-agent', async (req, res) => {
+    try {
+        const { snapshot, previousActions, userPrompt, selectedModel } = req.body;
+        if (!snapshot || !snapshot.snapshotText) {
+            return res.status(400).json({ error: 'Snapshot data is required' });
+        }
+
+        const { evaluateBrowserSnapshot } = require('./ai');
+        const agentDecision = await evaluateBrowserSnapshot(snapshot, previousActions || [], userPrompt, selectedModel);
+
+        res.json({ success: true, decision: agentDecision });
+    } catch (error) {
+        console.error('Browser Agent Error:', error);
+        res.status(500).json({ error: 'Failed to evaluate browser snapshot' });
+    }
+});
+
+// Backward-compatible route alias.
 app.post('/api/ai/job-agent', async (req, res) => {
     try {
         const { snapshot, previousActions, userPrompt, selectedModel } = req.body;
         if (!snapshot || !snapshot.snapshotText) {
             return res.status(400).json({ error: 'Snapshot data is required' });
         }
-        
-        const { evaluateJobPageSnapshot } = require('./ai'); // Lazy load or require at top, assuming it's correctly exported
-        const agentDecision = await evaluateJobPageSnapshot(snapshot, previousActions || [], userPrompt, selectedModel);
-        
+        const { evaluateBrowserSnapshot } = require('./ai');
+        const agentDecision = await evaluateBrowserSnapshot(snapshot, previousActions || [], userPrompt, selectedModel);
         res.json({ success: true, decision: agentDecision });
     } catch (error) {
-        console.error('Job Agent Error:', error);
-        res.status(500).json({ error: 'Failed to evaluate job page snapshot' });
+        console.error('Job Agent Alias Error:', error);
+        res.status(500).json({ error: 'Failed to evaluate browser snapshot' });
     }
 });
 

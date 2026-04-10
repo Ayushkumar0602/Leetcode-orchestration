@@ -29,13 +29,15 @@ if (!window.jobApplierAgentInjected && window.name === 'whizan-ai-agent') {
     // A simplified tree walker
     const walkNode = (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent.trim();
+        let text = node.textContent.trim();
         if (text) {
+          // Truncate excessively long textual blocks to save tokens (e.g. Terms of Service, large articles)
+          if (text.length > 200) text = text.slice(0, 200) + '...';
           snapshotText += text + " ";
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // Skip script, style
-        if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'SVG', 'PATH'].includes(node.tagName)) {
+        // Skip script, style, svg etc.
+        if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'SVG', 'PATH', 'META', 'LINK'].includes(node.tagName)) {
           return;
         }
         
@@ -113,13 +115,26 @@ if (!window.jobApplierAgentInjected && window.name === 'whizan-ai-agent') {
   }, true); // capture phase to intercept before any site's own click handlers
 
   // Also strip target="_blank" from ALL links to prevent passive pops
+  let idleTimeout = null;
   const observer = new MutationObserver(() => {
     document.querySelectorAll('a[target="_blank"], a[target="_new"]').forEach(a => {
       a.setAttribute('data-original-target', a.getAttribute('target'));
       a.removeAttribute('target');
     });
+    
+    // Proactive IDLE detection to speed up the Agent
+    clearTimeout(idleTimeout);
+    idleTimeout = setTimeout(() => {
+        if (window.parent && window.parent !== window) {
+           window.parent.postMessage({
+              source: 'job-applier-content-script',
+              type: 'PAGE_IDLE',
+              url: window.location.href
+           }, '*');
+        }
+    }, 1000);
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
   // Apply to existing links immediately
   document.querySelectorAll('a[target="_blank"], a[target="_new"]').forEach(a => {
     a.setAttribute('data-original-target', a.getAttribute('target'));
@@ -187,7 +202,8 @@ if (!window.jobApplierAgentInjected && window.name === 'whizan-ai-agent') {
               cursor.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.6)';
               cursor.style.zIndex = '9999999';
               cursor.style.pointerEvents = 'none';
-              cursor.style.transition = 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+              // Sped up transition drastically based on user feedback
+              cursor.style.transition = 'all 0.15s cubic-bezier(0.25, 1, 0.5, 1)';
               cursor.style.left = `${window.innerWidth / 2}px`;
               cursor.style.top = `${window.innerHeight / 2}px`;
               document.body.appendChild(cursor);
@@ -209,29 +225,46 @@ if (!window.jobApplierAgentInjected && window.name === 'whizan-ai-agent') {
                     cursor.style.transform = 'scale(1)';
                     cursor.style.backgroundColor = 'rgba(59, 130, 246, 0.4)';
                     resolve();
-                 }, 100);
-              }, 200);
-           }, 20);
+                 }, 50); // fast zoom out
+              }, 100); // fast zoom in
+           }, 10);
         });
+      };
+
+      // Playwright-style Auto-wait for elements (Wait up to 3 seconds for DOM rendering of SPA modals)
+      const waitForElementTarget = async (selector, timeout = 3000) => {
+          const start = Date.now();
+          while (Date.now() - start < timeout) {
+              let el = null;
+              if (selector && selector.startsWith('el-')) {
+                  el = document.querySelector(`[data-agent-id="${selector}"]`);
+              }
+              if (!el && selector) {
+                  el = document.querySelector(selector);
+              }
+              if (el && el.offsetParent !== null) { // exists and is visible
+                  return el;
+              }
+              await new Promise(r => setTimeout(r, 100)); // poll every 100ms
+          }
+          return null; // throw timeout
       };
 
       try {
         if (action.action === 'click') {
-          // Priority to data-agent-id if provided
-          let el = null;
-          if (action.selector && action.selector.startsWith('el-')) {
-             el = document.querySelector(`[data-agent-id="${action.selector}"]`);
-          } 
-          if (!el && action.selector) {
-             el = document.querySelector(action.selector); // Fallback standard CSS selector
-          }
+          const el = await waitForElementTarget(action.selector, 3000);
           
           if (el) {
             const rect = el.getBoundingClientRect();
             window.scrollBy({ top: rect.top - window.innerHeight / 2, behavior: 'smooth' });
-            await new Promise(r => setTimeout(r, 400));
+            await new Promise(r => setTimeout(r, 200));
             await moveCursorTo(el);
             el.click();
+            
+            // Add a built-in post-click buffer logic — if clicking creates a massive DOM mutation
+            // (like a modal opening on LinkedIn), waiting 1s ensures the orchestrator doesn't snapshot mid-render.
+            await new Promise(r => setTimeout(r, 1200));
+            
             success = true;
             message = "Click successful";
           } else {
@@ -239,13 +272,7 @@ if (!window.jobApplierAgentInjected && window.name === 'whizan-ai-agent') {
           }
         } 
         else if (action.action === 'type') {
-          let el = null;
-          if (action.selector && action.selector.startsWith('el-')) {
-             el = document.querySelector(`[data-agent-id="${action.selector}"]`);
-          } 
-          if (!el && action.selector) {
-             el = document.querySelector(action.selector);
-          }
+          const el = await waitForElementTarget(action.selector, 3000);
           
           if (el) {
              const rect = el.getBoundingClientRect();

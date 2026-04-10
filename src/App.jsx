@@ -16,6 +16,7 @@ import Login from './Login';
 import MySubmissions from './MySubmissions';
 import InterviewEvaluation from './InterviewEvaluation';
 import ScraperPage from './ScraperPage';
+import ScrapperPage from './ScrapperPage';
 import LandingPage from './LandingPage';
 import ProfilePage from './ProfilePage';
 import PublicProfile from './PublicProfile';
@@ -103,6 +104,7 @@ function App() {
             <Route path="/aiinterview/:id?" element={<AIInterview />} />
             <Route path="/submissions" element={<MySubmissions />} />
             <Route path="/scraper" element={<ScraperPage />} />
+            <Route path="/scrapper" element={<ScrapperPage />} />
             <Route path="/evaluation/:interviewId" element={<InterviewEvaluation />} />
             <Route path="/sheets" element={<DSASheets />} />
             <Route path="/sheets/:sheetId" element={<SheetDetail />} />

@@ -35,6 +35,7 @@ export default function JobApplier() {
   const batchQueueRef = useRef([]);
   const pendingTimeoutsRef = useRef([]);
   const abortControllerRef = useRef(null); // cancels in-flight Gemini fetch
+  const failedActionCountsRef = useRef({}); // signature -> consecutive fail count
 
   // Safe timeout that auto-registers for cancellation on stop
   const safeTimeout = (fn, delay) => {
@@ -48,6 +49,29 @@ export default function JobApplier() {
 
   const addLog = (msg, type = 'info', actionData = null) => {
     setAgentLogs(prev => [...prev, { time: new Date().toISOString(), msg, type, actionData }]);
+  };
+
+  const actionSignature = (action = {}) => `${action.action || ''}|${action.selector || ''}|${action.value || ''}`;
+
+  const sanitizeDecision = (rawDecision) => {
+    const allowed = new Set(['click', 'type', 'navigate', 'switch-tab', 'new-tab', 'scroll', 'scroll-until', 'wait', 'done']);
+    const solo = new Set(['navigate', 'switch-tab', 'new-tab', 'scroll', 'scroll-until', 'wait']);
+    if (!rawDecision || typeof rawDecision !== 'object') return null;
+    const normalized = {
+      thought: String(rawDecision.thought || ''),
+      actions: Array.isArray(rawDecision.actions) ? rawDecision.actions : []
+    };
+    const actions = normalized.actions
+      .slice(0, 20)
+      .map((a) => ({
+        action: typeof a?.action === 'string' ? a.action.trim() : '',
+        selector: typeof a?.selector === 'string' ? a.selector.trim() : undefined,
+        value: a?.value == null ? undefined : String(a.value)
+      }))
+      .filter((a) => allowed.has(a.action));
+    if (actions.length === 0) return null;
+    if (solo.has(actions[0].action)) return { thought: normalized.thought, actions: [actions[0]] };
+    return { thought: normalized.thought, actions };
   };
 
   const handleNavigate = (e) => {
@@ -110,6 +134,7 @@ export default function JobApplier() {
     const userPrompt = instruction || 'Resume autonomous task';
     userInstructionRef.current = userPrompt;
     agentEnabledRef.current = true;
+    failedActionCountsRef.current = {};
     setAgentStatus('Analyzing');
     
     addLog(userPrompt, 'user');
@@ -264,13 +289,18 @@ export default function JobApplier() {
            const controller = new AbortController();
            abortControllerRef.current = controller;
            const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com');
-           const res = await fetch(`${API_BASE}/api/ai/job-agent`, {
+           const compactActions = previousActionsRef.current.slice(-20).map((a) => ({
+              action: a?.action || a?.command || '',
+              selector: a?.selector || undefined,
+              value: a?.value || undefined
+           }));
+           const res = await fetch(`${API_BASE}/api/ai/browser-agent`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               signal: controller.signal,
               body: JSON.stringify({
                  snapshot,
-                 previousActions: previousActionsRef.current,
+                 previousActions: compactActions,
                  userPrompt: userInstructionRef.current,
                  selectedModel: selectedModelRef.current
               })
@@ -283,10 +313,11 @@ export default function JobApplier() {
            if (!res.ok) throw new Error("API responded with " + res.status);
            const data = await res.json();
            
-           if (data.decision) {
-              addLog(`💭 ${data.decision.thought}`, "success");
+           const decision = sanitizeDecision(data.decision);
+           if (decision) {
+              addLog(`💭 ${decision.thought}`, "success");
               
-              const actions = data.decision.actions || [];
+              const actions = decision.actions || [];
               
               if (actions.length === 0) {
                  setAgentStatus('Error');
@@ -375,6 +406,7 @@ export default function JobApplier() {
         addLog(`Action result: ${event.data.success ? '✅' : '❌'} ${event.data.message}`, event.data.success ? "success" : "error");
         
         if (event.data.success) {
+           failedActionCountsRef.current = {};
            // If there are more batch actions, execute the next one
            if (batchQueueRef.current.length > 0) {
               const nextAction = batchQueueRef.current[0];
@@ -392,6 +424,23 @@ export default function JobApplier() {
               safeTimeout(requestSnapshot, 2500);
            }
         } else {
+           const lastAction = previousActionsRef.current[previousActionsRef.current.length - 1] || {};
+           const sig = actionSignature(lastAction);
+           failedActionCountsRef.current[sig] = (failedActionCountsRef.current[sig] || 0) + 1;
+           const failCount = failedActionCountsRef.current[sig];
+
+           if (failCount >= 2) {
+              addLog("Loop guard: repeated action failure detected. Forcing fresh snapshot and strategy shift.", "warning");
+              batchQueueRef.current = [];
+              previousActionsRef.current.push({
+                role: 'system',
+                command: `Avoid repeating failed action ${sig}; choose alternative path.`
+              });
+              setAgentStatus('Analyzing');
+              safeTimeout(requestSnapshot, 1200);
+              return;
+           }
+
            setAgentStatus('Error');
            agentEnabledRef.current = false;
            batchQueueRef.current = [];
@@ -421,6 +470,15 @@ export default function JobApplier() {
            setInputUrl(url);
         }
       }
+      else if (event.data.type === 'PAGE_IDLE') {
+        // If we are currently "Analyzing" and there are timeouts pending (meaning we're waiting to snapshot), accelerate it!
+        if (agentEnabledRef.current && agentStatus === 'Analyzing' && pendingTimeoutsRef.current.length > 0) {
+           pendingTimeoutsRef.current.forEach(id => clearTimeout(id));
+           pendingTimeoutsRef.current = [];
+           addLog(`⚡ DOM idle detected. Bypassing wait...`, 'info');
+           requestSnapshot();
+        }
+      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -436,7 +494,7 @@ export default function JobApplier() {
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', height: '60px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: '#050505', flexShrink: 0 }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <span style={{ fontSize: '1.2rem', fontWeight: 800, background: 'linear-gradient(90deg, #60a5fa, #c084fc)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
-                Job Applier Engine
+                Universal Browser Agent
             </span>
             <div style={{ padding: '4px 8px', background: 'rgba(16,185,129,0.1)', color: '#34d399', fontSize: '0.75rem', fontWeight: 700, borderRadius: '4px' }}>AI BROWSER AGENT</div>
          </div>
