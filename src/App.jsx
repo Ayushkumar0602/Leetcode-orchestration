@@ -63,6 +63,28 @@ import ToolsSQLEditor from './tools/ToolsSQLEditor';
 import ToolsGitPlayground from './tools/ToolsGitPlayground';
 import ToolsMLSandbox from './tools/ToolsMLSandbox';
 
+// Company Sheets
+import GoogleSheet from './companywisesheet/google/GoogleSheet';
+import AmazonSheet from './companywisesheet/amazon/AmazonSheet';
+import AppleSheet from './companywisesheet/apple/AppleSheet';
+import FacebookSheet from './companywisesheet/facebook/FacebookSheet';
+import MicrosoftSheet from './companywisesheet/microsoft/MicrosoftSheet';
+import NetflixSheet from './companywisesheet/netflix/NetflixSheet';
+import UberSheet from './companywisesheet/uber/UberSheet';
+import TwitterSheet from './companywisesheet/twitter/TwitterSheet';
+import AdobeSheet from './companywisesheet/adobe/AdobeSheet';
+import AirbnbSheet from './companywisesheet/airbnb/AirbnbSheet';
+import SalesforceSheet from './companywisesheet/salesforce/SalesforceSheet';
+import OracleSheet from './companywisesheet/oracle/OracleSheet';
+import TeslaSheet from './companywisesheet/tesla/TeslaSheet';
+import SpotifySheet from './companywisesheet/spotify/SpotifySheet';
+import LinkedInSheet from './companywisesheet/linkedin/LinkedInSheet';
+import SnapchatSheet from './companywisesheet/snapchat/SnapchatSheet';
+import PalantirSheet from './companywisesheet/palantir/PalantirSheet';
+import CoinbaseSheet from './companywisesheet/coinbase/CoinbaseSheet';
+import GoldmanSachsSheet from './companywisesheet/goldmansachs/GoldmanSachsSheet';
+import JPMorganSheet from './companywisesheet/jpmorgan/JPMorganSheet';
+
 // Components
 import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
@@ -171,6 +193,27 @@ function App() {
             <Route path="/resumeoptimiser" element={<ResumeOptimiser />} />
             <Route path="/joblisting" element={<JobListing />} />
             <Route path="/jobapplier" element={<JobApplier />} />
+            
+            {/* Company Wise Sheets */}
+            <Route path="/company/google/:page?" element={<GoogleSheet />} />
+            <Route path="/company/amazon/:page?" element={<AmazonSheet />} />
+            <Route path="/company/apple/:page?" element={<AppleSheet />} />
+            <Route path="/company/facebook/:page?" element={<FacebookSheet />} />
+            <Route path="/company/microsoft/:page?" element={<MicrosoftSheet />} />
+            <Route path="/company/netflix/:page?" element={<NetflixSheet />} />
+            <Route path="/company/uber/:page?" element={<UberSheet />} />
+            <Route path="/company/twitter/:page?" element={<TwitterSheet />} />
+            <Route path="/company/adobe/:page?" element={<AdobeSheet />} />
+            <Route path="/company/salesforce/:page?" element={<SalesforceSheet />} />
+            <Route path="/company/oracle/:page?" element={<OracleSheet />} />
+            <Route path="/company/tesla/:page?" element={<TeslaSheet />} />
+            <Route path="/company/spotify/:page?" element={<SpotifySheet />} />
+            <Route path="/company/linkedin/:page?" element={<LinkedInSheet />} />
+            <Route path="/company/snapchat/:page?" element={<SnapchatSheet />} />
+            <Route path="/company/palantir/:page?" element={<PalantirSheet />} />
+            <Route path="/company/coinbase/:page?" element={<CoinbaseSheet />} />
+            <Route path="/company/goldmansachs/:page?" element={<GoldmanSachsSheet />} />
+            <Route path="/company/jpmorgan/:page?" element={<JPMorganSheet />} />
 
             {/* Standalone Tools Routes */}
             <Route path="/tools/codesandbox" element={<ToolsSandbox />} />

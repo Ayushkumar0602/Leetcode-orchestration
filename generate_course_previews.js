@@ -84,6 +84,44 @@ async function generateCoursePreviews() {
 
         console.log(`✅ Successfully generated ${generatedCount} custom static HTML previews in dist/courses/`);
 
+        // --- Automated Sitemap Generation for Courses ---
+        const sitemapDistPath = path.join(DIST_DIR, 'sitemap.xml');
+        const sitemapPublicPath = path.join(__dirname, 'public', 'sitemap.xml');
+        
+        let sitemapTarget = '';
+        if (fs.existsSync(sitemapDistPath)) sitemapTarget = sitemapDistPath;
+        else if (fs.existsSync(sitemapPublicPath)) sitemapTarget = sitemapPublicPath;
+
+        if (sitemapTarget) {
+            console.log(`Updating sitemap.xml with dynamic course URLs...`);
+            const sitemapContent = fs.readFileSync(sitemapTarget, 'utf-8');
+            const today = new Date().toISOString().split('T')[0];
+            
+            const courseUrlsXml = courses
+                .filter(c => c.slug)
+                .map(course => `  <url>\n    <loc>https://whizan.xyz/courses/${course.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`)
+                .join('\n');
+
+            const sitemapRegex = /(<!-- Course Details -->)[\\s\\S]*?(?=<!-- DSA Sheets -->)/;
+            if (sitemapRegex.test(sitemapContent)) {
+                const newSitemapContent = sitemapContent.replace(
+                    sitemapRegex,
+                    `$1\n${courseUrlsXml}\n\n  `
+                );
+                
+                // Update BOTH dist (for deployment) and public (for local git tracking/visibility)
+                if (fs.existsSync(sitemapDistPath)) {
+                    fs.writeFileSync(sitemapDistPath, newSitemapContent, 'utf-8');
+                }
+                if (fs.existsSync(sitemapPublicPath)) {
+                    fs.writeFileSync(sitemapPublicPath, newSitemapContent, 'utf-8');
+                }
+                console.log(`✅ Automatically injected ${courses.length} dynamic courses into sitemap`);
+            } else {
+                console.warn('⚠️ Could not find "<!-- Course Details -->" block in sitemap.xml');
+            }
+        }
+
     } catch (err) {
         console.error('Error in generate_course_previews.js:', err);
     }

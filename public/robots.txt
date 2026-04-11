@@ -5,3 +5,4 @@ Disallow: /aiinterview
 Disallow: /aiinterviewselect
 
 Sitemap: https://whizan.xyz/sitemap.xml
+Sitemap: https://whizan.xyz/atom.xml

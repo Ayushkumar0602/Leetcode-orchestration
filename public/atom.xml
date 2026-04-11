@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Whizan AI - Company Specific DSA Interview Roadmaps</title>
+  <subtitle>Master Data Structures and Algorithms for the world's top tech companies.</subtitle>
+  <link href="https://whizan.xyz/atom.xml" rel="self" />
+  <link href="https://whizan.xyz/" />
+  <updated>2026-04-11T00:00:00Z</updated>
+  <id>https://whizan.xyz/</id>
+  <author>
+    <name>Whizan AI Team</name>
+    <email>support@whizan.xyz</email>
+  </author>
+
+  <entry>
+    <title>Google Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/google" />
+    <id>https://whizan.xyz/company/google</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Complete guide to Google's most frequently asked DSA questions and interview patterns.</summary>
+  </entry>
+
+  <entry>
+    <title>Amazon Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/amazon" />
+    <id>https://whizan.xyz/company/amazon</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Master Amazon SDE technical rounds with curated LeetCode challenges and leadership principle integration.</summary>
+  </entry>
+
+  <entry>
+    <title>Apple Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/apple" />
+    <id>https://whizan.xyz/company/apple</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Deep dive into Apple's technical engineering loops, focusing on resource-efficient DSA solutions.</summary>
+  </entry>
+
+  <entry>
+    <title>Meta (Facebook) Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/facebook" />
+    <id>https://whizan.xyz/company/facebook</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Excel in Meta technical interviews with a focus on speed, optimality, and product architecture.</summary>
+  </entry>
+
+  <entry>
+    <title>Microsoft Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/microsoft" />
+    <id>https://whizan.xyz/company/microsoft</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Prepare for Microsoft SDE roles with a vetted list of technical coding patterns and core DSA.</summary>
+  </entry>
+
+  <entry>
+    <title>Netflix Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/netflix" />
+    <id>https://whizan.xyz/company/netflix</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>High-performance DSA and scalable system patterns for Netflix software engineering interviews.</summary>
+  </entry>
+
+  <entry>
+    <title>Uber Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/uber" />
+    <id>https://whizan.xyz/company/uber</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Master real-time logistics and routing algorithms used in Uber technical interviews.</summary>
+  </entry>
+
+  <entry>
+    <title>Twitter (X) Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/twitter" />
+    <id>https://whizan.xyz/company/twitter</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Social graph algorithms and real-time data processing patterns for Twitter technical loops.</summary>
+  </entry>
+
+  <entry>
+    <title>Adobe Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/adobe" />
+    <id>https://whizan.xyz/company/adobe</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Preparation guide for Adobe roles, focusing on multimedia processing and cloud engineering.</summary>
+  </entry>
+
+  <entry>
+    <title>Airbnb Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/airbnb" />
+    <id>https://whizan.xyz/company/airbnb</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Marketplace dynamics and distributed systems challenges for Airbnb software engineering rounds.</summary>
+  </entry>
+
+  <entry>
+    <title>Salesforce Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/salesforce" />
+    <id>https://whizan.xyz/company/salesforce</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Cloud-native architecture and CRM system technical rounds preparation for Salesforce.</summary>
+  </entry>
+
+  <entry>
+    <title>Oracle Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/oracle" />
+    <id>https://whizan.xyz/company/oracle</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Database engineering and cloud infrastructure DSA challenges for Oracle technical interviews.</summary>
+  </entry>
+
+  <entry>
+    <title>Tesla Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/tesla" />
+    <id>https://whizan.xyz/company/tesla</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Master highly optimized DSA and system efficiency for Tesla software engineering rounds.</summary>
+  </entry>
+
+  <entry>
+    <title>Spotify Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/spotify" />
+    <id>https://whizan.xyz/company/spotify</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Real-time content streaming and playlist algorithms for Spotify technical interviews.</summary>
+  </entry>
+
+  <entry>
+    <title>LinkedIn Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/linkedin" />
+    <id>https://whizan.xyz/company/linkedin</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Social graph data structures and professional platform engineering at LinkedIn.</summary>
+  </entry>
+
+  <entry>
+    <title>Snapchat Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/snapchat" />
+    <id>https://whizan.xyz/company/snapchat</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Multimedia data handling and high-concurrency loops for Snapchat engineering.</summary>
+  </entry>
+
+  <entry>
+    <title>Palantir Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/palantir" />
+    <id>https://whizan.xyz/company/palantir</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Complex data analysis algorithms and rigorous technical rounds preparation for Palantir.</summary>
+  </entry>
+
+  <entry>
+    <title>Coinbase Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/coinbase" />
+    <id>https://whizan.xyz/company/coinbase</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Blockchain engineering and crypto-transaction security technical rounds for Coinbase.</summary>
+  </entry>
+
+  <entry>
+    <title>Goldman Sachs Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/goldmansachs" />
+    <id>https://whizan.xyz/company/goldmansachs</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Financial system algorithms and high-frequency technical interview preparation for Goldman Sachs.</summary>
+  </entry>
+
+  <entry>
+    <title>JPMorgan Chase Interview Preparation Roadmap</title>
+    <link href="https://whizan.xyz/company/jpmorgan" />
+    <id>https://whizan.xyz/company/jpmorgan</id>
+    <updated>2026-04-11T00:00:00Z</updated>
+    <summary>Large-scale banking systems and secure software engineering rounds for JPMorgan Chase.</summary>
+  </entry>
+
+</feed>
