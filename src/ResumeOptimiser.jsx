@@ -19,6 +19,7 @@ import TimelineBasedTemplate from './components/TimelineBasedTemplate';
 import { useReactToPrint } from 'react-to-print';
 import { db } from './firebase';
 import { collection, addDoc, query, where, getDocs, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import { toast } from 'sonner';
 import './index.css';
 
 // Configure PDF.js worker
@@ -461,6 +462,7 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
 
       await upload.done();
       setStatus({ type: 'success', message: 'Resume uploaded securely!' });
+      toast.success('Vault Updated: Master Resume Uploaded Successfully!');
 
       // Refresh the existing resume view
       setExistingResume({
@@ -472,6 +474,7 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
     } catch (error) {
       console.error('Upload Error:', error);
       setStatus({ type: 'error', message: error.message || 'An error occurred during upload.' });
+      toast.error('Vault Upload Failed: ' + (error.message || 'Unknown error occurred.'));
     } finally {
       setUploading(false);
     }
@@ -487,6 +490,7 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
         await s3Client.send(dCmd);
         setExistingResume(null);
         setStatus({ type: 'success', message: 'Master resume deleted successfully.' });
+        toast.info('Master Resume successfully removed from Vault.');
       }
     } catch (err) {
       console.error(err);

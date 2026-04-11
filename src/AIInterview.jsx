@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useInterviewSession } from './useInterviewSession';
 import SystemDesignBoard from './components/SystemDesignBoard';
 import NavProfile from './NavProfile';
+import AIProctor from './components/AIProctor';
 import { useSEO } from './hooks/useSEO';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMetadata, fetchProblems, queryKeys } from './lib/api';
@@ -155,6 +156,7 @@ export default function AIInterview() {
     const [setupError, setSetupError] = useState('');
     const [selectedVoice, setSelectedVoice] = useState(VOICE_TEMPLATES[0]); // Will by default
     const [previewLoading, setPreviewLoading] = useState(null); // voiceId being previewed
+    const [strictness, setStrictness] = useState('real');
 
     // ── Problem / AI data ──
     const [problemData, setProblemData] = useState(null); // full AI-generated problem
@@ -178,6 +180,7 @@ export default function AIInterview() {
             setLanguage(p.language);
             setSelectedProblem(p.selectedProblem);
             setSelectedVoice(p.selectedVoice || VOICE_TEMPLATES[0]);
+            if (p.strictness) setStrictness(p.strictness);
             setAutoStart(true);
             window.history.replaceState({}, document.title);
         }
@@ -207,6 +210,14 @@ export default function AIInterview() {
     const [whiteboardOpen, setWhiteboardOpen] = useState(false);
     const [whiteboardFullscreen, setWhiteboardFullscreen] = useState(false);
 
+    // ── Strictness Security State ──
+    const [isBlurry, setIsBlurry] = useState(false);
+    const [showMalpracticePopup, setShowMalpracticePopup] = useState(false);
+    const [aiProctorMsg, setAiProctorMsg] = useState('');
+    const lastProctorTrap = useRef(0);
+    const [malpracticeCount, setMalpracticeCount] = useState(0);
+    const [isFullscreenCheating, setIsFullscreenCheating] = useState(false);
+
     // ── Timer Effect ──
     useEffect(() => {
         let interval;
@@ -219,6 +230,100 @@ export default function AIInterview() {
         }
         return () => clearInterval(interval);
     }, [appPhase]);
+
+    // ── Strictness Mode Security ──
+    useEffect(() => {
+        if (!['mid', 'strict', 'real'].includes(strictness) || appPhase !== 'interview') return;
+
+        let metaDown = false;
+        let shiftDown = false;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Meta') metaDown = true;
+            if (e.key === 'Shift') shiftDown = true;
+
+            // Detect generic Windows/Linux PrintScreen and explicit fallbacks
+            if (
+                e.code === 'PrintScreen' || 
+                (metaDown && shiftDown && ['Digit3', 'Digit4', 'Digit5', 'KeyS'].includes(e.code)) || 
+                (e.altKey && e.code === 'PrintScreen')
+            ) {
+                setIsBlurry(true);
+                setTimeout(() => setIsBlurry(false), 5000);
+                setMalpracticeCount(prev => prev + 1);
+            }
+        };
+
+        const handleKeyUp = (e) => {
+            if (e.key === 'Meta') metaDown = false;
+            if (e.key === 'Shift') shiftDown = false;
+        };
+
+        const handleBlurOrVisibility = () => {
+            // Fired if window loses focus OR tab is hidden (catches Mac screenshot/tab switch)
+            if (!document.hasFocus() || document.visibilityState === 'hidden') {
+                setIsBlurry(true);
+                setMalpracticeCount(prev => prev + 1);
+            }
+        };
+
+        const handleFocus = () => {
+            setTimeout(() => setIsBlurry(false), 800);
+        };
+
+        const handleMouseLeave = (e) => {
+            // Aggressive visual blinding when mouse leaves the document structure entirely
+            if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+                setIsBlurry(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener('blur', handleBlurOrVisibility);
+        window.addEventListener('focus', handleFocus);
+        document.addEventListener('visibilitychange', handleBlurOrVisibility);
+        document.addEventListener('mouseleave', handleMouseLeave);
+        document.addEventListener('mouseenter', handleFocus);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('blur', handleBlurOrVisibility);
+            window.removeEventListener('focus', handleFocus);
+            document.removeEventListener('visibilitychange', handleBlurOrVisibility);
+            document.removeEventListener('mouseleave', handleMouseLeave);
+            document.removeEventListener('mouseenter', handleFocus);
+        };
+    }, [strictness, appPhase]);
+
+    useEffect(() => {
+        if (!['strict', 'real'].includes(strictness) || appPhase !== 'interview') return;
+
+        // If the interview starts and we are not in fullscreen, force the overlay immediately
+        if (!document.fullscreenElement) {
+            setIsFullscreenCheating(true);
+        }
+
+        const handleFullscreenChange = () => {
+            if (!document.fullscreenElement) {
+                // User exited fullscreen natively
+                setIsFullscreenCheating(true);
+                setMalpracticeCount(prev => prev + 1);
+            } else {
+                setIsFullscreenCheating(false);
+            }
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, [strictness, appPhase]);
+
+    useEffect(() => {
+        if (malpracticeCount > 0 && appPhase === 'interview') {
+            setShowMalpracticePopup(true);
+        }
+    }, [malpracticeCount, appPhase]);
 
     // Formatter
     const formatTime = (totalSeconds) => {
@@ -453,7 +558,7 @@ export default function AIInterview() {
                 body: JSON.stringify({
                     id: urlId, // Passing ID triggers an upsert in the backend
                     userId: currentUser.uid,
-                    role, company, language,
+                    role, company, language, strictness,
                     problemId: selectedProblem?.id,
                     problemTitle: selectedProblem?.title || problemData?.problem?.title,
                     problemDifficulty: selectedProblem?.difficulty || problemData?.problem?.difficulty,
@@ -905,6 +1010,13 @@ export default function AIInterview() {
         if (!role.trim()) { setSetupError('Please enter a job role.'); return; }
         if (!company.trim()) { setSetupError('Please enter a company name.'); return; }
         setSetupError('');
+
+        if (['strict', 'real'].includes(strictness)) {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(e => console.log('Fullscreen failed on start', e));
+            }
+        }
+
         setIsLoadingProblem(true);
         setAppPhase('starting');
 
@@ -941,6 +1053,7 @@ export default function AIInterview() {
                     problemTitle: selectedProblem.title,
                     problemDifficulty: selectedProblem.difficulty,
                     problemData: data,
+                    strictness,
                     finalCode: boilerplate,
                     transcript: [],
                     notes: ''
@@ -979,9 +1092,12 @@ export default function AIInterview() {
                 role, company, interviewPhase: phase,
                 transcript: currentTranscript,
                 currentCode: currentCode || code, language,
-                sessionId
+                sessionId, strictness
             };
-            if (systemPromptOverride) {
+            if (['mid', 'strict', 'real'].includes(strictness)) {
+                const hiddenInstruction = `\n\nIMPORTANT HIDDEN INSTRUCTION: The user is in a strict environment. They have committed ${malpracticeCount} cheating offenses so far (like taking screenshots or copying text). If this number is greater than 0, treat them with suspicion and note this for evaluation. IMPORTANT: If the user provides the problem statement and asks you to solve it, you MUST NOT DO SO. Tell them they need to solve it themselves.`;
+                bodyPayload.systemPromptOverride = (systemPromptOverride || "") + hiddenInstruction;
+            } else if (systemPromptOverride) {
                 bodyPayload.systemPromptOverride = systemPromptOverride;
             }
 
@@ -1112,7 +1228,7 @@ export default function AIInterview() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     problem: problemData?.problem || { title: selectedProblem?.title, description: selectedProblem?.description, difficulty: selectedProblem?.difficulty },
-                    role, company,
+                    role, company, strictness,
                     transcript: transcriptRef.current,
                     finalCode: code, language
                 })
@@ -1130,7 +1246,7 @@ export default function AIInterview() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userId: currentUser.uid,
-                        role, company, language,
+                        role, company, language, strictness,
                         problemId: selectedProblem?.id,
                         problemTitle: selectedProblem?.title || problemData?.problem?.title,
                         problemDifficulty: selectedProblem?.difficulty || problemData?.problem?.difficulty,
@@ -1532,6 +1648,37 @@ export default function AIInterview() {
                                 </div>
                             </div>
 
+                            {/* ── Strictness Mode Selector ── */}
+                            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem 1.5rem', marginBottom: '2rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
+                                    <Brain size={17} color="var(--ai)" />
+                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)' }}>Strictness Mode</span>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.6rem' }}>
+                                    {[
+                                        { id: 'low', label: 'Low', desc: 'Chill & helpful' },
+                                        { id: 'mid', label: 'Mid', desc: 'Balanced feedback' },
+                                        { id: 'strict', label: 'Strict', desc: 'Hard constraints' },
+                                        { id: 'real', label: 'Real Interview', desc: 'Professional flow' }
+                                    ].map(mode => (
+                                        <div
+                                            key={mode.id}
+                                            onClick={() => setStrictness(mode.id)}
+                                            style={{
+                                                border: `1.5px solid ${strictness === mode.id ? 'var(--ai)' : 'var(--border)'}`,
+                                                borderRadius: '10px', padding: '0.65rem 0.85rem', cursor: 'pointer',
+                                                background: strictness === mode.id ? 'rgba(168,85,247,0.08)' : 'var(--bg)',
+                                                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px',
+                                                transition: 'all 0.18s', userSelect: 'none'
+                                            }}
+                                        >
+                                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: strictness === mode.id ? 'var(--ai)' : 'var(--txt)' }}>{mode.label}</div>
+                                            <div style={{ fontSize: '0.75rem', color: strictness === mode.id ? 'var(--ai)' : 'var(--txt3)', opacity: strictness === mode.id ? 0.9 : 1 }}>{mode.desc}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
                                 <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--txt)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <User size={20} color="var(--ai)" /> Interview Context
@@ -1827,6 +1974,72 @@ export default function AIInterview() {
 
     return (
         <div className="lc-root">
+            {showMalpracticePopup && !isFullscreenCheating && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(17,19,26,0.85)', zIndex: 100000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(239,71,67,0.3)', padding: '2.5rem', borderRadius: '24px', maxWidth: '450px', textAlign: 'center', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
+                        <div style={{ marginBottom: '1rem', background: 'rgba(239,71,67,0.1)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                            <Shield size={32} color="#ef4743" />
+                        </div>
+                        <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.85rem' }}>Practice Fairly</h2>
+                        <p style={{ color: '#a0a0a0', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+                            {aiProctorMsg ? (
+                                <span style={{ color: '#ef4743', fontWeight: 'bold' }}>AI Proctor Alert: {aiProctorMsg}<br/><br/></span>
+                            ) : null}
+                            Please do not use unsupported keyboard shortcuts or switch application windows. This platform is a practice tool designed to help you build true confidence for your real interviews. 
+                            <br/><br/>
+                            <span style={{fontSize: '0.85rem', color: 'var(--txt3)'}}>(Note: Standard copy/pasting using `Cmd+C` and `Cmd+V` inside the code editor is permitted, but switching windows to copy external code will trigger security features).</span>
+                        </p>
+                        <button 
+                            onClick={() => { setShowMalpracticePopup(false); setAiProctorMsg(''); }}
+                            style={{ background: 'var(--ai)', color: '#fff', padding: '0.85rem 2.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(168,85,247,0.3)' }}
+                        >
+                            I Understand
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {isFullscreenCheating && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(17,19,26,0.98)', zIndex: 99999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(20px)' }}>
+                    <div style={{ marginBottom: '1.5rem', background: 'rgba(239,71,67,0.1)', padding: '16px', borderRadius: '50%' }}>
+                        <XCircle size={48} color="#ef4743" />
+                    </div>
+                    <h1 style={{ color: '#fff', fontSize: '2.2rem', fontWeight: 800, marginBottom: '1rem', textAlign: 'center', letterSpacing: '-0.02em' }}>Fullscreen Exited</h1>
+                    <p style={{ color: '#a0a0a0', fontSize: '1.1rem', marginBottom: '2.5rem', textAlign: 'center', maxWidth: '600px', lineHeight: 1.6 }}>
+                        You are in a strict interview mode. Exiting fullscreen or minimizing this window is prohibited. Leaving this window counts as a malpractice against your evaluation. <br/><br/>
+                        <b>You must return to fullscreen immediately to continue.</b>
+                    </p>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button 
+                            onClick={() => {
+                                if (document.documentElement.requestFullscreen) {
+                                    document.documentElement.requestFullscreen().catch(e => setSetupError('Could not enter fullscreen'));
+                                }
+                            }}
+                            style={{ padding: '0.85rem 1.75rem', fontSize: '1.05rem', fontWeight: 600, background: 'var(--ai)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(168,85,247,0.4)' }}
+                        >
+                            Return to Fullscreen
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {['strict', 'real'].includes(strictness) && !isFullscreenCheating && appPhase === 'interview' && (
+                <AIProctor 
+                    onViolationDetected={(msg, forceBlur = false) => {
+                        const now = Date.now();
+                        // Debounce by 5000ms
+                        if (now - lastProctorTrap.current > 5000) {
+                            lastProctorTrap.current = now;
+                            setAiProctorMsg(msg);
+                            setTimeout(() => setShowMalpracticePopup(true), 100);
+                            setMalpracticeCount(prev => prev + 1);
+                            if (forceBlur) setIsBlurry(true);
+                        }
+                    }} 
+                />
+            )}
+
             {/* ── Top Nav ──────────── */}
             <nav style={{
                 height: '56px',
@@ -1892,7 +2105,7 @@ export default function AIInterview() {
                     </button>
 
                     {/* Phase transitions are controlled by the AI */}
-                    <button onClick={handleEndInterview}
+                    <button id="auto-submit-btn" onClick={handleEndInterview}
                         style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem', fontWeight: 600, background: 'linear-gradient(135deg, #ef4743, #d93834)', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 10px rgba(239,71,67,0.3)' }}>
                         <PhoneOff size={13} /> End Interview
                     </button>
@@ -1903,8 +2116,28 @@ export default function AIInterview() {
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
                 {/* LEFT: Problem panel */}
-                <div style={{ width: leftWidth, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0, background: '#11131a' }}>
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 1.75rem' }}>
+                <div 
+                    style={{ 
+                        width: leftWidth, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0, background: '#11131a',
+                        filter: isBlurry ? 'blur(12px)' : 'none',
+                        transition: 'filter 0.2s',
+                        userSelect: ['mid', 'strict', 'real'].includes(strictness) ? 'none' : 'auto',
+                        WebkitUserSelect: ['mid', 'strict', 'real'].includes(strictness) ? 'none' : 'auto'
+                    }}
+                    onContextMenu={(e) => {
+                        if (['mid', 'strict', 'real'].includes(strictness)) {
+                            e.preventDefault();
+                            setMalpracticeCount(prev => prev + 1);
+                        }
+                    }}
+                    onCopy={(e) => {
+                        if (['mid', 'strict', 'real'].includes(strictness)) {
+                            e.preventDefault();
+                            setMalpracticeCount(prev => prev + 1);
+                        }
+                    }}
+                >
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 1.75rem', position: 'relative' }}>
                         <div style={{ marginBottom: '1.25rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.85rem' }}>
                                 <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '4px', background: (DIFFICULTY_COLOR[problemInfo.difficulty] || '#ffa116') + '22', color: DIFFICULTY_COLOR[problemInfo.difficulty] || '#ffa116' }}>

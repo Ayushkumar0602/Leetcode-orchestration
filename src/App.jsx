@@ -66,8 +66,16 @@ import ToolsMLSandbox from './tools/ToolsMLSandbox';
 // Components
 import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
+import NetworkStatusBanner from './components/NetworkStatusBanner';
 import TermsAndConditions from './TermsAndConditions';
 import FloatingOrb from './components/FloatingOrb';
+import NotFound from './NotFound';
+import OfflinePage from './components/OfflinePage';
+import MaintenancePage from './components/MaintenancePage';
+import useMaintenanceMode from './hooks/useMaintenanceMode';
+import useIsAdmin from './hooks/useIsAdmin';
+import { Toaster } from 'sonner';
+import { useLocation } from 'react-router-dom';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,15 +88,65 @@ const queryClient = new QueryClient({
   },
 });
 
+/**
+ * MaintenanceGate
+ * — Admins (isAdmin: true OR hardcoded UID) NEVER see any maintenance page.
+ * — Checks global maintenance first, then per-page maintenance for the current route.
+ * — Must render inside BrowserRouter + AuthProvider.
+ */
+function MaintenanceGate() {
+  const { isActive, message, estimatedEnd, progressPercent, pageMaintenance } = useMaintenanceMode();
+  const { isAdmin } = useIsAdmin();
+  const location = useLocation();
+
+  // Admins bypass ALL maintenance — strict rule
+  if (isAdmin) return null;
+
+  // 1. Global maintenance — entire site is locked
+  if (isActive) {
+    return <MaintenancePage message={message} estimatedEnd={estimatedEnd} progressPercent={progressPercent} />;
+  }
+
+  // 2. Per-page maintenance — check if the current pathname matches any locked page
+  const currentPath = location.pathname;
+  const pageConfig = pageMaintenance?.[currentPath];
+  if (pageConfig?.isActive) {
+    return (
+      <MaintenancePage
+        message={pageConfig.message || `This page (${currentPath}) is temporarily under maintenance.`}
+        estimatedEnd={pageConfig.estimatedEnd || null}
+        progressPercent={pageConfig.progressPercent ?? 65}
+      />
+    );
+  }
+
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
     <AgentProvider>
     <BrowserRouter>
       <AuthProvider>
+        <Toaster 
+          theme="dark" 
+          position="bottom-right" 
+          richColors 
+          closeButton 
+          toastOptions={{ 
+            style: { fontFamily: "'Inter', sans-serif", border: '1px solid rgba(255,255,255,0.1)' },
+            className: 'my-toast-class'
+          }} 
+        />
         {/* Global route-change tracker — renders nothing, fires analytics on every navigation */}
         <RouteTracker />
         <NotificationPopupManager />
+        <NetworkStatusBanner />
+        {/* Full-screen offline overlay — appears when internet connection is lost */}
+        <OfflinePage />
+        {/* Full-screen maintenance overlay — toggled via Firestore config/app.maintenanceMode */}
+        <MaintenanceGate />
         <div className="app-root">
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -160,6 +218,9 @@ function App() {
                 <AdminPortal />
               </AdminRoute>
             } />
+            
+            {/* Catch-all 404 Route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
           <SocialShare />
           <FloatingOrb />

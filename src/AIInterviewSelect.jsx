@@ -45,6 +45,9 @@ export default function AIInterviewSelect() {
     const [companySearch, setCompanySearch] = useState('');
     const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
 
+    // Strictness state
+    const [strictness, setStrictness] = useState('real');
+
     // Problem mode: 'random' | 'manual'
     const [problemMode, setProblemMode] = useState('random');
 
@@ -156,11 +159,25 @@ export default function AIInterviewSelect() {
 
         setSetupError('');
 
+        if (['strict', 'real'].includes(strictness)) {
+            try {
+                setIsStarting(true);
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                // Stop tracks immediately so the actual Interview page can acquire them cleanly
+                stream.getTracks().forEach(track => track.stop());
+            } catch (err) {
+                console.error("Camera/Mic Permission Denied:", err);
+                setSetupError('Camera and Microphone access are strictly required for Strict and Real Interview mode constraints. Please grant permissions to continue.');
+                setIsStarting(false);
+                return;
+            }
+        }
+
         // Push config to AIInterview
         navigate('/aiinterview', {
             state: {
                 setupParams: {
-                    role, company, language, selectedProblem: problemToUse, selectedVoice
+                    role, company, language, selectedProblem: problemToUse, selectedVoice, strictness
                 }
             }
         });
@@ -396,6 +413,36 @@ export default function AIInterviewSelect() {
                                         style={{ width: '100%', padding: '0.85rem 1rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px', color: '#fff', fontSize: '0.95rem', outline: 'none', cursor: 'pointer' }}>
                                         {Object.entries(LANG_OPTIONS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                                     </select>
+                                </div>
+                            </div>
+
+                            {/* Strictness Mode Row */}
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--txt2)', marginBottom: '0.6rem', fontWeight: 600 }}>
+                                    <Brain size={14} /> Strictness Mode
+                                </label>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem' }}>
+                                    {[
+                                        { id: 'low', label: 'Low', desc: 'Chill & helpful' },
+                                        { id: 'mid', label: 'Mid', desc: 'Balanced feedback' },
+                                        { id: 'strict', label: 'Strict', desc: 'Hard constraints' },
+                                        { id: 'real', label: 'Real Interview', desc: 'Professional flow' }
+                                    ].map(mode => (
+                                        <div
+                                            key={mode.id}
+                                            onClick={() => setStrictness(mode.id)}
+                                            style={{
+                                                border: `1px solid ${strictness === mode.id ? '#a855f7' : 'var(--border)'}`,
+                                                borderRadius: '8px', padding: '0.75rem', cursor: 'pointer',
+                                                background: strictness === mode.id ? 'rgba(168,85,247,0.1)' : 'var(--bg)',
+                                                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px',
+                                                transition: 'all 0.2s', userSelect: 'none'
+                                            }}
+                                        >
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: strictness === mode.id ? '#a855f7' : '#fff' }}>{mode.label}</div>
+                                            <div style={{ fontSize: '0.7rem', color: strictness === mode.id ? 'rgba(168,85,247,0.8)' : 'var(--txt3)' }}>{mode.desc}</div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
