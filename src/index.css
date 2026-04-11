@@ -69,6 +69,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 1;
 }
 
 .lc-logo {
@@ -97,7 +98,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  flex: 1;
+  flex: 0 0 auto;
   justify-content: center;
   min-width: 0;
 }
@@ -124,7 +125,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-shrink: 0;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 /* Run / Submit buttons */
@@ -1039,8 +1041,8 @@ body {
   }
 }
 
-/* Mobile: stack vertically */
-@media (max-width: 680px) {
+/* Mobile/Tablet: stack vertically */
+@media (max-width: 768px) {
   body {
     overflow: auto;
   }
@@ -1058,14 +1060,19 @@ body {
   }
 
   .lc-left-panel {
-    width: 100%;
-    border-right: none;
+    width: 100% !important;
+    border-right: none !important;
     border-bottom: 1px solid var(--border);
     overflow-y: visible;
     max-height: none;
   }
 
+  .lc-resizer {
+    display: none !important;
+  }
+
   .lc-right-panel {
+    width: 100% !important;
     height: 70vh;
     min-height: 400px;
   }
@@ -1305,8 +1312,14 @@ body {
 @media (max-width: 480px) {
   .pl-problem-row,
   .pl-table-header {
-    grid-template-columns: 36px 1fr 80px 76px !important;
+    grid-template-columns: 36px 1fr 80px 70px !important;
     padding: 10px 10px !important;
+  }
+  .pl-solve-text {
+    display: none !important;
+  }
+  .pl-solve-btn {
+    padding: 5px 8px !important;
   }
   .pl-hero-title {
     font-size: 1.25rem !important;
@@ -1443,8 +1456,10 @@ body {
     padding: 1rem !important;
   }
 
-  .problem-list-sidebar {
+  .problem-list-sidebar,
+  .problem-list-main {
     width: 100% !important;
+    box-sizing: border-box;
   }
 }
 

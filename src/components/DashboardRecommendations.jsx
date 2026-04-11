@@ -200,9 +200,9 @@ function MLProblemsSection({ uid }) {
     return (
         <div style={{ marginBottom: '3rem', animation: 'cardAppear 0.5s ease-out 0.55s both' }}>
             {/* Section header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.25rem' }}>
+            <div className="rec-section-header">
                 <div>
-                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#fff' }}>
+                    <h2 className="rec-title">
                         <div style={{
                             width: 36, height: 36, borderRadius: '10px',
                             background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15))',
@@ -213,7 +213,7 @@ function MLProblemsSection({ uid }) {
                         </div>
                         AI-Picks For You
                     </h2>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--txt2)', paddingLeft: '46px' }}>
+                    <p className="rec-subtitle">
                         Personalized based on your interview performance
                         {updatedAt && (
                             <span style={{ opacity: 0.5, marginLeft: '6px', fontSize: '0.75rem' }}>
@@ -224,11 +224,7 @@ function MLProblemsSection({ uid }) {
                 </div>
                 <button
                     onClick={() => navigate('/dsaquestion')}
-                    style={{
-                        background: 'transparent', border: 'none', color: '#818cf8',
-                        fontSize: '0.88rem', fontWeight: 600, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '6px',
-                    }}
+                    className="rec-view-all"
                 >
                     All Problems <ArrowRight size={14} />
                 </button>
@@ -308,36 +304,92 @@ export default function DashboardRecommendations({ userStats, interviews }) {
     }, [courses, userStats, interviews]);
 
     return (
-        <>
+        <div className="recommendations-container">
+            <style>{`
+                .recommendations-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0;
+                }
+                .rec-section-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    margin-bottom: 1.25rem;
+                }
+                .rec-title-wrap {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .rec-title {
+                    font-size: 1.4rem;
+                    font-weight: 800;
+                    margin: 0 0 6px 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: #fff;
+                }
+                .rec-subtitle {
+                    margin: 0;
+                    font-size: 0.85rem;
+                    color: var(--txt2);
+                    padding-left: 46px;
+                }
+                .rec-view-all {
+                    background: transparent;
+                    border: none;
+                    color: #818cf8;
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .courses-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                    gap: 20px;
+                }
+
+                @media (max-width: 768px) {
+                    .rec-title { font-size: 1.2rem; }
+                    .rec-subtitle { font-size: 0.75rem; padding-left: 0; margin-top: 4px; }
+                    .rec-section-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+                    .rec-view-all { font-size: 0.8rem; }
+                    .courses-grid { grid-template-columns: 1fr; }
+                }
+            `}</style>
+            
             {/* ── ML Problem Recommendations (new section) ── */}
             {uid && <MLProblemsSection uid={uid} />}
 
             {/* ── Course Recommendations (original section) ── */}
             {!isLoading && recommendedCourses.courses.length > 0 && (
                 <div style={{ marginBottom: '3rem', animation: 'cardAppear 0.5s ease-out 0.6s both' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+                    <div className="rec-section-header">
                         <div>
-                            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#fff' }}>
+                            <h2 className="rec-title">
                                 <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.15))', border: '1px solid rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <BrainCircuit size={18} color="#60a5fa" />
                                 </div>
                                 {recommendedCourses.title}
                             </h2>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--txt2)', paddingLeft: '46px' }}>
+                            <p className="rec-subtitle">
                                 {recommendedCourses.reason}
                             </p>
                         </div>
                         <button
                             onClick={() => navigate('/courses')}
-                            style={{ background: 'transparent', border: 'none', color: '#a855f7', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'color 0.2s' }}
-                            onMouseEnter={e => e.currentTarget.style.color = '#c084fc'}
-                            onMouseLeave={e => e.currentTarget.style.color = '#a855f7'}
+                            className="rec-view-all"
+                            style={{ color: '#a855f7' }}
                         >
                             View Curriculum <ArrowRight size={16} />
                         </button>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                    <div className="courses-grid">
                         {recommendedCourses.courses.map(course => (
                             <div
                                 key={course.id}
@@ -379,6 +431,6 @@ export default function DashboardRecommendations({ userStats, interviews }) {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }

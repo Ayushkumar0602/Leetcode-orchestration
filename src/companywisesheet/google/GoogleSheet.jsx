@@ -119,6 +119,37 @@ export default function GoogleSheet() {
                     position: sticky;
                     top: 100px;
                 }
+                .hero-title {
+                    font-size: 3rem;
+                    font-weight: 800;
+                    margin: 0 0 16px 0;
+                    letter-spacing: -1.5px;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+                    line-height: 1.1;
+                }
+                .hero-subtitle {
+                    color: var(--txt2);
+                    font-size: 1.05rem;
+                    max-width: 650px;
+                    margin: 0 auto;
+                    line-height: 1.6;
+                }
+                .problems-container {
+                    display: flex;
+                    flex-direction: column;
+                    background: rgba(15,15,20,0.6);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    borderRadius: 20px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                }
+                .problems-grid {
+                    display: grid;
+                    grid-template-columns: 56px 1fr 100px 90px 110px;
+                    align-items: center;
+                    padding: 16px 24px;
+                }
                 @media (max-width: 1024px) {
                     .google-sheet-layout {
                         grid-template-columns: 1fr;
@@ -127,6 +158,23 @@ export default function GoogleSheet() {
                         position: static;
                         top: auto;
                     }
+                }
+                @media (max-width: 768px) {
+                    .hero-title { font-size: 2rem !important; }
+                    .hero-subtitle { font-size: 0.95rem !important; }
+                    .problems-grid { 
+                        grid-template-columns: 48px 1fr 90px 100px !important; 
+                        padding: 14px 16px !important;
+                    }
+                    .acceptance-col { display: none; }
+                    .sheet-content { padding: 2rem 1rem !important; }
+                }
+                @media (max-width: 480px) {
+                    .hero-title { font-size: 1.75rem !important; }
+                    .problems-grid { 
+                        grid-template-columns: 1fr 80px 90px !important; 
+                    }
+                    .id-col { display: none; }
                 }
             `}</style>
             
@@ -174,7 +222,7 @@ export default function GoogleSheet() {
                 </div>
             </nav>
 
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            <div className="sheet-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                 
                 {/* Hero Section */}
                 <div style={{ textAlign: 'center', marginBottom: '1rem', position: 'relative' }}>
@@ -189,7 +237,7 @@ export default function GoogleSheet() {
                             <Building2 size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px' }}/>
                             Exclusive Company Roadmap
                         </div>
-                        <h1 style={{ fontSize: '3rem', fontWeight: 800, margin: '0 0 16px 0', letterSpacing: '-1.5px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                        <h1 className="hero-title">
                             <span style={{ color: '#4285F4' }}>G</span>
                             <span style={{ color: '#EA4335' }}>o</span>
                             <span style={{ color: '#FBBC05' }}>o</span>
@@ -198,7 +246,7 @@ export default function GoogleSheet() {
                             <span style={{ color: '#EA4335' }}>e</span>
                             <span style={{ color: '#fff' }}>{' '}Interview Questions</span>
                         </h1>
-                        <p style={{ color: 'var(--txt2)', fontSize: '1.05rem', maxWidth: '650px', margin: '0 auto', lineHeight: 1.6 }}>
+                        <p className="hero-subtitle">
                             Master the absolute best and most frequently asked Data Structures and Algorithms questions for Google software engineering interviews.
                         </p>
                     </div>
@@ -223,12 +271,12 @@ export default function GoogleSheet() {
                         </div>
 
                         {/* Problems Table */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0', background: 'rgba(15,15,20,0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 100px 90px 110px', padding: '16px 24px', background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                <span>#</span>
+                        <div className="problems-container">
+                            <div className="problems-grid" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)', fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                <span className="id-col">#</span>
                                 <span>Problem Title</span>
                                 <span>Difficulty</span>
-                                <span>Acceptance</span>
+                                <span className="acceptance-col">Acceptance</span>
                                 <span style={{ textAlign: 'right' }}>Actions</span>
                             </div>
 
@@ -247,11 +295,12 @@ export default function GoogleSheet() {
 
                                 return (
                                     <div key={p.id} onClick={() => handleSolve(p)}
-                                        style={{ display: 'grid', gridTemplateColumns: '56px 1fr 100px 90px 110px', alignItems: 'center', padding: '18px 24px', borderBottom: idx < problems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.paddingLeft = '30px'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.paddingLeft = '24px'; }}
+                                        className="problems-grid"
+                                        style={{ borderBottom: idx < problems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)' }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                                     >
-                                        <span style={{ fontSize: '0.85rem', color: 'var(--txt3)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{p.id}</span>
+                                        <span className="id-col" style={{ fontSize: '0.85rem', color: 'var(--txt3)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{p.id}</span>
 
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                                             {solved ? (
@@ -266,7 +315,7 @@ export default function GoogleSheet() {
                                             {p.difficulty}
                                         </span>
 
-                                        <span style={{ fontSize: '0.9rem', color: 'var(--txt2)', fontWeight: 500 }}>{p.acceptance_rate}%</span>
+                                        <span className="acceptance-col" style={{ fontSize: '0.9rem', color: 'var(--txt2)', fontWeight: 500 }}>{p.acceptance_rate}%</span>
 
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
                                             <button

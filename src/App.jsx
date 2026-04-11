@@ -62,6 +62,10 @@ import ToolsSandbox from './tools/ToolsSandbox';
 import ToolsSQLEditor from './tools/ToolsSQLEditor';
 import ToolsGitPlayground from './tools/ToolsGitPlayground';
 import ToolsMLSandbox from './tools/ToolsMLSandbox';
+// DSA Notes
+import Introduction from './dsa/notes/Introduction';
+import BigONotation from './dsa/notes/BigONotation';
+
 
 // Company Sheets
 import GoogleSheet from './companywisesheet/google/GoogleSheet';
@@ -220,6 +224,11 @@ function App() {
             <Route path="/tools/sql-editor" element={<ToolsSQLEditor />} />
             <Route path="/tools/git-playground" element={<ToolsGitPlayground />} />
             <Route path="/tools/ml-sandbox" element={<ToolsMLSandbox />} />
+
+            {/* DSA Notes Routes */}
+            <Route path="/dsa/notes/introduction" element={<Introduction />} />
+            <Route path="/dsa/notes/big-o-notation" element={<BigONotation />} />
+
 
             {/* System Design Routes */}
             <Route path="/systemdesign" element={<SystemDesign />} />

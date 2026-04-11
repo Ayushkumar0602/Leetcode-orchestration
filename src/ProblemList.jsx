@@ -201,7 +201,7 @@ export default function ProblemList() {
                     })}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 0', justifyContent: 'flex-end' }}>
                     <select className="lc-lang-select-sm pl-nav-lang-select" value={selectedLanguage} onChange={e => handleLanguageSelect(e.target.value)}>
                         {Object.entries(LANG_OPTIONS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
@@ -366,7 +366,7 @@ export default function ProblemList() {
                 </div>
 
                 {/* ── RIGHT MAIN CONTENT ─────────────────── */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="problem-list-main" style={{ flex: 1, minWidth: 0 }}>
                     {/* Hero + Search row */}
                     <div style={{ marginBottom: '1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -461,6 +461,7 @@ export default function ProblemList() {
                                     {/* Actions */}
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }} onClick={e => e.stopPropagation()}>
                                         <button
+                                            className="pl-save-btn"
                                             title="Save to list"
                                             onClick={e => { e.stopPropagation(); setBookmarkModal({ problemId: p.id }); }}
                                             style={{ background: inAnyList ? 'rgba(var(--accent-rgb,99,102,241),0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${inAnyList ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}`, borderRadius: '7px', padding: '5px 8px', cursor: 'pointer', color: inAnyList ? 'var(--accent)' : 'var(--txt3)', display: 'flex', alignItems: 'center', transition: 'all 0.15s' }}
@@ -468,10 +469,11 @@ export default function ProblemList() {
                                             <Bookmark size={13} fill={inAnyList ? 'currentColor' : 'none'} />
                                         </button>
                                         <button
+                                            className="pl-solve-btn"
                                             onClick={e => { e.stopPropagation(); handleSolve(p); }}
                                             style={{ background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '7px', padding: '5px 12px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
                                         >
-                                            Solve <ArrowRight size={12} />
+                                            <span className="pl-solve-text">Solve</span> <ArrowRight size={12} />
                                         </button>
                                     </div>
                                 </div>

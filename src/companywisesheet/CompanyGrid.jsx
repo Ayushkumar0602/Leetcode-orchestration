@@ -6,8 +6,8 @@ import { ChevronRight } from 'lucide-react';
 export default function CompanyGrid() {
     return (
         <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '3rem' }}>
-            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                <h3 style={{ 
+            <div className="company-grid-header" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                <h3 className="company-grid-title" style={{ 
                     fontSize: '1.8rem', 
                     fontWeight: 800, 
                     margin: '0 0 12px 0', 
@@ -16,12 +16,17 @@ export default function CompanyGrid() {
                 }}>
                     Explore More Company Roadmaps
                 </h3>
-                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto' }}>
+                <p className="company-grid-desc" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto' }}>
                     Select a target company to master their specific Data Structures and Algorithms interview patterns.
                 </p>
             </div>
 
             <style>{`
+                @media (max-width: 768px) {
+                    .company-grid-title { font-size: 1.5rem !important; }
+                    .company-grid-desc { font-size: 0.85rem !important; }
+                    .company-grid-header { margin-bottom: 1.5rem !important; }
+                }
                 .company-grid {
                     display: grid;
                     grid-template-columns: repeat(4, 1fr);
