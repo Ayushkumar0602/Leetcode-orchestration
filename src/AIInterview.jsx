@@ -1445,14 +1445,24 @@ export default function AIInterview() {
                                     <h1 className="ai-setup-page-title" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '0.5rem', letterSpacing: '-0.02em', textAlign: 'left' }}>AI Interview Setup</h1>
                                     <p style={{ color: 'var(--txt2)', fontSize: '0.95rem', margin: 0, textAlign: 'left' }}>Select a problem and tell us about your target role.</p>
                                 </div>
-                                <button 
-                                    onClick={() => navigate('/courses')}
-                                    style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                                >
-                                    <BookOpen size={18} /> Course Catalog
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <button 
+                                        onClick={() => navigate('/companyinterviewselect')}
+                                        style={{ background: 'rgba(168,85,247,0.1)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                                    >
+                                        <Building size={18} /> Company Sheets
+                                    </button>
+                                    <button 
+                                        onClick={() => navigate('/courses')}
+                                        style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
+                                    >
+                                        <BookOpen size={18} /> Course Catalog
+                                    </button>
+                                </div>
                             </div>
 
                             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem', marginBottom: '2.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>

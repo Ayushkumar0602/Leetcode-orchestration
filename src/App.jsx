@@ -11,6 +11,7 @@ import RecommendationPage from './RecommendationPage';
 import UserAnalytics from './UserAnalytics';
 import AIInterview from './AIInterview';
 import AIInterviewSelect from './AIInterviewSelect';
+import CompanyInterviewSelect from './CompanyInterviewSelect';
 import InfoAIInterview from './InfoAIInterview';
 import Login from './Login';
 import MySubmissions from './MySubmissions';
@@ -45,6 +46,7 @@ import SystemDesignHLD from './SystemDesignHLD';
 import SystemDesignLLD from './SystemDesignLLD';
 import AISystemDesignInterview from './AISystemDesignInterview';
 import SystemDesignInterview from './SystemDesignInterview';
+import SystemDesignBookChapter from './books/systemdesign/SystemDesignBookChapter';
 
 // Admin Features
 import AdminPortal from './admin/AdminPortal';
@@ -183,6 +185,7 @@ function App() {
             <Route path="/recommendation" element={<RecommendationPage />} />
             <Route path="/analytics" element={<UserAnalytics />} />
             <Route path="/aiinterviewselect" element={<AIInterviewSelect />} />
+            <Route path="/companyinterviewselect" element={<CompanyInterviewSelect />} />
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />
             <Route path="/aiinterview/:id?" element={<AIInterview />} />
@@ -237,6 +240,7 @@ function App() {
             <Route path="/aisystemdesigninterview/:id" element={<AISystemDesignInterview />} />
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
             <Route path="/revise/systemdesign/hld/:topicId" element={<SystemDesignReviseHLD />} />
+            <Route path="/books/systemdesign/:topicname" element={<SystemDesignBookChapter />} />
 
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationCenter />} />

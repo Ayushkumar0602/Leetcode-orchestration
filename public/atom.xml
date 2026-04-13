@@ -170,5 +170,117 @@
     <updated>2026-04-11T00:00:00Z</updated>
     <summary>Large-scale banking systems and secure software engineering rounds for JPMorgan Chase.</summary>
   </entry>
+  <entry>
+    <title>System Design Interview: Single Server Setup</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter1" />
+    <id>https://whizan.xyz/books/systemdesign/chapter1</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Single Server Setup for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Back-of-the-envelope Estimation</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter2" />
+    <id>https://whizan.xyz/books/systemdesign/chapter2</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Back-of-the-envelope Estimation for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: System Design Interview Framework</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter3" />
+    <id>https://whizan.xyz/books/systemdesign/chapter3</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master System Design Interview Framework for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a Rate Limiter</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter4" />
+    <id>https://whizan.xyz/books/systemdesign/chapter4</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a Rate Limiter for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design Consistent Hashing</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter5" />
+    <id>https://whizan.xyz/books/systemdesign/chapter5</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design Consistent Hashing for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a Key-Value Store</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter6" />
+    <id>https://whizan.xyz/books/systemdesign/chapter6</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a Key-Value Store for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a Unique ID Generator</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter7" />
+    <id>https://whizan.xyz/books/systemdesign/chapter7</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a Unique ID Generator for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a URL Shortener</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter8" />
+    <id>https://whizan.xyz/books/systemdesign/chapter8</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a URL Shortener for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a Web Crawler</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter9" />
+    <id>https://whizan.xyz/books/systemdesign/chapter9</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a Web Crawler for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a Notification System</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter10" />
+    <id>https://whizan.xyz/books/systemdesign/chapter10</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a Notification System for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a News Feed System</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter11" />
+    <id>https://whizan.xyz/books/systemdesign/chapter11</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a News Feed System for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a Chat System</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter12" />
+    <id>https://whizan.xyz/books/systemdesign/chapter12</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a Chat System for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design a Search Autocomplete System</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter13" />
+    <id>https://whizan.xyz/books/systemdesign/chapter13</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design a Search Autocomplete System for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design YouTube</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter14" />
+    <id>https://whizan.xyz/books/systemdesign/chapter14</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design YouTube for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: Design Google Drive</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter15" />
+    <id>https://whizan.xyz/books/systemdesign/chapter15</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master Design Google Drive for your next System Design Interview.</summary>
+  </entry>
+  <entry>
+    <title>System Design Interview: The Learning Continues</title>
+    <link href="https://whizan.xyz/books/systemdesign/chapter16" />
+    <id>https://whizan.xyz/books/systemdesign/chapter16</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master The Learning Continues for your next System Design Interview.</summary>
+  </entry>
 
 </feed>
