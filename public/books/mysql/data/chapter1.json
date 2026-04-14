@@ -1,0 +1,206 @@
+[
+  {
+    "type": "header",
+    "text": "Installing MySQL"
+  },
+  {
+    "type": "header",
+    "text": "What is MySQL workbench?"
+  },
+  {
+    "type": "paragraph",
+    "text": "MySQL Workbench is a visual tool for database architects, developers, and DBAs. It provides data modeling, SQL development, and comprehensive administration tools for server configuration, user administration, backup, and much more."
+  },
+  {
+    "type": "header",
+    "text": "What is a Database Management System (DBMS)?"
+  },
+  {
+    "type": "paragraph",
+    "text": "A Database Management System (DBMS) is software that interacts with end users, applications, and the database itself to capture and analyze data. It allows for the creation, retrieval, updating, and management of data in databases. If you know"
+  },
+  {
+    "type": "paragraph",
+    "text": "one DBMS, you can easily transition to another, as they share similar concepts and functionalities."
+  },
+  {
+    "type": "header",
+    "text": "Windows / macOS Installation"
+  },
+  {
+    "type": "bullet",
+    "text": "Download from: https://dev.mysql.com/downloads/installer/"
+  },
+  {
+    "type": "bullet",
+    "text": "Run the installer and choose Developer Default."
+  },
+  {
+    "type": "bullet",
+    "text": "Set a root password when prompted."
+  },
+  {
+    "type": "bullet",
+    "text": "Install MySQL Workbench (optional but helpful GUI)."
+  },
+  {
+    "type": "header",
+    "text": "Linux (Ubuntu) Installation"
+  },
+  {
+    "type": "paragraph",
+    "text": "Follow these steps to install MySQL and create a user:"
+  },
+  {
+    "type": "header",
+    "text": "Step 1: Update Package Index"
+  },
+  {
+    "type": "paragraph",
+    "text": "sudo apt update"
+  },
+  {
+    "type": "header",
+    "text": "Step 2: Install MySQL Server"
+  },
+  {
+    "type": "paragraph",
+    "text": "sudo apt install mysql-server"
+  },
+  {
+    "type": "header",
+    "text": "Step 3: Secure the Installation"
+  },
+  {
+    "type": "paragraph",
+    "text": "sudo mysql_secure_installation"
+  },
+  {
+    "type": "paragraph",
+    "text": "Choose your options (yes to most)."
+  },
+  {
+    "type": "header",
+    "text": "'harry'@'localhost'Step 4: Create a User"
+  },
+  {
+    "type": "code",
+    "text": "'harry'@'localhost'"
+  },
+  {
+    "type": "paragraph",
+    "text": "Log into MySQL:"
+  },
+  {
+    "type": "code",
+    "text": "sudo mysql"
+  },
+  {
+    "type": "paragraph",
+    "text": "Run the following SQL commands:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE USER 'harry'@'localhost' IDENTIFIED BY 'password';\n\nGRANT ALL PRIVILEGES ON *.* TO 'harry'@'localhost' WITH GRANT OPTION;\n\nFLUSH PRIVILEGES;\n\nEXIT;"
+  },
+  {
+    "type": "header",
+    "text": "passwordStep 5: Test Login"
+  },
+  {
+    "type": "code",
+    "text": "password"
+  },
+  {
+    "type": "paragraph",
+    "text": "mysql -u harry -p"
+  },
+  {
+    "type": "paragraph",
+    "text": "Enter the password:"
+  },
+  {
+    "type": "code",
+    "text": "'password'Make sure to replace\n'password'"
+  },
+  {
+    "type": "paragraph",
+    "text": "production environments."
+  },
+  {
+    "type": "paragraph",
+    "text": "with a secure password of your choice in"
+  },
+  {
+    "type": "header",
+    "text": "Getting Started with MySQL"
+  },
+  {
+    "type": "header",
+    "text": "What is a Database?"
+  },
+  {
+    "type": "paragraph",
+    "text": "A database is a container that stores related data in an organized way. In MySQL, a database holds one or more tables."
+  },
+  {
+    "type": "paragraph",
+    "text": "Think of it like:"
+  },
+  {
+    "type": "header",
+    "text": "Folder analogy:"
+  },
+  {
+    "type": "bullet",
+    "text": "A database is like a folder."
+  },
+  {
+    "type": "bullet",
+    "text": "Each table is a file inside that folder."
+  },
+  {
+    "type": "bullet",
+    "text": "The rows in the table are like the content inside each file."
+  },
+  {
+    "type": "header",
+    "text": "Excel analogy:"
+  },
+  {
+    "type": "bullet",
+    "text": "A database is like an Excel workbook."
+  },
+  {
+    "type": "bullet",
+    "text": "Each table is a separate sheet inside that workbook."
+  },
+  {
+    "type": "bullet",
+    "text": "Each row in the table is like a row in Excel."
+  },
+  {
+    "type": "header",
+    "text": "Step 1: Create a Database"
+  },
+  {
+    "type": "paragraph",
+    "text": "CREATE DATABASE startersql;"
+  },
+  {
+    "type": "paragraph",
+    "text": "After creating the database, either:"
+  },
+  {
+    "type": "bullet",
+    "text": "Right-click it in MySQL Workbench and select “Set as Default Schema”, or"
+  },
+  {
+    "type": "bullet",
+    "text": "Use this SQL command:"
+  },
+  {
+    "type": "code",
+    "text": "USE startersql;"
+  }
+]

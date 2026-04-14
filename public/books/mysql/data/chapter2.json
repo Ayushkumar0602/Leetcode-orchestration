@@ -1,0 +1,194 @@
+[
+  {
+    "type": "header",
+    "text": "usersStep 2: Create a Table"
+  },
+  {
+    "type": "code",
+    "text": "users"
+  },
+  {
+    "type": "paragraph",
+    "text": "Now we’ll create a simpletable:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL,\nemail VARCHAR(100) UNIQUE NOT NULL,\ngender ENUM('Male', 'Female', 'Other'), date_of_birth DATE,\ncreated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);"
+  },
+  {
+    "type": "paragraph",
+    "text": "This table will store basic user info."
+  },
+  {
+    "type": "header",
+    "text": "Step 3: Drop the Database"
+  },
+  {
+    "type": "paragraph",
+    "text": "You can delete the entire database (and all its tables) using:"
+  },
+  {
+    "type": "code",
+    "text": "DROP DATABASE startersql;"
+  },
+  {
+    "type": "paragraph",
+    "text": "Be careful — this will delete everything in that database."
+  },
+  {
+    "type": "header",
+    "text": "Data Types Explained"
+  },
+  {
+    "type": "paragraph",
+    "text": ": Integer type, used for whole numbers."
+  },
+  {
+    "type": "paragraph",
+    "text": "INTVARCHAR(100): Variable-length string, up to 100 characters.\nINT\nVARCHAR(100)\nENUMgender ENUM('Male', 'Female', 'Other'): A string object with a value chosen from a list of permitted values. eg.\nENUM\ngender ENUM('Male', 'Female', 'Other')\nDATEdate_of_birth DATE: Stores date values. eg\nDATE\ndate_of_birth DATE\nTIMESTAMP: Stores date and time, automatically set to the current timestamp when a row is created.\nTIMESTAMP"
+  },
+  {
+    "type": "paragraph",
+    "text": ": Stores TRUE or FALSE values, often used for flags like."
+  },
+  {
+    "type": "header",
+    "text": "BOOLEANis_activeDECIMAL(10, 2): Stores exact numeric data values, useful for financial data. The first number is the total number of digits, and the second is the number of digits after the decimal point."
+  },
+  {
+    "type": "code",
+    "text": "BOOLEAN\nis_active\nDECIMAL(10, 2)"
+  },
+  {
+    "type": "header",
+    "text": "Constraints Explained"
+  },
+  {
+    "type": "paragraph",
+    "text": ": Automatically generates a unique number for each row."
+  },
+  {
+    "type": "paragraph",
+    "text": "AUTO_INCREMENTPRIMARY KEY: Uniquely identifies each row in the table.\nAUTO_INCREMENT\nPRIMARY KEY\nNOT NULL: Ensures a column cannot have a NULL value.\nNOT NULL\nUNIQUE: Ensures all values in a column are different.\nUNIQUE\nDEFAULT: Sets a default value for a column if no value is provided. eg.\nDEFAULT\ncreated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMPis_active BOOLEAN,\ncreated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\nis_active BOOLEAN\nDEFAULT TRUE"
+  },
+  {
+    "type": "header",
+    "text": "Working with Tables in MySQL"
+  },
+  {
+    "type": "header",
+    "text": "Selecting Data from a Table"
+  },
+  {
+    "type": "header",
+    "text": "Select All Columns"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This fetches every column and every row from thetable."
+  },
+  {
+    "type": "header",
+    "text": "usersSelect Specific Columns"
+  },
+  {
+    "type": "code",
+    "text": "users\nSELECT name, email FROM users;\nnameThis only fetches the\nname"
+  },
+  {
+    "type": "paragraph",
+    "text": "and"
+  },
+  {
+    "type": "paragraph",
+    "text": "columns from all rows."
+  },
+  {
+    "type": "header",
+    "text": "emailRenaming a Table"
+  },
+  {
+    "type": "code",
+    "text": "email"
+  },
+  {
+    "type": "paragraph",
+    "text": "To rename an existing table:"
+  },
+  {
+    "type": "code",
+    "text": "RENAME TABLE users TO customers;"
+  },
+  {
+    "type": "paragraph",
+    "text": "To rename it back:"
+  },
+  {
+    "type": "code",
+    "text": "RENAME TABLE customers TO users;"
+  },
+  {
+    "type": "header",
+    "text": "ALTER TABLEgendernameAltering a Table"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE\ngender\nname"
+  },
+  {
+    "type": "paragraph",
+    "text": "You can useto modify an existing table."
+  },
+  {
+    "type": "header",
+    "text": "Add a Column"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;"
+  },
+  {
+    "type": "header",
+    "text": "Drop a Column"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users DROP COLUMN is_active;"
+  },
+  {
+    "type": "header",
+    "text": "Modify a Column Type"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users MODIFY COLUMN name VARCHAR(150);"
+  },
+  {
+    "type": "header",
+    "text": "emailMove a Column to the First Position"
+  },
+  {
+    "type": "code",
+    "text": "email"
+  },
+  {
+    "type": "paragraph",
+    "text": "To move a column (e.g.,) to the first position:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users MODIFY COLUMN email VARCHAR(100) FIRST;"
+  },
+  {
+    "type": "paragraph",
+    "text": "To move a column after another column (e.g., moveafter):"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users MODIFY COLUMN gender ENUM('Male', 'Female', 'Other') AFTER name;"
+  }
+]

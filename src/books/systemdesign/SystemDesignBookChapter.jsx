@@ -425,20 +425,59 @@ const styles = `
     backdrop-filter: blur(4px);
     z-index: 30;
   }
-  
-  .reader-content {
-    padding: 2rem;
-  }
-}
-
-  .sidebar-header {
-    justify-content: space-between;
-  }
-
   .sidebar-close-btn {
     display: flex;
   }
+  .sidebar-header {
+    justify-content: space-between;
+  }
 }
+
+@media (max-width: 768px) {
+  .reader-content {
+    padding: 1.5rem 1rem;
+  }
+  
+  .reader-header {
+    font-size: 1.5rem;
+    margin: 2.5rem 0 1.2rem 0;
+  }
+  
+  .reader-paragraph {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+  
+  .reader-title {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .reader-image-container {
+    padding: 1rem;
+    margin: 2rem 0;
+  }
+
+  .bullet-point {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reader-content {
+    padding: 1rem 0.8rem;
+  }
+  
+  .reader-header {
+    font-size: 1.35rem;
+  }
+  
+  .reader-paragraph {
+    font-size: 1rem;
+  }
+}
+
 `;
 
 
@@ -693,12 +732,12 @@ export default function SystemDesignBookChapter() {
           
           {/* Bottom Navigation */}
           {blocks.length > 0 && (
-            <div style={{ marginTop: '5rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
-               <button onClick={() => window.scrollTo(0, 0)} style={{ background: 'var(--hover-bg)', color: 'var(--text-main)', border: 'none', padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', transition: 'background 0.2s', fontWeight: 500 }}>
+            <div style={{ marginTop: '5rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+               <button onClick={() => window.scrollTo(0, 0)} style={{ background: 'var(--hover-bg)', color: 'var(--text-main)', border: 'none', padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', transition: 'background 0.2s', fontWeight: 500, flex: '1 1 auto' }}>
                  Back to Top
                </button>
                {nextChapter && (
-                 <button onClick={() => navigate(`/books/systemdesign/${nextChapter.id}`)} style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                 <button onClick={() => navigate(`/books/systemdesign/${nextChapter.id}`)} style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flex: '1 1 auto' }}>
                    Next Chapter <ArrowLeft size={18} transform="rotate(180)" />
                  </button>
                )}

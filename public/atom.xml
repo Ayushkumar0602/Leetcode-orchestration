@@ -282,5 +282,40 @@
     <updated>2026-04-13T00:00:00Z</updated>
     <summary>Master The Learning Continues for your next System Design Interview.</summary>
   </entry>
+  <entry>
+    <title>MySQL Handbook: Foundations &amp; Setup</title>
+    <link href="https://whizan.xyz/books/mysql/chapter1" />
+    <id>https://whizan.xyz/books/mysql/chapter1</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master MySQL basics and installation for database engineering.</summary>
+  </entry>
+  <entry>
+    <title>MySQL Handbook: Table Design &amp; Data Modeling</title>
+    <link href="https://whizan.xyz/books/mysql/chapter2" />
+    <id>https://whizan.xyz/books/mysql/chapter2</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Deep dive into MySQL DDL and effective table structures.</summary>
+  </entry>
+  <entry>
+    <title>MySQL Handbook: Data Manipulation Essentials</title>
+    <link href="https://whizan.xyz/books/mysql/chapter3" />
+    <id>https://whizan.xyz/books/mysql/chapter3</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master INSERT, UPDATE, and DELETE operations in MySQL.</summary>
+  </entry>
+  <entry>
+    <title>MySQL Handbook: Retrieval &amp; Filtering (DQL)</title>
+    <link href="https://whizan.xyz/books/mysql/chapter4" />
+    <id>https://whizan.xyz/books/mysql/chapter4</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Complete guide to SELECT queries and data filtering logic.</summary>
+  </entry>
+  <entry>
+    <title>MySQL Handbook: Advanced Queries &amp; Integrity</title>
+    <link href="https://whizan.xyz/books/mysql/chapter5" />
+    <id>https://whizan.xyz/books/mysql/chapter5</id>
+    <updated>2026-04-13T00:00:00Z</updated>
+    <summary>Master constraints, integrity, and optimized querying in MySQL.</summary>
+  </entry>
 
 </feed>

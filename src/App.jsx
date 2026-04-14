@@ -12,6 +12,9 @@ import UserAnalytics from './UserAnalytics';
 import AIInterview from './AIInterview';
 import AIInterviewSelect from './AIInterviewSelect';
 import CompanyInterviewSelect from './CompanyInterviewSelect';
+import AIInterviewSchedule from './AIInterviewSchedule';
+import OARoundSelect from './OARoundSelect';
+import OARound from './OARound';
 import InfoAIInterview from './InfoAIInterview';
 import Login from './Login';
 import MySubmissions from './MySubmissions';
@@ -47,6 +50,10 @@ import SystemDesignLLD from './SystemDesignLLD';
 import AISystemDesignInterview from './AISystemDesignInterview';
 import SystemDesignInterview from './SystemDesignInterview';
 import SystemDesignBookChapter from './books/systemdesign/SystemDesignBookChapter';
+import MySQLBookChapter from './books/mysql/MySQLBookChapter';
+import DockerBookChapter from './books/docker/DockerBookChapter';
+import MLBookChapter from './books/ml/MLBookChapter';
+
 
 // Admin Features
 import AdminPortal from './admin/AdminPortal';
@@ -185,6 +192,9 @@ function App() {
             <Route path="/recommendation" element={<RecommendationPage />} />
             <Route path="/analytics" element={<UserAnalytics />} />
             <Route path="/aiinterviewselect" element={<AIInterviewSelect />} />
+            <Route path="/aiinterviewschedule" element={<AIInterviewSchedule />} />
+            <Route path="/oaround" element={<OARoundSelect />} />
+            <Route path="/oaround/:roomId" element={<OARound />} />
             <Route path="/companyinterviewselect" element={<CompanyInterviewSelect />} />
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />
@@ -241,6 +251,10 @@ function App() {
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
             <Route path="/revise/systemdesign/hld/:topicId" element={<SystemDesignReviseHLD />} />
             <Route path="/books/systemdesign/:topicname" element={<SystemDesignBookChapter />} />
+            <Route path="/books/mysql/:topicname" element={<MySQLBookChapter />} />
+            <Route path="/books/docker/:topicname" element={<DockerBookChapter />} />
+            <Route path="/books/ml/:topicname" element={<MLBookChapter />} />
+
 
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/notifications" element={<NotificationCenter />} />

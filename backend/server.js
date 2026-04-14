@@ -492,6 +492,78 @@ ${jobDescription}
     }
 });
 
+// --- OA Round Evaluation Route ---
+app.post('/api/oaround/evaluate', async (req, res) => {
+    try {
+        const { company, timeTakenSeconds, q1, q2 } = req.body;
+        const { callGemini } = require('./interview');
+        
+        const formatTime = (seconds) => {
+            const m = Math.floor((seconds || 0) / 60);
+            const s = (seconds || 0) % 60;
+            return `${m}m ${s}s`;
+        };
+        
+        const q1Log = q1 ? `Question 1: ${q1.title}\nDescription:\n${q1.description}\nLanguage: ${q1.language}\nCode:\n${q1.code}` : 'Question 1: Not attempted';
+        const q2Log = q2 ? `Question 2: ${q2.title}\nDescription:\n${q2.description}\nLanguage: ${q2.language}\nCode:\n${q2.code}` : 'Question 2: Not attempted';
+
+        const prompt = `You are an elite technical interviewer evaluating a candidate for an Online Assessment (OA) at ${company || 'a top tech company'}.
+The candidate had 60 minutes to complete two coding problems. They finished in ${formatTime(timeTakenSeconds)}.
+
+Here are the candidate's code submissions alongside the actual problem description they were tasked to solve:
+---
+${q1Log}
+---
+${q2Log}
+---
+
+Your task is to analyze the user's code directly against the problem description. Evaluate their algorithmic approach, space/time complexity, and whether the code correctly implements the logic described in the question. Do NOT rely on test case ratios, rely entirely on the validity of their code.
+
+Create a detailed evaluation report.
+Focus on:
+1. Provide a constructive critique of Question 1.
+2. Provide a constructive critique of Question 2.
+3. Make a final decisive recommendation on whether to "Proceed to next round" or "Reject", keeping in mind the typical hiring bar for ${company || 'this role'}.
+
+Return your response strictly as a JSON object, with NO markdown formatting, NO \`\`\`json wrappers. Just raw valid JSON. The JSON must exactly match this structure:
+{
+  "q1Score": Number (0-100),
+  "q2Score": Number (0-100),
+  "totalScore": Number (0-100),
+  "recommendation": "Proceed to next round" | "Reject" | "Borderline",
+  "report": "string containing the detailed markdown evaluation report"
+}`;
+
+        let raw = await callGemini(prompt);
+        raw = String(raw || '').trim();
+        // Remove markdown wrapper if AI includes it despite instructions
+        if (raw.startsWith('```json')) {
+            raw = raw.replace(/^```json/i, '').replace(/```$/i, '').trim();
+        } else if (raw.startsWith('```')) {
+            raw = raw.replace(/^```/i, '').replace(/```$/i, '').trim();
+        }
+
+        let parsedData;
+        try {
+            parsedData = JSON.parse(raw);
+        } catch (jsonErr) {
+            console.error('Failed to parse AI JSON:', raw);
+            throw new Error('AI returned malformed JSON payload.');
+        }
+
+        res.json({
+            q1Score: parsedData.q1Score || 0,
+            q2Score: parsedData.q2Score || 0,
+            totalScore: parsedData.totalScore || 0,
+            recommendation: parsedData.recommendation || 'Borderline',
+            report: parsedData.report || 'No detailed report returned.'
+        });
+    } catch (error) {
+        console.error('Error evaluating OA:', error);
+        res.status(500).json({ error: 'Failed to generate AI report' });
+    }
+});
+
 // --- Public Course Routes ---
 app.get('/api/public/courses', async (req, res) => {
     try {
@@ -901,13 +973,13 @@ app.post('/api/submit', async (req, res) => {
                 res.write(`data: ${JSON.stringify({ type: 'progress', passed: passedCount, total: testCases.length })}\n\n`);
             } else {
                 // Stop immediately on first failure
-                res.write(`data: ${JSON.stringify({ type: 'done', accepted: false, failedAt: i, failedLabel: tc.label || `Case ${i + 1}`, results })}\n\n`);
+                res.write(`data: ${JSON.stringify({ type: 'done', accepted: false, failedAt: i, failedLabel: tc.label || `Case ${i + 1}`, results, passed: passedCount, total: testCases.length })}\n\n`);
                 return res.end();
             }
         }
 
         // All test cases passed
-        res.write(`data: ${JSON.stringify({ type: 'done', accepted: true, results })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'done', accepted: true, results, passed: passedCount, total: testCases.length })}\n\n`);
         return res.end();
 
     } catch (error) {

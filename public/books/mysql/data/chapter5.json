@@ -1,0 +1,3658 @@
+[
+  {
+    "type": "header",
+    "text": "Working with NULL"
+  },
+  {
+    "type": "header",
+    "text": "IS NULL"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE date_of_birth IS NULL;"
+  },
+  {
+    "type": "header",
+    "text": "IS NOT NULL"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE date_of_birth IS NOT NULL;"
+  },
+  {
+    "type": "header",
+    "text": "BETWEEN"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE date_of_birth BETWEEN '1990-01-01' AND '2000-12-31';"
+  },
+  {
+    "type": "header",
+    "text": "IN"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE gender IN ('Male', 'Other');"
+  },
+  {
+    "type": "header",
+    "text": "LIKE (Pattern Matching)"
+  },
+  {
+    "type": "code",
+    "text": "-- Ends with a\n\nSELECT * FROM users WHERE name LIKE '%li%';\n\n-- Starts with A\n\nSELECT * FROM users WHERE name LIKE '%a';\n\n-- Ends with a\n\nSELECT * FROM users WHERE name LIKE '%li%';\n\n-- Contains 'li'\n\nSELECT * FROM users WHERE name LIKE 'A%';\n\n-- Contains 'li';"
+  },
+  {
+    "type": "header",
+    "text": "AND / OR"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE gender = 'Female' AND date_of_birth > '1990-01-01';\n\nSELECT * FROM users WHERE gender = 'Male' OR gender = 'Other';"
+  },
+  {
+    "type": "header",
+    "text": "ORDER BY"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users ORDER BY date_of_birth ASC;\n\nSELECT * FROM users ORDER BY name DESC;"
+  },
+  {
+    "type": "header",
+    "text": "LIMIT"
+  },
+  {
+    "type": "code",
+    "text": "-- Skip first 5 rows, then get next 10\n\nSELECT * FROM users LIMIT 5, 10;\n\n-- Top 5 rows\n\nSELECT * FROM users LIMIT 10 OFFSET 5;\n\n-- Get 10 rows starting from the 6th row (Same as\n\nSELECT * FROM users LIMIT 5;\n\n-- Get 10 rows starting from the 6th row (Same as\n\nSELECT * FROM users LIMIT 5;\n\n-- Get 10 rows starting from the 6th row (Same as;"
+  },
+  {
+    "type": "paragraph",
+    "text": "above)SELECT * FROM users ORDER BY created_at DESC LIMIT 10;"
+  },
+  {
+    "type": "code",
+    "text": "above)\nSELECT * FROM users ORDER BY created_at DESC LIMIT 10;"
+  },
+  {
+    "type": "header",
+    "text": "Quick Quiz"
+  },
+  {
+    "type": "paragraph",
+    "text": "What does the following queries do?"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE salary > 60000 ORDER BY created_at DESC LIMIT 5;\n\nSELECT * FROM users ORDER BY salary DESC;\n\nSELECT * FROM users WHERE salary BETWEEN 50000 AND 70000;"
+  },
+  {
+    "type": "header",
+    "text": "UPDATE - Modifying Existing Data"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Thestatement is used to change values in one or more rows."
+  },
+  {
+    "type": "header",
+    "text": "Basic Syntax"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE table_name\nSET column1 = value1, column2 = value2 WHERE condition;"
+  },
+  {
+    "type": "header",
+    "text": "Example: Update One Column"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE users\nSET name = 'Alicia' WHERE id = 1;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This changes the name of the user withto “Alicia”."
+  },
+  {
+    "type": "header",
+    "text": "id = 1Example: Update Multiple Columns"
+  },
+  {
+    "type": "code",
+    "text": "id = 1\n\nUPDATE users\nSET name = 'Robert', email = 'robert@example.com' WHERE id = 2;"
+  },
+  {
+    "type": "header",
+    "text": "Without WHERE Clause (Warning)"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE users\nSET gender = 'Other';\n\nWHEREThis updates every row in the table. Be very careful when omitting the clause.\nWHERE;"
+  },
+  {
+    "type": "header",
+    "text": "UPDATEQuick Quiz: Practice YourSkills"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Try answering or running these queries based on yourtable."
+  },
+  {
+    "type": "bullet",
+    "text": "usersid = 5Update the salary of user withto ₹70,000."
+  },
+  {
+    "type": "code",
+    "text": "users\nid = 5\n\nUPDATE users\nSET salary = 70000 WHERE id = 5;"
+  },
+  {
+    "type": "header",
+    "text": "aisha@example.comChange the name of the user with email"
+  },
+  {
+    "type": "code",
+    "text": "aisha@example.com"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aisha Khanto."
+  },
+  {
+    "type": "code",
+    "text": "Aisha Khan\n\nUPDATE users\nSET name = 'Aisha Khan'\nWHERE email = 'aisha@example.com';"
+  },
+  {
+    "type": "bullet",
+    "text": "Increase salary by ₹10,000 for all users whose salary is less than ₹60,000."
+  },
+  {
+    "type": "code",
+    "text": "UPDATE users\nSET salary = salary + 10000 WHERE salary < 60000;"
+  },
+  {
+    "type": "header",
+    "text": "IshaanOtherSet the gender of userto."
+  },
+  {
+    "type": "code",
+    "text": "Ishaan\nOther\n\nUPDATE users\nSET gender = 'Other' WHERE name = 'Ishaan';"
+  },
+  {
+    "type": "bullet",
+    "text": "Reset salary of all users to ₹50,000 (Careful - affects all rows)."
+  },
+  {
+    "type": "code",
+    "text": "UPDATE users\nSET salary = 50000;"
+  },
+  {
+    "type": "paragraph",
+    "text": "Note: This query will overwrite salary for every user. Use with caution!"
+  },
+  {
+    "type": "header",
+    "text": "DELETE - Removing Data from a Table"
+  },
+  {
+    "type": "code",
+    "text": "DELETE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Thestatement removes rows from a table."
+  },
+  {
+    "type": "header",
+    "text": "Basic Syntax"
+  },
+  {
+    "type": "code",
+    "text": "DELETE FROM table_name WHERE condition;"
+  },
+  {
+    "type": "header",
+    "text": "Example: Delete One Row"
+  },
+  {
+    "type": "code",
+    "text": "DELETE FROM users WHERE id = 3;"
+  },
+  {
+    "type": "header",
+    "text": "Delete Multiple Rows"
+  },
+  {
+    "type": "code",
+    "text": "DELETE FROM users\nWHERE gender = 'Other';"
+  },
+  {
+    "type": "header",
+    "text": "Delete All Rows (but keep table structure)"
+  },
+  {
+    "type": "code",
+    "text": "DELETE FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "Drop the Entire Table (use with caution)"
+  },
+  {
+    "type": "paragraph",
+    "text": "DROP TABLE users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This removes the table structure and all data permanently."
+  },
+  {
+    "type": "header",
+    "text": "Best Practices"
+  },
+  {
+    "type": "bullet",
+    "text": "Always useunless you’re intentionally updating/deleting everything."
+  },
+  {
+    "type": "code",
+    "text": "WHERESELECTConsider running a will be affected:\nWHERE\nSELECT"
+  },
+  {
+    "type": "paragraph",
+    "text": "with the same"
+  },
+  {
+    "type": "paragraph",
+    "text": "clause first to confirm what"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE id = 3;\nWHEREAlways back up important data before performing destructive operations.\nWHERE"
+  },
+  {
+    "type": "header",
+    "text": "DELETEQuick Quiz: Practice YourSkills"
+  },
+  {
+    "type": "code",
+    "text": "DELETE"
+  },
+  {
+    "type": "paragraph",
+    "text": "what will happen if you run these queries?"
+  },
+  {
+    "type": "code",
+    "text": "DELETE FROM users\nWHERE salary IS NULL;\n\nDELETE FROM users\nWHERE salary < 50000;"
+  },
+  {
+    "type": "header",
+    "text": "MySQL Constraints"
+  },
+  {
+    "type": "paragraph",
+    "text": "Constraints in MySQL are rules applied to table columns to ensure the accuracy, validity, and integrity of the data."
+  },
+  {
+    "type": "header",
+    "text": "UNIQUEConstraint"
+  },
+  {
+    "type": "code",
+    "text": "UNIQUE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Ensures that all values in a column are different."
+  },
+  {
+    "type": "header",
+    "text": "Example (during table creation):"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT PRIMARY KEY,\nemail VARCHAR(100) UNIQUE\n);"
+  },
+  {
+    "type": "header",
+    "text": "UNIQUEALTER TABLEAddusing:"
+  },
+  {
+    "type": "code",
+    "text": "UNIQUE\n\nALTER TABLE\n\nALTER TABLE users\nADD CONSTRAINT unique_email UNIQUE (email);"
+  },
+  {
+    "type": "header",
+    "text": "NOT NULLConstraint"
+  },
+  {
+    "type": "code",
+    "text": "NOT NULL"
+  },
+  {
+    "type": "paragraph",
+    "text": "Ensures that a column cannot contain NULL values."
+  },
+  {
+    "type": "header",
+    "text": "Example:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT PRIMARY KEY,\nname VARCHAR(100) NOT NULL\n);"
+  },
+  {
+    "type": "header",
+    "text": "Change an existing column to NOT NULL:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users\nMODIFY COLUMN name VARCHAR(100) NOT NULL;"
+  },
+  {
+    "type": "header",
+    "text": "Make a column nullable again:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users\nMODIFY COLUMN name VARCHAR(100) NULL;"
+  },
+  {
+    "type": "header",
+    "text": "CHECKConstraint"
+  },
+  {
+    "type": "code",
+    "text": "CHECK"
+  },
+  {
+    "type": "paragraph",
+    "text": "Ensures that values in a column satisfy a specific condition."
+  },
+  {
+    "type": "header",
+    "text": "Example: Allow only dates of birth after Jan 1, 2000"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users\nADD CONSTRAINT chk_dob CHECK (date_of_birth > '2000-01-01');"
+  },
+  {
+    "type": "paragraph",
+    "text": "Naming the constraint () helps if you want to drop it later."
+  },
+  {
+    "type": "header",
+    "text": "chk_dobDEFAULTConstraint"
+  },
+  {
+    "type": "code",
+    "text": "chk_dob\nDEFAULT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sets a default value for a column if none is provided during insert."
+  },
+  {
+    "type": "header",
+    "text": "Example:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT PRIMARY KEY,\nis_active BOOLEAN DEFAULT TRUE\n);"
+  },
+  {
+    "type": "header",
+    "text": "ALTER TABLEAdd DEFAULT using:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users\nALTER COLUMN is_active SET DEFAULT TRUE;\n\nALTER TABLE usersALTER COLUMN is_active SET DEFAULT TRUE;"
+  },
+  {
+    "type": "header",
+    "text": "PRIMARY KEYConstraint"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEY"
+  },
+  {
+    "type": "paragraph",
+    "text": "Uniquely identifies each row. Must be NOT NULL and UNIQUE."
+  },
+  {
+    "type": "header",
+    "text": "Example:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT PRIMARY KEY, name VARCHAR(100)\n);"
+  },
+  {
+    "type": "header",
+    "text": "ALTER TABLEAdd later with:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users\nADD PRIMARY KEY (id);\n\nALTER TABLE usersADD PRIMARY KEY (id);"
+  },
+  {
+    "type": "bullet",
+    "text": "AUTO_INCREMENTPRIMARY KEY"
+  },
+  {
+    "type": "code",
+    "text": "AUTO_INCREMENT\nPRIMARY KEY"
+  },
+  {
+    "type": "paragraph",
+    "text": "Used withto automatically assign the next number."
+  },
+  {
+    "type": "header",
+    "text": "Example:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100)\n);"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each new row gets the next available integer value in."
+  },
+  {
+    "type": "header",
+    "text": "idSummary Table"
+  },
+  {
+    "type": "code",
+    "text": "id"
+  },
+  {
+    "type": "paragraph",
+    "text": "Constraint"
+  },
+  {
+    "type": "paragraph",
+    "text": "Purpose"
+  },
+  {
+    "type": "code",
+    "text": "UNIQUE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Prevents duplicate values"
+  },
+  {
+    "type": "code",
+    "text": "NOT NULL"
+  },
+  {
+    "type": "paragraph",
+    "text": "Ensures value is not NULL"
+  },
+  {
+    "type": "code",
+    "text": "CHECK"
+  },
+  {
+    "type": "paragraph",
+    "text": "Restricts values using a condition"
+  },
+  {
+    "type": "code",
+    "text": "DEFAULT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sets a default value"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEY"
+  },
+  {
+    "type": "paragraph",
+    "text": "Uniquely identifies each row"
+  },
+  {
+    "type": "code",
+    "text": "AUTO_INCREMENT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Automatically generates unique numbers"
+  },
+  {
+    "type": "header",
+    "text": "SQL Functions (MySQL)"
+  },
+  {
+    "type": "paragraph",
+    "text": "SQL functions help you analyze, transform, or summarize data in your tables."
+  },
+  {
+    "type": "code",
+    "text": "usersnameemailgenderdate_of_birthsalarycreated_atWe’ll use thetable which includes:\nusers\nname\nemail\ngender\ndate_of_birth\nsalary\ncreated_at\nid•\nid"
+  },
+  {
+    "type": "paragraph",
+    "text": ","
+  },
+  {
+    "type": "paragraph",
+    "text": ",,"
+  },
+  {
+    "type": "header",
+    "text": "Aggregate Functions"
+  },
+  {
+    "type": "paragraph",
+    "text": "These return a single value from a set of rows."
+  },
+  {
+    "type": "code",
+    "text": "COUNT()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Count total number of users:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT COUNT(*) FROM users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "Count users who are Female:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT COUNT(*) FROM users WHERE gender = 'Female';"
+  },
+  {
+    "type": "header",
+    "text": "MIN()MAX()and"
+  },
+  {
+    "type": "code",
+    "text": "MIN()\nMAX()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Get the minimum and maximum salary:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT MIN(salary) AS min_salary, MAX(salary) AS max_salary FROM users;\nSUM()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Calculate total salary payout:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT SUM(salary) AS total_payroll FROM users;\nAVG()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Find average salary:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT AVG(salary) AS avg_salary FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "GROUP BYGrouping with"
+  },
+  {
+    "type": "code",
+    "text": "GROUP BY"
+  },
+  {
+    "type": "paragraph",
+    "text": "Average salary by gender:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT gender, AVG(salary) AS avg_salary FROM users\nGROUP BY gender;"
+  },
+  {
+    "type": "header",
+    "text": "String Functions"
+  },
+  {
+    "type": "paragraph",
+    "text": "LENGTH()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Length of user names:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT name, LENGTH(name) AS name_length FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "LOWER()UPPER()and"
+  },
+  {
+    "type": "code",
+    "text": "LOWER()\nUPPER()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Convert names to lowercase or uppercase:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT name, LOWER(name) AS lowercase_name FROM users;\n\nSELECT name, UPPER(name) AS uppercase_name FROM users;\n\nCONCAT()\n\nSELECT name, LOWER(name) AS lowercase_name FROM users;\n\nCONCAT();"
+  },
+  {
+    "type": "paragraph",
+    "text": "Combine name and email:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT CONCAT(name, ' <', email, '>') AS user_contact FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "Date Functions"
+  },
+  {
+    "type": "paragraph",
+    "text": "NOW()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Current date and time:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT NOW();"
+  },
+  {
+    "type": "paragraph",
+    "text": "YEAR()MONTH()DAY(),,"
+  },
+  {
+    "type": "code",
+    "text": "YEAR()\nMONTH()\nDAY()\ndate_of_birthExtract parts of:\ndate_of_birth\nSELECT name, YEAR(date_of_birth) AS birth_year FROM users;\nDATEDIFF()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Find number of days between today and birthdate:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT name, DATEDIFF(CURDATE(), date_of_birth) AS days_lived FROM users;\nTIMESTAMPDIFF()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Calculate age in years:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT name, TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) AS age FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "Mathematical Functions"
+  },
+  {
+    "type": "paragraph",
+    "text": "ROUND()FLOOR()CEIL(),,"
+  },
+  {
+    "type": "code",
+    "text": "ROUND()\nFLOOR()\nCEIL()\n\nSELECT salary,\nROUND(salary) AS rounded, FLOOR(salary) AS floored, CEIL(salary) AS ceiled\nFROM users;\nMOD()\n\nSELECT salary,\nROUND(salary) AS rounded, FLOOR(salary) AS floored, CEIL(salary) AS ceiled\nFROM users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "Find even or odd user IDs:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT id, MOD(id, 2) AS remainder FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "Conditional Functions"
+  },
+  {
+    "type": "paragraph",
+    "text": "IF()SELECT name, gender,IF(gender = 'Female', 'Yes', 'No') AS is_female FROM users;"
+  },
+  {
+    "type": "code",
+    "text": "IF()\n\nSELECT name, gender,\nIF(gender = 'Female', 'Yes', 'No') AS is_female FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "Summary Table"
+  },
+  {
+    "type": "paragraph",
+    "text": "Function"
+  },
+  {
+    "type": "paragraph",
+    "text": "Purpose"
+  },
+  {
+    "type": "code",
+    "text": "COUNT()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Count rows"
+  },
+  {
+    "type": "code",
+    "text": "SUM()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Total of a column"
+  },
+  {
+    "type": "code",
+    "text": "AVG()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Average of values"
+  },
+  {
+    "type": "code",
+    "text": "MIN() / MAX()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Lowest / highest value"
+  },
+  {
+    "type": "code",
+    "text": "LENGTH()"
+  },
+  {
+    "type": "paragraph",
+    "text": "String length"
+  },
+  {
+    "type": "code",
+    "text": "CONCAT()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Merge strings"
+  },
+  {
+    "type": "code",
+    "text": "YEAR() / DATEDIFF()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Date breakdown / age"
+  },
+  {
+    "type": "code",
+    "text": "ROUND()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Rounding numbers"
+  },
+  {
+    "type": "code",
+    "text": "IF()"
+  },
+  {
+    "type": "paragraph",
+    "text": "Conditional logic"
+  },
+  {
+    "type": "header",
+    "text": "MySQL Transactions and AutoCommit"
+  },
+  {
+    "type": "paragraph",
+    "text": "By default, MySQL operates in AutoCommit mode. This means that every SQL"
+  },
+  {
+    "type": "paragraph",
+    "text": "statement is treated as a transaction and is committed automatically. However, for more control over when changes are saved, you can turn AutoCommit off and"
+  },
+  {
+    "type": "paragraph",
+    "text": "manage transactions manually."
+  },
+  {
+    "type": "header",
+    "text": "Disabling AutoCommit"
+  },
+  {
+    "type": "paragraph",
+    "text": "When AutoCommit is off, you can explicitly control when to commit or rollback changes."
+  },
+  {
+    "type": "header",
+    "text": "To disable AutoCommit:"
+  },
+  {
+    "type": "paragraph",
+    "text": "SET autocommit = 0;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This turns off AutoCommit, meaning that changes you make won’t be saved to the database unless you explicitly tell MySQL to commit them."
+  },
+  {
+    "type": "code",
+    "text": "COMMITImportant: Until you execute a, your changes are not permanent.\nCOMMIT"
+  },
+  {
+    "type": "header",
+    "text": "COMMIT — Save Changes to the Database"
+  },
+  {
+    "type": "paragraph",
+    "text": "Once you’ve made changes and you’re confident that everything is correct, you can"
+  },
+  {
+    "type": "code",
+    "text": "COMMITuse thecommand to save those changes.\nCOMMIT"
+  },
+  {
+    "type": "header",
+    "text": "To commit a transaction:"
+  },
+  {
+    "type": "paragraph",
+    "text": "COMMIT;"
+  },
+  {
+    "type": "code",
+    "text": "COMMIT;\nCOMMITROLLBACKThis saves all the changes made since the last point, the changes become permanent.\nCOMMIT\nROLLBACK"
+  },
+  {
+    "type": "paragraph",
+    "text": "or"
+  },
+  {
+    "type": "paragraph",
+    "text": ". After this"
+  },
+  {
+    "type": "header",
+    "text": "ROLLBACK — Revert Changes to the Last Safe Point"
+  },
+  {
+    "type": "paragraph",
+    "text": "If you make an error or decide you don’t want to save your changes, you can"
+  },
+  {
+    "type": "paragraph",
+    "text": "rollback the transaction to its previous state."
+  },
+  {
+    "type": "header",
+    "text": "To rollback a transaction:"
+  },
+  {
+    "type": "paragraph",
+    "text": "ROLLBACK;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This undoes all changes since the lastor."
+  },
+  {
+    "type": "header",
+    "text": "COMMITROLLBACKExample Workflow"
+  },
+  {
+    "type": "code",
+    "text": "COMMIT\nROLLBACK"
+  },
+  {
+    "type": "paragraph",
+    "text": "Here’s a simple example of using"
+  },
+  {
+    "type": "code",
+    "text": "COMMITand\nCOMMIT\nROLLBACKin a transaction:\nROLLBACK"
+  },
+  {
+    "type": "bullet",
+    "text": "Turn off AutoCommit:"
+  },
+  {
+    "type": "code",
+    "text": "SET autocommit = 0;"
+  },
+  {
+    "type": "bullet",
+    "text": "Make some changes (e.g., updating a salary):"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE users SET salary = 80000 WHERE id = 5;"
+  },
+  {
+    "type": "bullet",
+    "text": "Decide whether to commit or rollback:"
+  },
+  {
+    "type": "bullet",
+    "text": "If you’re happy with the changes, run:"
+  },
+  {
+    "type": "code",
+    "text": "COMMIT;"
+  },
+  {
+    "type": "bullet",
+    "text": "If you’re not happy and want to revert the changes, run:"
+  },
+  {
+    "type": "code",
+    "text": "ROLLBACK;"
+  },
+  {
+    "type": "header",
+    "text": "Enabling AutoCommit Again"
+  },
+  {
+    "type": "paragraph",
+    "text": "If you want to turn AutoCommit back on (so that every statement is automatically committed), you can do so with:"
+  },
+  {
+    "type": "code",
+    "text": "SET autocommit = 1;"
+  },
+  {
+    "type": "header",
+    "text": "Best Practices"
+  },
+  {
+    "type": "header",
+    "text": "Use"
+  },
+  {
+    "type": "paragraph",
+    "text": "when you want to make changes permanent."
+  },
+  {
+    "type": "code",
+    "text": "COMMITROLLBACKto discard changes if something goes wrong.\nCOMMIT\nROLLBACK"
+  },
+  {
+    "type": "bullet",
+    "text": "Consider disabling AutoCommit when performing complex updates to avoid saving partial or incorrect data."
+  },
+  {
+    "type": "header",
+    "text": "PRIMARY KEYUnderstandingin MySQL"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEY"
+  },
+  {
+    "type": "paragraph",
+    "text": "Ais a constraint in SQL that uniquely identifies each row in a table."
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEYIt is one of the most important concepts in database design.\nPRIMARY KEY"
+  },
+  {
+    "type": "header",
+    "text": "What is a Primary Key?"
+  },
+  {
+    "type": "bullet",
+    "text": "A:"
+  },
+  {
+    "type": "bullet",
+    "text": "PRIMARY KEYMust be unique"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEY"
+  },
+  {
+    "type": "bullet",
+    "text": "Cannot be NULL"
+  },
+  {
+    "type": "bullet",
+    "text": "Is used to identify rows in a table"
+  },
+  {
+    "type": "bullet",
+    "text": "Can be a single column or a combination of columns"
+  },
+  {
+    "type": "bullet",
+    "text": "Each table can have only one primary key"
+  },
+  {
+    "type": "header",
+    "text": "Example:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100)\n);"
+  },
+  {
+    "type": "header",
+    "text": "PRIMARY KEYUNIQUEHow IsDifferent from?"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEY\nUNIQUE"
+  },
+  {
+    "type": "paragraph",
+    "text": "At first glance,"
+  },
+  {
+    "type": "paragraph",
+    "text": "and"
+  },
+  {
+    "type": "paragraph",
+    "text": "might seem similar since both prevent"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEYUNIQUEduplicate values. But there are important differences:\nPRIMARY KEY\nUNIQUE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Feature"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEY\nUNIQUE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Must be unique"
+  },
+  {
+    "type": "paragraph",
+    "text": "Yes"
+  },
+  {
+    "type": "paragraph",
+    "text": "Allows NULL values"
+  },
+  {
+    "type": "paragraph",
+    "text": "No"
+  },
+  {
+    "type": "paragraph",
+    "text": "Yes (one or more NULLs allowed)"
+  },
+  {
+    "type": "paragraph",
+    "text": "How many allowed"
+  },
+  {
+    "type": "paragraph",
+    "text": "Only one per table"
+  },
+  {
+    "type": "paragraph",
+    "text": "Can have multiple"
+  },
+  {
+    "type": "paragraph",
+    "text": "Required by table"
+  },
+  {
+    "type": "paragraph",
+    "text": "Recommended, often required"
+  },
+  {
+    "type": "paragraph",
+    "text": "Optional"
+  },
+  {
+    "type": "paragraph",
+    "text": "Dropping"
+  },
+  {
+    "type": "paragraph",
+    "text": "Cannot be easily dropped"
+  },
+  {
+    "type": "paragraph",
+    "text": "Can be dropped anytime"
+  },
+  {
+    "type": "header",
+    "text": "Example with UNIQUE"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE users (\nid INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(100) UNIQUE,\nname VARCHAR(100)\n);"
+  },
+  {
+    "type": "paragraph",
+    "text": "In this example:"
+  },
+  {
+    "type": "paragraph",
+    "text": "is the unique identifier for each row."
+  },
+  {
+    "type": "code",
+    "text": "idemailmust be unique, but is not the primary key.\nid\nemail"
+  },
+  {
+    "type": "header",
+    "text": "UNIQUECan I Drop a PRIMARY KEY?"
+  },
+  {
+    "type": "code",
+    "text": "UNIQUE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Yes, but it is more restricted than dropping aconstraint."
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users DROP PRIMARY KEY;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This may fail if the primary key is being used elsewhere (like in a foreign key or auto_increment column)."
+  },
+  {
+    "type": "code",
+    "text": "UNIQUETo drop aconstraint:\nUNIQUE\nALTER TABLE users DROP INDEX email;"
+  },
+  {
+    "type": "header",
+    "text": "Auto Increment"
+  },
+  {
+    "type": "paragraph",
+    "text": "In MySQL, a"
+  },
+  {
+    "type": "paragraph",
+    "text": "is often used with the"
+  },
+  {
+    "type": "paragraph",
+    "text": "attribute to"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEYAUTO_INCREMENTautomatically generate unique values for new rows.\nPRIMARY KEY\nAUTO_INCREMENT\n\nCREATE TABLE users (\nid INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100)\n);"
+  },
+  {
+    "type": "paragraph",
+    "text": "This means that every time you insert a new row, MySQL will automatically assign a"
+  },
+  {
+    "type": "code",
+    "text": "idunique value to the\nid\nAUTO_INCREMENT\n\nALTER TABLE users AUTO_INCREMENT = 1000;using:\nAUTO_INCREMENT\n\nALTER TABLE users AUTO_INCREMENT = 1000;"
+  },
+  {
+    "type": "header",
+    "text": "Key Takeaways"
+  },
+  {
+    "type": "paragraph",
+    "text": "column. You can change the starting value of"
+  },
+  {
+    "type": "code",
+    "text": "PRIMARY KEYUse\nPRIMARY KEY\nUNIQUEUse\nUNIQUE"
+  },
+  {
+    "type": "paragraph",
+    "text": "or phone)."
+  },
+  {
+    "type": "paragraph",
+    "text": "for the main identifier of a row."
+  },
+  {
+    "type": "paragraph",
+    "text": "for enforcing non-duplicate values in other columns (like email"
+  },
+  {
+    "type": "bullet",
+    "text": "You can have only one primary key, but you can have many unique constraints."
+  },
+  {
+    "type": "header",
+    "text": "Foreign Keys in MySQL"
+  },
+  {
+    "type": "paragraph",
+    "text": "A foreign key is a column that creates a link between two tables. It ensures that the value in one table must match a value in another table."
+  },
+  {
+    "type": "paragraph",
+    "text": "This is used to maintain data integrity between related data."
+  },
+  {
+    "type": "header",
+    "text": "Why Use Foreign Keys?"
+  },
+  {
+    "type": "paragraph",
+    "text": "Imagine this scenario:"
+  },
+  {
+    "type": "code",
+    "text": "usersYou have atable. Now you want to store each user’s address. Instead of\nusers"
+  },
+  {
+    "type": "paragraph",
+    "text": "putting address columns inside the"
+  },
+  {
+    "type": "code",
+    "text": "addressesuserstable, and link it to\naddresses\nusers"
+  },
+  {
+    "type": "paragraph",
+    "text": "table, you create a separate using a foreign key."
+  },
+  {
+    "type": "header",
+    "text": "addressesCreating a Table with a Foreign Key"
+  },
+  {
+    "type": "code",
+    "text": "addresses"
+  },
+  {
+    "type": "paragraph",
+    "text": "Let’s create antable where each address belongs to a user."
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE addresses (\nid INT AUTO_INCREMENT PRIMARY KEY,\nuser_id INT,\nstreet VARCHAR(255), city VARCHAR(100),\nstate VARCHAR(100),\npincode VARCHAR(10),\nFOREIGN KEY (user_id) REFERENCES users(id)\n);"
+  },
+  {
+    "type": "header",
+    "text": "Explanation:"
+  },
+  {
+    "type": "code",
+    "text": "user_idis a foreign key.\nuser_id\nidIt references the\nid"
+  },
+  {
+    "type": "paragraph",
+    "text": "column in the"
+  },
+  {
+    "type": "paragraph",
+    "text": "table."
+  },
+  {
+    "type": "code",
+    "text": "usersThis ensures that every address must be linked to a valid user.\nusers"
+  },
+  {
+    "type": "header",
+    "text": "Dropping a Foreign Key"
+  },
+  {
+    "type": "paragraph",
+    "text": "To drop a foreign key, you need to know its constraint name. MySQL auto-generates it if you don’t specify one, or you can name it yourself:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE addresses (\nid INT AUTO_INCREMENT PRIMARY KEY,\nuser_id INT,\nCONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)\n);"
+  },
+  {
+    "type": "paragraph",
+    "text": "To drop it:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE addresses\nDROP FOREIGN KEY fk_user;"
+  },
+  {
+    "type": "header",
+    "text": "Adding a Foreign Key Later (Using ALTER)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose the foreign key was not defined during table creation. You can add it"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLElater using:\n\nALTER TABLE addresses\nADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);\n\nALTER TABLE addressesADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);"
+  },
+  {
+    "type": "header",
+    "text": "ON DELETEAddingAction"
+  },
+  {
+    "type": "code",
+    "text": "ON DELETE"
+  },
+  {
+    "type": "paragraph",
+    "text": "By default, if you delete a user that has related addresses, MySQL will throw an"
+  },
+  {
+    "type": "code",
+    "text": "ON DELETEerror. You can control this behavior with.\nON DELETE"
+  },
+  {
+    "type": "header",
+    "text": "ON DELETE CASCADEExample with:"
+  },
+  {
+    "type": "code",
+    "text": "ON DELETE CASCADE"
+  },
+  {
+    "type": "paragraph",
+    "text": "If you want addresses to be automatically deleted when the user is deleted:"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE addresses (\nid INT AUTO_INCREMENT PRIMARY KEY,\nuser_id INT,\nstreet VARCHAR(255), city VARCHAR(100),\nstate VARCHAR(100),\npincode VARCHAR(10),\nCONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE\n);"
+  },
+  {
+    "type": "paragraph",
+    "text": "Or alter it later:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE addresses\nADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;"
+  },
+  {
+    "type": "header",
+    "text": "Other ON DELETE Options"
+  },
+  {
+    "type": "paragraph",
+    "text": "ON DELETE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Option"
+  },
+  {
+    "type": "paragraph",
+    "text": "Behavior"
+  },
+  {
+    "type": "code",
+    "text": "CASCADE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Deletes all related rows in child table"
+  },
+  {
+    "type": "code",
+    "text": "SET NULL"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sets the foreign key to NULL in the child table"
+  },
+  {
+    "type": "code",
+    "text": "RESTRICT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Prevents deletion of parent if child exists (default)"
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "bullet",
+    "text": "Foreign keys connect tables and enforce valid references."
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLEYou can create them inline or with.\n\nALTER TABLE"
+  },
+  {
+    "type": "bullet",
+    "text": "You can drop them by name."
+  },
+  {
+    "type": "code",
+    "text": "ON DELETEUseto control what happens when the parent row is deleted.\nON DELETE"
+  },
+  {
+    "type": "header",
+    "text": "SQL JOINs in MySQL"
+  },
+  {
+    "type": "paragraph",
+    "text": "In SQL, JOINs are used to combine rows from two or more tables based on related columns — usually a foreign key in one table referencing a primary key in another."
+  },
+  {
+    "type": "paragraph",
+    "text": "We’ll use the following two tables:"
+  },
+  {
+    "type": "header",
+    "text": "userstable"
+  },
+  {
+    "type": "code",
+    "text": "users"
+  },
+  {
+    "type": "paragraph",
+    "text": "id"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "3"
+  },
+  {
+    "type": "paragraph",
+    "text": "Raj"
+  },
+  {
+    "type": "header",
+    "text": "addressestable"
+  },
+  {
+    "type": "code",
+    "text": "addresses"
+  },
+  {
+    "type": "paragraph",
+    "text": "id"
+  },
+  {
+    "type": "paragraph",
+    "text": "user_id"
+  },
+  {
+    "type": "paragraph",
+    "text": "city"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "paragraph",
+    "text": "Mumbai"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Kolkata"
+  },
+  {
+    "type": "paragraph",
+    "text": "3"
+  },
+  {
+    "type": "paragraph",
+    "text": "4"
+  },
+  {
+    "type": "paragraph",
+    "text": "Delhi"
+  },
+  {
+    "type": "code",
+    "text": "user_idusers.idNote:is a foreign key that references.\nuser_id\nusers.id"
+  },
+  {
+    "type": "header",
+    "text": "INNER JOIN"
+  },
+  {
+    "type": "paragraph",
+    "text": "Returns only the matching rows from both tables."
+  },
+  {
+    "type": "code",
+    "text": "SELECT users.name, addresses.city FROM users\nINNER JOIN addresses ON users.id = addresses.user_id;"
+  },
+  {
+    "type": "header",
+    "text": "Output:"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "city"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "Mumbai"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "Kolkata"
+  },
+  {
+    "type": "code",
+    "text": "RajDelhiis excluded because there is no matching address.is excluded\nRaj\nDelhi\nuser_idusersbecause its(4) is not in.\nuser_id\nusers"
+  },
+  {
+    "type": "header",
+    "text": "Visual Representation:"
+  },
+  {
+    "type": "paragraph",
+    "text": "usersaddresses| 1 || 1 || 2 || 2 |||||=> only matching pairs"
+  },
+  {
+    "type": "code",
+    "text": "users\naddresses\n| 1 |\n| 2 |\n|\n=> only matching pairs"
+  },
+  {
+    "type": "header",
+    "text": "LEFT JOIN"
+  },
+  {
+    "type": "paragraph",
+    "text": "Returns all rows from the left table (), and matching rows from the right"
+  },
+  {
+    "type": "code",
+    "text": "usersaddressestable (). If no match is found, NULLs are returned.\nusers\naddresses\n\nSELECT users.name, addresses.city FROM users\nLEFT JOIN addresses ON users.id = addresses.user_id;"
+  },
+  {
+    "type": "header",
+    "text": "Output:"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "city"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "Mumbai"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "Kolkata"
+  },
+  {
+    "type": "paragraph",
+    "text": "Raj"
+  },
+  {
+    "type": "paragraph",
+    "text": "NULL"
+  },
+  {
+    "type": "code",
+    "text": "Rajis shown even though he doesn’t have an address.\nRaj"
+  },
+  {
+    "type": "header",
+    "text": "Visual Representation:"
+  },
+  {
+    "type": "paragraph",
+    "text": "usersaddresses| 1 || 1 || 2 || 2 || 3 |||=> all users + matched addresses (or NULL)"
+  },
+  {
+    "type": "code",
+    "text": "users\naddresses\n| 1 |\n| 2 |\n| 3 |\n|\n=> all users + matched addresses (or NULL)"
+  },
+  {
+    "type": "header",
+    "text": "RIGHT JOIN"
+  },
+  {
+    "type": "paragraph",
+    "text": "Returns all rows from the right table (), and matching rows from the"
+  },
+  {
+    "type": "code",
+    "text": "addressesusersleft table (). If no match is found, NULLs are returned.\naddresses\nusers\n\nSELECT users.name, addresses.city FROM users\nRIGHT JOIN addresses ON users.id = addresses.user_id;"
+  },
+  {
+    "type": "header",
+    "text": "Output:"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "city"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "Mumbai"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "Kolkata"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "city"
+  },
+  {
+    "type": "paragraph",
+    "text": "NULL"
+  },
+  {
+    "type": "paragraph",
+    "text": "Delhi"
+  },
+  {
+    "type": "code",
+    "text": "Delhiuser_idis shown even though it points to athat doesn’t exist.\nDelhi\nuser_id"
+  },
+  {
+    "type": "header",
+    "text": "Visual Representation:"
+  },
+  {
+    "type": "paragraph",
+    "text": "usersaddresses| 1 || 1 || 2 || 2 |||| 4 |=> all addresses + matched users (or NULL)"
+  },
+  {
+    "type": "code",
+    "text": "users\naddresses\n| 1 |\n| 2 |\n|\n| 4 |\n=> all addresses + matched users (or NULL)"
+  },
+  {
+    "type": "header",
+    "text": "Summary Table"
+  },
+  {
+    "type": "paragraph",
+    "text": "JOIN Type"
+  },
+  {
+    "type": "paragraph",
+    "text": "Description"
+  },
+  {
+    "type": "code",
+    "text": "INNER JOIN"
+  },
+  {
+    "type": "paragraph",
+    "text": "Only matching rows from both tables"
+  },
+  {
+    "type": "code",
+    "text": "LEFT JOIN"
+  },
+  {
+    "type": "paragraph",
+    "text": "All rows from left table + matching from right"
+  },
+  {
+    "type": "code",
+    "text": "RIGHT JOIN"
+  },
+  {
+    "type": "paragraph",
+    "text": "All rows from right table + matching from left"
+  },
+  {
+    "type": "header",
+    "text": "UNIONUNION ALLSQLand"
+  },
+  {
+    "type": "code",
+    "text": "UNION\nUNION ALL\nUNIONSELECTThe\nUNION\nSELECT"
+  },
+  {
+    "type": "paragraph",
+    "text": "operator in SQL is used to combine the result sets of two or more statements. It removes duplicates by default."
+  },
+  {
+    "type": "code",
+    "text": "UNION ALLIf you want to include all rows including duplicates, use.\nUNION ALL"
+  },
+  {
+    "type": "header",
+    "text": "Example Scenario"
+  },
+  {
+    "type": "paragraph",
+    "text": "You already have atable for active users. Now, we’ll create an"
+  },
+  {
+    "type": "code",
+    "text": "usersadmin_userstable to store users who are administrators or have special roles. We\nusers\nadmin_users\nUNIONwill then combine the names from both tables using.\nUNION"
+  },
+  {
+    "type": "header",
+    "text": "admin_usersStep 1: Create theTable"
+  },
+  {
+    "type": "code",
+    "text": "admin_users\n\nCREATE TABLE admin_users ( id INT PRIMARY KEY,\nname VARCHAR(100), email VARCHAR(100),\ngender ENUM('Male', 'Female', 'Other'), date_of_birth DATE,\nsalary INT\n);"
+  },
+  {
+    "type": "header",
+    "text": "admin_usersStep 2: Insert Sample Data into"
+  },
+  {
+    "type": "code",
+    "text": "admin_users\n\nINSERT INTO admin_users (id, name, email, gender, date_of_birth, salary) VALUES (101, 'Anil Kumar', 'anil@example.com', 'Male', '1985-04-12', 60000),\n(102, 'Pooja Sharma', 'pooja@example.com', 'Female', '1992-09-20', 58000),\n(103, 'Rakesh Yadav', 'rakesh@example.com', 'Male', '1989-11-05', 54000),\n(104, 'Fatima Begum', 'fatima@example.com', 'Female', '1990-06-30', 62000);"
+  },
+  {
+    "type": "header",
+    "text": "UNIONStep 3: Useto Combine Data"
+  },
+  {
+    "type": "code",
+    "text": "UNION"
+  },
+  {
+    "type": "paragraph",
+    "text": "Let’s combine the active and admin user names."
+  },
+  {
+    "type": "code",
+    "text": "SELECT name FROM users UNION\n\nSELECT name FROM admin_users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This returns a single list of unique names from both tables."
+  },
+  {
+    "type": "header",
+    "text": "UNION ALLExample"
+  },
+  {
+    "type": "code",
+    "text": "UNION ALL\nUNION ALLIf you want to keep duplicate names (if any), use.\nUNION ALL\n\nSELECT name FROM users UNION ALL\n\nSELECT name FROM admin_users;"
+  },
+  {
+    "type": "header",
+    "text": "Using More Than One Column"
+  },
+  {
+    "type": "code",
+    "text": "SELECTYou can also select multiple columns as long as both\nSELECT"
+  },
+  {
+    "type": "header",
+    "text": "same number of columns with compatible types."
+  },
+  {
+    "type": "paragraph",
+    "text": "queries return the"
+  },
+  {
+    "type": "code",
+    "text": "SELECT name, salary FROM users UNION\n\nSELECT name, salary FROM admin_users;"
+  },
+  {
+    "type": "header",
+    "text": "Adding separate roles"
+  },
+  {
+    "type": "code",
+    "text": "SELECT name, 'User' AS role FROM users UNION\n\nSELECT name, 'Admin' AS role FROM admin_users;"
+  },
+  {
+    "type": "header",
+    "text": "UNIONUsing Order By with"
+  },
+  {
+    "type": "code",
+    "text": "UNION\n\nSELECT name FROM users UNION\n\nSELECT name FROM admin_users ORDER BY name;"
+  },
+  {
+    "type": "header",
+    "text": "UNIONSELECTRules of"
+  },
+  {
+    "type": "code",
+    "text": "UNION\nSELECT"
+  },
+  {
+    "type": "bullet",
+    "text": "The number of columns and their data types must match in all statements."
+  },
+  {
+    "type": "code",
+    "text": "UNIONremoves duplicates by default.\nUNION\nUNION ALLkeeps duplicates.\nUNION ALL"
+  },
+  {
+    "type": "header",
+    "text": "UNIONWhen to Use"
+  },
+  {
+    "type": "code",
+    "text": "UNION"
+  },
+  {
+    "type": "bullet",
+    "text": "When you have two similar tables (like current and archived data)."
+  },
+  {
+    "type": "bullet",
+    "text": "When you need to combine filtered results (e.g., high-salary users from two sources)."
+  },
+  {
+    "type": "bullet",
+    "text": "When performing cross-category reporting."
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "paragraph",
+    "text": "Operator"
+  },
+  {
+    "type": "paragraph",
+    "text": "Behavior"
+  },
+  {
+    "type": "code",
+    "text": "UNION"
+  },
+  {
+    "type": "paragraph",
+    "text": "Combines results, removes duplicates"
+  },
+  {
+    "type": "code",
+    "text": "UNION ALL"
+  },
+  {
+    "type": "paragraph",
+    "text": "Combines results, keeps duplicates"
+  },
+  {
+    "type": "header",
+    "text": "Self JOIN in MySQL"
+  },
+  {
+    "type": "paragraph",
+    "text": "A Self JOIN is a regular join, but the table is joined with itself."
+  },
+  {
+    "type": "paragraph",
+    "text": "This is useful when rows in the same table are related to each other. For example, when users refer other users, and we store the ID of the person who referred them"
+  },
+  {
+    "type": "code",
+    "text": "usersin the sametable.\nusers"
+  },
+  {
+    "type": "header",
+    "text": "referred_by_idStep 1: Add aColumn"
+  },
+  {
+    "type": "code",
+    "text": "referred_by_id"
+  },
+  {
+    "type": "paragraph",
+    "text": "We’ll extend the existingtable to include a column called,"
+  },
+  {
+    "type": "code",
+    "text": "usersreferred_by_ididwhich holds theof the user who referred them.\nusers\nreferred_by_id\nid\n\nALTER TABLE users\nADD COLUMN referred_by_id INT;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This column:"
+  },
+  {
+    "type": "bullet",
+    "text": "Will be NULL for users who were not referred."
+  },
+  {
+    "type": "code",
+    "text": "idWill contain theof another user who referred them.\nid"
+  },
+  {
+    "type": "header",
+    "text": "id = 1Step 2: Insert Referral Data (Optional)"
+  },
+  {
+    "type": "code",
+    "text": "id = 1"
+  },
+  {
+    "type": "paragraph",
+    "text": "Assumingis the first user, and referred others:"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE users SET referred_by_id = 1 WHERE id IN (2, 3);\n\n-- User 1 referred Users 2\nand 3\n\nUPDATE users SET referred_by_id = 2 WHERE id = 4;\n\n-- User 2 referred User 4\n\nUPDATE users SET referred_by_id = 1 WHERE id IN (2, 3);\n\n-- User 2 referred User 4;"
+  },
+  {
+    "type": "header",
+    "text": "Step 3: Use a Self JOIN to Get Referrer Names"
+  },
+  {
+    "type": "paragraph",
+    "text": "We want to get each user’s name along with the name of the person who referred them."
+  },
+  {
+    "type": "code",
+    "text": "SELECT\na.id,\na.name AS user_name, b.name AS referred_by\nFROM users a\nINNER JOIN users b ON a.referred_by_id = b.id;"
+  },
+  {
+    "type": "header",
+    "text": "Explanation:"
+  },
+  {
+    "type": "code",
+    "text": "a\nb\nLEFT JOINNULLis used so that users with included.\nLEFT JOIN\nNULL"
+  },
+  {
+    "type": "paragraph",
+    "text": "in"
+  },
+  {
+    "type": "code",
+    "text": "referred_by_idare also\nreferred_by_id"
+  },
+  {
+    "type": "header",
+    "text": "Sample Output:"
+  },
+  {
+    "type": "paragraph",
+    "text": "id"
+  },
+  {
+    "type": "paragraph",
+    "text": "user_name"
+  },
+  {
+    "type": "paragraph",
+    "text": "referred_by"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "NULL"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "3"
+  },
+  {
+    "type": "paragraph",
+    "text": "Raj"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "4"
+  },
+  {
+    "type": "paragraph",
+    "text": "Fatima"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "bullet",
+    "text": "Use Self JOIN when you need to join a table with itself."
+  },
+  {
+    "type": "code",
+    "text": "idIn referral-based relationships, store the referrer’sin the same table.\nid\na\nb"
+  },
+  {
+    "type": "paragraph",
+    "text": "and"
+  },
+  {
+    "type": "paragraph",
+    "text": "to differentiate the two instances of the same table."
+  },
+  {
+    "type": "header",
+    "text": "MySQL Views"
+  },
+  {
+    "type": "paragraph",
+    "text": "A view in MySQL is a virtual table based on the result of aquery. It does"
+  },
+  {
+    "type": "code",
+    "text": "SELECTnot store data itself — it always reflects the current data in the base tables. Views are useful when:\nSELECT"
+  },
+  {
+    "type": "bullet",
+    "text": "You want to simplify complex queries"
+  },
+  {
+    "type": "bullet",
+    "text": "You want to reuse logic"
+  },
+  {
+    "type": "bullet",
+    "text": "You want to hide certain columns from users"
+  },
+  {
+    "type": "bullet",
+    "text": "You want a “live snapshot” of filtered data"
+  },
+  {
+    "type": "header",
+    "text": "Creating a View"
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose we want a view that lists all users earning more than ₹70,000."
+  },
+  {
+    "type": "code",
+    "text": "CREATE VIEW high_salary_users AS SELECT id, name, salary\nFROM users\nWHERE salary > 70000;"
+  },
+  {
+    "type": "header",
+    "text": "usersQuerying the View"
+  },
+  {
+    "type": "code",
+    "text": "users\nSELECT * FROM high_salary_users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This will return all users from thetable where salary is above ₹70,000."
+  },
+  {
+    "type": "header",
+    "text": "Demonstrating That a View is Always Up-To-Date"
+  },
+  {
+    "type": "paragraph",
+    "text": "Let’s see what happens when the underlying data changes."
+  },
+  {
+    "type": "header",
+    "text": "Step 1: View before update"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM high_salary_users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "Output:"
+  },
+  {
+    "type": "paragraph",
+    "text": "id"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "salary"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "75000"
+  },
+  {
+    "type": "paragraph",
+    "text": "5"
+  },
+  {
+    "type": "paragraph",
+    "text": "Fatima"
+  },
+  {
+    "type": "paragraph",
+    "text": "80000"
+  },
+  {
+    "type": "header",
+    "text": "Step 2: Update a user’s salary"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE users\nSET salary = 72000 WHERE name = 'Raj';"
+  },
+  {
+    "type": "header",
+    "text": "Step 3: Query the view again"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM high_salary_users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "New Output:"
+  },
+  {
+    "type": "paragraph",
+    "text": "id"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "salary"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "75000"
+  },
+  {
+    "type": "paragraph",
+    "text": "5"
+  },
+  {
+    "type": "paragraph",
+    "text": "Fatima"
+  },
+  {
+    "type": "paragraph",
+    "text": "80000"
+  },
+  {
+    "type": "paragraph",
+    "text": "3"
+  },
+  {
+    "type": "paragraph",
+    "text": "Raj"
+  },
+  {
+    "type": "paragraph",
+    "text": "72000"
+  },
+  {
+    "type": "paragraph",
+    "text": "Notice how Raj is now included in the view — without updating the view"
+  },
+  {
+    "type": "paragraph",
+    "text": "itself. That’s because views always reflect live data from the original table."
+  },
+  {
+    "type": "header",
+    "text": "Dropping a View"
+  },
+  {
+    "type": "paragraph",
+    "text": "To remove a view:"
+  },
+  {
+    "type": "code",
+    "text": "DROP VIEW high_salary_users;"
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "bullet",
+    "text": "Views act like saved SELECT queries"
+  },
+  {
+    "type": "bullet",
+    "text": "Views are not duplicated data"
+  },
+  {
+    "type": "bullet",
+    "text": "Changes to base tables are reflected automatically"
+  },
+  {
+    "type": "bullet",
+    "text": "Great for simplifying complex queries or creating filtered access"
+  },
+  {
+    "type": "header",
+    "text": "MySQL Indexes"
+  },
+  {
+    "type": "paragraph",
+    "text": "Indexes in MySQL are used to speed up data retrieval. They work like the index of a book — helping the database engine find rows faster, especially for searches, filters, and joins."
+  },
+  {
+    "type": "header",
+    "text": "Viewing Indexes on a Table"
+  },
+  {
+    "type": "paragraph",
+    "text": "To see the indexes on a table, use:"
+  },
+  {
+    "type": "code",
+    "text": "SHOW INDEXES FROM users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This shows all the indexes currently defined on the automatically created primary key index."
+  },
+  {
+    "type": "header",
+    "text": "Creating a Single-Column Index"
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose you’re frequently searching users by their"
+  },
+  {
+    "type": "paragraph",
+    "text": "table, including the"
+  },
+  {
+    "type": "code",
+    "text": "usersemail. You can speed this up\nusers\nemail\nemailby indexing thecolumn.\nemail\nCREATE INDEX idx_email ON users(email);"
+  },
+  {
+    "type": "header",
+    "text": "What this does:"
+  },
+  {
+    "type": "code",
+    "text": "idx_emailCreates an index named\nidx_email"
+  },
+  {
+    "type": "bullet",
+    "text": "Improves performance of queries like:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE email = 'example@example.com';"
+  },
+  {
+    "type": "header",
+    "text": "Important Notes"
+  },
+  {
+    "type": "bullet",
+    "text": "Indexes consume extra disk space"
+  },
+  {
+    "type": "bullet",
+    "text": "JOINIndexes slow down"
+  },
+  {
+    "type": "code",
+    "text": "JOIN"
+  },
+  {
+    "type": "paragraph",
+    "text": ","
+  },
+  {
+    "type": "header",
+    "text": ", and"
+  },
+  {
+    "type": "paragraph",
+    "text": "operations slightly"
+  },
+  {
+    "type": "code",
+    "text": "INSERT\n\nUPDATEDELETE(because the index must be updated)\nINSERT\n\nUPDATE\nDELETE\nWHEREUse indexes only when needed (i.e., for columns used in\nWHERE\nORDER BY)\nORDER BY"
+  },
+  {
+    "type": "header",
+    "text": "salaryCreating a Multi-Column Index"
+  },
+  {
+    "type": "code",
+    "text": "salary"
+  },
+  {
+    "type": "paragraph",
+    "text": ",,"
+  },
+  {
+    "type": "paragraph",
+    "text": "genderIf you often query users using both"
+  },
+  {
+    "type": "code",
+    "text": "gender\nCREATE INDEX idx_gender_salary ON users(gender, salary);more efficient than separate indexes.\nCREATE INDEX idx_gender_salary ON users(gender, salary);"
+  },
+  {
+    "type": "header",
+    "text": "Usage Example:"
+  },
+  {
+    "type": "header",
+    "text": "and"
+  },
+  {
+    "type": "paragraph",
+    "text": ", a multi-column index is"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users\nWHERE gender = 'Female' AND salary > 70000;\n\ngendersalaryThis query can take advantage of the combined index onand.\ngender\nsalary;"
+  },
+  {
+    "type": "header",
+    "text": "Index Order Matters"
+  },
+  {
+    "type": "paragraph",
+    "text": "For a multi-column index on:"
+  },
+  {
+    "type": "code",
+    "text": "(gender, salary)This works efficiently:\n(gender, salary)\nWHERE gender = 'Female' AND salary > 70000"
+  },
+  {
+    "type": "bullet",
+    "text": "But this may not use the index effectively:"
+  },
+  {
+    "type": "code",
+    "text": "WHERE salary > 70000"
+  },
+  {
+    "type": "paragraph",
+    "text": "Because the first column in the index () is missing in the filter."
+  },
+  {
+    "type": "header",
+    "text": "genderDropping an Index"
+  },
+  {
+    "type": "code",
+    "text": "gender"
+  },
+  {
+    "type": "paragraph",
+    "text": "To delete an index:"
+  },
+  {
+    "type": "code",
+    "text": "DROP INDEX idx_email ON users;"
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "paragraph",
+    "text": "Feature"
+  },
+  {
+    "type": "paragraph",
+    "text": "Description"
+  },
+  {
+    "type": "code",
+    "text": "SHOW INDEXES"
+  },
+  {
+    "type": "paragraph",
+    "text": "View current indexes on a table"
+  },
+  {
+    "type": "code",
+    "text": "CREATE INDEX"
+  },
+  {
+    "type": "paragraph",
+    "text": "Create single or multi-column indexes"
+  },
+  {
+    "type": "code",
+    "text": "DROP INDEX"
+  },
+  {
+    "type": "paragraph",
+    "text": "Remove an index"
+  },
+  {
+    "type": "paragraph",
+    "text": "Use when"
+  },
+  {
+    "type": "paragraph",
+    "text": "Query performance on large tables is a concern"
+  },
+  {
+    "type": "paragraph",
+    "text": "Avoid on"
+  },
+  {
+    "type": "paragraph",
+    "text": "Columns that are rarely queried or always unique"
+  },
+  {
+    "type": "header",
+    "text": "Subqueries in MySQL"
+  },
+  {
+    "type": "paragraph",
+    "text": "A subquery is a query nested inside another query. Subqueries are useful for breaking down complex problems into smaller parts."
+  },
+  {
+    "type": "paragraph",
+    "text": "They can be used in:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT\nWHERE\nFROM"
+  },
+  {
+    "type": "paragraph",
+    "text": "statements clauses clauses"
+  },
+  {
+    "type": "header",
+    "text": "Example Scenario: Salary Comparison"
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose we want to find all users who earn more than the average salary of all users."
+  },
+  {
+    "type": "header",
+    "text": "Scalar Subquery Example"
+  },
+  {
+    "type": "paragraph",
+    "text": "This subquery returns a single value — the average salary — and we compare each user’s salary against it."
+  },
+  {
+    "type": "code",
+    "text": "SELECT id, name, salary FROM users\nWHERE salary > (\n\nSELECT AVG(salary) FROM users\n);"
+  },
+  {
+    "type": "header",
+    "text": "Explanation:"
+  },
+  {
+    "type": "bullet",
+    "text": "The inner query:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT AVG(salary) FROM usersreturns the average salary.\n\nSELECT AVG(salary) FROM users"
+  },
+  {
+    "type": "bullet",
+    "text": "The outer query selects all users with a salary greater than that average."
+  },
+  {
+    "type": "header",
+    "text": "INSubquery with"
+  },
+  {
+    "type": "code",
+    "text": "IN"
+  },
+  {
+    "type": "paragraph",
+    "text": "Now let’s say we want to find users who have been referred by someone who earns more than ₹75,000."
+  },
+  {
+    "type": "code",
+    "text": "SELECT id, name, referred_by_id FROM users\nWHERE referred_by_id IN (\n\nSELECT id FROM users WHERE salary > 75000\n);"
+  },
+  {
+    "type": "header",
+    "text": "Explanation:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT id FROM users WHERE salary > 75000The inner query:\n\nSELECT id FROM users WHERE salary > 75000"
+  },
+  {
+    "type": "paragraph",
+    "text": "of user IDs (referrers) who earn more than ₹75,000."
+  },
+  {
+    "type": "code",
+    "text": "referred_by_idThe outer query selects users whose\nreferred_by_id"
+  },
+  {
+    "type": "paragraph",
+    "text": "returns a list is in that list."
+  },
+  {
+    "type": "header",
+    "text": "Other Places Subqueries Are Used"
+  },
+  {
+    "type": "paragraph",
+    "text": "You can also use subqueries:"
+  },
+  {
+    "type": "code",
+    "text": "SELECTInside\nSELECT\nFROMIn the\nFROM"
+  },
+  {
+    "type": "paragraph",
+    "text": "columns (called scalar subqueries) clause to create derived tables"
+  },
+  {
+    "type": "code",
+    "text": "SELECTExample in:\nSELECT\n\nSELECT name, salary,\n(\n\nSELECT AVG(salary) FROM users) AS average_salary FROM users;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This shows each user’s salary along with the overall average."
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "paragraph",
+    "text": "Subquery Type"
+  },
+  {
+    "type": "paragraph",
+    "text": "Use Case"
+  },
+  {
+    "type": "paragraph",
+    "text": "Scalar Subquery"
+  },
+  {
+    "type": "paragraph",
+    "text": "Returns one value (e.g. AVG, MAX)"
+  },
+  {
+    "type": "code",
+    "text": "Subquery with IN"
+  },
+  {
+    "type": "paragraph",
+    "text": "Returns multiple values"
+  },
+  {
+    "type": "code",
+    "text": "Subquery in SELECT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Shows related calculated value"
+  },
+  {
+    "type": "code",
+    "text": "Subquery in FROM"
+  },
+  {
+    "type": "paragraph",
+    "text": "Acts as a virtual table"
+  },
+  {
+    "type": "paragraph",
+    "text": "Subqueries are powerful tools when filtering based on computed or dynamic conditions."
+  },
+  {
+    "type": "header",
+    "text": "GROUP BY and HAVING in MySQL"
+  },
+  {
+    "type": "paragraph",
+    "text": "Theclause is used to group rows that have the same values in"
+  },
+  {
+    "type": "code",
+    "text": "GROUP BYCOUNTSUMspecified columns. It is typically used with aggregate functions like,,\nGROUP BY\nCOUNT\nSUM\nAVGMINMAX,, or.\nAVG\nMIN\nMAX\nHAVINGWHEREThe\nHAVING\nWHERE"
+  },
+  {
+    "type": "paragraph",
+    "text": "clause is used to filter groups after aggregation — similar to how filters individual rows."
+  },
+  {
+    "type": "header",
+    "text": "usersExample Table:"
+  },
+  {
+    "type": "code",
+    "text": "users"
+  },
+  {
+    "type": "paragraph",
+    "text": "Assume this is yourtable:"
+  },
+  {
+    "type": "paragraph",
+    "text": "id"
+  },
+  {
+    "type": "paragraph",
+    "text": "name"
+  },
+  {
+    "type": "paragraph",
+    "text": "gender"
+  },
+  {
+    "type": "paragraph",
+    "text": "salary"
+  },
+  {
+    "type": "paragraph",
+    "text": "referred_by_id"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "paragraph",
+    "text": "Aarav"
+  },
+  {
+    "type": "paragraph",
+    "text": "Male"
+  },
+  {
+    "type": "paragraph",
+    "text": "80000"
+  },
+  {
+    "type": "paragraph",
+    "text": "NULL"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sneha"
+  },
+  {
+    "type": "paragraph",
+    "text": "Female"
+  },
+  {
+    "type": "paragraph",
+    "text": "75000"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "paragraph",
+    "text": "3"
+  },
+  {
+    "type": "paragraph",
+    "text": "Raj"
+  },
+  {
+    "type": "paragraph",
+    "text": "Male"
+  },
+  {
+    "type": "paragraph",
+    "text": "72000"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "paragraph",
+    "text": "4"
+  },
+  {
+    "type": "paragraph",
+    "text": "Fatima"
+  },
+  {
+    "type": "paragraph",
+    "text": "Female"
+  },
+  {
+    "type": "paragraph",
+    "text": "85000"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "5"
+  },
+  {
+    "type": "paragraph",
+    "text": "Priya"
+  },
+  {
+    "type": "paragraph",
+    "text": "Female"
+  },
+  {
+    "type": "paragraph",
+    "text": "70000"
+  },
+  {
+    "type": "paragraph",
+    "text": "NULL"
+  },
+  {
+    "type": "header",
+    "text": "GROUP BY Example: Average Salary by Gender"
+  },
+  {
+    "type": "code",
+    "text": "SELECT gender, AVG(salary) AS average_salary FROM users\nGROUP BY gender;"
+  },
+  {
+    "type": "header",
+    "text": "Explanation:"
+  },
+  {
+    "type": "bullet",
+    "text": "This groups users by gender."
+  },
+  {
+    "type": "bullet",
+    "text": "Then calculates the average salary for each group."
+  },
+  {
+    "type": "header",
+    "text": "GROUP BY with COUNT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Find how many users were referred by each user:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT referred_by_id, COUNT(*) AS total_referred FROM users\nWHERE referred_by_id IS NOT NULL GROUP BY referred_by_id;"
+  },
+  {
+    "type": "header",
+    "text": "Output:"
+  },
+  {
+    "type": "paragraph",
+    "text": "referred_by_id"
+  },
+  {
+    "type": "paragraph",
+    "text": "total_referred"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "paragraph",
+    "text": "2"
+  },
+  {
+    "type": "paragraph",
+    "text": "1"
+  },
+  {
+    "type": "header",
+    "text": "HAVING Clause: Filtering Groups"
+  },
+  {
+    "type": "paragraph",
+    "text": "Let’s say we only want to show genders where the average salary is greater than"
+  },
+  {
+    "type": "paragraph",
+    "text": "₹75,000."
+  },
+  {
+    "type": "code",
+    "text": "SELECT gender, AVG(salary) AS avg_salary FROM users\nGROUP BY gender\nHAVING AVG(salary) > 75000;"
+  },
+  {
+    "type": "header",
+    "text": "Why not"
+  },
+  {
+    "type": "code",
+    "text": "WHERE\nHAVING"
+  },
+  {
+    "type": "paragraph",
+    "text": "?"
+  },
+  {
+    "type": "code",
+    "text": "WHEREis used before grouping.\nWHERE"
+  },
+  {
+    "type": "paragraph",
+    "text": "is used after groups are formed — it’s the only way to filter"
+  },
+  {
+    "type": "paragraph",
+    "text": "aggregated values."
+  },
+  {
+    "type": "header",
+    "text": "Another Example: Groups with More Than 1 Referral"
+  },
+  {
+    "type": "code",
+    "text": "SELECT referred_by_id, COUNT(*) AS total_referred FROM users\nWHERE referred_by_id IS NOT NULL GROUP BY referred_by_id\nHAVING COUNT(*) > 1;"
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "paragraph",
+    "text": "Clause"
+  },
+  {
+    "type": "paragraph",
+    "text": "Purpose"
+  },
+  {
+    "type": "paragraph",
+    "text": "Can use aggregates?"
+  },
+  {
+    "type": "code",
+    "text": "WHERE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Filters rows before grouping"
+  },
+  {
+    "type": "paragraph",
+    "text": "No"
+  },
+  {
+    "type": "paragraph",
+    "text": "Groups rows based on column values"
+  },
+  {
+    "type": "paragraph",
+    "text": "N/A"
+  },
+  {
+    "type": "code",
+    "text": "HAVING"
+  },
+  {
+    "type": "paragraph",
+    "text": "Filters groups after aggregation"
+  },
+  {
+    "type": "paragraph",
+    "text": "Yes"
+  },
+  {
+    "type": "paragraph",
+    "text": "Use"
+  },
+  {
+    "type": "paragraph",
+    "text": "to organize data, and"
+  },
+  {
+    "type": "paragraph",
+    "text": "to filter those groups based on"
+  },
+  {
+    "type": "code",
+    "text": "GROUP BYHAVINGaggregate conditions.\nGROUP BY\nHAVING"
+  },
+  {
+    "type": "header",
+    "text": "ROLLUP"
+  },
+  {
+    "type": "paragraph",
+    "text": "To get subtotals and grand totals, you can use:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT gender, COUNT(*) AS total_users FROM users\nGROUP BY gender WITH ROLLUP;"
+  },
+  {
+    "type": "header",
+    "text": "Explanation:"
+  },
+  {
+    "type": "bullet",
+    "text": "This will give you a count of users by gender, along with a grand total for all users."
+  },
+  {
+    "type": "code",
+    "text": ";"
+  },
+  {
+    "type": "paragraph",
+    "text": "A stored procedure is a saved SQL block that can be executed later. It’s useful when you want to encapsulate logic that can be reused multiple times — like queries, updates, or conditional operations."
+  },
+  {
+    "type": "header",
+    "text": "Why Change the Delimiter?"
+  },
+  {
+    "type": "paragraph",
+    "text": "By default, MySQL usesto end SQL statements."
+  },
+  {
+    "type": "code",
+    "text": ";"
+  },
+  {
+    "type": "paragraph",
+    "text": "can confuse MySQL. To avoid this, we temporarily change the delimiter (e.g. to"
+  },
+  {
+    "type": "code",
+    "text": "$$//or) while creating the procedure.\n$$\n//"
+  },
+  {
+    "type": "header",
+    "text": "Syntax for Creating a Stored Procedure"
+  },
+  {
+    "type": "paragraph",
+    "text": "DELIMITER $$CREATE PROCEDURE procedure_name()BEGIN-- SQL statements go here END$$DELIMITER ;"
+  },
+  {
+    "type": "code",
+    "text": "DELIMITER $$\nCREATE PROCEDURE procedure_name()\nBEGIN\n-- SQL statements go here END$$\nDELIMITER ;"
+  },
+  {
+    "type": "paragraph",
+    "text": "After the procedure is created, we reset the delimiter back to."
+  },
+  {
+    "type": "header",
+    "text": "usersCreating a Procedure with Input Parameters"
+  },
+  {
+    "type": "code",
+    "text": "users"
+  },
+  {
+    "type": "paragraph",
+    "text": "Let’s say you want to create a stored procedure that inserts a new user into the table."
+  },
+  {
+    "type": "header",
+    "text": "usersExample:"
+  },
+  {
+    "type": "code",
+    "text": "users"
+  },
+  {
+    "type": "paragraph",
+    "text": "DELIMITER $$CREATE PROCEDURE AddUser(IN p_name VARCHAR(100),IN p_email VARCHAR(100),IN p_gender ENUM('Male', 'Female', 'Other'), IN p_dob DATE,IN p_salary INT)BEGININSERT INTO users (name, email, gender, date_of_birth, salary) VALUES (p_name, p_email, p_gender, p_dob, p_salary);END$$DELIMITER ;"
+  },
+  {
+    "type": "code",
+    "text": "DELIMITER $$\nCREATE PROCEDURE AddUser(\nIN p_name VARCHAR(100),\nIN p_email VARCHAR(100),\nIN p_gender ENUM('Male', 'Female', 'Other'), IN p_dob DATE,\nIN p_salary INT\n)\nBEGIN\nINSERT INTO users (name, email, gender, date_of_birth, salary) VALUES (p_name, p_email, p_gender, p_dob, p_salary);\nEND$$\nDELIMITER ;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This creates a procedure namedthat accepts five input parameters."
+  },
+  {
+    "type": "header",
+    "text": "AddUserCalling the Procedure"
+  },
+  {
+    "type": "code",
+    "text": "AddUser"
+  },
+  {
+    "type": "paragraph",
+    "text": "You can call the procedure using:"
+  },
+  {
+    "type": "code",
+    "text": "CALL AddUser('Kiran Sharma', 'kiran@example.com', 'Female', '1994-06-15', 72000);"
+  },
+  {
+    "type": "paragraph",
+    "text": "This will insert the new user into thetable."
+  },
+  {
+    "type": "header",
+    "text": "Notes"
+  },
+  {
+    "type": "bullet",
+    "text": "Input parameters are declared using thekeyword."
+  },
+  {
+    "type": "code",
+    "text": "INStored procedures are stored in the database and can be reused.\nIN"
+  },
+  {
+    "type": "header",
+    "text": "Viewing Stored Procedures"
+  },
+  {
+    "type": "code",
+    "text": "SHOW PROCEDURE STATUS WHERE Db = 'startersql';"
+  },
+  {
+    "type": "header",
+    "text": "Dropping a Stored Procedure"
+  },
+  {
+    "type": "paragraph",
+    "text": "DROP PROCEDURE IF EXISTS AddUser;"
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "paragraph",
+    "text": "Command"
+  },
+  {
+    "type": "paragraph",
+    "text": "Purpose"
+  },
+  {
+    "type": "code",
+    "text": "DELIMITER $$"
+  },
+  {
+    "type": "paragraph",
+    "text": "Temporarily change statement delimiter"
+  },
+  {
+    "type": "code",
+    "text": "CREATE PROCEDURE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Defines a new stored procedure"
+  },
+  {
+    "type": "code",
+    "text": "CALL procedure_name(...)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Executes a stored procedure"
+  },
+  {
+    "type": "code",
+    "text": "DROP PROCEDURE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Removes an existing procedure"
+  },
+  {
+    "type": "header",
+    "text": "UPDATETriggers in MySQL"
+  },
+  {
+    "type": "code",
+    "text": "UPDATE"
+  },
+  {
+    "type": "paragraph",
+    "text": "A trigger is a special kind of stored program that is automatically executed"
+  },
+  {
+    "type": "code",
+    "text": "INSERT(triggered) when a specific event occurs in a table — such as\nINSERT\nDELETE.\nDELETE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Triggers are commonly used for:"
+  },
+  {
+    "type": "bullet",
+    "text": "Logging changes"
+  },
+  {
+    "type": "bullet",
+    "text": "Enforcing additional business rules"
+  },
+  {
+    "type": "bullet",
+    "text": "Automatically updating related data"
+  },
+  {
+    "type": "header",
+    "text": "CREATE TRIGGER trigger_name AFTER INSERT ON table_name FOR EACH ROWBEGIN-- statements to execute END;Basic Trigger Structure"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TRIGGER trigger_name AFTER INSERT ON table_name FOR EACH ROW\nBEGIN\n-- statements to execute END;"
+  },
+  {
+    "type": "paragraph",
+    "text": "Triggers can be fired:"
+  },
+  {
+    "type": "paragraph",
+    "text": ","
+  },
+  {
+    "type": "paragraph",
+    "text": ", or"
+  },
+  {
+    "type": "code",
+    "text": "BEFOREAFTERor\nBEFORE\nAFTER\nINSERTOn,\nINSERT"
+  },
+  {
+    "type": "paragraph",
+    "text": "an event"
+  },
+  {
+    "type": "code",
+    "text": "UPDATEDELETE, or\n\nUPDATE\nDELETE"
+  },
+  {
+    "type": "header",
+    "text": "Scenario: Log Every New User Insertion"
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose we want to log every time a new user is inserted into thetable."
+  },
+  {
+    "type": "code",
+    "text": "usersuser_logWe’ll create a separate table calledto store log entries.\nusers\nuser_log"
+  },
+  {
+    "type": "header",
+    "text": "Step 1: Create the Log Table"
+  },
+  {
+    "type": "code",
+    "text": "CREATE TABLE user_log (\nid INT AUTO_INCREMENT PRIMARY KEY,\nuser_id INT,\nname VARCHAR(100),\ncreated_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);"
+  },
+  {
+    "type": "header",
+    "text": "Step 2: Create the Trigger"
+  },
+  {
+    "type": "paragraph",
+    "text": "We now define a trigger that runs after a new user is added."
+  },
+  {
+    "type": "code",
+    "text": "END$$\nDELIMITER;\n\nDELIMITER $$\nCREATE TRIGGER after_user_insert\nAFTER INSERT ON users FOR EACH ROW\nBEGIN\nINSERT INTO user_log (user_id, name) VALUES (NEW.id, NEW.name);"
+  },
+  {
+    "type": "header",
+    "text": "Explanation:"
+  },
+  {
+    "type": "code",
+    "text": "AFTER INSERT"
+  },
+  {
+    "type": "paragraph",
+    "text": "means the trigger fires after the user is inserted."
+  },
+  {
+    "type": "code",
+    "text": "NEW"
+  },
+  {
+    "type": "paragraph",
+    "text": "refers to the new row being added to the"
+  },
+  {
+    "type": "paragraph",
+    "text": "table."
+  },
+  {
+    "type": "code",
+    "text": "usersuser_logWe insert the new user’s ID and name into thetable.\nusers\nuser_log"
+  },
+  {
+    "type": "header",
+    "text": "user_logStep 3: Test the Trigger"
+  },
+  {
+    "type": "code",
+    "text": "user_log"
+  },
+  {
+    "type": "paragraph",
+    "text": "CALL AddUser('Ritika Jain', 'ritika@example.com', 'Female', '1996-03-12', 74000);"
+  },
+  {
+    "type": "paragraph",
+    "text": "Now check thetable:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM user_log;"
+  },
+  {
+    "type": "paragraph",
+    "text": "You should see Ritika’s info automatically logged."
+  },
+  {
+    "type": "header",
+    "text": "Dropping a Trigger"
+  },
+  {
+    "type": "paragraph",
+    "text": "If you need to remove a trigger:"
+  },
+  {
+    "type": "code",
+    "text": "DROP TRIGGER IF EXISTS after_user_insert;"
+  },
+  {
+    "type": "header",
+    "text": "Summary"
+  },
+  {
+    "type": "paragraph",
+    "text": "Trigger Component"
+  },
+  {
+    "type": "paragraph",
+    "text": "Description"
+  },
+  {
+    "type": "code",
+    "text": "BEFORE / AFTER"
+  },
+  {
+    "type": "paragraph",
+    "text": "When the trigger runs"
+  },
+  {
+    "type": "code",
+    "text": "INSERT / UPDATE /\nDELETE"
+  },
+  {
+    "type": "paragraph",
+    "text": "What kind of action triggers it"
+  },
+  {
+    "type": "code",
+    "text": "NEW.column\nRefers to the new row (for INSERT ,\n\nUPDATE )\nOLD.column\nRefers to the old row (for\n\nUPDATE , DELETE )\nFOR EACH ROW"
+  },
+  {
+    "type": "paragraph",
+    "text": "Executes for each affected row"
+  },
+  {
+    "type": "header",
+    "text": "More on MySQL"
+  },
+  {
+    "type": "paragraph",
+    "text": "This section covers some essential MySQL features and operators that help you write more powerful and flexible queries."
+  },
+  {
+    "type": "header",
+    "text": "WHERELogical Operators"
+  },
+  {
+    "type": "code",
+    "text": "WHERE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Logical operators are used to combine multiple conditions in aclause."
+  },
+  {
+    "type": "paragraph",
+    "text": "Operator"
+  },
+  {
+    "type": "paragraph",
+    "text": "Description"
+  },
+  {
+    "type": "paragraph",
+    "text": "Example"
+  },
+  {
+    "type": "code",
+    "text": "AND"
+  },
+  {
+    "type": "paragraph",
+    "text": "All conditions must be true"
+  },
+  {
+    "type": "code",
+    "text": "salary > 50000 AND gender = 'Male'\nOR"
+  },
+  {
+    "type": "paragraph",
+    "text": "At least one condition is true"
+  },
+  {
+    "type": "code",
+    "text": "gender = 'Male' OR gender = 'Other'\nNOT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Reverses a condition"
+  },
+  {
+    "type": "code",
+    "text": "NOT gender = 'Female'"
+  },
+  {
+    "type": "header",
+    "text": "ALTER TABLEAdd a Column to an Existing Table"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Useto add a column:"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users\nADD COLUMN city VARCHAR(100);\n\ncityusersThis adds a new column named\ncity\nusers;"
+  },
+  {
+    "type": "paragraph",
+    "text": "to the"
+  },
+  {
+    "type": "paragraph",
+    "text": "table."
+  },
+  {
+    "type": "header",
+    "text": "LIKEWildcard Operators"
+  },
+  {
+    "type": "code",
+    "text": "LIKE"
+  },
+  {
+    "type": "paragraph",
+    "text": "Wildcards are used with theoperator for pattern matching in text."
+  },
+  {
+    "type": "paragraph",
+    "text": "Wildcard"
+  },
+  {
+    "type": "paragraph",
+    "text": "Description"
+  },
+  {
+    "type": "paragraph",
+    "text": "Example"
+  },
+  {
+    "type": "paragraph",
+    "text": "Matches any sequence"
+  },
+  {
+    "type": "code",
+    "text": "WHERE name LIKE 'A%' (starts with A)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Matches a single character"
+  },
+  {
+    "type": "code",
+    "text": "WHERE name LIKE '_a%' (second letter is ‘a’)"
+  },
+  {
+    "type": "header",
+    "text": "LIMIT with OFFSET"
+  },
+  {
+    "type": "code",
+    "text": "LIMIT\n\nSELECT * FROM users ORDER BY idLIMIT 5 OFFSET 10;\n\nis used to limit the number of rows returned. rows before starting to return rows.\nLIMIT\n\nSELECT * FROM users ORDER BY id\nLIMIT 5 OFFSET 10;\n\nSELECT * FROM users ORDER BY idLIMIT 10, 5;\n\nThis skips the first 10 rows and returns the next 5. Alternative syntax:\n\nSELECT * FROM users ORDER BY id\nLIMIT 10, 5;\n\nLIMIT offset, countThis also skips 10 and returns 5 (syntax:\nLIMIT offset, count;"
+  },
+  {
+    "type": "paragraph",
+    "text": "skips a number of"
+  },
+  {
+    "type": "code",
+    "text": "OFFSET).\nOFFSET"
+  },
+  {
+    "type": "header",
+    "text": "DISTINCTDISTINCT Keyword"
+  },
+  {
+    "type": "code",
+    "text": "DISTINCT"
+  },
+  {
+    "type": "paragraph",
+    "text": "is used to return only unique values."
+  },
+  {
+    "type": "code",
+    "text": "SELECT DISTINCT gender FROM users;\nusersReturns a list of unique gender values from thetable.\nusers"
+  },
+  {
+    "type": "header",
+    "text": "TRUNCATETRUNCATE Keyword"
+  },
+  {
+    "type": "code",
+    "text": "TRUNCATE"
+  },
+  {
+    "type": "paragraph",
+    "text": "removes all rows from a table, but keeps the table structure."
+  },
+  {
+    "type": "code",
+    "text": "TRUNCATE TABLE users;"
+  },
+  {
+    "type": "bullet",
+    "text": "Faster than"
+  },
+  {
+    "type": "code",
+    "text": "DELETE FROM usersCannot be rolled back (unless in a transaction-safe environment)\n\nDELETE FROM users"
+  },
+  {
+    "type": "header",
+    "text": "CHANGE vs MODIFY Column"
+  },
+  {
+    "type": "paragraph",
+    "text": "Both"
+  },
+  {
+    "type": "paragraph",
+    "text": "and"
+  },
+  {
+    "type": "paragraph",
+    "text": "are used to alter existing columns in a table, but they"
+  },
+  {
+    "type": "code",
+    "text": "CHANGEMODIFYwork slightly differently.\nCHANGE\nMODIFY"
+  },
+  {
+    "type": "header",
+    "text": "CHANGE: Rename and change datatype"
+  },
+  {
+    "type": "code",
+    "text": "ALTER TABLE users\nCHANGE COLUMN city location VARCHAR(150);\n\ncityThis renames\ncity;"
+  },
+  {
+    "type": "paragraph",
+    "text": "to"
+  },
+  {
+    "type": "paragraph",
+    "text": "and changes its type."
+  },
+  {
+    "type": "header",
+    "text": "locationsalaryMODIFY: Only change datatype"
+  },
+  {
+    "type": "code",
+    "text": "location\nsalary\n\nALTER TABLE users\nMODIFY COLUMN salary BIGINT;"
+  },
+  {
+    "type": "paragraph",
+    "text": "This changes only the datatype of."
+  }
+]

@@ -148,6 +148,44 @@ export default function SystemDesign() {
                             </button>
                         </div>
                     </div>
+
+                    {/* MySQL Handbook Card */}
+                    <div
+                        onClick={() => navigate('/books/mysql/chapter1')}
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', display: 'flex', flexDirection: 'column' }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)';
+                            e.currentTarget.style.borderColor = '#00758f';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                        }}
+                    >
+                        <div style={{ height: '220px', background: 'rgba(0,0,0,0.2)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ position: 'absolute', inset: 0, opacity: 0.1, backgroundImage: 'radial-gradient(circle at 50% 50%, #00758f 2px, transparent 0)', backgroundSize: '30px 30px' }} />
+                            <Database size={80} color="#00758f" style={{ opacity: 0.8 }} />
+                        </div>
+                        <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
+                                <span style={{ background: 'rgba(0,117,143,0.15)', color: '#00afcc', padding: '4px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>DATABASE MASTERY</span>
+                            </div>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '1rem' }}>MySQL Handbook</h2>
+                            <p style={{ color: 'var(--txt2)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem', flex: 1 }}>
+                                Comprehensive guide to MySQL. From installation and basic CRUD to optimized querying, constraints, and database management.
+                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--txt3)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Database size={16} /> Core SQL</span>
+                                <span>•</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Zap size={16} /> Performance</span>
+                            </div>
+                            <button style={{ width: '100%', padding: '1rem', background: 'rgba(0,117,143,0.1)', border: 'none', borderRadius: '12px', color: '#00afcc', fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'background 0.2s' }}>
+                                Start Reading <ArrowRight size={18} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

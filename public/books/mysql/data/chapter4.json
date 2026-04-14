@@ -1,0 +1,70 @@
+[
+  {
+    "type": "header",
+    "text": "SELECTQuerying Data in MySQL using"
+  },
+  {
+    "type": "code",
+    "text": "SELECT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Thestatement is used to query data from a table."
+  },
+  {
+    "type": "header",
+    "text": "Basic Syntax"
+  },
+  {
+    "type": "code",
+    "text": "SELECT column1, column2 FROM table_name;"
+  },
+  {
+    "type": "paragraph",
+    "text": "To select all columns:"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users;"
+  },
+  {
+    "type": "header",
+    "text": "WHEREFiltering Rows with"
+  },
+  {
+    "type": "code",
+    "text": "WHERE"
+  },
+  {
+    "type": "header",
+    "text": "Equal To"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE gender = 'Male';"
+  },
+  {
+    "type": "header",
+    "text": "Not Equal To"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE gender != 'Female';\n\n-- or\n\nSELECT * FROM users WHERE gender <> 'Female';"
+  },
+  {
+    "type": "header",
+    "text": "Greater Than / Less Than"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE date_of_birth < '1995-01-01';\n\nSELECT * FROM users WHERE id > 10;"
+  },
+  {
+    "type": "header",
+    "text": "Greater Than or Equal / Less Than or Equal"
+  },
+  {
+    "type": "code",
+    "text": "SELECT * FROM users WHERE id >= 5;\n\nSELECT * FROM users WHERE id <= 20;"
+  }
+]

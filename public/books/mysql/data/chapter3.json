@@ -1,0 +1,78 @@
+[
+  {
+    "type": "header",
+    "text": "INSERT INTOInserting Data into MySQL Tables"
+  },
+  {
+    "type": "code",
+    "text": "INSERT INTO"
+  },
+  {
+    "type": "paragraph",
+    "text": "To add data into a table, we use thestatement."
+  },
+  {
+    "type": "header",
+    "text": "Insert Without Specifying Column Names (Full Row Insert)"
+  },
+  {
+    "type": "paragraph",
+    "text": "This method requires you to provide values for all columns in order, except"
+  },
+  {
+    "type": "code",
+    "text": "AUTO_INCREMENTcolumns with default values or.\nAUTO_INCREMENT\n\nINSERT INTO users VALUES\n(1, 'Alice', 'alice@example.com', 'Female', '1995-05-14', DEFAULT);"
+  },
+  {
+    "type": "paragraph",
+    "text": "Not recommended if your table structure might change (e.g., new columns added later)."
+  },
+  {
+    "type": "header",
+    "text": "Insert by Specifying Column Names (Best Practice)"
+  },
+  {
+    "type": "paragraph",
+    "text": "This method is safer and more readable. You only insert into specific columns."
+  },
+  {
+    "type": "code",
+    "text": "INSERT INTO users (name, email, gender, date_of_birth) VALUES ('Bob', 'bob@example.com', 'Male', '1990-11-23');"
+  },
+  {
+    "type": "paragraph",
+    "text": "or for multiple rows:"
+  },
+  {
+    "type": "code",
+    "text": "INSERT INTO users (name, email, gender, date_of_birth) VALUES ('Bob', 'bob@example.com', 'Male', '1990-11-23'),\n('Charlie', 'charlie@example.com', 'Other', '1988-02-17');"
+  },
+  {
+    "type": "paragraph",
+    "text": "The remaining columns like"
+  },
+  {
+    "type": "paragraph",
+    "text": "(which is"
+  },
+  {
+    "type": "paragraph",
+    "text": ") and"
+  },
+  {
+    "type": "code",
+    "text": "idAUTO_INCREMENTcreated_at(which has a default) are automatically handled by MySQL.\nid\nAUTO_INCREMENT\ncreated_at"
+  },
+  {
+    "type": "header",
+    "text": "Insert Multiple Rows at Once"
+  },
+  {
+    "type": "code",
+    "text": "INSERT INTO users (name, email, gender, date_of_birth) VALUES ('Charlie', 'charlie@example.com', 'Other', '1988-02-17'),\n('David', 'david@example.com', 'Male', '2000-08-09'),\n('Eva', 'eva@example.com', 'Female', '1993-12-30');"
+  },
+  {
+    "type": "paragraph",
+    "text": "This is more efficient than inserting rows one by one."
+  }
+]

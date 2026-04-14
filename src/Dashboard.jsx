@@ -46,7 +46,7 @@ const LANG_LABEL = {
 
 const DIFFICULTY_COLOR = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' };
 
-export default function Dashboard({ embedded = false, initialProblem = null }) {
+export default function Dashboard({ embedded = false, initialProblem = null, onScoreUpdate = null, initialCode = null, onCodeChange = null, onSaveCode = null }) {
     const location = useLocation();
     const navigate = useNavigate();
     const { id: routeId } = useParams();
@@ -55,8 +55,14 @@ export default function Dashboard({ embedded = false, initialProblem = null }) {
     const [language, setLanguage] = useState(
         () => localStorage.getItem('whizan_lang') || 'python'
     );
-    const [code, setCode] = useState(LANGUAGE_TEMPLATES.python);
+    const [code, setCode] = useState(() => initialCode || LANGUAGE_TEMPLATES.python);
     const [isRouted, setIsRouted] = useState(false);
+
+    useEffect(() => {
+        if (onCodeChange) {
+            onCodeChange(code);
+        }
+    }, [code, onCodeChange]);
 
     // UX Features State
     const [leftWidth, setLeftWidth] = useState(500);
@@ -225,7 +231,7 @@ export default function Dashboard({ embedded = false, initialProblem = null }) {
     };
 
     // ─── AI Generate ──────────────────────────────────────────────
-    const handleAIGenerate = async (overrideProblem, overrideLanguage, overrideId) => {
+    const handleAIGenerate = async (overrideProblem, overrideLanguage, overrideId, skipCodeOverride = false) => {
         const textToUse = overrideProblem || problemStatement;
         const langToUse = overrideLanguage || language;
 
@@ -242,7 +248,7 @@ export default function Dashboard({ embedded = false, initialProblem = null }) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'AI generation failed.');
 
-            if (data.code) {
+            if (data.code && !skipCodeOverride) {
                 setCode(data.code);
             }
             if (data.wrapper) setAiWrapper(data.wrapper);
@@ -297,7 +303,7 @@ export default function Dashboard({ embedded = false, initialProblem = null }) {
                 setLanguage(langToUse);
                 if (initialProblem.description) {
                     setIsRouted(true);
-                    handleAIGenerate(initialProblem.description, langToUse, initialProblem.id);
+                    handleAIGenerate(initialProblem.description, langToUse, initialProblem.id, !!initialCode);
                 }
                 return;
             }
@@ -485,8 +491,20 @@ export default function Dashboard({ embedded = false, initialProblem = null }) {
                             if (data.accepted) {
                                 setIsTimerRunning(false);
                             }
+                            
+                            if (onScoreUpdate) {
+                                onScoreUpdate({ 
+                                    passed: data.passed || 0, 
+                                    total: data.total || 0,
+                                    code,
+                                    language,
+                                    problemTitle: initialProblem?.title || "Problem",
+                                    description: initialProblem?.description || ""
+                                });
+                            }
 
                             // ── 1. Update the global aggregate stats ──
+
                             const activeProblemId = routeId || location.state?.problemParams?.id || initialProblem?.id;
                             const d = difficulty || location.state?.problemParams?.difficulty || initialProblem?.difficulty;
                             if (activeProblemId) {
@@ -675,6 +693,17 @@ export default function Dashboard({ embedded = false, initialProblem = null }) {
                     <button className="lc-submit-btn" onClick={handleSubmit} disabled={isLoading}>
                         {isSubmitting ? <Loader2 size={14} className="spin" /> : <Send size={14} />} Submit
                     </button>
+                    {onSaveCode && (
+                        <button onClick={() => onSaveCode(code)}
+                            style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)',
+                                color: '#60a5fa', borderRadius: '7px', padding: '6px 12px', fontWeight: 600,
+                                cursor: 'pointer', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.2s' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.25)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,130,246,0.15)'}
+                        >
+                            <Bookmark size={13} fill="currentColor" /> Save Progress
+                        </button>
+                    )}
                     <button onClick={handleReset}
                         style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                             color: 'var(--txt2)', borderRadius: '7px', padding: '5px 10px',
