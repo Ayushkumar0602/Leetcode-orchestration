@@ -1,174 +1,184 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import {
-    Play, Mic, MicOff, PhoneOff, Brain, LogOut, Volume2, VolumeX,
-    Send, Terminal, Trash2, Pen, Eraser, RotateCcw, Loader2,
-    CheckCircle2, XCircle, Layers, MessageSquare, Code2, Sparkles,
-    TrendingUp, Star, ArrowLeft, Clock, User, Building, Cpu,
-    Server, Database, HardDrive, Cloud, Globe, Minus, Maximize2
+    AlertCircle,
+    BookOpen,
+    Brain,
+    Clock,
+    Code2,
+    Layers,
+    Loader2,
+    Maximize2,
+    Mic,
+    MicOff,
+    Minimize2,
+    PhoneOff,
+    Play,
+    Send,
+    StickyNote,
+    Terminal,
+    Volume2,
+    VolumeX
 } from 'lucide-react';
-
-// ─── Voice Templates ──────────────────────────────────────────────────────────
-const VOICE_TEMPLATES = [
-    { id: 'will', voiceId: 'bIHbv24MWmeRgasZH58o', name: 'Will', tag: 'Authoritative', emoji: '🎙️' },
-    { id: 'sarah', voiceId: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', tag: 'Warm', emoji: '🎤' },
-    { id: 'eric', voiceId: 'cjVigY5qzO86Huf0OWal', name: 'Eric', tag: 'Calm', emoji: '🔊' },
-    { id: 'jessica', voiceId: 'cgSgspJ2msm6clMCkdW9', name: 'Jessica', tag: 'Articulate', emoji: '✨' },
-    { id: 'alice', voiceId: 'Xb7hH8MSUJpSbSDYk0k2', name: 'Alice', tag: 'British', emoji: '🇬🇧' },
-    { id: 'daniel', voiceId: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', tag: 'Deep', emoji: '🎧' },
-];
+import { useAuth } from './contexts/AuthContext';
+import AIProctor from './components/AIProctor';
+import SystemDesignBoard from './components/SystemDesignBoard';
+import { useSEO } from './hooks/useSEO';
 
 const LANG_OPTIONS = { python: 'Python', javascript: 'JavaScript', cpp: 'C++', java: 'Java', go: 'Go' };
 const LANGUAGE_TEMPLATES = {
-    python: '# System Design Implementation\n\nclass Solution:\n    def design(self):\n        # Write your implementation here\n        pass\n\n# Example usage:\n# s = Solution()\n# s.design()',
-    javascript: '// System Design Implementation\n\nclass Solution {\n    constructor() {\n        // Initialize your data structures\n    }\n    design() {\n        // Write your implementation here\n    }\n}\n\n// const s = new Solution();\n// s.design();',
-    cpp: '#include <iostream>\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\n// System Design Implementation\nclass Solution {\npublic:\n    void design() {\n        // Write your implementation here\n    }\n};\n',
-    java: 'import java.util.*;\n\n// System Design Implementation\nclass Solution {\n    public Solution() {\n        // Initialize data structures\n    }\n    \n    public void design() {\n        // Write your implementation here\n    }\n}\n',
-    go: 'package main\n\nimport "fmt"\n\n// System Design Implementation\ntype Solution struct {\n    // Add fields here\n}\n\nfunc NewSolution() *Solution {\n    return &Solution{}\n}\n\nfunc (s *Solution) Design() {\n    fmt.Println("Implement here")\n}\n',
+    python: '# General scratchpad for system design\n\nclass Solution:\n    def design(self):\n        pass',
+    javascript: '// General scratchpad for system design\nclass Solution {\n  design() {}\n}',
+    cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n  return 0;\n}',
+    java: 'import java.util.*;\n\nclass Solution {\n  void design() {}\n}',
+    go: 'package main\n\nfunc main() {\n}\n'
 };
 
-// Score Badge
+const VOICE_TEMPLATES = [
+    { id: 'manan', speaker: 'manan', name: 'Manan', gender: 'Male', tag: 'Authoritative' },
+    { id: 'ratan', speaker: 'ratan', name: 'Ratan', gender: 'Male', tag: 'Calm' },
+    { id: 'rohan', speaker: 'rohan', name: 'Rohan', gender: 'Male', tag: 'Deep' },
+    { id: 'jessica', speaker: 'shreya', name: 'Jessica', gender: 'Female', tag: 'Articulate' },
+    { id: 'shreya', speaker: 'shreya', name: 'Shreya', gender: 'Female', tag: 'Warm' },
+    { id: 'roopa', speaker: 'roopa', name: 'Roopa', gender: 'Female', tag: 'Professional' }
+];
+
+const MALE_VIDEO_MAP = {
+    manan: '/male_manan.mp4',
+    ratan: '/male_ratan.mp4',
+    rohan: '/male_rohan.mp4'
+};
+
+const SCORE_SKILL_LABELS = {
+    requirementsGathering: 'Requirements',
+    architectureDesign: 'Architecture',
+    scalabilityThinking: 'Scalability',
+    tradeoffAnalysis: 'Trade-offs',
+    communication: 'Communication',
+    technicalDepth: 'Technical Depth'
+};
+
 function ScoreBadge({ score }) {
     const color = score >= 75 ? '#00b8a3' : score >= 50 ? '#ffa116' : '#ef4743';
-    const bg = score >= 75 ? 'rgba(0,184,163,0.1)' : score >= 50 ? 'rgba(255,161,22,0.1)' : 'rgba(239,71,67,0.1)';
     const circumference = 2 * Math.PI * 54;
     const strokeDash = (score / 100) * circumference;
     return (
         <div style={{ position: 'relative', width: 140, height: 140 }}>
             <svg width="140" height="140" style={{ transform: 'rotate(-90deg)' }}>
                 <circle cx="70" cy="70" r="54" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
-                <circle cx="70" cy="70" r="54" fill="none" stroke={color} strokeWidth="10"
-                    strokeDasharray={`${strokeDash} ${circumference}`}
-                    strokeLinecap="round" style={{ transition: 'stroke-dasharray 1s ease' }} />
+                <circle cx="70" cy="70" r="54" fill="none" stroke={color} strokeWidth="10" strokeDasharray={`${strokeDash} ${circumference}`} strokeLinecap="round" />
             </svg>
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '2rem', fontWeight: 700, color }}>{score}</span>
-                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>/ 100</span>
+            <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ color, fontSize: '2rem', fontWeight: 800 }}>{score}</div>
+                    <div style={{ fontSize: 11, color: 'var(--txt3)' }}>/100</div>
+                </div>
             </div>
         </div>
     );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 export default function SystemDesignInterview() {
+    useSEO({
+        title: 'AI System Design Interview',
+        description: 'Practice system design interviews with AI interviewer, whiteboard, editor, and proctored environment.',
+        canonical: '/systemdesigninterview'
+    });
+
     const { id } = useParams();
     const [searchParams] = useSearchParams();
+    const location = useLocation();
     const navigate = useNavigate();
-    const { currentUser, logout } = useAuth();
-    const topic = searchParams.get('topic') || 'System Design';
+    const { currentUser } = useAuth();
+    const topic = (searchParams.get('topic') || location.state?.setupParams?.topic || 'System Design').trim();
 
-    // ── Phase ──
-    const [appPhase, setAppPhase] = useState('setup'); // setup | interview | evaluating | score
-
-    // ── Setup state ──
+    const [appPhase, setAppPhase] = useState('setup');
     const [role, setRole] = useState('');
     const [company, setCompany] = useState('');
-    const [selectedVoice, setSelectedVoice] = useState(VOICE_TEMPLATES[0]);
-    const [setupError, setSetupError] = useState('');
-
-    // ── Code editor ──
     const [language, setLanguage] = useState('python');
     const [code, setCode] = useState(LANGUAGE_TEMPLATES.python);
-    const [terminalOutput, setTerminalOutput] = useState('');
-    const [isRunning, setIsRunning] = useState(false);
-    const [terminalOpen, setTerminalOpen] = useState(true);
+    const [selectedVoice, setSelectedVoice] = useState(VOICE_TEMPLATES[0]);
+    const [strictness, setStrictness] = useState('real');
+    const [setupError, setSetupError] = useState('');
+    const [sessionId, setSessionId] = useState(id || null);
 
-    // ── Whiteboard ──
-    const canvasRef = useRef(null);
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [tool, setTool] = useState('pen'); // pen | eraser | rect | circle | arrow | line | server | database | cache | loadbalancer | api | queue | cdn
-    const [penColor, setPenColor] = useState('#818cf8');
-    const [whiteboardText, setWhiteboardText] = useState('');
-    const lastPos = useRef(null);
-    const shapeStart = useRef(null);
-    const currentPath = useRef([]);
-    const drawnShapes = useRef([]); // Store shapes for redraw on resize
-
-    // ── Panel collapse ──
-    const [editorMinimized, setEditorMinimized] = useState(false);
-    const [whiteboardMinimized, setWhiteboardMinimized] = useState(false);
-
-    // ── AI Chat ──
     const [transcript, setTranscript] = useState([]);
     const transcriptRef = useRef([]);
     const [userInput, setUserInput] = useState('');
+    const [isListening, setIsListening] = useState(false);
     const [isAiThinking, setIsAiThinking] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [ttsEnabled, setTtsEnabled] = useState(true);
-    const [isListening, setIsListening] = useState(false);
+    const [notes, setNotes] = useState('');
+    const [rightPanelTab, setRightPanelTab] = useState('chat');
+
+    const [consoleOpen, setConsoleOpen] = useState(true);
+    const [terminalOutput, setTerminalOutput] = useState('');
+    const [isRunning, setIsRunning] = useState(false);
+    const [whiteboardOpen, setWhiteboardOpen] = useState(false);
+    const [whiteboardFullscreen, setWhiteboardFullscreen] = useState(false);
+
+    const [scoreReport, setScoreReport] = useState(null);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const interviewStartRef = useRef(null);
+
+    const [isBlurry, setIsBlurry] = useState(false);
+    const [malpracticeCount, setMalpracticeCount] = useState(0);
+    const [aiProctorMsg, setAiProctorMsg] = useState('');
+    const [showMalpracticePopup, setShowMalpracticePopup] = useState(false);
+    const [isFullscreenCheating, setIsFullscreenCheating] = useState(false);
+    const [lockdownNotice, setLockdownNotice] = useState('');
+
     const audioRef = useRef(null);
     const recognitionRef = useRef(null);
     const chatEndRef = useRef(null);
+    const femaleVideoRef = useRef(null);
+    const maleVideoRef = useRef(null);
+    const userInputRef = useRef('');
 
-    // ── Timer ──
-    const [elapsedSeconds, setElapsedSeconds] = useState(0);
-    const timerRef = useRef(null);
-    const startTimeRef = useRef(null);
-
-    // ── Score ──
-    const [scoreReport, setScoreReport] = useState(null);
-
-    // ─── Auth guard ──────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!currentUser) {
-            navigate('/login?redirect=/systemdesign', { replace: true });
-        }
+        if (!currentUser) navigate('/login?redirect=/systemdesigninterviewselect', { replace: true });
     }, [currentUser, navigate]);
 
-    // ─── Keep transcript ref in sync ─────────────────────────────────────────
-    useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
-
-    // ─── Scroll chat ─────────────────────────────────────────────────────────
-    useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [transcript]);
-
-    // ─── Language change ─────────────────────────────────────────────────────
-    useEffect(() => { setCode(LANGUAGE_TEMPLATES[language] || ''); }, [language]);
-
-    // ─── Interview timer ──────────────────────────────────────────────────────
     useEffect(() => {
-        if (appPhase === 'interview') {
-            startTimeRef.current = Date.now();
-            timerRef.current = setInterval(() => {
-                setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000));
-            }, 1000);
+        const setup = location.state?.setupParams;
+        if (setup && appPhase === 'setup') {
+            setRole(setup.role || '');
+            setCompany(setup.company || '');
+            setLanguage(setup.language || 'python');
+            setCode(LANGUAGE_TEMPLATES[setup.language || 'python']);
+            setSelectedVoice(setup.selectedVoice || VOICE_TEMPLATES[0]);
+            setStrictness(setup.strictness || 'real');
+            setSessionId(id || null);
+            setAppPhase('interview');
         }
-        return () => clearInterval(timerRef.current);
+    }, [location.state, appPhase, id]);
+
+    useEffect(() => {
+        transcriptRef.current = transcript;
+    }, [transcript]);
+
+    useEffect(() => {
+        userInputRef.current = userInput;
+    }, [userInput]);
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [transcript, isAiThinking]);
+
+    useEffect(() => {
+        setCode(LANGUAGE_TEMPLATES[language] || '');
+    }, [language]);
+
+    useEffect(() => {
+        if (appPhase !== 'interview') return;
+        interviewStartRef.current = Date.now();
+        const interval = setInterval(() => {
+            setElapsedSeconds(Math.floor((Date.now() - interviewStartRef.current) / 1000));
+        }, 1000);
+        return () => clearInterval(interval);
     }, [appPhase]);
-
-    const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-
-    // ─── ElevenLabs TTS ──────────────────────────────────────────────────────
-    const stopSpeech = () => {
-        if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
-        setIsSpeaking(false);
-    };
-
-    const speakText = async (text) => {
-        if (!ttsEnabled || !text?.trim()) return;
-        stopSpeech();
-        setIsSpeaking(true);
-        try {
-            const res = await fetch('https://leetcode-orchestration.onrender.com/api/elevenlabs/tts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text.trim(), voiceId: selectedVoice.voiceId })
-            });
-            if (!res.ok) throw new Error('TTS failed');
-            const blob = await res.blob();
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            audioRef.current = audio;
-            audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); audioRef.current = null; };
-            audio.onerror = () => { setIsSpeaking(false); audioRef.current = null; };
-            await audio.play();
-        } catch (err) { console.error('TTS error:', err); setIsSpeaking(false); }
-    };
-
-    // ─── Speech recognition ──────────────────────────────────────────────────
-    const userInputRef = useRef(userInput);
-    useEffect(() => { userInputRef.current = userInput; }, [userInput]);
 
     useEffect(() => {
         if (appPhase !== 'interview') return;
@@ -178,16 +188,16 @@ export default function SystemDesignInterview() {
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'en-US';
-        let sessionTranscript = '';
-        recognition.onstart = () => { sessionTranscript = userInputRef.current ? userInputRef.current + ' ' : ''; };
+        let seed = '';
+        recognition.onstart = () => { seed = userInputRef.current ? `${userInputRef.current} ` : ''; };
         recognition.onresult = (e) => {
             let finalPart = '';
-            let interim = '';
-            for (let i = 0; i < e.results.length; i++) {
-                if (e.results[i].isFinal) finalPart += e.results[i][0].transcript + ' ';
-                else interim += e.results[i][0].transcript;
+            let interimPart = '';
+            for (let i = 0; i < e.results.length; i += 1) {
+                if (e.results[i].isFinal) finalPart += `${e.results[i][0].transcript} `;
+                else interimPart += e.results[i][0].transcript;
             }
-            setUserInput((sessionTranscript + finalPart + interim).trimStart());
+            setUserInput(`${seed}${finalPart}${interimPart}`.trimStart());
         };
         recognition.onend = () => setIsListening(false);
         recognition.onerror = () => setIsListening(false);
@@ -195,83 +205,223 @@ export default function SystemDesignInterview() {
         return () => recognition.abort();
     }, [appPhase]);
 
-    const toggleMic = () => {
-        if (isListening) {
-            recognitionRef.current?.stop();
-            setIsListening(false);
-        } else {
-            try {
-                recognitionRef.current?.start();
-                setIsListening(true);
-            } catch (_) { }
+    useEffect(() => {
+        if (!['mid', 'strict', 'real'].includes(strictness) || appPhase !== 'interview') return undefined;
+        const preventCopy = (e) => e.preventDefault();
+        const preventContext = (e) => e.preventDefault();
+        document.addEventListener('copy', preventCopy);
+        document.addEventListener('cut', preventCopy);
+        document.addEventListener('paste', preventCopy);
+        document.addEventListener('contextmenu', preventContext);
+        return () => {
+            document.removeEventListener('copy', preventCopy);
+            document.removeEventListener('cut', preventCopy);
+            document.removeEventListener('paste', preventCopy);
+            document.removeEventListener('contextmenu', preventContext);
+        };
+    }, [strictness, appPhase]);
+
+    useEffect(() => {
+        if (!['strict', 'real'].includes(strictness) || appPhase !== 'interview') return undefined;
+        const onVisibility = () => {
+            if (document.hidden) {
+                setMalpracticeCount((v) => v + 1);
+                setAiProctorMsg('Tab switch detected. Please stay in interview window.');
+                setShowMalpracticePopup(true);
+            }
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+        return () => document.removeEventListener('visibilitychange', onVisibility);
+    }, [strictness, appPhase]);
+
+    useEffect(() => {
+        if (!['strict', 'real'].includes(strictness) || appPhase !== 'interview') return undefined;
+        const onFullscreen = () => {
+            if (!document.fullscreenElement) {
+                setIsFullscreenCheating(true);
+                setMalpracticeCount((v) => v + 1);
+                setAiProctorMsg('Fullscreen exited. Re-enter fullscreen to continue.');
+                setShowMalpracticePopup(true);
+            } else {
+                setIsFullscreenCheating(false);
+            }
+        };
+        document.addEventListener('fullscreenchange', onFullscreen);
+        return () => document.removeEventListener('fullscreenchange', onFullscreen);
+    }, [strictness, appPhase]);
+
+    useEffect(() => {
+        if (!['strict', 'real'].includes(strictness) || appPhase !== 'interview') return;
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.().catch(() => {
+                setAiProctorMsg('Unable to auto-enter fullscreen. Please enable fullscreen manually.');
+                setShowMalpracticePopup(true);
+            });
+        }
+    }, [strictness, appPhase]);
+
+    useEffect(() => {
+        if (malpracticeCount >= 5 && appPhase === 'interview') {
+            setLockdownNotice('Interview ended due to repeated policy violations.');
+            endInterview();
+        }
+    }, [malpracticeCount, appPhase]);
+
+    useEffect(() => {
+        if (!sessionId || !currentUser || appPhase !== 'interview') return undefined;
+        const saveTimer = setInterval(() => {
+            fetch('https://leetcode-orchestration.onrender.com/api/systemdesign/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    interviewId: sessionId,
+                    userId: currentUser.uid,
+                    topic,
+                    role,
+                    company,
+                    strictness,
+                    language,
+                    transcript: transcriptRef.current,
+                    notes,
+                    finalCode: code,
+                    whiteboardText: 'Diagram is on whiteboard overlay',
+                    durationMinutes: Math.round(elapsedSeconds / 60)
+                })
+            }).catch(() => {});
+        }, 12000);
+        return () => clearInterval(saveTimer);
+    }, [sessionId, currentUser, appPhase, topic, role, company, strictness, language, notes, code, elapsedSeconds]);
+
+    useEffect(() => {
+        if (!id || location.state?.setupParams || !currentUser) return;
+        fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${id}?userId=${currentUser.uid}`)
+            .then((res) => res.ok ? res.json() : null)
+            .then((data) => {
+                if (!data) return;
+                setRole(data.role || '');
+                setCompany(data.company || '');
+                setLanguage(data.language || 'python');
+                setCode(data.finalCode || LANGUAGE_TEMPLATES[data.language || 'python'] || LANGUAGE_TEMPLATES.python);
+                setStrictness(data.strictness || 'real');
+                setTranscript(data.transcript || []);
+                setNotes(data.notes || '');
+                if (data.scoreReport) {
+                    setScoreReport(data.scoreReport);
+                    setAppPhase('score');
+                } else {
+                    setAppPhase('interview');
+                }
+            })
+            .catch(() => {});
+    }, [id, location.state, currentUser]);
+
+    const formattedTime = useMemo(() => `${String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')}:${String(elapsedSeconds % 60).padStart(2, '0')}`, [elapsedSeconds]);
+
+    const stopSpeech = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+            audioRef.current = null;
+        }
+        setIsSpeaking(false);
+        [femaleVideoRef, maleVideoRef].forEach((r) => {
+            if (r.current) r.current.pause();
+        });
+    };
+
+    const speakText = async (text) => {
+        if (!ttsEnabled || !text?.trim()) return;
+        stopSpeech();
+        setIsSpeaking(true);
+        try {
+            const res = await fetch('https://leetcode-orchestration.onrender.com/api/sarvam/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, speaker: selectedVoice.speaker })
+            });
+            if (!res.ok) throw new Error('tts');
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audioRef.current = audio;
+            const selectedVideoRef = selectedVoice.gender === 'Female' ? femaleVideoRef : maleVideoRef;
+            selectedVideoRef.current?.play().catch(() => {});
+            audio.onended = () => {
+                setIsSpeaking(false);
+                selectedVideoRef.current?.pause();
+                URL.revokeObjectURL(url);
+            };
+            audio.onerror = () => setIsSpeaking(false);
+            await audio.play();
+        } catch (_) {
+            setIsSpeaking(false);
         }
     };
 
-    // ─── AI Chat ─────────────────────────────────────────────────────────────
     const sendMessage = useCallback(async (textOverride) => {
-        const text = textOverride || userInput;
-        if (!text.trim() || isAiThinking) return;
-        const userMsg = { role: 'user', text: text.trim() };
-        const newTranscript = [...transcriptRef.current, userMsg];
-        setTranscript(newTranscript);
+        const text = (textOverride || userInput).trim();
+        if (!text || isAiThinking) return;
+        const userMsg = { role: 'user', text };
+        const nextTranscript = [...transcriptRef.current, userMsg];
+        setTranscript(nextTranscript);
         setUserInput('');
         setIsAiThinking(true);
         try {
-            const wbText = whiteboardText || 'Whiteboard is empty';
             const res = await fetch('https://leetcode-orchestration.onrender.com/api/systemdesign/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    topic, role, company,
-                    transcript: newTranscript,
+                    topic,
+                    role,
+                    company,
+                    strictness,
                     code,
-                    whiteboardText: wbText,
-                    phase: 'discussion'
+                    transcript: nextTranscript,
+                    whiteboardText: 'Diagram is on interactive whiteboard'
                 })
             });
             const data = await res.json();
-            const aiMsg = { role: 'ai', text: data.text || '...' };
-            setTranscript(prev => [...prev, aiMsg]);
+            const aiMsg = { role: 'ai', text: data.text || 'Let us continue with your approach.' };
+            setTranscript((prev) => [...prev, aiMsg]);
             speakText(aiMsg.text);
-        } catch (err) {
-            setTranscript(prev => [...prev, { role: 'ai', text: 'Sorry, I had trouble connecting. Please try again.' }]);
+        } catch (_) {
+            setTranscript((prev) => [...prev, { role: 'ai', text: 'I am having trouble connecting. Please try again.' }]);
         } finally {
             setIsAiThinking(false);
         }
-    }, [userInput, isAiThinking, topic, role, company, code, whiteboardText]);
+    }, [userInput, isAiThinking, topic, role, company, strictness, code, ttsEnabled, selectedVoice]);
 
-    // ─── Start interview (opening AI message) ────────────────────────────────
-    const startInterview = () => {
-        if (!role.trim()) { setSetupError('Please enter your target job role.'); return; }
-        setSetupError('');
-        setAppPhase('interview');
-        // Opening message from AI
-        setTimeout(() => {
-            sendMessageAsSystem(`Hello! I'm your interviewer today. We'll be focusing on: "${topic}". This session is for the ${role} position${company ? ` at ${company}` : ''}. Please start by walking me through how you would approach this problem — what clarifying questions would you ask first?`);
-        }, 500);
-    };
-
-    const sendMessageAsSystem = (text) => {
-        const aiMsg = { role: 'ai', text };
+    useEffect(() => {
+        if (appPhase !== 'interview' || transcriptRef.current.length > 0 || !role) return;
+        const intro = `Hello! I am your system design interviewer. Today we will design "${topic}" for the ${role} role${company ? ` at ${company}` : ''}. Start with clarifying questions and assumptions.`;
+        const aiMsg = { role: 'ai', text: intro };
         setTranscript([aiMsg]);
-        speakText(text);
+        speakText(intro);
+    }, [appPhase, role, company, topic]);
+
+    const toggleMic = () => {
+        if (isListening) {
+            recognitionRef.current?.stop();
+            setIsListening(false);
+            return;
+        }
+        recognitionRef.current?.start();
+        setIsListening(true);
     };
 
-    // ─── Run code ────────────────────────────────────────────────────────────
     const runCode = async () => {
         if (!code.trim() || isRunning) return;
         setIsRunning(true);
         setTerminalOutput('Running...');
-        setTerminalOpen(true);
+        setConsoleOpen(true);
         try {
             const res = await fetch('https://leetcode-orchestration.onrender.com/api/execute', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, language, input: '' })
             });
-            const result = await res.json();
-            if (result.error) setTerminalOutput(`Error:\n${result.error}`);
-            else setTerminalOutput(result.stdout || result.output || '✓ No output (ran successfully)');
+            const data = await res.json();
+            setTerminalOutput(data.error ? `Error:\n${data.error}` : (data.stdout || data.output || 'Execution completed.'));
         } catch (err) {
             setTerminalOutput(`Connection error: ${err.message}`);
         } finally {
@@ -279,815 +429,313 @@ export default function SystemDesignInterview() {
         }
     };
 
-    // ─── Whiteboard ──────────────────────────────────────────────────────────
-    // Scale display coords to canvas coords (fixes alignment when canvas is stretched)
-    const getCanvasPos = (clientX, clientY) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return { x: 0, y: 0 };
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
-        };
-    };
-
-    const getEventPos = (e) => {
-        if (e.touches) return getCanvasPos(e.touches[0].clientX, e.touches[0].clientY);
-        return getCanvasPos(e.clientX, e.clientY);
-    };
-
-    const drawShape = (ctx, type, x1, y1, x2, y2, color) => {
-        ctx.strokeStyle = color || penColor;
-        ctx.fillStyle = color || penColor;
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        if (type === 'rect') {
-            const w = x2 - x1, h = y2 - y1;
-            ctx.strokeRect(x1, y1, w, h);
-        } else if (type === 'circle') {
-            const r = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-            ctx.beginPath();
-            ctx.arc(x1, y1, r, 0, Math.PI * 2);
-            ctx.stroke();
-        } else if (type === 'line') {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-        } else if (type === 'arrow') {
-            const headLen = 15;
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x2, y2);
-            ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-        }
-    };
-
-    const drawStamp = (ctx, type, x, y, size = 48, color) => {
-        const c = color || penColor;
-        const s = size / 2;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.strokeStyle = c;
-        ctx.fillStyle = c;
-        ctx.lineWidth = 2;
-        // Draw icon as simple shapes (server=rect stack, database=cylinder, etc.)
-        if (type === 'server') {
-            ctx.strokeRect(-s * 0.8, -s * 0.6, s * 1.6, s * 0.4);
-            ctx.strokeRect(-s * 0.8, -s * 0.1, s * 1.6, s * 0.4);
-            ctx.strokeRect(-s * 0.8, s * 0.4, s * 1.6, s * 0.4);
-            ctx.fillRect(-s * 0.5, -s * 0.5, 4, 4);
-            ctx.fillRect(-s * 0.5, 0, 4, 4);
-            ctx.fillRect(-s * 0.5, s * 0.5, 4, 4);
-        } else if (type === 'database') {
-            ctx.beginPath();
-            ctx.ellipse(0, -s * 0.3, s * 0.8, s * 0.2, 0, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(-s * 0.8, -s * 0.3);
-            ctx.lineTo(-s * 0.8, s * 0.5);
-            ctx.quadraticCurveTo(-s * 0.8, s * 0.9, 0, s * 0.9);
-            ctx.quadraticCurveTo(s * 0.8, s * 0.9, s * 0.8, s * 0.5);
-            ctx.lineTo(s * 0.8, -s * 0.3);
-            ctx.stroke();
-        } else if (type === 'cache') {
-            ctx.strokeRect(-s * 0.7, -s * 0.7, s * 1.4, s * 1.4);
-            ctx.beginPath();
-            ctx.moveTo(-s * 0.5, s * 0.5);
-            ctx.lineTo(s * 0.5, -s * 0.5);
-            ctx.moveTo(-s * 0.5, -s * 0.5);
-            ctx.lineTo(s * 0.5, s * 0.5);
-            ctx.stroke();
-        } else if (type === 'loadbalancer') {
-            ctx.beginPath();
-            ctx.moveTo(0, -s * 0.8);
-            ctx.lineTo(-s * 0.7, s * 0.6);
-            ctx.lineTo(s * 0.7, s * 0.6);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.globalAlpha = 0.2;
-            ctx.fillStyle = c;
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        } else if (type === 'api') {
-            ctx.beginPath();
-            ctx.arc(0, 0, s * 0.6, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(-s * 0.4, 0);
-            ctx.lineTo(s * 0.4, 0);
-            ctx.moveTo(0, -s * 0.4);
-            ctx.lineTo(0, s * 0.4);
-            ctx.stroke();
-        } else if (type === 'queue') {
-            ctx.strokeRect(-s * 0.8, -s * 0.5, s * 1.6, s * 1);
-            ctx.beginPath();
-            ctx.moveTo(-s * 0.6, 0);
-            ctx.lineTo(s * 0.6, 0);
-            ctx.stroke();
-        } else if (type === 'cdn') {
-            ctx.beginPath();
-            ctx.arc(0, -s * 0.2, s * 0.5, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(-s * 0.6, s * 0.3);
-            ctx.quadraticCurveTo(0, s * 0.8, s * 0.6, s * 0.3);
-            ctx.stroke();
-        }
-        ctx.restore();
-    };
-
-    const onCanvasMouseDown = (e) => {
-        const pos = getEventPos(e);
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
-        if (!canvas || !ctx) return;
-
-        const stampTools = ['server', 'database', 'cache', 'loadbalancer', 'api', 'queue', 'cdn'];
-        if (stampTools.includes(tool)) {
-            drawStamp(ctx, tool, pos.x, pos.y, 48, penColor);
-            drawnShapes.current.push({ type: 'stamp', tool, x: pos.x, y: pos.y, color: penColor });
-            setWhiteboardText(`User added ${tool} to the whiteboard. Board has system design diagram.`);
-            return;
-        }
-
-        if (['rect', 'circle', 'arrow', 'line'].includes(tool)) {
-            shapeStart.current = pos;
-            setIsDrawing(true);
-            return;
-        }
-
-        if (tool === 'pen' || tool === 'eraser') {
-            currentPath.current = [pos];
-        }
-        setIsDrawing(true);
-        lastPos.current = pos;
-    };
-
-    const onCanvasMouseMove = (e) => {
-        const pos = getEventPos(e);
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
-        if (!canvas || !ctx) return;
-
-        if (isDrawing && ['rect', 'circle', 'arrow', 'line'].includes(tool) && shapeStart.current) {
-            redrawCanvas(ctx);
-            drawShape(ctx, tool, shapeStart.current.x, shapeStart.current.y, pos.x, pos.y);
-            return;
-        }
-
-        if (!isDrawing) return;
-        if (tool === 'pen' || tool === 'eraser') {
-            currentPath.current.push(pos);
-            ctx.beginPath();
-            ctx.moveTo(lastPos.current.x, lastPos.current.y);
-            ctx.lineTo(pos.x, pos.y);
-            if (tool === 'eraser') {
-                ctx.strokeStyle = '#0f1117';
-                ctx.lineWidth = 24;
-            } else {
-                ctx.strokeStyle = penColor;
-                ctx.lineWidth = 2.5;
-            }
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.stroke();
-            lastPos.current = pos;
-        }
-        setWhiteboardText(`User is drawing on the whiteboard. Board has sketches/diagrams for the system design.`);
-    };
-
-    const redrawCanvas = (ctx) => {
-        const canvas = canvasRef.current;
-        if (!canvas || !ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawnShapes.current.forEach(s => {
-            if (s.type === 'stamp') drawStamp(ctx, s.tool, s.x, s.y, 48, s.color);
-            else if (s.type === 'path') {
-                if (s.points.length < 2) return;
-                ctx.strokeStyle = s.isEraser ? '#0f1117' : s.color;
-                ctx.lineWidth = s.isEraser ? 24 : 2.5;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.beginPath();
-                ctx.moveTo(s.points[0].x, s.points[0].y);
-                for (let i = 1; i < s.points.length; i++) ctx.lineTo(s.points[i].x, s.points[i].y);
-                ctx.stroke();
-            } else drawShape(ctx, s.type, s.x1, s.y1, s.x2, s.y2, s.color);
-        });
-    };
-
-    const onCanvasMouseUp = (e) => {
-        const pos = getEventPos(e);
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
-        if (isDrawing && ['rect', 'circle', 'arrow', 'line'].includes(tool) && shapeStart.current && canvas && ctx) {
-            drawnShapes.current.push({
-                type: tool,
-                x1: shapeStart.current.x, y1: shapeStart.current.y,
-                x2: pos.x, y2: pos.y,
-                color: penColor
-            });
-            redrawCanvas(ctx);
-            shapeStart.current = null;
-            setWhiteboardText(`User added ${tool} shape. Board has system design diagram.`);
-        } else if (isDrawing && (tool === 'pen' || tool === 'eraser') && currentPath.current.length > 1) {
-            drawnShapes.current.push({
-                type: 'path',
-                points: [...currentPath.current],
-                color: penColor,
-                isEraser: tool === 'eraser'
-            });
-            currentPath.current = [];
-        }
-        setIsDrawing(false);
-    };
-
-    const onCanvasMouseLeave = () => {
-        if (isDrawing && shapeStart.current) shapeStart.current = null;
-        if (isDrawing && (tool === 'pen' || tool === 'eraser') && currentPath.current.length > 1) {
-            const canvas = canvasRef.current;
-            const ctx = canvas?.getContext('2d');
-            if (canvas && ctx) {
-                drawnShapes.current.push({
-                    type: 'path',
-                    points: [...currentPath.current],
-                    color: penColor,
-                    isEraser: tool === 'eraser'
-                });
-            }
-            currentPath.current = [];
-        }
-        setIsDrawing(false);
-    };
-
-    const clearCanvas = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
-        if (canvas && ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawnShapes.current = [];
-            setWhiteboardText('');
-        }
-    };
-
-    // Touch handlers
-    const handleTouchStart = (e) => { e.preventDefault(); onCanvasMouseDown(e); };
-    const handleTouchMove = (e) => { e.preventDefault(); onCanvasMouseMove(e); };
-    const handleTouchEnd = (e) => { e.preventDefault(); onCanvasMouseUp(e); };
-
-    // ─── Evaluate & End interview ─────────────────────────────────────────────
     const endInterview = async () => {
-        clearInterval(timerRef.current);
         stopSpeech();
         setAppPhase('evaluating');
         try {
             const res = await fetch('https://leetcode-orchestration.onrender.com/api/systemdesign/evaluate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic, role, company, transcript: transcriptRef.current, finalCode: code, whiteboardText })
+                body: JSON.stringify({
+                    topic,
+                    role,
+                    company,
+                    strictness,
+                    transcript: transcriptRef.current,
+                    finalCode: code,
+                    notes,
+                    whiteboardText: 'Diagram on collaborative whiteboard'
+                })
             });
             const report = await res.json();
             setScoreReport(report);
-            // Save to Firestore
             await fetch('https://leetcode-orchestration.onrender.com/api/systemdesign/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId: currentUser.uid,
-                    role, company, topic, language,
-                    finalCode: code, whiteboardText,
+                    interviewId: sessionId,
+                    userId: currentUser?.uid,
+                    topic,
+                    role,
+                    company,
+                    strictness,
+                    language,
                     transcript: transcriptRef.current,
+                    notes,
+                    finalCode: code,
                     scoreReport: report,
+                    whiteboardText: 'Diagram on collaborative whiteboard',
                     durationMinutes: Math.round(elapsedSeconds / 60)
                 })
             });
             setAppPhase('score');
-        } catch (err) {
-            console.error('Evaluation error:', err);
-            setScoreReport({ overallScore: 70, verdict: 'Maybe', summary: 'Evaluation failed, please try again.', skills: {}, strengths: [], improvements: [] });
+        } catch (_) {
+            setScoreReport({
+                overallScore: 65,
+                verdict: 'Maybe',
+                summary: 'Evaluation service failed. Please retry.',
+                skills: {},
+                strengths: [],
+                improvements: []
+            });
             setAppPhase('score');
         }
     };
 
-    const SCORE_SKILL_LABELS = {
-        requirementsGathering: 'Requirements',
-        architectureDesign: 'Architecture',
-        scalabilityThinking: 'Scalability',
-        tradeoffAnalysis: 'Trade-offs',
-        communication: 'Communication',
-        technicalDepth: 'Technical Depth'
+    const startFromInlineSetup = async () => {
+        if (!role.trim()) {
+            setSetupError('Please enter a target job role.');
+            return;
+        }
+        if (['strict', 'real'].includes(strictness)) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                stream.getTracks().forEach((track) => track.stop());
+            } catch (_) {
+                setSetupError('Camera and microphone permissions are required for strict modes.');
+                return;
+            }
+        }
+        setAppPhase('interview');
+    };
+
+    const handleProctorViolation = (msg, forceBlur = false) => {
+        setAiProctorMsg(msg);
+        setShowMalpracticePopup(true);
+        setMalpracticeCount((v) => v + 1);
+        if (forceBlur) {
+            setIsBlurry(true);
+            setTimeout(() => setIsBlurry(false), 5000);
+        }
     };
 
     if (!currentUser) return null;
 
-    // ────────────────────────── SETUP PHASE ─────────────────────────────────
     if (appPhase === 'setup') {
         return (
-            <div style={{
-                minHeight: '100vh',
-                background: '#050505',
-                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: "'Inter', sans-serif",
-                padding: '2rem'
-            }}>
-                <div style={{ width: '100%', maxWidth: '540px' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-                            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Cpu size={22} color="white" />
-                            </div>
-                        </div>
-                        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'white', margin: 0, letterSpacing: '-0.5px' }}>System Design Interview</h1>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem', fontSize: '0.9rem' }}>Topic-wise practice session</p>
-                        <div style={{ display: 'inline-block', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#818cf8', padding: '6px 16px', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 600, marginTop: '0.75rem' }}>
-                            🎯 {topic}
-                        </div>
+            <div style={{ minHeight: '100vh', background: '#050505', display: 'grid', placeItems: 'center', padding: 16 }}>
+                <div style={{ width: '100%', maxWidth: 560, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: 20 }}>
+                    <h2 style={{ marginTop: 0, color: '#fff' }}>System Design Interview</h2>
+                    <p style={{ marginTop: 0, color: 'var(--txt2)', fontSize: 14 }}>Quick setup fallback for direct links to this route.</p>
+                    <div style={{ color: '#93c5fd', marginBottom: 10 }}>Topic: {topic}</div>
+                    <div style={{ display: 'grid', gap: 8 }}>
+                        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Target role" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 10, color: '#fff' }} />
+                        <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 10, color: '#fff' }} />
                     </div>
-
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '2rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                            {/* Role */}
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-                                    <User size={13} /> Job Role *
-                                </label>
-                                <input
-                                    value={role}
-                                    onChange={e => setRole(e.target.value)}
-                                    placeholder="e.g. Senior Software Engineer, Staff Engineer"
-                                    style={{ width: '100%', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: 'white', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
-                                    onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.6)'}
-                                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                                />
-                            </div>
-                            {/* Company */}
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
-                                    <Building size={13} /> Company (optional)
-                                </label>
-                                <input
-                                    value={company}
-                                    onChange={e => setCompany(e.target.value)}
-                                    placeholder="e.g. Google, Meta, Amazon"
-                                    style={{ width: '100%', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: 'white', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
-                                    onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.6)'}
-                                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                                />
-                            </div>
-                            {/* Voice */}
-                            <div>
-                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem', display: 'block' }}>AI Interviewer Voice</label>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                                    {VOICE_TEMPLATES.map(v => (
-                                        <button
-                                            key={v.id}
-                                            onClick={() => setSelectedVoice(v)}
-                                            style={{ padding: '0.6rem 0.5rem', borderRadius: '10px', border: `1px solid ${selectedVoice.id === v.id ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.08)'}`, background: selectedVoice.id === v.id ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', color: 'white', cursor: 'pointer', textAlign: 'center', fontSize: '0.8rem', transition: 'all 0.15s' }}
-                                        >
-                                            <div style={{ fontSize: '1rem' }}>{v.emoji}</div>
-                                            <div style={{ fontWeight: 600, fontSize: '0.82rem' }}>{v.name}</div>
-                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>{v.tag}</div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {setupError && <div style={{ background: 'rgba(239,71,67,0.1)', border: '1px solid rgba(239,71,67,0.3)', color: '#ef4743', padding: '0.75rem 1rem', borderRadius: '8px', fontSize: '0.85rem' }}>{setupError}</div>}
-
-                            <button
-                                onClick={startInterview}
-                                style={{ width: '100%', padding: '1rem', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '12px', color: 'white', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '0.5rem' }}
-                            >
-                                <Brain size={18} /> Start Interview
-                            </button>
-                        </div>
-                    </div>
-                    <button onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.3)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.85rem', margin: '1.5rem auto 0', padding: 0 }}>
-                        <ArrowLeft size={14} /> Back
-                    </button>
+                    {setupError && <div style={{ marginTop: 8, color: '#fca5a5', display: 'flex', alignItems: 'center', gap: 6 }}><AlertCircle size={14} /> {setupError}</div>}
+                    <button onClick={startFromInlineSetup} style={{ marginTop: 12, width: '100%', background: 'linear-gradient(135deg,#3b82f6,#a855f7)', border: 'none', borderRadius: 10, padding: 10, color: '#fff', fontWeight: 700 }}>Start Interview</button>
                 </div>
             </div>
         );
     }
 
-    // ────────────────────────── SCORE PHASE ─────────────────────────────────
+    if (appPhase === 'evaluating') {
+        return (
+            <div style={{ minHeight: '100vh', background: '#050505', display: 'grid', placeItems: 'center' }}>
+                <div style={{ textAlign: 'center', color: '#fff' }}>
+                    <Loader2 size={42} style={{ animation: 'spin 1s linear infinite' }} />
+                    <div style={{ marginTop: 12 }}>Evaluating your system design interview...</div>
+                </div>
+                <style>{'@keyframes spin { to { transform: rotate(360deg);} }'}</style>
+            </div>
+        );
+    }
+
     if (appPhase === 'score' && scoreReport) {
         const verdict = scoreReport.verdict || 'Maybe';
         const verdictColor = verdict === 'Hire' ? '#00b8a3' : verdict === 'No Hire' ? '#ef4743' : '#ffa116';
         return (
-            <div style={{
-                minHeight: '100vh',
-                background: '#050505',
-                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
-                fontFamily: "'Inter', sans-serif",
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center'
-            }}>
-                <div style={{ width: '100%', maxWidth: '760px', marginTop: '2rem' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                        <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'white', margin: 0 }}>Interview Complete!</h1>
-                        <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>System Design: {topic}</p>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                        {/* Score Card */}
-                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', padding: 20 }}>
+                <div style={{ maxWidth: 900, margin: '0 auto' }}>
+                    <h1>System Design Interview Result</h1>
+                    <p style={{ color: 'var(--txt2)' }}>{topic} · {role}{company ? ` @ ${company}` : ''}</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginTop: 12 }}>
+                        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 14, display: 'grid', placeItems: 'center' }}>
                             <ScoreBadge score={scoreReport.overallScore || 0} />
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: verdictColor }}>{verdict}</div>
-                                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.25rem' }}>Decision</div>
+                            <div style={{ marginTop: 8, color: verdictColor, fontWeight: 800 }}>{verdict}</div>
+                        </div>
+                        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 14 }}>
+                            <h3 style={{ marginTop: 0 }}>Summary</h3>
+                            <p style={{ color: 'var(--txt2)' }}>{scoreReport.summary || 'No summary available.'}</p>
+                            <div style={{ display: 'grid', gap: 8 }}>
+                                {Object.entries(scoreReport.skills || {}).map(([k, val]) => {
+                                    const color = val >= 75 ? '#00b8a3' : val >= 50 ? '#ffa116' : '#ef4743';
+                                    return (
+                                        <div key={k}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                                                <span>{SCORE_SKILL_LABELS[k] || k}</span>
+                                                <span style={{ color }}>{val}%</span>
+                                            </div>
+                                            <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 999 }}>
+                                                <div style={{ width: `${val}%`, height: '100%', background: color, borderRadius: 999 }} />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
-                        {/* Summary */}
-                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '2rem' }}>
-                            <h3 style={{ color: 'white', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem' }}>Summary</h3>
-                            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, fontSize: '0.9rem', margin: 0 }}>{scoreReport.summary}</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 14 }}>
+                        <div style={{ background: 'rgba(0,184,163,0.08)', border: '1px solid rgba(0,184,163,0.26)', borderRadius: 14, padding: 14 }}>
+                            <h4 style={{ marginTop: 0, color: '#00b8a3' }}>Strengths</h4>
+                            {(scoreReport.strengths || []).map((s, i) => <div key={i} style={{ color: 'var(--txt2)', marginBottom: 6 }}>- {s}</div>)}
+                        </div>
+                        <div style={{ background: 'rgba(255,161,22,0.08)', border: '1px solid rgba(255,161,22,0.26)', borderRadius: 14, padding: 14 }}>
+                            <h4 style={{ marginTop: 0, color: '#ffa116' }}>Improvements</h4>
+                            {(scoreReport.improvements || []).map((s, i) => <div key={i} style={{ color: 'var(--txt2)', marginBottom: 6 }}>- {s}</div>)}
                         </div>
                     </div>
-
-                    {/* Skills */}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                        <h3 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, marginBottom: '1.25rem' }}>Skill Breakdown</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-                            {Object.entries(scoreReport.skills || {}).map(([key, val]) => {
-                                const color = val >= 75 ? '#00b8a3' : val >= 50 ? '#ffa116' : '#ef4743';
-                                return (
-                                    <div key={key}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '6px' }}>
-                                            <span style={{ color: 'rgba(255,255,255,0.6)' }}>{SCORE_SKILL_LABELS[key] || key}</span>
-                                            <span style={{ color, fontWeight: 600 }}>{val}%</span>
-                                        </div>
-                                        <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
-                                            <div style={{ height: '100%', width: `${val}%`, background: color, borderRadius: '99px', transition: 'width 1s ease' }} />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                    <div style={{ marginTop: 14, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 14 }}>
+                        <h4 style={{ marginTop: 0 }}>Saved Notes</h4>
+                        <p style={{ color: 'var(--txt2)', whiteSpace: 'pre-wrap' }}>{notes?.trim() || 'No notes were captured.'}</p>
                     </div>
-
-                    {/* Strengths & Improvements */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                        <div style={{ background: 'rgba(0,184,163,0.05)', border: '1px solid rgba(0,184,163,0.15)', borderRadius: '16px', padding: '1.5rem' }}>
-                            <h3 style={{ color: '#00b8a3', fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <CheckCircle2 size={15} /> Strengths
-                            </h3>
-                            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {(scoreReport.strengths || []).map((s, i) => (
-                                    <li key={i} style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', display: 'flex', gap: '8px' }}>
-                                        <span style={{ color: '#00b8a3', flexShrink: 0 }}>•</span>{s}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div style={{ background: 'rgba(255,161,22,0.05)', border: '1px solid rgba(255,161,22,0.15)', borderRadius: '16px', padding: '1.5rem' }}>
-                            <h3 style={{ color: '#ffa116', fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <TrendingUp size={15} /> Areas to Improve
-                            </h3>
-                            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {(scoreReport.improvements || []).map((s, i) => (
-                                    <li key={i} style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', display: 'flex', gap: '8px' }}>
-                                        <span style={{ color: '#ffa116', flexShrink: 0 }}>•</span>{s}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                        <button onClick={() => navigate('/systemdesign')} style={{ border: 'none', borderRadius: 10, background: 'linear-gradient(135deg,#3b82f6,#a855f7)', color: '#fff', padding: '10px 14px', fontWeight: 700 }}>Practice Another Topic</button>
+                        <button onClick={() => navigate('/systemdesigninterviewselect', { state: { topic } })} style={{ border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)', color: '#fff', padding: '10px 14px' }}>New Interview Setup</button>
                     </div>
-
-                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                        <button onClick={() => navigate('/aiinterview')} style={{ padding: '0.9rem 2rem', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '12px', color: '#818cf8', fontWeight: 600, cursor: 'pointer', fontSize: '0.95rem' }}>
-                            All Interviews
-                        </button>
-                        <button onClick={() => navigate('/systemdesign')} style={{ padding: '0.9rem 2rem', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>
-                            Practice Another Topic
-                        </button>
-                    </div>
+                    {lockdownNotice && (
+                        <div style={{ marginTop: 12, color: '#fca5a5', fontSize: 13 }}>{lockdownNotice}</div>
+                    )}
                 </div>
             </div>
         );
     }
 
-    // ────────────────────────── EVALUATING PHASE ─────────────────────────────
-    if (appPhase === 'evaluating') {
-        return (
-            <div style={{
-                minHeight: '100vh',
-                background: '#050505',
-                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: "'Inter', sans-serif"
-            }}>
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                    <Loader2 size={48} color="#6366f1" style={{ animation: 'spin 1s linear infinite', marginBottom: '1.5rem' }} />
-                    <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Evaluating your interview...</h2>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', margin: 0 }}>Analyzing your architecture decisions, communication, and technical depth</p>
-                </div>
-            </div>
-        );
-    }
-
-    // ────────────────────────── INTERVIEW PHASE ───────────────────────────────
     return (
-        <div style={{
-            height: '100vh',
-            background: '#050505',
-            backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
-            display: 'flex',
-            flexDirection: 'column',
-            fontFamily: "'Inter', sans-serif",
-            overflow: 'hidden'
-        }}>
-
-            {/* ── Navbar ──────────────────────────────────────────────────── */}
-            <nav style={{ height: '52px', background: 'rgba(5,5,5,0.95)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, zIndex: 100 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: '8px', padding: '4px 12px' }}>
-                        <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ef4743', animation: 'pulse 1s infinite' }} />
-                        <span style={{ color: '#818cf8', fontSize: '0.78rem', fontWeight: 600 }}>LIVE — {topic}</span>
+        <div style={{ height: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {isBlurry && <div style={{ position: 'fixed', inset: 0, backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.5)', zIndex: 99998 }} />}
+            {showMalpracticePopup && (
+                <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 99999, background: '#1f1f1f', border: '1px solid rgba(239,71,67,0.5)', borderRadius: 10, padding: 10, maxWidth: 340 }}>
+                    <div style={{ color: '#fca5a5', fontWeight: 700, marginBottom: 6 }}>Proctor Alert</div>
+                    <div style={{ color: 'var(--txt2)', fontSize: 13 }}>{aiProctorMsg || 'Policy violation detected.'}</div>
+                    <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+                        {isFullscreenCheating && (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        await document.documentElement.requestFullscreen?.();
+                                        setIsFullscreenCheating(false);
+                                        setShowMalpracticePopup(false);
+                                    } catch (_) {}
+                                }}
+                                style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.45)', color: '#bfdbfe', borderRadius: 8, padding: '4px 8px' }}
+                            >
+                                Re-enter Fullscreen
+                            </button>
+                        )}
+                        <button onClick={() => setShowMalpracticePopup(false)} style={{ background: 'transparent', border: '1px solid var(--border)', color: '#fff', borderRadius: 8, padding: '4px 8px' }}>Dismiss</button>
                     </div>
-                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem' }}>Role: {role}{company ? ` @ ${company}` : ''}</span>
                 </div>
+            )}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
-                        <Clock size={14} /> <span style={{ fontVariantNumeric: 'tabular-nums', fontFamily: 'monospace' }}>{formatTime(elapsedSeconds)}</span>
-                    </div>
-                    <button onClick={() => setTtsEnabled(v => !v)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '6px', color: ttsEnabled ? '#818cf8' : 'rgba(255,255,255,0.3)', cursor: 'pointer', display: 'flex' }}>
-                        {ttsEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                    </button>
-                    <button
-                        onClick={endInterview}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(239,71,67,0.15)', border: '1px solid rgba(239,71,67,0.3)', color: '#ef4743', padding: '6px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                        <PhoneOff size={14} /> End Interview
-                    </button>
+            <nav style={{ height: 52, borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 12, padding: '4px 8px', borderRadius: 999, background: 'rgba(59,130,246,0.16)', border: '1px solid rgba(59,130,246,0.35)' }}>LIVE · {topic}</span>
+                    <span style={{ color: 'var(--txt3)', fontSize: 12 }}>{role}{company ? ` @ ${company}` : ''}</span>
+                    <span style={{ color: '#fca5a5', fontSize: 12 }}>Mode: {strictness}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button onClick={() => setWhiteboardOpen((v) => !v)} style={{ background: whiteboardOpen ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: 8, padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 5 }}><Layers size={13} /> Whiteboard</button>
+                    <button onClick={() => setRightPanelTab((t) => t === 'chat' ? 'notes' : 'chat')} style={{ background: rightPanelTab === 'notes' ? 'rgba(168,85,247,0.24)' : 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: 8, padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 5 }}><StickyNote size={13} /> {rightPanelTab === 'notes' ? 'Chat' : 'Notes'}</button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--txt3)', fontSize: 13 }}><Clock size={13} /> {formattedTime}</div>
+                    <button onClick={() => setTtsEnabled((v) => !v)} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.2)', color: ttsEnabled ? '#93c5fd' : 'var(--txt3)', borderRadius: 8, padding: 6 }}>{ttsEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}</button>
+                    <button onClick={endInterview} style={{ background: 'rgba(239,71,67,0.2)', border: '1px solid rgba(239,71,67,0.5)', color: '#fca5a5', borderRadius: 8, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 5 }}><PhoneOff size={13} /> End</button>
                 </div>
             </nav>
 
-            {/* ── 3-Column Layout ────────────────────────────────────────── */}
-            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: `${editorMinimized ? '40px' : '1fr'} ${whiteboardMinimized ? '40px' : '1fr'} 360px`, gap: 0, overflow: 'hidden', minHeight: 0 }}>
-
-                {/* ── Column 1: Code Editor + Terminal ─────────────────── */}
-                <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.07)', overflow: 'hidden', minHeight: 0 }}>
-                    {/* Editor header */}
-                    <div style={{ padding: editorMinimized ? '12px 4px' : '8px 12px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: editorMinimized ? 'center' : 'space-between', flexShrink: 0, flexDirection: editorMinimized ? 'column' : 'row', gap: editorMinimized ? 8 : 0 }}>
-                        {!editorMinimized && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                            <Code2 size={14} color="rgba(255,255,255,0.5)" />
-                            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', fontWeight: 600 }}>Code Editor</span>
-                        </div>}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexDirection: editorMinimized ? 'column' : 'row' }}>
-                            {editorMinimized && <Code2 size={16} color="rgba(255,255,255,0.5)" />}
-                            {!editorMinimized && (
-                                <>
-                                    <select
-                                        value={language}
-                                        onChange={e => setLanguage(e.target.value)}
-                                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'rgba(255,255,255,0.7)', padding: '3px 8px', fontSize: '0.78rem', cursor: 'pointer', outline: 'none' }}
-                                    >
-                                        {Object.entries(LANG_OPTIONS).map(([k, v]) => (
-                                            <option key={k} value={k} style={{ background: '#0f1117' }}>{v}</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={runCode}
-                                        disabled={isRunning}
-                                        style={{ display: 'flex', alignItems: 'center', gap: '5px', background: isRunning ? 'rgba(99,102,241,0.1)' : 'rgba(0,184,163,0.15)', border: `1px solid ${isRunning ? 'rgba(99,102,241,0.2)' : 'rgba(0,184,163,0.3)'}`, color: isRunning ? '#6366f1' : '#00b8a3', padding: '4px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: isRunning ? 'not-allowed' : 'pointer' }}
-                                    >
-                                        {isRunning ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Play size={12} />}
-                                        {isRunning ? 'Running…' : 'Run'}
-                                    </button>
-                                </>
-                            )}
-                            <button onClick={() => setEditorMinimized(v => !v)} title={editorMinimized ? 'Maximize' : 'Minimize'} style={{ background: 'transparent', border: '1px solid transparent', borderRadius: '6px', padding: '4px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                {editorMinimized ? <Maximize2 size={14} /> : <Minus size={14} />}
-                            </button>
+            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', minHeight: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.1)', minHeight: 0 }}>
+                    <div style={{ height: 40, borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Code2 size={13} /> <span style={{ fontSize: 12 }}>General Code Editor</span></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: '#fff', borderRadius: 6, padding: '4px 6px', fontSize: 12 }}>
+                                {Object.entries(LANG_OPTIONS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                            </select>
+                            <button onClick={runCode} disabled={isRunning} style={{ background: 'rgba(0,184,163,0.18)', border: '1px solid rgba(0,184,163,0.38)', color: '#5eead4', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 5 }}>{isRunning ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Play size={12} />}Run</button>
                         </div>
                     </div>
+                    <div style={{ flex: consoleOpen ? '1 1 60%' : 1, minHeight: 0 }}>
+                        <Editor height="100%" language={language === 'cpp' ? 'cpp' : language} value={code} onChange={(v) => setCode(v || '')} theme="vs-dark" options={{ minimap: { enabled: false }, fontSize: 13 }} />
+                    </div>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                        <button onClick={() => setConsoleOpen((v) => !v)} style={{ width: '100%', textAlign: 'left', background: 'rgba(255,255,255,0.04)', border: 'none', color: 'var(--txt2)', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6 }}><Terminal size={13} /> Console {consoleOpen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}</button>
+                        {consoleOpen && <pre style={{ margin: 0, height: 140, overflow: 'auto', background: '#0a0a0f', padding: 10, color: '#5eead4', fontSize: 12, fontFamily: 'monospace' }}>{terminalOutput || '$ Output will appear here after running code.'}</pre>}
+                    </div>
+                </div>
 
-                    {/* Monaco editor */}
-                    {!editorMinimized && (
-                        <>
-                            <div style={{ flex: terminalOpen ? '1 1 60%' : 1, minHeight: 0 }}>
-                                <Editor
-                                    height="100%"
-                                    language={language === 'cpp' ? 'cpp' : language}
-                                    value={code}
-                                    onChange={v => setCode(v || '')}
-                                    theme="vs-dark"
-                                    options={{ fontSize: 13, minimap: { enabled: false }, lineNumbers: 'on', scrollBeyondLastLine: false, padding: { top: 12 }, fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}
-                                />
+                <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    <div style={{ padding: 8, borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#3b82f6,#a855f7)', display: 'grid', placeItems: 'center', position: 'relative' }}>
+                                <Brain size={16} />
+                                {isSpeaking && <div style={{ position: 'absolute', inset: -2, borderRadius: '50%', border: '2px solid rgba(59,130,246,0.7)', animation: 'ping 1s infinite' }} />}
                             </div>
-                            {/* Terminal */}
-                            <div style={{ flexShrink: 0, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                                <button
-                                    onClick={() => setTerminalOpen(v => !v)}
-                                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0,0,0,0.3)', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
-                                >
-                                    <Terminal size={12} /> Terminal (Docker) {terminalOpen ? '▲' : '▼'}
-                                </button>
-                                {terminalOpen && (
-                                    <div style={{ height: '160px', background: '#0a0a0f', padding: '12px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.82rem', color: terminalOutput.startsWith('Error') ? '#ef4743' : '#00b8a3', whiteSpace: 'pre-wrap' }}>
-                                        {terminalOutput || <span style={{ color: 'rgba(255,255,255,0.2)' }}>$ Output will appear here after you Run code…</span>}
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: 13 }}>{selectedVoice.name} · AI Interviewer</div>
+                                <div style={{ color: 'var(--txt3)', fontSize: 11 }}>{isAiThinking ? 'Thinking...' : isSpeaking ? 'Speaking...' : 'Listening'}</div>
+                            </div>
+                        </div>
+                        <div style={{ width: 120, height: 72, borderRadius: 10, overflow: 'hidden', background: '#000', border: '1px solid rgba(255,255,255,0.15)' }}>
+                            {selectedVoice.gender === 'Female' ? (
+                                <video ref={femaleVideoRef} src="/female_speak1.mp4" muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <video ref={maleVideoRef} src={MALE_VIDEO_MAP[selectedVoice.id] || '/male_manan.mp4'} muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            )}
+                        </div>
+                    </div>
+                    {rightPanelTab === 'notes' ? (
+                        <div style={{ flex: 1, minHeight: 0, padding: 10, display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><BookOpen size={13} /> Interview Notes</div>
+                                <button onClick={() => setNotes('')} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--txt2)', borderRadius: 6, padding: '4px 8px' }}>Clear</button>
+                            </div>
+                            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} style={{ flex: 1, minHeight: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, color: '#fff', padding: 10, resize: 'none' }} placeholder="Capture architecture decisions, trade-offs, APIs, scaling notes..." />
+                        </div>
+                    ) : (
+                        <>
+                            <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                {transcript.map((m, i) => (
+                                    <div key={i} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '88%', background: m.role === 'user' ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, padding: '8px 10px', fontSize: 13, lineHeight: 1.45 }}>
+                                        {m.text}
                                     </div>
-                                )}
+                                ))}
+                                {isAiThinking && <div style={{ color: 'var(--txt3)', fontSize: 12 }}>AI is thinking...</div>}
+                                <div ref={chatEndRef} />
+                            </div>
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: 8, display: 'flex', gap: 6 }}>
+                                <textarea value={userInput} onChange={(e) => setUserInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} rows={2} placeholder={isListening ? 'Listening...' : 'Explain your design decisions...'} style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: '#fff', padding: 8, resize: 'none' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    <button onClick={toggleMic} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: isListening ? 'rgba(239,71,67,0.2)' : 'rgba(255,255,255,0.08)', color: '#fff' }}>{isListening ? <MicOff size={14} /> : <Mic size={14} />}</button>
+                                    <button onClick={() => sendMessage()} disabled={isAiThinking || !userInput.trim()} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(59,130,246,0.4)', background: 'rgba(59,130,246,0.2)', color: '#fff' }}><Send size={14} /></button>
+                                </div>
                             </div>
                         </>
                     )}
-                    {editorMinimized && (
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }} />
-                    )}
-                </div>
-
-                {/* ── Column 2: Whiteboard ───────────────────────────────── */}
-                <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.07)', overflow: 'hidden', background: '#0f1117' }}>
-                    {/* Whiteboard toolbar */}
-                    <div style={{ padding: whiteboardMinimized ? '12px 4px' : '8px 12px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: whiteboardMinimized ? 'center' : 'space-between', flexShrink: 0, flexDirection: whiteboardMinimized ? 'column' : 'row', gap: whiteboardMinimized ? 8 : 0 }}>
-                        {!whiteboardMinimized && <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                            <Layers size={14} color="rgba(255,255,255,0.5)" />
-                            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', fontWeight: 600 }}>Whiteboard</span>
-                        </div>}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flexDirection: whiteboardMinimized ? 'column' : 'row' }}>
-                            {whiteboardMinimized && <Layers size={16} color="rgba(255,255,255,0.5)" />}
-                            {!whiteboardMinimized && <>
-                            {/* Color picker */}
-                            {['#818cf8', '#00b8a3', '#ffa116', '#ef4743', '#e2e8f0', '#f472b6'].map(c => (
-                                <button key={c} onClick={() => { setPenColor(c); setTool('pen'); }}
-                                    style={{ width: '18px', height: '18px', borderRadius: '50%', background: c, border: penColor === c && tool === 'pen' ? '2px solid white' : '2px solid transparent', cursor: 'pointer', padding: 0 }}
-                                />
-                            ))}
-                            <div style={{ width: '1px', height: '18px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
-                            <button onClick={() => setTool('pen')} title="Pen" style={{ background: tool === 'pen' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'pen' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'pen' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <Pen size={14} />
-                            </button>
-                            <button onClick={() => setTool('eraser')} title="Eraser" style={{ background: tool === 'eraser' ? 'rgba(239,71,67,0.1)' : 'transparent', border: `1px solid ${tool === 'eraser' ? 'rgba(239,71,67,0.3)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'eraser' ? '#ef4743' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <Eraser size={14} />
-                            </button>
-                            <div style={{ width: '1px', height: '18px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
-                            {/* Shapes */}
-                            <button onClick={() => setTool('rect')} title="Rectangle" style={{ background: tool === 'rect' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'rect' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'rect' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex', fontSize: '10px', fontWeight: 600 }}>□</button>
-                            <button onClick={() => setTool('circle')} title="Circle" style={{ background: tool === 'circle' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'circle' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'circle' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex', fontSize: '10px' }}>○</button>
-                            <button onClick={() => setTool('line')} title="Line" style={{ background: tool === 'line' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'line' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'line' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex', fontSize: '10px' }}>／</button>
-                            <button onClick={() => setTool('arrow')} title="Arrow" style={{ background: tool === 'arrow' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'arrow' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'arrow' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <ArrowLeft size={14} style={{ transform: 'rotate(-45deg)' }} />
-                            </button>
-                            <div style={{ width: '1px', height: '18px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
-                            {/* System design stamps */}
-                            <button onClick={() => setTool('server')} title="Server" style={{ background: tool === 'server' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'server' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'server' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <Server size={14} />
-                            </button>
-                            <button onClick={() => setTool('database')} title="Database" style={{ background: tool === 'database' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'database' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'database' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <Database size={14} />
-                            </button>
-                            <button onClick={() => setTool('cache')} title="Cache" style={{ background: tool === 'cache' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'cache' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'cache' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <HardDrive size={14} />
-                            </button>
-                            <button onClick={() => setTool('loadbalancer')} title="Load Balancer" style={{ background: tool === 'loadbalancer' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'loadbalancer' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'loadbalancer' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <Layers size={14} />
-                            </button>
-                            <button onClick={() => setTool('api')} title="API" style={{ background: tool === 'api' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'api' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'api' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <Globe size={14} />
-                            </button>
-                            <button onClick={() => setTool('queue')} title="Message Queue" style={{ background: tool === 'queue' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'queue' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'queue' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <MessageSquare size={14} />
-                            </button>
-                            <button onClick={() => setTool('cdn')} title="CDN" style={{ background: tool === 'cdn' ? 'rgba(99,102,241,0.2)' : 'transparent', border: `1px solid ${tool === 'cdn' ? 'rgba(99,102,241,0.4)' : 'transparent'}`, borderRadius: '6px', padding: '4px', color: tool === 'cdn' ? '#818cf8' : 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex' }}>
-                                <Cloud size={14} />
-                            </button>
-                            <div style={{ width: '1px', height: '18px', background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
-                            <button onClick={clearCanvas} title="Clear All" style={{ background: 'transparent', border: '1px solid transparent', borderRadius: '6px', padding: '4px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', display: 'flex' }}>
-                                <Trash2 size={14} />
-                            </button>
-                            </>}
-                            <button onClick={() => setWhiteboardMinimized(v => !v)} title={whiteboardMinimized ? 'Maximize' : 'Minimize'} style={{ background: 'transparent', border: '1px solid transparent', borderRadius: '6px', padding: '4px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex', marginLeft: whiteboardMinimized ? 'auto' : 0 }}>
-                                {whiteboardMinimized ? <Maximize2 size={14} /> : <Minus size={14} />}
-                            </button>
-                        </div>
-                    </div>
-                    {/* Canvas */}
-                    {!whiteboardMinimized && <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                        <canvas
-                            ref={canvasRef}
-                            width={800}
-                            height={600}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: ['server','database','cache','loadbalancer','api','queue','cdn'].includes(tool) ? 'copy' : tool === 'eraser' ? 'cell' : 'crosshair', background: '#0f1117', touchAction: 'none' }}
-                            onMouseDown={onCanvasMouseDown}
-                            onMouseMove={onCanvasMouseMove}
-                            onMouseUp={onCanvasMouseUp}
-                            onMouseLeave={onCanvasMouseLeave}
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                        />
-                        {!whiteboardText && (
-                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                                <Layers size={40} color="rgba(255,255,255,0.05)" />
-                                <p style={{ color: 'rgba(255,255,255,0.08)', fontSize: '0.9rem', marginTop: '0.75rem' }}>Draw your system architecture here<br />The AI can see what you draw</p>
-                            </div>
-                        )}
-                    </div>}
-                    {whiteboardMinimized && (
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }} />
-                    )}
-                </div>
-
-                {/* ── Column 3: AI Chat ───────────────────────────────────── */}
-                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-                    {/* Chat header */}
-                    <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
-                            <Brain size={16} color="white" />
-                            {isSpeaking && <div style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: '2px solid rgba(99,102,241,0.6)', animation: 'ping 1s infinite' }} />}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ color: 'white', fontSize: '0.85rem', fontWeight: 600 }}>{selectedVoice.name} — AI Interviewer</div>
-                            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem' }}>{isAiThinking ? 'Thinking...' : isSpeaking ? 'Speaking...' : 'Listening'}</div>
-                        </div>
-                    </div>
-
-                    {/* Messages */}
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 }}>
-                        {transcript.length === 0 && (
-                            <div style={{ textAlign: 'center', marginTop: '2rem', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
-                                Starting interview…
-                            </div>
-                        )}
-                        {transcript.map((msg, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                                <div style={{
-                                    maxWidth: '88%', padding: '10px 14px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                                    background: msg.role === 'user' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                                    border: '1px solid ' + (msg.role === 'user' ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.07)'),
-                                    color: 'rgba(255,255,255,0.85)',
-                                    fontSize: '0.85rem', lineHeight: 1.6
-                                }}>
-                                    {msg.text}
-                                </div>
-                            </div>
-                        ))}
-                        {isAiThinking && (
-                            <div style={{ display: 'flex' }}>
-                                <div style={{ padding: '10px 14px', borderRadius: '16px 16px 16px 4px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                    {[0, 1, 2].map(i => <div key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: '#818cf8', animation: `bounce 1s ${i * 0.2}s infinite` }} />)}
-                                </div>
-                            </div>
-                        )}
-                        <div ref={chatEndRef} />
-                    </div>
-
-                    {/* Input area */}
-                    <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.2)', flexShrink: 0 }}>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end' }}>
-                            <textarea
-                                value={userInput}
-                                onChange={e => setUserInput(e.target.value)}
-                                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                                placeholder={isListening ? '🎙️ Listening...' : 'Type your answer or press mic...'}
-                                rows={2}
-                                style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: 'white', padding: '8px 12px', fontSize: '0.85rem', resize: 'none', outline: 'none', fontFamily: "'Inter', sans-serif", lineHeight: 1.5 }}
-                            />
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <button
-                                    onClick={toggleMic}
-                                    style={{ width: '36px', height: '36px', borderRadius: '10px', border: 'none', background: isListening ? 'rgba(239,71,67,0.2)' : 'rgba(255,255,255,0.07)', color: isListening ? '#ef4743' : 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                >
-                                    {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-                                </button>
-                                <button
-                                    onClick={() => sendMessage()}
-                                    disabled={isAiThinking || !userInput.trim()}
-                                    style={{ width: '36px', height: '36px', borderRadius: '10px', border: 'none', background: userInput.trim() ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.05)', color: userInput.trim() ? '#818cf8' : 'rgba(255,255,255,0.2)', cursor: userInput.trim() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                >
-                                    <Send size={15} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
+            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, height: whiteboardFullscreen ? '100vh' : '58vh', transform: whiteboardOpen ? 'translateY(0)' : 'translateY(100%)', transition: 'transform 0.25s ease', opacity: whiteboardOpen ? 1 : 0, pointerEvents: whiteboardOpen ? 'auto' : 'none', zIndex: 4000, background: '#07090f', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+                <div style={{ height: 46, borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Layers size={14} /> System Design Whiteboard</div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => setWhiteboardFullscreen((v) => !v)} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: 8, padding: '4px 8px' }}>{whiteboardFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</button>
+                        <button onClick={() => { setWhiteboardOpen(false); setWhiteboardFullscreen(false); }} style={{ background: 'rgba(239,71,67,0.2)', border: '1px solid rgba(239,71,67,0.4)', color: '#fca5a5', borderRadius: 8, padding: '4px 8px' }}>Close</button>
+                    </div>
+                </div>
+                <div style={{ height: 'calc(100% - 46px)' }}>
+                    <SystemDesignBoard />
+                </div>
+            </div>
+
+            {['strict', 'real'].includes(strictness) && !isFullscreenCheating && appPhase === 'interview' && (
+                <AIProctor onViolationDetected={handleProctorViolation} />
+            )}
+            <div style={{ position: 'fixed', bottom: 12, left: 12, fontSize: 11, color: 'var(--txt3)', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: 999 }}>
+                Violations: {malpracticeCount}
+            </div>
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
-                @keyframes ping { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
-                @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-                @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+                @keyframes ping { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } }
             `}</style>
         </div>
     );

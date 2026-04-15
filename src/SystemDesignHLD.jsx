@@ -135,8 +135,7 @@ export default function SystemDesignHLD() {
             navigate('/login?redirect=/systemdesign/hld');
             return;
         }
-        const interviewId = Date.now().toString();
-        navigate(`/systemdesigninterview/${interviewId}?topic=${encodeURIComponent(topicName)}`);
+        navigate(`/systemdesigninterviewselect?topic=${encodeURIComponent(topicName)}`);
     };
 
     return (

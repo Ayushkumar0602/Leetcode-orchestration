@@ -40,7 +40,9 @@ import Courses from './Courses';
 import CourseDetail from './CourseDetail';
 import LearnCourse from './LearnCourse';
 import LearnCourseLecture from './LearnCourseLecture';
+import BooksPage from './BooksPage';
 import { TelemetryProvider } from './contexts/TelemetryContext';
+
 
 // System Design Features
 import SystemDesignReviseHLD from './SystemDesignReviseHLD';
@@ -49,6 +51,7 @@ import SystemDesignHLD from './SystemDesignHLD';
 import SystemDesignLLD from './SystemDesignLLD';
 import AISystemDesignInterview from './AISystemDesignInterview';
 import SystemDesignInterview from './SystemDesignInterview';
+import SystemDesignInterviewSelect from './SystemDesignInterviewSelect';
 import SystemDesignBookChapter from './books/systemdesign/SystemDesignBookChapter';
 import MySQLBookChapter from './books/mysql/MySQLBookChapter';
 import DockerBookChapter from './books/docker/DockerBookChapter';
@@ -248,6 +251,7 @@ function App() {
             <Route path="/systemdesign/hld" element={<SystemDesignHLD />} />
             <Route path="/systemdesign/lld" element={<SystemDesignLLD />} />
             <Route path="/aisystemdesigninterview/:id" element={<AISystemDesignInterview />} />
+            <Route path="/systemdesigninterviewselect" element={<SystemDesignInterviewSelect />} />
             <Route path="/systemdesigninterview/:id" element={<SystemDesignInterview />} />
             <Route path="/revise/systemdesign/hld/:topicId" element={<SystemDesignReviseHLD />} />
             <Route path="/books/systemdesign/:topicname" element={<SystemDesignBookChapter />} />
@@ -272,6 +276,7 @@ function App() {
             
             {/* Course Routes */}
             <Route path="/courses" element={<Courses />} />
+            <Route path="/books" element={<BooksPage />} />
             <Route path="/courses/:slug" element={<CourseDetail />} />
             <Route path="/learn/:slug" element={<LearnCourse />} />
             <Route path="/learn/:slug/lecture" element={

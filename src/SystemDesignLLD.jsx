@@ -112,8 +112,7 @@ export default function SystemDesignLLD() {
             navigate('/login?redirect=/systemdesign/lld');
             return;
         }
-        const interviewId = Date.now().toString();
-        navigate(`/systemdesigninterview/${interviewId}?topic=${encodeURIComponent(topicName)}`);
+        navigate(`/systemdesigninterviewselect?topic=${encodeURIComponent(topicName)}`);
     };
 
     return (
