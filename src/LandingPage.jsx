@@ -501,6 +501,7 @@ export default function LandingPage() {
                             <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/courses'); }}>Interactive Courses</a>
                             <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/blog'); }}>Tech Blog</a>
                             <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/portfolio'); }}>Portfolio Builder</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/faq'); }}>FAQ Center</a>
                             <a href="#" onClick={(e) => { e.preventDefault(); handleCtaClick('/terms'); }}>Terms & Conditions</a>
                         </div>
                     </div>

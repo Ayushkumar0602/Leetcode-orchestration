@@ -100,6 +100,25 @@ import CoinbaseSheet from './companywisesheet/coinbase/CoinbaseSheet';
 import GoldmanSachsSheet from './companywisesheet/goldmansachs/GoldmanSachsSheet';
 import JPMorganSheet from './companywisesheet/jpmorgan/JPMorganSheet';
 
+// Topic Wise Interview Questions
+import ArraysAndHashing from './topicwise/ArraysAndHashing';
+import TwoPointers from './topicwise/TwoPointers';
+import SlidingWindow from './topicwise/SlidingWindow';
+import Stack from './topicwise/Stack';
+import BinarySearch from './topicwise/BinarySearch';
+import LinkedList from './topicwise/LinkedList';
+import Trees from './topicwise/Trees';
+import Backtracking from './topicwise/Backtracking';
+import HeapPriorityQueue from './topicwise/HeapPriorityQueue';
+import Tries from './topicwise/Tries';
+import Graphs from './topicwise/Graphs';
+import DP1D from './topicwise/DP1D';
+import DP2D from './topicwise/DP2D';
+import Greedy from './topicwise/Greedy';
+import Intervals from './topicwise/Intervals';
+import MathGeometry from './topicwise/MathGeometry';
+import BitManipulation from './topicwise/BitManipulation';
+
 // Components
 import SocialShare from './components/SocialShare';
 import NotificationPopupManager from './components/NotificationPopupManager';
@@ -109,6 +128,7 @@ import FloatingOrb from './components/FloatingOrb';
 import NotFound from './NotFound';
 import OfflinePage from './components/OfflinePage';
 import MaintenancePage from './components/MaintenancePage';
+import FAQ from './FAQ';
 import useMaintenanceMode from './hooks/useMaintenanceMode';
 import useIsAdmin from './hooks/useIsAdmin';
 import { Toaster } from 'sonner';
@@ -233,6 +253,25 @@ function App() {
             <Route path="/company/coinbase/:page?" element={<CoinbaseSheet />} />
             <Route path="/company/goldmansachs/:page?" element={<GoldmanSachsSheet />} />
             <Route path="/company/jpmorgan/:page?" element={<JPMorganSheet />} />
+            
+            {/* Topic Wise Interview Routes */}
+            <Route path="/topicswise/arrays-and-hashing/:page?" element={<ArraysAndHashing />} />
+            <Route path="/topicswise/two-pointers/:page?" element={<TwoPointers />} />
+            <Route path="/topicswise/sliding-window/:page?" element={<SlidingWindow />} />
+            <Route path="/topicswise/stack/:page?" element={<Stack />} />
+            <Route path="/topicswise/binary-search/:page?" element={<BinarySearch />} />
+            <Route path="/topicswise/linked-list/:page?" element={<LinkedList />} />
+            <Route path="/topicswise/trees/:page?" element={<Trees />} />
+            <Route path="/topicswise/backtracking/:page?" element={<Backtracking />} />
+            <Route path="/topicswise/heap-priority-queue/:page?" element={<HeapPriorityQueue />} />
+            <Route path="/topicswise/tries/:page?" element={<Tries />} />
+            <Route path="/topicswise/graphs/:page?" element={<Graphs />} />
+            <Route path="/topicswise/1d-dp/:page?" element={<DP1D />} />
+            <Route path="/topicswise/2d-dp/:page?" element={<DP2D />} />
+            <Route path="/topicswise/greedy/:page?" element={<Greedy />} />
+            <Route path="/topicswise/intervals/:page?" element={<Intervals />} />
+            <Route path="/topicswise/math-geometry/:page?" element={<MathGeometry />} />
+            <Route path="/topicswise/bit-manipulation/:page?" element={<BitManipulation />} />
 
             {/* Standalone Tools Routes */}
             <Route path="/tools/codesandbox" element={<ToolsSandbox />} />
@@ -268,6 +307,9 @@ function App() {
             {/* Blog Routes */}
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            
+            {/* FAQ Route */}
+            <Route path="/faq" element={<FAQ />} />
             
             {/* Terms Route */}
             <Route path="/terms" element={<TermsAndConditions />} />
