@@ -1,0 +1,1023 @@
+[
+  {
+    "type": "paragraph",
+    "text": "A multicast destination address defines a group of addresses; the relationship between the sender and the receivers is one-to-many."
+  },
+  {
+    "type": "paragraph",
+    "text": "The broadcast address is a special case of the multicast address; the recipients are all the stations on the LAN. A broadcast destination address is forty-eight 1s."
+  },
+  {
+    "type": "header",
+    "text": "Access Method: CSMA/CD"
+  },
+  {
+    "type": "paragraph",
+    "text": "Standard Ethernet uses I-persistent CSMA/CD Slot Time In an Ethernet network."
+  },
+  {
+    "type": "paragraph",
+    "text": "Slot time =round-trip time + time required to send the jam sequence"
+  },
+  {
+    "type": "paragraph",
+    "text": "The slot time in Ethernet is defined in bits. It is the time required for a station"
+  },
+  {
+    "type": "paragraph",
+    "text": "to send 512 bits. This means that the actual slot time depends on the data rate; for traditional 10-Mbps Ethernet it is 51.2 micro sec."
+  },
+  {
+    "type": "paragraph",
+    "text": "Slot Time and Maximum Network Length There is a relationship between the slot time and the maximum length of the network (collision domain). It is dependent on the propagation speed of the signal in the particular medium."
+  },
+  {
+    "type": "paragraph",
+    "text": "In most transmission media, the signal propagates at 2 x 108 m/s (two-thirds of the rate for propagation in air)."
+  },
+  {
+    "type": "header",
+    "text": "For traditional Ethernet, we calculate"
+  },
+  {
+    "type": "paragraph",
+    "text": "MaxLength=PropagationSpeedx(SlotTime/2) MaxLength= (2 x 108) X(51.2 X10-6 )/2= 5120m"
+  },
+  {
+    "type": "paragraph",
+    "text": "Of course, we need to consider the delay times in repeaters and interfaces, and the time required to send the jam sequence. These reduce the maximum- length of a traditional Ethernet network to 2500 m, just 48 percent of the theoretical calculation. MaxLength=2500 m"
+  },
+  {
+    "type": "header",
+    "text": "Physical Layer"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Standard Ethernet defines several physical layer implementations; four of the most common, are shown in Figure"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image1.webp",
+    "caption": "Figure 3-1"
+  },
+  {
+    "type": "header",
+    "text": "Encoding and Decoding"
+  },
+  {
+    "type": "paragraph",
+    "text": "All standard implementations use digital signaling (baseband) at 10 Mbps. At the sender, data are converted to a digital signal using the Manchester scheme; at the receiver, the received signal is interpreted as Manchester and decoded into data. Manchester encoding is self-synchronous, providing a transition at each bit interval. Figure shows the encoding scheme for Standard Ethernet"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image2.webp",
+    "caption": "Figure 3-2"
+  },
+  {
+    "type": "paragraph",
+    "text": "In Manchester encoding, the transition at the middle of the bit is used for synchronization"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image3.webp",
+    "caption": "Figure 3-3"
+  },
+  {
+    "type": "header",
+    "text": "lOBase5: Thick Ethernet"
+  },
+  {
+    "type": "paragraph",
+    "text": "The first implementation is called 10Base5, thick Ethernet, or Thicknet. lOBase5 was the first Ethernet specification to use a bus topology with an external transceiver (transmitter/receiver) connected via a tap to a thick coaxial cable. Figure shows a schematic diagram of a lOBase5 implementation"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image4.webp",
+    "caption": "Figure 3-4"
+  },
+  {
+    "type": "header",
+    "text": "10Base5 implementation"
+  },
+  {
+    "type": "header",
+    "text": "10Base2: Thin Ethernet"
+  },
+  {
+    "type": "paragraph",
+    "text": "The second implementation is called 10 Base2, thin Ethernet, or Cheapernet. 10Base2 also uses a bus topology, but the cable is much thinner and more flexible. Figure shows the schematic diagram of a 10Base2 implementation."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image5.webp",
+    "caption": "Figure 3-5"
+  },
+  {
+    "type": "header",
+    "text": "10Base2 implementation"
+  },
+  {
+    "type": "paragraph",
+    "text": "thin coaxial cable is less expensive than thick coaxial."
+  },
+  {
+    "type": "paragraph",
+    "text": "Installation is simpler because the thin coaxial cable is very flexible."
+  },
+  {
+    "type": "paragraph",
+    "text": "However, the length of each segment cannot exceed 185 m (close to 200 m) due to the high level of attenuation in thin coaxial cable."
+  },
+  {
+    "type": "header",
+    "text": "1OBase-T: Twisted-Pair Ethernet"
+  },
+  {
+    "type": "paragraph",
+    "text": "The third implementation is called 10Base-T or twisted-pair Ethernet. It uses a physical star topology. The stations are connected to a hub via two pairs of twisted cable, as shown in Figure"
+  },
+  {
+    "type": "paragraph",
+    "text": "The maximum length of the twisted cable here is defined as 100 m, to minimize the effect of attenuation in the twisted cable"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image6.webp",
+    "caption": "Figure 3-6"
+  },
+  {
+    "type": "header",
+    "text": "10Base-T implementation"
+  },
+  {
+    "type": "paragraph",
+    "text": "Although there are several types of optical fiber 10-Mbps Ethernet, the most common is called 10Base-F.10Base-F uses a star topology to connect stations to a hub. The stations are connected to the hub using two fiber-optic cables, as shown in Figure"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image7.webp",
+    "caption": "Figure 3-7"
+  },
+  {
+    "type": "header",
+    "text": "10Base-F implementation"
+  },
+  {
+    "type": "header",
+    "text": "UNIT-III"
+  },
+  {
+    "type": "header",
+    "text": "Network Layer Design Issues"
+  },
+  {
+    "type": "header",
+    "text": "Store-and-forward packet switching"
+  },
+  {
+    "type": "header",
+    "text": "Services provided to transport layer"
+  },
+  {
+    "type": "header",
+    "text": "Implementation of connectionless service"
+  },
+  {
+    "type": "header",
+    "text": "Implementation of connection-oriented service"
+  },
+  {
+    "type": "header",
+    "text": "Comparison of virtual-circuit and datagram networks"
+  },
+  {
+    "type": "header",
+    "text": "Store-and-forward packet switching"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image8.webp",
+    "caption": "Figure 3-8"
+  },
+  {
+    "type": "paragraph",
+    "text": "A host with a packet to send transmits it to the nearest router, either on its own LAN or over a point-to-point link to the ISP. The packet is stored there until it has fully arrived and the link has finished its processing by verifying the checksum. Then it is forwarded to the next router along the path until it reaches the destination host, where it is delivered. This mechanism is store-and-forward packet switching."
+  },
+  {
+    "type": "header",
+    "text": "Services provided to transport layer"
+  },
+  {
+    "type": "paragraph",
+    "text": "The network layer provides services to the transport layer at the network layer/transport layer interface. The services need to be carefully designed with the following goals in mind:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Services independent of router technology."
+  },
+  {
+    "type": "paragraph",
+    "text": "Transport layer shielded from number, type, topology of routers."
+  },
+  {
+    "type": "paragraph",
+    "text": "Network addresses available to transport layer use uniform numbering plan"
+  },
+  {
+    "type": "header",
+    "text": "\u2013even across LANs and WANs"
+  },
+  {
+    "type": "header",
+    "text": "Implementation of connectionless service"
+  },
+  {
+    "type": "paragraph",
+    "text": "If connectionless service is offered, packets are injected into the network individually and routed independently of each other. No advance setup is needed. In this context, the packets"
+  },
+  {
+    "type": "paragraph",
+    "text": "are frequently called datagrams (in analogy with telegrams) and the network is called a"
+  },
+  {
+    "type": "paragraph",
+    "text": "datagram network."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image9.webp",
+    "caption": "Figure 3-9"
+  },
+  {
+    "type": "paragraph",
+    "text": "A\u2019s table (initially)   A\u2019s table (later)    C\u2019s TableE\u2019s Table"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image10.webp",
+    "caption": "Figure 3-10"
+  },
+  {
+    "type": "paragraph",
+    "text": "Let us assume for this example that the message is four times longer than the maximum packet size, so the network layer has to break it into four packets, 1, 2, 3, and 4, and send each of them in turn to router A."
+  },
+  {
+    "type": "paragraph",
+    "text": "Every router has an internal table telling it where to send packets for each of the possible destinations. Each table entry is a pair(destination and the outgoing line). Only directly connected lines can be used."
+  },
+  {
+    "type": "paragraph",
+    "text": "A\u2019s initial routing table is shown in the figure under the label \u2018\u2018initially.\u2019\u2019"
+  },
+  {
+    "type": "paragraph",
+    "text": "At A, packets 1, 2, and 3 are stored briefly, having arrived on the incoming link. Then each packet is forwarded according to A\u2019s table, onto the outgoing link to C within a new frame. Packet 1 is then forwarded to E and then to F."
+  },
+  {
+    "type": "paragraph",
+    "text": "However, something different happens to packet 4. When it gets to A it is sent to router B, even though it is also destined for F. For some reason (traffic jam along ACE path), A decided to send packet 4 via a different route than that of the first three packets. Router A updated its routing table, as shown under the label \u2018\u2018later.\u2019\u2019"
+  },
+  {
+    "type": "paragraph",
+    "text": "The algorithm that manages the tables and makes the routing decisions is called the routing algorithm."
+  },
+  {
+    "type": "header",
+    "text": "Implementation of connection-oriented service"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image11.webp",
+    "caption": "Figure 3-11"
+  },
+  {
+    "type": "header",
+    "text": "A\u2019s tableC\u2019s TableE\u2019s Table"
+  },
+  {
+    "type": "paragraph",
+    "text": "If connection-oriented service is used, a path from the source router all the way to the destination router must be established before any data packets can be sent. This connection is called a VC (virtual circuit), and the network is called a virtual-circuit network"
+  },
+  {
+    "type": "paragraph",
+    "text": "When a connection is established, a route from the source machine to the destination machine is chosen as part of the connection setup and stored in tables inside the routers. That route is used for all traffic flowing over the connection, exactly the same way that the telephone system works. When the connection is released, the virtual circuit is also terminated. With connection-oriented service, each packet carries an identifier telling which virtual circuit it belongs to."
+  },
+  {
+    "type": "paragraph",
+    "text": "As an example, consider the situation shown in Figure. Here, host H1 has established connection 1 with host H2. This connection is remembered as the first entry in each of the routing tables. The first line of A\u2019s table says that if a packet bearing connection identifier 1 comes in from H1, it is to be sent to router C and given connection identifier 1. Similarly, the first entry at C routes the packet to E, also with connection identifier 1."
+  },
+  {
+    "type": "paragraph",
+    "text": "Now let us consider what happens if H3 also wants to establish a connection to H2. It chooses connection identifier 1 (because it is initiating the connection and this is its only connection) and tells the network to establish the virtual circuit."
+  },
+  {
+    "type": "paragraph",
+    "text": "This leads to the second row in the tables. Note that we have a conflict here because although A can easily distinguish connection 1 packets from H1 from connection 1 packets from H3, C cannot do this. For this reason, A assigns a different connection identifier to the outgoing traffic for the second connection. Avoiding conflicts of this kind is why routers need the ability to replace connection identifiers in outgoing packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "In some contexts, this process is called label switching. An example of a connection-oriented network service is MPLS (Multi Protocol Label Switching)."
+  },
+  {
+    "type": "header",
+    "text": "Comparison of virtual-circuit and datagram networks"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image13.webp",
+    "caption": "Figure 3-13"
+  },
+  {
+    "type": "header",
+    "text": "Routing Algorithms"
+  },
+  {
+    "type": "paragraph",
+    "text": "The main function of NL (Network Layer) is routing packets from the source machine to the destination machine."
+  },
+  {
+    "type": "paragraph",
+    "text": "There are two processes inside router:"
+  },
+  {
+    "type": "paragraph",
+    "text": "One of them handles each packet as it arrives, looking up the outgoing line to use for it in the routing table. This process is forwarding."
+  },
+  {
+    "type": "paragraph",
+    "text": "The other process is responsible for filling in and updating the routing tables. That is where the routing algorithm comes into play. This process is routing."
+  },
+  {
+    "type": "paragraph",
+    "text": "Regardless of whether routes are chosen independently for each packet or only when new connections are established, certain properties are desirable in a routing algorithm correctness, simplicity, robustness, stability, fairness, optimality"
+  },
+  {
+    "type": "paragraph",
+    "text": "Routing algorithms can be grouped into two major classes:"
+  },
+  {
+    "type": "paragraph",
+    "text": "nonadaptive (Static Routing)"
+  },
+  {
+    "type": "paragraph",
+    "text": "adaptive. (Dynamic Routing)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Nonadaptive algorithm do not base their routing decisions on measurements or estimates of the current traffic and topology. Instead, the choice of the route to use to get from I to J is computed in advance, off line, and downloaded to the routers when the network is booted. This procedure is sometimes called static routing."
+  },
+  {
+    "type": "paragraph",
+    "text": "Adaptive algorithm, in contrast, change their routing decisions to reflect changes in the topology, and usually the traffic as well."
+  },
+  {
+    "type": "header",
+    "text": "Adaptive algorithms differ in"
+  },
+  {
+    "type": "paragraph",
+    "text": "Where they get their information (e.g., locally, from adjacent routers, or from all routers),"
+  },
+  {
+    "type": "paragraph",
+    "text": "When they change the routes (e.g., every \u2206T sec, when the load changes or when the"
+  },
+  {
+    "type": "header",
+    "text": "topology changes), and"
+  },
+  {
+    "type": "paragraph",
+    "text": "What metric is used for optimization (e.g., distance, number of hops, or estimated transit time)."
+  },
+  {
+    "type": "header",
+    "text": "This procedure is called dynamic routing"
+  },
+  {
+    "type": "header",
+    "text": "Different Routing Algorithms"
+  },
+  {
+    "type": "header",
+    "text": "Optimality principle"
+  },
+  {
+    "type": "header",
+    "text": "Shortest path algorithm"
+  },
+  {
+    "type": "header",
+    "text": "Flooding"
+  },
+  {
+    "type": "header",
+    "text": "Distance vector routing"
+  },
+  {
+    "type": "header",
+    "text": "Link state routing"
+  },
+  {
+    "type": "header",
+    "text": "Hierarchical Routing"
+  },
+  {
+    "type": "header",
+    "text": "The Optimality Principle"
+  },
+  {
+    "type": "paragraph",
+    "text": "One can make a general statement about optimal routes without regard to network topology or traffic. This statement is known as the optimality principle."
+  },
+  {
+    "type": "paragraph",
+    "text": "It states that if router J is on the optimal path from router I to router K, then the optimal path from J to K also falls along the same"
+  },
+  {
+    "type": "paragraph",
+    "text": "As a direct consequence of the optimality principle, we can see that the set of optimal routes from all sources to a given destination form a tree rooted at the destination. Such a tree is called a sink tree. The goal of all routing algorithms is to discover and use the sink trees for all routers"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image14.webp",
+    "caption": "Figure 3-14"
+  },
+  {
+    "type": "paragraph",
+    "text": "(a) A network.(b) A sink tree for router B."
+  },
+  {
+    "type": "paragraph",
+    "text": "Shortest Path Routing (Dijkstra\u2019s)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The idea is to build a graph of the subnet, with each node of the graph representing a router and each arc of the graph representing a communication line or link."
+  },
+  {
+    "type": "paragraph",
+    "text": "To choose a route between a given pair of routers, the algorithm just finds the shortest path between them on the graph"
+  },
+  {
+    "type": "paragraph",
+    "text": "Start with the local node (router) as the root of the tree. Assign a cost of 0 to this node and make it the first permanent node."
+  },
+  {
+    "type": "paragraph",
+    "text": "Examine each neighbor of the node that was the last permanent node."
+  },
+  {
+    "type": "header",
+    "text": "Assign a cumulative cost to each node and make it tentative"
+  },
+  {
+    "type": "header",
+    "text": "Among the list of tentative nodes"
+  },
+  {
+    "type": "header",
+    "text": "Find the node with the smallest cost and make it Permanent"
+  },
+  {
+    "type": "paragraph",
+    "text": "If a node can be reached from more than one route then select the route with the shortest cumulative cost."
+  },
+  {
+    "type": "header",
+    "text": "Repeat steps 2 to 4 until every node becomes permanent"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image15.webp",
+    "caption": "Figure 3-15"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image16.webp",
+    "caption": "Figure 3-16"
+  },
+  {
+    "type": "header",
+    "text": "Flooding"
+  },
+  {
+    "type": "paragraph",
+    "text": "Another static algorithm is flooding, in which every incoming packet is sent out on every outgoing line except the one it arrived on."
+  },
+  {
+    "type": "paragraph",
+    "text": "Flooding obviously generates vast numbers of duplicate packets, in fact, an infinite number unless some measures are taken to damp the process."
+  },
+  {
+    "type": "paragraph",
+    "text": "One such measure is to have a hop counter contained in the header of each packet, which is decremented at each hop, with the packet being discarded when the counter reaches zero. Ideally, the hop counter should be initialized to the length of the path from source to destination."
+  },
+  {
+    "type": "paragraph",
+    "text": "A variation of flooding that is slightly more practical is selective flooding. In this algorithm the routers do not send every incoming packet out on every line, only on those lines that are going approximately in the right direction."
+  },
+  {
+    "type": "paragraph",
+    "text": "Flooding is not practical in most applications."
+  },
+  {
+    "type": "header",
+    "text": "Intra- and Inter domain Routing"
+  },
+  {
+    "type": "paragraph",
+    "text": "An autonomous system (AS) is a group of networks and routers under the authority of a single administration."
+  },
+  {
+    "type": "paragraph",
+    "text": "Routing inside an autonomous system is referred to as intra domain routing. (DISTANCE VECTOR, LINK STATE)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Routing between autonomous systems is referred to as inter domain routing. (PATH VECTOR) Each autonomous system can choose one or more intra domain routing protocols to handle routing inside the autonomous system. However, only one inter domain routing protocol handles routing between autonomous systems."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image17.webp",
+    "caption": "Figure 3-17"
+  },
+  {
+    "type": "header",
+    "text": "Distance Vector Routing"
+  },
+  {
+    "type": "paragraph",
+    "text": "In distance vector routing, the least-cost route between any two nodes is the route with minimum distance. In this protocol, as the name implies, each node maintains a vector (table) of minimum distances to every node."
+  },
+  {
+    "type": "header",
+    "text": "Mainly 3 things in this"
+  },
+  {
+    "type": "header",
+    "text": "Initialization Sharing Updating"
+  },
+  {
+    "type": "header",
+    "text": "Initialization"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each node can know only the distance between itself and its immediate neighbors, those directly connected to it. So for the moment, we assume that each node can send a message to the immediate neighbors and find the distance between itself and these neighbors. Below fig shows the initial tables for each node. The distance for any entry that is not a neighbor is marked as infinite (unreachable)."
+  },
+  {
+    "type": "header",
+    "text": "Initialization of tables in distance vector routing"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image18.webp",
+    "caption": "Figure 3-18"
+  },
+  {
+    "type": "header",
+    "text": "Sharing"
+  },
+  {
+    "type": "paragraph",
+    "text": "The whole idea of distance vector routing is the sharing of information between neighbors. Although node A does not know about node E, node C does. So if node C shares its routing table with A, node A can also know how to reach node E. On the other hand, node C does not know how to reach node D, but node A does. If node A shares its routing table with node C, node C also knows how to reach node D. In other words, nodes A and C, as immediate neighbors, can improve their routing tables if they help each other."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE: In distance vector routing, each node shares its routing table with its immediate neighbors periodically and when there is a change"
+  },
+  {
+    "type": "header",
+    "text": "Updating"
+  },
+  {
+    "type": "paragraph",
+    "text": "When a node receives a two-column table from a neighbor, it needs to update its routing table. Updating takes three steps:"
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiving node needs to add the cost between itself and the sending node to each value in the second column. (x+y)"
+  },
+  {
+    "type": "paragraph",
+    "text": "If the receiving node uses information from any row. The sending node is the next node in the route."
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiving node needs to compare each row of its old table with the corresponding row of the modified version of the received table."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the next-node entry is different, the receiving node chooses the row with the smaller cost. If there is a tie, the old one is kept."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the next-node entry is the same, the receiving node chooses the new row."
+  },
+  {
+    "type": "paragraph",
+    "text": "For example, suppose node C has previously advertised a route to node X with distance 3. Suppose that now there is no path between C and X; node C now advertises this route with a distance of infinity. Node A must not ignore this value even though its old entry is smaller. The old route does not exist anymore. The new route has a distance of infinity."
+  },
+  {
+    "type": "header",
+    "text": "Updating in distance vector routing"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image19.webp",
+    "caption": "Figure 3-19"
+  },
+  {
+    "type": "header",
+    "text": "Final Diagram"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image20.webp",
+    "caption": "Figure 3-20"
+  },
+  {
+    "type": "header",
+    "text": "When to Share"
+  },
+  {
+    "type": "paragraph",
+    "text": "The question now is, When does a node send its partial routing table (only two columns) to all its immediate neighbors? The table is sent both periodically and when there is a change in the table."
+  },
+  {
+    "type": "paragraph",
+    "text": "Periodic Update A node sends its routing table, normally every 30 s, in a periodic update. The period depends on the protocol that is using distance vector routing."
+  },
+  {
+    "type": "paragraph",
+    "text": "Triggered Update A node sends its two-column routing table to its neighbors anytime there is a change in its routing table. This is called a triggered update. The change can result from the following."
+  },
+  {
+    "type": "paragraph",
+    "text": "A node receives a table from a neighbor, resulting in changes in its own table after updating."
+  },
+  {
+    "type": "paragraph",
+    "text": "A node detects some failure in the neighboring links which results in a distance change to infinity."
+  },
+  {
+    "type": "header",
+    "text": "Two-node instability"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image21.webp",
+    "caption": "Figure 3-21"
+  },
+  {
+    "type": "header",
+    "text": "Three-node instability"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image22.webp",
+    "caption": "Figure 3-22"
+  },
+  {
+    "type": "header",
+    "text": "SOLUTIONS FOR INSTABILITY"
+  },
+  {
+    "type": "paragraph",
+    "text": "Defining Infinity: redefine infinity to a smaller number, such as 100. For our previous scenario, the system will be stable in less than 20 updates. As a matter of fact, most implementations of the distance vector protocol define the distance between each node to"
+  },
+  {
+    "type": "paragraph",
+    "text": "be 1 and define 16 as infinity. However, this means that the distance vector routing cannot be used in large systems. The size of the network, in each direction, cannot exceed 15 hops."
+  },
+  {
+    "type": "paragraph",
+    "text": "Split Horizon: In this strategy, instead of flooding the table through each interface, each node sends only part of its table through each interface. If, according to its table, node B thinks that the optimum route to reach X is via A, it does not need to advertise this piece of information to A; the information has come from A (A already knows). Taking information from node A, modifying it, and sending it back to node A creates the confusion. In our scenario, node B eliminates the last line of its routing table before it sends it to A. In this case, node A keeps the value of infinity as the distance to X. Later when node A sends its routing table to B, node B also corrects its routing table. The system becomes stable after the first update: both node A and B know that X is not reachable."
+  },
+  {
+    "type": "paragraph",
+    "text": "Split Horizon and Poison Reverse Using the split horizon strategy has one drawback. Normally, the distance vector protocol uses a timer, and if there is no news about a route, the node deletes the route from its table. When node B in the previous scenario eliminates the route to X from its advertisement to A, node A cannot guess that this is due to the split horizon strategy (the source of information was A) or because B has not received any news about X recently. The split horizon strategy can be combined with the poison reverse strategy. Node B can still advertise the value for X, but if the source of information is A, it can replace the distance with infinity as a warning: \"Do not use this value; what I know about this route comes from you.\""
+  },
+  {
+    "type": "header",
+    "text": "The Count-to-Infinity Problem"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image23.webp",
+    "caption": "Figure 3-23"
+  },
+  {
+    "type": "header",
+    "text": "Link State Routing"
+  },
+  {
+    "type": "paragraph",
+    "text": "Link state routing is based on the assumption that, although the global knowledge about the topology is not clear, each node has partial knowledge: it knows the state (type, condition, and cost) of its links. In other words, the whole topology can be compiled from the partial knowledge of each node"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image24.webp",
+    "caption": "Figure 3-24"
+  },
+  {
+    "type": "header",
+    "text": "Building Routing Tables"
+  },
+  {
+    "type": "paragraph",
+    "text": "Creation of the states of the links by each node, called the link state packet (LSP)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Dissemination of LSPs to every other router, called flooding, in an efficient and reliable way."
+  },
+  {
+    "type": "paragraph",
+    "text": "Formation of a shortest path tree for each node."
+  },
+  {
+    "type": "paragraph",
+    "text": "Calculation of a routing table based on the shortest path tree"
+  },
+  {
+    "type": "paragraph",
+    "text": "Creation of Link State Packet (LSP) A link state packet can carry a large amount of information. For the moment, we assume that it carries a minimum amount of data: the node identity, the list of links, a sequence number, and age. The first two, node identity and the list of links, are needed to make the topology. The third, sequence number, facilitates flooding and distinguishes new LSPs from old ones. The fourth, age, prevents old LSPs from remaining in the domain for a long time."
+  },
+  {
+    "type": "paragraph",
+    "text": "LSPs are generated on two occasions:"
+  },
+  {
+    "type": "header",
+    "text": "When there is a change in the topology of the domain"
+  },
+  {
+    "type": "paragraph",
+    "text": "on a periodic basis: The period in this case is much longer compared to distance vector. The timer set for periodic dissemination is normally in the range of 60 min or 2 h based on the implementation. A longer period ensures that flooding does not create too much traffic on the network."
+  },
+  {
+    "type": "paragraph",
+    "text": "Flooding of LSPs: After a node has prepared an LSP, it must be disseminated to all other nodes, not only to its neighbors. The process is called flooding and based on the following"
+  },
+  {
+    "type": "paragraph",
+    "text": "The creating node sends a copy of the LSP out of each interface"
+  },
+  {
+    "type": "paragraph",
+    "text": "A node that receives an LSP compares it with the copy it may already have. If the newly arrived LSP is older than the one it has (found by checking the sequence number), it discards the LSP. If it is newer, the node does the following:"
+  },
+  {
+    "type": "paragraph",
+    "text": "It discards the old LSP and keeps the new one."
+  },
+  {
+    "type": "paragraph",
+    "text": "It sends a copy of it out of each interface except the one from which the packet arrived. This guarantees that flooding stops somewhere in the domain (where a node has only one interface)."
+  },
+  {
+    "type": "header",
+    "text": "Formation of Shortest Path Tree: Dijkstra Algorithm"
+  },
+  {
+    "type": "paragraph",
+    "text": "A shortest path tree is a tree in which the path between the root and every other node is the shortest."
+  },
+  {
+    "type": "paragraph",
+    "text": "The Dijkstra algorithm creates a shortest path tree from a graph. The algorithm divides the nodes into two sets: tentative and permanent. It finds the neighbors of a current node, makes them tentative, examines them, and if they pass the criteria, makes them permanent."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image25.webp",
+    "caption": "Figure 3-25"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image26.webp",
+    "caption": "Figure 3-26"
+  },
+  {
+    "type": "header",
+    "text": "Calculation of a routing table"
+  },
+  {
+    "type": "header",
+    "text": "routing table for node A"
+  },
+  {
+    "type": "header",
+    "text": "Path Vector Routing"
+  },
+  {
+    "type": "paragraph",
+    "text": "Distance vector and link state routing are both intra domain routing protocols. They can be used inside an autonomous system, but not between autonomous systems. These two protocols are not suitable for inter domain routing mostly because of scalability. Both of these routing protocols become intractable when the domain of operation becomes large. Distance vector routing is subject to instability in the domain of operation. Link state routing needs a"
+  },
+  {
+    "type": "paragraph",
+    "text": "huge amount of resources to calculate routing tables. It also creates heavy traffic because of flooding. There is a need for a third routing protocol which we call path vector routing."
+  },
+  {
+    "type": "paragraph",
+    "text": "Path vector routing proved to be useful for inter domain routing. The principle of path vector routing is similar to that of distance vector routing. In path vector routing, we assume that there is one node (there can be more, but one is enough for our conceptual discussion) in each AS that acts on behalf of the entire AS. Let us call it the speaker node. The speaker node in an AS creates a routing table and advertises it to speaker nodes in the neighboring ASs. The idea is the same as for distance vector routing except that only speaker nodes in each AS can communicate with each other. However, what is advertised is different. A speaker node advertises the path, not the metric of the nodes, in its autonomous system or other autonomous systems"
+  },
+  {
+    "type": "header",
+    "text": "Initialization"
+  },
+  {
+    "type": "header",
+    "text": "Initial routing tables in path vector routing"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image28.webp",
+    "caption": "Figure 3-28"
+  },
+  {
+    "type": "header",
+    "text": "Sharing"
+  },
+  {
+    "type": "paragraph",
+    "text": "Just as in distance vector routing, in path vector routing, a speaker in an autonomous system shares its table with immediate neighbors. In Figure, node A1 shares its table with nodes B1"
+  },
+  {
+    "type": "paragraph",
+    "text": "and C1. Node C1 shares its table with nodes D1, B1, and A1. Node B1 shares its table with C1 and A1. Node D1 shares its table with C1."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image29.webp",
+    "caption": "Figure 3-29"
+  },
+  {
+    "type": "paragraph",
+    "text": "Updating When a speaker node receives a two-column table from a neighbor, it updates its own table by adding the nodes that are not in its routing table and adding its own autonomous system and the autonomous system that sent the table. After a while each speaker has a table and knows how to reach each node in other Ass"
+  },
+  {
+    "type": "paragraph",
+    "text": "Loop prevention. The instability of distance vector routing and the creation of loops can be avoided in path vector routing. When a router receives a message, it checks to see if its AS is in the path list to the destination. If it is, looping is involved and the message is ignored."
+  },
+  {
+    "type": "paragraph",
+    "text": "Policy routing. Policy routing can be easily implemented through path vector routing. When a router receives a message, it can check the path. If one of the AS listed in the path is against its policy, it can ignore that path and that destination. It does not update its routing table with this path, and it does not send this message to its neighbors."
+  },
+  {
+    "type": "paragraph",
+    "text": "Optimum path. What is the optimum path in path vector routing? We are looking for a path to a destination that is the best for the organization that runs the AS. One system may use RIP, which defines hop count as the metric; another may use OSPF with minimum delay defined as the metric. In our previous figure, each AS may have more than one path to a destination. For example, a path from AS4 to ASI can be AS4-AS3-AS2-AS1, or it can be AS4- AS3-ASI. For the tables, we chose the one that had the smaller number of ASs, but this is not always the case. Other criteria, such as security, safety, and reliability, can also be applied"
+  },
+  {
+    "type": "header",
+    "text": "Hierarchical Routing"
+  },
+  {
+    "type": "paragraph",
+    "text": "As networks grow in size, the router routing tables grow proportionally. Not only is router memory consumed by ever-increasing tables, but more CPU time is needed to scan them and more bandwidth is needed to send status reports about them."
+  },
+  {
+    "type": "paragraph",
+    "text": "At a certain point, the network may grow to the point where it is no longer feasible for every router to have an entry for every other router, so the routing will have to be done hierarchically, as it is in the telephone network."
+  },
+  {
+    "type": "paragraph",
+    "text": "When hierarchical routing is used, the routers are divided into what we will call regions. Each router knows all the details about how to route packets to destinations within its own region but knows nothing about the internal structure of other regions."
+  },
+  {
+    "type": "paragraph",
+    "text": "For huge networks, a two-level hierarchy may be insufficient; it may be necessary to group the regions into clusters, the clusters into zones, the zones into groups, and so on, until we run out of names for aggregations"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image30.webp",
+    "caption": "Figure 3-30"
+  },
+  {
+    "type": "paragraph",
+    "text": "When a single network becomes very large, an interesting question is \u2018\u2018how many levels"
+  },
+  {
+    "type": "header",
+    "text": "should the hierarchy have?\u2019\u2019"
+  },
+  {
+    "type": "paragraph",
+    "text": "For example, consider a network with 720 routers. If there is no hierarchy, each router needs 720 routing table entries."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the network is partitioned into 24 regions of 30 routers each, each router needs 30 local entries plus 23 remote entries for a total of 53 entries."
+  },
+  {
+    "type": "paragraph",
+    "text": "If a three-level hierarchy is chosen, with 8 clusters each containing 9 regions of 10 routers, each router needs 10 entries for local routers, 8 entries for routing to other regions within its own cluster, and 7 entries for distant clusters, for a total of 25 entries"
+  },
+  {
+    "type": "paragraph",
+    "text": "Kamoun and Kleinrock (1979) discovered that the optimal number of levels for an N router network is ln N, requiring a total of e ln N entries per router"
+  },
+  {
+    "type": "header",
+    "text": "CONGESTION CONTROL ALGORITHMS"
+  },
+  {
+    "type": "paragraph",
+    "text": "Too many packets present in (a part of) the network causes packet delay and loss that degrades performance. This situation is called congestion."
+  },
+  {
+    "type": "paragraph",
+    "text": "The network and transport layers share the responsibility for handling congestion. Since congestion occurs within the network, it is the network layer that directly experiences it and must ultimately determine what to do with the excess packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "However, the most effective way to control congestion is to reduce the load that the transport layer is placing on the network. This requires the network and transport layers to work together. In this chapter we will look at the network aspects of congestion."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter3/image31.webp",
+    "caption": "Figure 3-31"
+  },
+  {
+    "type": "paragraph",
+    "text": "When too much traffic is offered, congestion sets in and performance degrades sharply"
+  },
+  {
+    "type": "paragraph",
+    "text": "Above Figure depicts the onset of congestion. When the number of packets hosts send into the network is well within its carrying capacity, the number delivered is proportional to the number sent. If twice as many are sent, twice as many are delivered. However, as the offered load approaches the carrying capacity, bursts of traffic occasionally fill up the buffers inside routers and some packets are lost. These lost packets consume some of the capacity, so the number of delivered packets falls below the ideal curve. The network is now congested. Unless the network is well designed, it may experience a congestion collapse"
+  },
+  {
+    "type": "paragraph",
+    "text": "difference between congestion control and flow control."
+  },
+  {
+    "type": "paragraph",
+    "text": "Congestion control has to do with making sure the network is able to carry the offered traffic. It is a global issue, involving the behavior of all the hosts and routers."
+  },
+  {
+    "type": "paragraph",
+    "text": "Flow control, in contrast, relates to the traffic between a particular sender and a particular receiver. Its job is to make sure that a fast sender cannot continually transmit data faster than the receiver is able to absorb it."
+  },
+  {
+    "type": "paragraph",
+    "text": "To see the difference between these two concepts, consider a network made up of 100-Gbps fiber optic links on which a supercomputer is trying to force feed a large file to a personal computer that is capable of handling only 1 Gbps. Although there is no congestion (the network itself is not in trouble), flow control is needed to force the supercomputer to stop frequently to give the personal computer a chance to breathe."
+  },
+  {
+    "type": "paragraph",
+    "text": "At the other extreme, consider a network with 1-Mbps lines and 1000 large computers, half of which are trying to transfer files at 100 kbps to the other half. Here, the problem is not that of fast senders overpowering slow receivers, but that the total offered traffic exceeds what the network can handle."
+  },
+  {
+    "type": "paragraph",
+    "text": "The reason congestion control and flow control are often confused is that the best way to handle both problems is to get the host to slow down. Thus, a host can get a \u2018\u2018slow down\u2019\u2019 message either because the receiver cannot handle the load or because the network cannot handle it."
+  },
+  {
+    "type": "paragraph",
+    "text": "Several techniques can be employed. These include:"
+  },
+  {
+    "type": "header",
+    "text": "Warning bit"
+  },
+  {
+    "type": "header",
+    "text": "Choke packets"
+  },
+  {
+    "type": "header",
+    "text": "Load shedding"
+  },
+  {
+    "type": "header",
+    "text": "Random early discard"
+  },
+  {
+    "type": "header",
+    "text": "Traffic shaping"
+  },
+  {
+    "type": "paragraph",
+    "text": "The first 3 deal with congestion detection and recovery. The last 2 deal with congestion avoidance"
+  },
+  {
+    "type": "header",
+    "text": "Warning Bit"
+  },
+  {
+    "type": "paragraph",
+    "text": "A special bit in the packet header is set by the router to warn the source when congestion is detected."
+  },
+  {
+    "type": "paragraph",
+    "text": "The bit is copied and piggy-backed on the ACK and sent to the sender."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sender monitors the number of ACK packets it receives with the warning bit set and adjusts its transmission rate accordingly."
+  },
+  {
+    "type": "header",
+    "text": "Choke Packets"
+  }
+]

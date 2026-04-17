@@ -89,6 +89,8 @@ const BigONotation = () => {
       <Helmet>
         <title>Big-O Notation Masterclass | DSA Notes</title>
         <meta name="description" content="Comprehensive guide to Big-O notation, algorithm complexity analysis, time and space complexity, and common algorithm performance benchmarks." />
+        <meta name="keywords" content="big o notation, time complexity, space complexity, algorithm analysis, asymptotic notation, dsa notes" />
+        <link rel="canonical" href="https://whizan.xyz/dsa/notes/big-o-notation" />
       </Helmet>
 
       {/* Header */}

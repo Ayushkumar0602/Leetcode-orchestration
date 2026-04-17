@@ -1,0 +1,2960 @@
+[
+  {
+    "type": "paragraph",
+    "text": "A more direct way of telling the source to slow down."
+  },
+  {
+    "type": "paragraph",
+    "text": "A choke packet is a control packet generated at a congested node and transmitted to restrict traffic flow."
+  },
+  {
+    "type": "paragraph",
+    "text": "The source, on receiving the choke packet must reduce its transmission rate by a certain percentage."
+  },
+  {
+    "type": "paragraph",
+    "text": "An example of a choke packet is the ICMP Source Quench Packet. Hop-by-Hop Choke Packets"
+  },
+  {
+    "type": "paragraph",
+    "text": "Over long distances or at high speeds choke packets are not very effective."
+  },
+  {
+    "type": "paragraph",
+    "text": "A more efficient method is to send to choke packets hop-by-hop."
+  },
+  {
+    "type": "paragraph",
+    "text": "This requires each hop to reduce its transmission even before the choke packet arrive at the source"
+  },
+  {
+    "type": "header",
+    "text": "Load Shedding"
+  },
+  {
+    "type": "paragraph",
+    "text": "When buffers become full, routers simply discard packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "Which packet is chosen to be the victim depends on the application and on the error strategy used in the data link layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "For a file transfer, for, e.g. cannot discard older packets since this will cause a gap in the received data."
+  },
+  {
+    "type": "paragraph",
+    "text": "For real-time voice or video it is probably better to throw away old data and keep new packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "Get the application to mark packets with discard priority."
+  },
+  {
+    "type": "paragraph",
+    "text": "Random Early Discard (RED)"
+  },
+  {
+    "type": "paragraph",
+    "text": "This is a proactive approach in which the router discards one or more packets before the buffer becomes completely full."
+  },
+  {
+    "type": "paragraph",
+    "text": "Each time a packet arrives, the RED algorithm computes the average queue length, avg."
+  },
+  {
+    "type": "paragraph",
+    "text": "If avg is lower than some lower threshold, congestion is assumed to be minimal or non- existent and the packet is queued."
+  },
+  {
+    "type": "paragraph",
+    "text": "If avg is greater than some upper threshold, congestion is assumed to be serious and the packet is discarded."
+  },
+  {
+    "type": "paragraph",
+    "text": "If avg is between the two thresholds, this might indicate the onset of congestion. The probability of congestion is then calculated."
+  },
+  {
+    "type": "header",
+    "text": "Traffic Shaping"
+  },
+  {
+    "type": "paragraph",
+    "text": "Another method of congestion control is to \u201cshape\u201d the traffic before it enters the"
+  },
+  {
+    "type": "paragraph",
+    "text": "network."
+  },
+  {
+    "type": "paragraph",
+    "text": "Traffic shaping controls the rate at which packets are sent (not just how many). Used in ATM and Integrated Services networks."
+  },
+  {
+    "type": "paragraph",
+    "text": "At connection set-up time, the sender and carrier negotiate a traffic pattern (shape)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Two traffic shaping algorithms are:"
+  },
+  {
+    "type": "header",
+    "text": "Leaky Bucket Token Bucket"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Leaky Bucket Algorithm used to control rate in a network. It is implemented as a single- server queue with constant service time. If the bucket (buffer) overflows then packets are discarded."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image1.webp",
+    "caption": "Figure 4-1"
+  },
+  {
+    "type": "paragraph",
+    "text": "(a) A leaky bucket with water.(b) a leaky bucket with packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "The leaky bucket enforces a constant output rate (average rate) regardless of the burstiness of the input. Does nothing when input is idle."
+  },
+  {
+    "type": "paragraph",
+    "text": "The host injects one packet per clock tick onto the network. This results in a uniform flow of packets, smoothing out bursts and reducing congestion."
+  },
+  {
+    "type": "paragraph",
+    "text": "When packets are the same size (as in ATM cells), the one packet per tick is okay. For variable length packets though, it is better to allow a fixed number of bytes per tick. E.g. 1024 bytes per tick will allow one 1024-byte packet or two 512-byte packets or four 256- byte packets on 1 tick"
+  },
+  {
+    "type": "header",
+    "text": "Token Bucket Algorithm"
+  },
+  {
+    "type": "paragraph",
+    "text": "In contrast to the LB, the Token Bucket Algorithm, allows the output rate to vary, depending on the size of the burst."
+  },
+  {
+    "type": "paragraph",
+    "text": "In the TB algorithm, the bucket holds tokens. To transmit a packet, the host must capture and destroy one token."
+  },
+  {
+    "type": "paragraph",
+    "text": "Tokens are generated by a clock at the rate of one token every \uf044t sec."
+  },
+  {
+    "type": "paragraph",
+    "text": "Idle hosts can capture and save up tokens (up to the max. size of the bucket) in order to send larger bursts later."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image2.webp",
+    "caption": "Figure 4-2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Before.(b)  After."
+  },
+  {
+    "type": "header",
+    "text": "Leaky Bucket vs. Token Bucket"
+  },
+  {
+    "type": "paragraph",
+    "text": "LB discards packets; TB does not. TB discards tokens."
+  },
+  {
+    "type": "paragraph",
+    "text": "With TB, a packet can only be transmitted if there are enough tokens to cover its length in bytes."
+  },
+  {
+    "type": "paragraph",
+    "text": "LB sends packets at an average rate. TB allows for large bursts to be sent faster by speeding up the output."
+  },
+  {
+    "type": "paragraph",
+    "text": "TB allows saving up tokens (permissions) to send large bursts. LB does not allow saving."
+  },
+  {
+    "type": "header",
+    "text": "TRANSPORT LAYER"
+  },
+  {
+    "type": "paragraph",
+    "text": "The network layer provides end-to-end packet delivery using datagrams or virtual circuits."
+  },
+  {
+    "type": "paragraph",
+    "text": "The transport layer builds on the network layer to provide data transport from a process on a source machine to a process on a destination machine with a desired level of reliability that is independent of the physical networks currently in use."
+  },
+  {
+    "type": "header",
+    "text": "Services Provided to the Upper Layers"
+  },
+  {
+    "type": "paragraph",
+    "text": "The ultimate goal of the transport layer is to provide efficient, reliable, and cost-effective data transmission service to its users, normally processes in the application layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "To achieve this, the transport layer makes use of the services provided by the network layer. The software and/or hardware within the transport layer that does the work is called the transport entity."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image3.webp",
+    "caption": "Figure 4-3"
+  },
+  {
+    "type": "paragraph",
+    "text": "The network, transport, and application layers."
+  },
+  {
+    "type": "paragraph",
+    "text": "The connection-oriented transport service. connections have three phases: establishment, data transfer, and release."
+  },
+  {
+    "type": "header",
+    "text": "Addressing and flow control"
+  },
+  {
+    "type": "paragraph",
+    "text": "The connectionless transport service ."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image4.webp",
+    "caption": "Figure 4-4"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image5.webp",
+    "caption": "Figure 4-5"
+  },
+  {
+    "type": "header",
+    "text": "IP addresses versus port numbers"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image6.webp",
+    "caption": "Figure 4-6"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image7.webp",
+    "caption": "Figure 4-7"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.6 Multiplexing and demultiplexing"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image8.webp",
+    "caption": "Figure 4-8"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.7 Error control"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image9.webp",
+    "caption": "Figure 4-9"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.8 Position of UDP, TCP, and SCTP in TCP/IP suite"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image10.webp",
+    "caption": "Figure 4-10"
+  },
+  {
+    "type": "header",
+    "text": "Transport Service Primitives"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image11.webp",
+    "caption": "Figure 4-11"
+  },
+  {
+    "type": "header",
+    "text": "The primitives for a simple transport"
+  },
+  {
+    "type": "paragraph",
+    "text": "service."
+  },
+  {
+    "type": "paragraph",
+    "text": "To start with, the server executes a LISTEN primitive, typically by calling a library procedure that makes a system call that blocks the server until a client turns up."
+  },
+  {
+    "type": "paragraph",
+    "text": "When a client wants to talk to the server, it executes a CONNECT primitive. The transport entity carries out this primitive by blocking the caller and sending a packet to the server. The client\u2019s CONNECT call causes a CONNECTION REQUEST segment to be sent to the server. When it arrives, the transport entity checks to see that the server is blocked on a LISTEN (i.e., is interested in handling requests). If so, it then unblocks the server and sends a CONNECTION ACCEPTED segment back to the client. When this segment arrives, the client is unblocked and the connection is established."
+  },
+  {
+    "type": "paragraph",
+    "text": "Data can now be exchanged using the SEND and RECEIVE primitives. In the simplest form, either party can do a (blocking) RECEIVE to wait for the other party to do a SEND. When the segment arrives, the receiver is unblocked. It can then process the segment and send a reply. As long as both sides can keep track of whose turn it is to send, this scheme works fine."
+  },
+  {
+    "type": "paragraph",
+    "text": "When a connection is no longer needed, it must be released to free up table space within the two transport entities. Disconnection has two variants: asymmetric and symmetric."
+  },
+  {
+    "type": "paragraph",
+    "text": "In the asymmetric variant, either transport user can issue a DISCONNECT primitive, which results in a DISCONNECT segment being sent to the remote transport entity. Upon its arrival, the connection is released."
+  },
+  {
+    "type": "paragraph",
+    "text": "In the symmetric variant, each direction is closed separately, independently of the other one. When one side does a DISCONNECT, that means it has no more data to send but it is still willing to accept data from its partner. In this model, a connection is released when both sides have done a DISCONNECT"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image12.webp",
+    "caption": "Figure 4-12"
+  },
+  {
+    "type": "header",
+    "text": "Transport Service Primitives"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image13.webp",
+    "caption": "Figure 4-13"
+  },
+  {
+    "type": "paragraph",
+    "text": "A state diagram for a simple connection management scheme. Transitions labeled in italics are caused by packet arrivals. The solid lines show the client's state sequence.The dashed lines show the server's state sequence."
+  },
+  {
+    "type": "header",
+    "text": "Elements of Transport Protocols"
+  },
+  {
+    "type": "header",
+    "text": "Addressing"
+  },
+  {
+    "type": "header",
+    "text": "Connection Establishment"
+  },
+  {
+    "type": "header",
+    "text": "Connection Release"
+  },
+  {
+    "type": "header",
+    "text": "Flow Control and Buffering"
+  },
+  {
+    "type": "header",
+    "text": "Multiplexing"
+  },
+  {
+    "type": "header",
+    "text": "Crash Recovery"
+  },
+  {
+    "type": "header",
+    "text": "Transport Protocol"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image14.webp",
+    "caption": "Figure 4-14"
+  },
+  {
+    "type": "paragraph",
+    "text": "Environment of the data link layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "Environment of the transport layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "Over point-to-point links such as wires or optical fiber, it is usually not necessary for a router to specify which router it wants to talk to\u2014each outgoing line leads directly to a particular router. In the transport layer, explicit addressing of destinations is required."
+  },
+  {
+    "type": "paragraph",
+    "text": "The process of establishing a connection over the wire of Fig(a) is simple: the other end is always there (unless it has crashed, in which case it is not there). Either way, there is not much to do. Even on wireless links the process is not much different. Just sending a message is sufficient to have it reach all other destinations. If the message is not acknowledged due to an error, it can be resent. In the transport layer, initial connection establishment is complicated, as we will see."
+  },
+  {
+    "type": "paragraph",
+    "text": "Another (exceedingly annoying) difference between the data link layer and the transport layer is the potential existence of storage capacity in the network. The consequences of the network\u2019s ability to delay and duplicate packets can sometimes be disastrous and can require the use of special protocols to correctly transport information."
+  },
+  {
+    "type": "bullet",
+    "text": "4. Buffering and flow control are needed in both layers, but the presence in the transport layer of a large and varying number of connections with bandwidth that fluctuates as the connections compete with each other may require a different approach than we"
+  },
+  {
+    "type": "header",
+    "text": "Addressing"
+  },
+  {
+    "type": "paragraph",
+    "text": "When an application (e.g., a user) process wishes to set up a connection to a remote application process, it must specify which one to connect to. (Connectionless transport has the same problem: to whom should each message be sent?) The method normally used is to define transport addresses to which processes can listen for connection requests. In the Internet, these endpoints are called ports. We will use the generic term TSAP (Transport Service Access Point) to mean a specific endpoint in the transport layer. The analogous endpoints in the network layer (i.e., network layer addresses) are not-surprisingly called NSAPs (Network Service Access Points). IP addresses are examples of NSAPs."
+  },
+  {
+    "type": "header",
+    "text": "Addressing"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image15.webp",
+    "caption": "Figure 4-15"
+  },
+  {
+    "type": "header",
+    "text": "TSAPs, NSAPs and transport"
+  },
+  {
+    "type": "paragraph",
+    "text": "connections."
+  },
+  {
+    "type": "paragraph",
+    "text": "A possible scenario for a transport connection is as follows:"
+  },
+  {
+    "type": "paragraph",
+    "text": "A mail server process attaches itself to TSAP 1522 on host 2 to wait for an incoming call. A call such as our LISTEN might be used, for example."
+  },
+  {
+    "type": "paragraph",
+    "text": "An application process on host 1 wants to send an email message, so it attaches itself to TSAP 1208 and issues a CONNECT request. The request specifies TSAP 1208 on host 1 as the source and TSAP 1522 on host 2 as the destination. This action ultimately results in a transport connection being established between the application process and the server."
+  },
+  {
+    "type": "paragraph",
+    "text": "The application process sends over the mail message."
+  },
+  {
+    "type": "paragraph",
+    "text": "The mail server responds to say that it will deliver the message."
+  },
+  {
+    "type": "paragraph",
+    "text": "The transport connection is released."
+  },
+  {
+    "type": "header",
+    "text": "special process called a portmapper"
+  },
+  {
+    "type": "header",
+    "text": "CONNECTION ESTABLISHMENT"
+  },
+  {
+    "type": "paragraph",
+    "text": "Establishing a connection sounds easy, but it is actually surprisingly tricky. At first glance, it would seem sufficient for one transport entity to just send a CONNECTION REQUEST segment to the destination and wait for a CONNECTION ACCEPTED reply. The problem occurs when the network can lose, delay, corrupt, and duplicate packets. This behavior causes serious complications"
+  },
+  {
+    "type": "paragraph",
+    "text": "To solve this specific problem,(DELAYED DUPLICATES) Tomlinson (1975) introduced the three-way handshake. This establishment protocol involves one peer checking with the other that the connection request is indeed current. The normal setup procedure when host 1 initiates is shown in Fig. (a). Host 1 chooses a sequence number, x, and sends a CONNECTION REQUEST segment containing it to host 2. Host 2 replies with an ACK segment acknowledging x and announcing its own initial sequence number, y. Finally, host 1 acknowledges host 2\u2019s choice of an initial sequence number in the first data segment that it sends."
+  },
+  {
+    "type": "header",
+    "text": "Connection Establishment"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image16.webp",
+    "caption": "Figure 4-16"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image17.webp",
+    "caption": "Figure 4-17"
+  },
+  {
+    "type": "paragraph",
+    "text": "Three protocol scenarios for establishing a connection using a three-way handshake.CR denotes CONNECTION REQUEST."
+  },
+  {
+    "type": "paragraph",
+    "text": "Normal operation,"
+  },
+  {
+    "type": "paragraph",
+    "text": "Old CONNECTION REQUEST appearing out of nowhere."
+  },
+  {
+    "type": "paragraph",
+    "text": "Duplicate CONNECTION REQUEST and duplicate ACK."
+  },
+  {
+    "type": "paragraph",
+    "text": "In Fig.(b), the first segment is a delayed duplicate CONNECTION REQUEST from an old connection. This segment arrives at host 2 without host 1\u2019s knowledge. Host 2 reacts to this segment by sending host 1 an ACK segment, in effect asking for verification that host 1 was indeed trying to set up a new connection. When host 1 rejects host 2\u2019s attempt to establish a connection, host 2 realizes that it was tricked by a delayed duplicate and abandons the connection. In this way, a delayed duplicate does no damage"
+  },
+  {
+    "type": "paragraph",
+    "text": "The worst case is when both a delayed CONNECTION REQUEST and an ACK are floating around in the subnet. This case is shown in Fig. (c). As in the previous example, host 2 gets a delayed CONNECTION REQUEST and replies to it. At this point, it is crucial to realize that host 2 has proposed using y as the initial sequence number for host 2 to host 1 traffic, knowing full well that no segments containing sequence number y or acknowledgements to y are still in existence. When the second delayed segment arrives at host 2, the fact that z has been acknowledged rather than y tells host 2 that this, too, is an old duplicate. The important thing to realize here is that there is no combination of old segments that can cause the protocol to fail and have a connection set up by accident when no one wants it."
+  },
+  {
+    "type": "header",
+    "text": "Connection Release"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image18.webp",
+    "caption": "Figure 4-18"
+  },
+  {
+    "type": "paragraph",
+    "text": "Abrupt disconnection with loss of data."
+  },
+  {
+    "type": "paragraph",
+    "text": "there are two styles of terminating a connection: asymmetric release and symmetric release Asymmetric release is the way the telephone system works: when one party hangs up, the connection is broken. Symmetric release treats the connection as two separate unidirectional connections and requires each one to be released separately"
+  },
+  {
+    "type": "paragraph",
+    "text": "Asymmetric release is abrupt and may result in data loss. Consider the scenario of Fig. After the connection is established, host 1 sends a segment that arrives properly at host 2. Then host 1 sends another segment. Unfortunately, host 2 issues a DISCONNECT before the second segment arrives. The result is that the connection is released and data are lost."
+  },
+  {
+    "type": "paragraph",
+    "text": "Clearly, a more sophisticated release protocol is needed to avoid data loss. One way is to use symmetric release, in which each direction is released independently of the other one. Here, a host can continue to receive data even after it has sent a DISCONNECT segment."
+  },
+  {
+    "type": "paragraph",
+    "text": "Symmetric release does the job when each process has a fixed amount of data to send and clearly knows when it has sent it. One can envision a protocol in which host 1 says \u2018\u2018I am done. Are you done too?\u2019\u2019 If host 2 responds: \u2018\u2018I am done too. Goodbye, the connection can be safely released.\u2019\u2019"
+  },
+  {
+    "type": "header",
+    "text": "Connection Release"
+  },
+  {
+    "type": "paragraph",
+    "text": "The two-army problem."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image19.webp",
+    "caption": "Figure 4-19"
+  },
+  {
+    "type": "header",
+    "text": "Connection Release"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image20.webp",
+    "caption": "Figure 4-20"
+  },
+  {
+    "type": "header",
+    "text": "6-14, a, b6-14, a, b"
+  },
+  {
+    "type": "header",
+    "text": "6-14, a, b"
+  },
+  {
+    "type": "header",
+    "text": "6-14, a, b"
+  },
+  {
+    "type": "paragraph",
+    "text": "Four protocol scenarios for releasing a connection. (a) Normal case of a three-way handshake.  (b) final ACK lost."
+  },
+  {
+    "type": "header",
+    "text": "Connection Release"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image21.webp",
+    "caption": "Figure 4-21"
+  },
+  {
+    "type": "header",
+    "text": "6-14, c,d6-14, c,d"
+  },
+  {
+    "type": "header",
+    "text": "6-14, c,d"
+  },
+  {
+    "type": "header",
+    "text": "6-14, c,d"
+  },
+  {
+    "type": "paragraph",
+    "text": "Response lost. (d) Response lost and subsequent DRs lost."
+  },
+  {
+    "type": "paragraph",
+    "text": "releases the connection. Meanwhile, the receiver times out andreleases the connection. Meanwhile, the receiver times out andIn Fig. (a), we see the normal case in which one of the users sends a DR (DISCONNECTION REQUEST) segment to initiate the connection release. When it arrives, the recipient sends back a DR segment and starts a timer, just in case its DR is lost. When this DR arrives, the original sender sends back an ACK segment and releases the connection. Finally, when the ACK segment arrives, the receiver also releases the connection."
+  },
+  {
+    "type": "paragraph",
+    "text": "releases the connection. Meanwhile, the receiver times out and"
+  },
+  {
+    "type": "paragraph",
+    "text": "releases the connection. Meanwhile, the receiver times out and"
+  },
+  {
+    "type": "paragraph",
+    "text": "If the final ACK segment is lost, as shown in Fig.(b), the situation is saved by the timer. When the timer expires, the connection is released anyway. Now consider the case of the second DR being lost. The user initiating the disconnection will not receive the expected response, will time out, and will start all over again."
+  },
+  {
+    "type": "paragraph",
+    "text": "In Fig.(c), we see how this works, assuming that the second time no segments are lost and all segments are delivered correctly and on time."
+  },
+  {
+    "type": "paragraph",
+    "text": "Last scenario, Fig.(d), is the same as Fig. (c) except that now we assume all the repeated attempts to retransmit the DR also fail due to lost segments. After N retries, the sender just gives up and"
+  },
+  {
+    "type": "header",
+    "text": "TCP"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a connection oriented protocol; it creates a virtual connection between two TCPs to send data. In addition, TCP uses flow and error control mechanisms at the transport level. In brief, TCP is called a connection-oriented, reliable transport protocol. It adds connection-oriented and reliability features to the services of IP."
+  },
+  {
+    "type": "paragraph",
+    "text": "Topics discussed in this section:"
+  },
+  {
+    "type": "header",
+    "text": "TCP Services TCP Features Segment"
+  },
+  {
+    "type": "header",
+    "text": "A TCP Connection Flow Control Error Control"
+  },
+  {
+    "type": "header",
+    "text": "TCP Services"
+  },
+  {
+    "type": "header",
+    "text": "Process-to-Process Communication"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP provides process-to-process communication using port numbers. Below Table lists some well-known port numbers used by TCP."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image22.webp",
+    "caption": "Figure 4-22"
+  },
+  {
+    "type": "header",
+    "text": "Stream Delivery Service"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP, on the other hand, allows the sending process to deliver data as a stream of bytes and allows the receiving process to obtain data as a stream of bytes. TCP creates an environment in which the two processes seem to be connected by an imaginary \"tube\u201c that carries their data across the Internet. This imaginary environment is showed in below Figure. The sending process produces (writes to) the stream of bytes, and the receiving process consumes (reads from) them"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image23.webp",
+    "caption": "Figure 4-23"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sending and Receiving Buffers Because the sending and the receiving processes may not write or read data at the same speed, TCP needs buffers for storage. There are two buffers, the sending buffer and the receiving buffer, one for each direction. One way to implement a buffer is to use a circular array of I-byte locations as shown in Figure. For simplicity, we have shown two buffers of 20 bytes each. Normally the buffers are hundreds or thousands of bytes, depending on the implementation. We also show the buffers as the same size, which is not always the case."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image24.webp",
+    "caption": "Figure 4-24"
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure shows the movement of the data in one direction. At the sending site, the buffer has three types of chambers. The white section contains empty chambers that can be filled by the sending process (producer). The gray area holds bytes that have been sent but not yet acknowledged. TCP keeps these bytes in the buffer until it receives an acknowledgment. The colored area contains bytes to be sent by the sending TCP."
+  },
+  {
+    "type": "paragraph",
+    "text": "However, as we will see later in this chapter, TCP may be able to send only part of this colored section. This could be due to the slowness of the receiving process or perhaps to congestion in the network. Also note that after the bytes in the gray chambers are acknowledged, the chambers are recycled and available for use by the sending process."
+  },
+  {
+    "type": "paragraph",
+    "text": "This is why we show a circular buffer."
+  },
+  {
+    "type": "paragraph",
+    "text": "The operation of the buffer at the receiver site is simpler. The circular buffer is divided into two areas (shown as white and colored). The white area contains empty chambers to be filled by bytes received from the network. The colored sections contain received bytes that can be read by the receiving process. When a byte is read by the receiving process, the chamber is recycled and added to the pool of empty chambers."
+  },
+  {
+    "type": "header",
+    "text": "\u200bTCP segments"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image25.webp",
+    "caption": "Figure 4-25"
+  },
+  {
+    "type": "paragraph",
+    "text": "At the transport layer, TCP groups a number of bytes together into a packet called a segment. TCP adds a header to each segment (for control purposes)and delivers the segment to the IP layer for transmission. The segments are encapsulated in IP datagrams and transmitted."
+  },
+  {
+    "type": "paragraph",
+    "text": "This entire operation is transparent to the receiving process. Later we will see that segments may be received out of order, lost, or corrupted and resent. All these are handled by TCP with the receiving process unaware of any activities. Above fig shows how segments are created from the bytes in the buffers"
+  },
+  {
+    "type": "header",
+    "text": "23.34"
+  },
+  {
+    "type": "header",
+    "text": "\u200bFull-Duplex Communication"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP offers full-duplex service, in which data can flow in both directions at the same time. Each TCP then has a sending and receiving buffer, and segments move in both directions"
+  },
+  {
+    "type": "header",
+    "text": "\u200bConnection-Oriented Service"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a connection-oriented protocol. When a process at site A wants to send and receive data from another process at site B, the following occurs:"
+  },
+  {
+    "type": "paragraph",
+    "text": "The two TCPs establish a connection between them."
+  },
+  {
+    "type": "paragraph",
+    "text": "Data are exchanged in both directions."
+  },
+  {
+    "type": "paragraph",
+    "text": "The connection is terminated."
+  },
+  {
+    "type": "header",
+    "text": "\u200bReliable Service"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a reliable transport protocol. It uses an acknowledgment mechanism to check the safe and sound arrival of data. We will discuss this feature further in the section on error control."
+  },
+  {
+    "type": "header",
+    "text": "TCP Features"
+  },
+  {
+    "type": "header",
+    "text": "\u200bNumbering System"
+  },
+  {
+    "type": "paragraph",
+    "text": "There are two fields called the sequence number and the acknowledgment number. These two fields refer to the byte number and not the segment number."
+  },
+  {
+    "type": "paragraph",
+    "text": "Byte Number The bytes of data being transferred in each connection are numbered by TCP. The numbering starts with a randomly generated number. For example, if the random number happens to be 1057 and the total data to be sent are 6000 bytes, the bytes are numbered from 1057 to 7056. We will see that byte numbering is used for flow and error control."
+  },
+  {
+    "type": "paragraph",
+    "text": "Sequence Number After the bytes have been numbered, TCP assigns a sequence number to each segment that is being sent. The sequence number for each segment is the number of the first byte carried in that segment."
+  },
+  {
+    "type": "paragraph",
+    "text": "Acknowledgment Number The value of the acknowledgment field in a segment defines the number of the next byte a party expects to receive. The acknowledgment number is cumulative."
+  },
+  {
+    "type": "header",
+    "text": "Flow Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP, provides flow control. The receiver of the data controls the amount of data that are to be sent by the sender. This is done to prevent the receiver from being overwhelmed with data. The numbering system allows TCP to use a byte-oriented flow control."
+  },
+  {
+    "type": "header",
+    "text": "Error Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "To provide reliable service, TCP implements an error control mechanism. Although error control considers a segment as the unit of data for error detection (loss or corrupted segments), error control is byte-oriented, as we will see later."
+  },
+  {
+    "type": "header",
+    "text": "Congestion Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP takes into account congestion in the network. The amount of data sent by a sender is not only controlled by the receiver (flow control), but is also determined by the level of congestion in the network"
+  },
+  {
+    "type": "header",
+    "text": "TCP segment format"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image26.webp",
+    "caption": "Figure 4-26"
+  },
+  {
+    "type": "header",
+    "text": "23.38"
+  },
+  {
+    "type": "paragraph",
+    "text": "The segment consists of a 20- to 60-byte header,."
+  },
+  {
+    "type": "paragraph",
+    "text": "Source port address. This is a 16-bit field that defines the port number of the application program in the host that is sending the segment."
+  },
+  {
+    "type": "paragraph",
+    "text": "Destination port address. This is a 16-bit field that defines the port number of the application program in the host that is receiving the segment."
+  },
+  {
+    "type": "paragraph",
+    "text": "Sequence number. This 32-bit field defines the number assigned to the first byte of data contained in this segment. As we said before, TCP is a stream transport protocol. To ensure connectivity, each byte to be transmitted is numbered. The sequence number tells the destination which byte in this sequence comprises the first byte in the segment. During connection establishment, each party uses a random number generator to create an initial sequence number (ISN), which is usually different in each direction."
+  },
+  {
+    "type": "paragraph",
+    "text": "Acknowledgment number. This 32-bit field defines the byte number that the receiver of the segment is expecting to receive from the other party. If the receiver of the segment has successfully received byte number x from the other party, it defines x + I as the acknowledgment number. Acknowledgment and data can be piggybacked together."
+  },
+  {
+    "type": "paragraph",
+    "text": "Header length. This 4-bit field indicates the number of 4-byte words in the TCP header. The length of the header can be between 20 and 60 bytes. Therefore, the value of this field can be between 5 (5 x 4 =20) and 15 (15 x 4 =60)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Reserved. This is a 6-bit field reserved for future use."
+  },
+  {
+    "type": "paragraph",
+    "text": "Control. This field defines 6 different control bits or flags as shown in Figure. One or more of these bits can be set at a time."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image27.webp",
+    "caption": "Figure 4-27"
+  },
+  {
+    "type": "paragraph",
+    "text": "These bits enable flow control, connection establishment and termination, connection abortion, and the mode of data transfer in TCP."
+  },
+  {
+    "type": "paragraph",
+    "text": "Window size. This field defines the size of the window, in bytes, that the other party must maintain. Note that the length of this field is 16 bits, which means that the maximum size of the window is 65,535 bytes. This value is normally referred to as the receiving window (rwnd) and is determined by the receiver. The sender must obey the dictation of the receiver in this case."
+  },
+  {
+    "type": "paragraph",
+    "text": "Checksum. This 16-bit field contains the checksum. The calculation of the checksum for TCP follows the same procedure as the one described for UDP. However, the inclusion of the checksum in the UDP datagram is optional, whereas the inclusion of the checksum for TCP is mandatory. The same pseudoheader, serving the same purpose, is added to the segment. For the TCP pseudoheader, the value for the protocol field is 6."
+  },
+  {
+    "type": "paragraph",
+    "text": "Urgent pointer. This l6-bit field, which is valid only if the urgent flag is set, is used when the segment contains urgent data. It defines the number that must be added to the sequence number to obtain the number of the last urgent byte in the data section of the segment. This will be discussed later in this chapter."
+  },
+  {
+    "type": "paragraph",
+    "text": "Options. There can be up to 40 bytes of optional information in the TCP header. We will not discuss these options here; please refer to the reference list for more information."
+  },
+  {
+    "type": "header",
+    "text": "A TCP Connection"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is connection-oriented. A connection-oriented transport protocol establishes a virtual path between the source and destination. All the segments belonging to a message are then sent over this virtual path. Using a single virtual pathway for the entire message facilitates the acknowledgment process as well as retransmission of damaged or lost frames."
+  },
+  {
+    "type": "paragraph",
+    "text": "In TCP, connection-oriented transmission requires three phases:"
+  },
+  {
+    "type": "paragraph",
+    "text": "connection establishment,"
+  },
+  {
+    "type": "paragraph",
+    "text": "data transfer,"
+  },
+  {
+    "type": "paragraph",
+    "text": "connection termination."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP connection establishment(3 way handshaking)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The client sends the first segment, a SYN segment, in which only the SYN flag is set."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE:A SYN segment cannot carry data, but it consumes one sequence number."
+  },
+  {
+    "type": "paragraph",
+    "text": "The server sends the second segment, a SYN +ACK segment, with 2 flag bits set: SYN and ACK. This segment has a dual purpose. It is a SYN segmentforcommunicationintheotherdirectionandservesasthe acknowledgment for the SYN segment. It consumes one sequence number. NOTE:A SYN+ACK segment cannotcarry data, but does consume one  sequence number"
+  },
+  {
+    "type": "paragraph",
+    "text": "The client sends the third segment. This is just an ACK segment. It acknowledges the receipt of the second segment with the ACK flag and acknowledgment number field. Note that the sequence number in this segment is the same as the one in the SYN segment; the ACK segment does not consume any sequence numbers."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE: An ACK segment, if carrying no data, consumes no sequence number"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image28.webp",
+    "caption": "Figure 4-28"
+  },
+  {
+    "type": "paragraph",
+    "text": "entire  connection  is  set  up,  using  what  is  called  a  cookie.entire  connection  is  set  up,  using  what  is  called  a  cookie.SYN Flooding Attack"
+  },
+  {
+    "type": "paragraph",
+    "text": "entire  connection  is  set  up,  using  what  is  called  a  cookie."
+  },
+  {
+    "type": "paragraph",
+    "text": "entire  connection  is  set  up,  using  what  is  called  a  cookie."
+  },
+  {
+    "type": "paragraph",
+    "text": "This happens when a malicious attacker sends a large number of SYN segments to a server, pretending that each of them is corning from a different client by faking the source IP addresses in the datagram's."
+  },
+  {
+    "type": "paragraph",
+    "text": "The server, assuming that the clients are issuing an active open, allocates the necessary resources, such as creating communication tables and setting timers. The TCP server then sends the SYN +ACK segments to the fake clients, which are lost. During this time, however, a lot of resources are occupied without being used. If, during this short time, the number of SYN segments is large, the server eventually runs out of resources and may crash. This SYN flooding attack belongs to a type of security attack known as a denial-of-service attack, in which an attacker monopolizes a system with so many service requests that the system collapses and denies service to every request."
+  },
+  {
+    "type": "header",
+    "text": "SOLUTIONS:"
+  },
+  {
+    "type": "paragraph",
+    "text": "1 Some have imposed a limit on connection requests during a specified period of"
+  },
+  {
+    "type": "paragraph",
+    "text": "time."
+  },
+  {
+    "type": "paragraph",
+    "text": "2 Others filter out datagrams coming from unwanted source addresses."
+  },
+  {
+    "type": "paragraph",
+    "text": "3 One recent strategy is to postpone resource allocation until the"
+  },
+  {
+    "type": "header",
+    "text": "Data Transfer"
+  },
+  {
+    "type": "paragraph",
+    "text": "After connection is established, bidirectional data transfer can take place. The client and server can both send data and acknowledgments. Data traveling in the same direction as an acknowledgment are carried on the same segment. The acknowledgment is piggybacked with the data"
+  },
+  {
+    "type": "paragraph",
+    "text": "In this example, after connection is established (not shown in the figure), the client sends 2000 bytes of data in two segments. The server then sends 2000 bytes in one segment. The client sends one more segment. The first three segments carry both data and acknowledgment, but the last segment carries only an acknowledgment because there are no more data to be sent."
+  },
+  {
+    "type": "paragraph",
+    "text": "Note the values of the sequence and acknowledgment numbers. The data segments sent by the client have the PSH (push) flag set so that the server TCP knows to deliver data to the server process as soon as they are received."
+  },
+  {
+    "type": "header",
+    "text": "Data transfer"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image29.webp",
+    "caption": "Figure 4-29"
+  },
+  {
+    "type": "paragraph",
+    "text": "PUSHING DATA: Delayed transmission and delayed delivery of data may not be acceptable by the application program."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP can handle such a situation. The application program at the sending site can request a push operation. This means that the sending TCP must not wait for the window to be filled. It must create a segment and send it immediately. The sending TCP must also set the push bit (PSH) to let the receiving TCP know that the segment includes data that must be delivered to the receiving application program as soon as possible and not to wait for more data to come."
+  },
+  {
+    "type": "paragraph",
+    "text": "Urgent Data : TCP is a stream-oriented protocol. This means that the data are presented from the application program to TCP as a stream of bytes. Each byte of data has a position in the stream. However, sending application program wants a piece of data to be read out of order by the receiving application program."
+  },
+  {
+    "type": "paragraph",
+    "text": "Connection Termination (three-way handshaking and four-way handshaking with a half-close option.)"
+  },
+  {
+    "type": "bullet",
+    "text": "1. In a normal situation, the client TCP, after receiving a close command from the client process, sends the first segment, a FIN segment in which the FIN flag is set."
+  },
+  {
+    "type": "paragraph",
+    "text": "Note that a FIN segment can include the last chunk of data sent by the client, or it can be just a control segment as shown in Figure. If it is only a control segment, it consumes only one sequence number."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE: The FIN segment consumes one sequence number ifit does not carry data."
+  },
+  {
+    "type": "paragraph",
+    "text": "The server TCP, after receiving the FIN segment, informs its process of the situation and sends the second segment, a FIN +ACK segment, to confirm the receipt of the FIN segment from the client and at the same time to announce the closing of the connection in the other direction. This segment can also contain the last chunk of data from the server. If it does not carry data, it consumes only one sequence number."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE: The FIN +ACK segment consumes one sequence number if it does not carry data."
+  },
+  {
+    "type": "bullet",
+    "text": "3. The client TCP sends the last segment, an ACK segment, to confirm the receipt of the FIN segment from the TCP server. This segment contains the acknowledgment number, which is 1 plus the sequence number received in the FIN segment from the server. This segment cannot carry data and consumes no sequence numbers."
+  },
+  {
+    "type": "paragraph",
+    "text": "Half-Close In TCP, one end can stop sending data while still receiving data. This is called a half-close. Although either end can issue a half-close, it is normally initiated by the client. It can occur when the server needs all the data before processing can begin."
+  },
+  {
+    "type": "paragraph",
+    "text": "A good example is sorting. When the client sends data to the server to be sorted, the server needs to receive all the data before sorting can start. This means the client, after sending all the data, can close the connection in the outbound direction. However, the inbound direction must remain open to receive the sorted data. The server, after receiving the data, still needs time for sorting; its outbound direction must remain open"
+  },
+  {
+    "type": "header",
+    "text": "Connection termination using three-way handshaking"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image30.webp",
+    "caption": "Figure 4-30"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.21 Half-close"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image31.webp",
+    "caption": "Figure 4-31"
+  },
+  {
+    "type": "header",
+    "text": "Flow Control or TCP Sliding Window"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP uses a sliding window, to handle flow control. The sliding window protocol used by TCP, however, is something between the Go-Back-N and Selective Repeat sliding window."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sliding window protocol in TCP looks like the Go-Back-N protocol because it does not use NAKs;"
+  },
+  {
+    "type": "paragraph",
+    "text": "it looks like Selective Repeat because the receiver holds the out-of-order segments until the missing ones arrive."
+  },
+  {
+    "type": "paragraph",
+    "text": "There are two big differences between this sliding window and the one we used at the data link layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "the sliding window of TCP is byte-oriented; the one we discussed in the data link layer is frame-oriented."
+  },
+  {
+    "type": "paragraph",
+    "text": "the TCP's sliding window is of variable size; the one we discussed in the data link layer was of fixed size"
+  },
+  {
+    "type": "header",
+    "text": "Sliding window"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image32.webp",
+    "caption": "Figure 4-32"
+  },
+  {
+    "type": "paragraph",
+    "text": "The window is opened, closed, or shrunk. These three activities, as we will see, are in the control of the receiver (and depend on congestion in the network), not the sender."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sender must obey the commands of the receiver in this matter. Opening a window means moving the right wall to the right. This allows more new bytes in the buffer that are eligible for sending."
+  },
+  {
+    "type": "paragraph",
+    "text": "Closing the window means moving the left wall to the right. This means that some bytes have been acknowledged and the sender need not worry about them anymore."
+  },
+  {
+    "type": "paragraph",
+    "text": "Shrinking the window means moving the right wall to the left."
+  },
+  {
+    "type": "paragraph",
+    "text": "The size of the window at one end is determined by the lesser of two values: receiver window (rwnd) or congestion window (cwnd)."
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiver window is the value advertised by the opposite end in a segment containing acknowledgment. It is the number of bytes the other end can accept before its buffer overflows and data are discarded."
+  },
+  {
+    "type": "paragraph",
+    "text": "The congestion window is a value determined by the network to avoid congestion"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image33.webp",
+    "caption": "Figure 4-33"
+  },
+  {
+    "type": "header",
+    "text": "Window management in TCP"
+  },
+  {
+    "type": "paragraph",
+    "text": "When the window is 0, the sender may not normally send segments, with two exceptions."
+  },
+  {
+    "type": "paragraph",
+    "text": "urgent data may be sent, for example, to allow the user to kill the process running on the remote machine."
+  },
+  {
+    "type": "paragraph",
+    "text": "the sender may send a 1-byte segment to force the receiver to reannounce the next byte expected and the window size. This packet is called a window probe."
+  },
+  {
+    "type": "paragraph",
+    "text": "The TCP standard explicitly provides this option to prevent deadlock if a window update ever gets lost."
+  },
+  {
+    "type": "paragraph",
+    "text": "Senders are not required to transmit data as soon as they come in from the application. Neither are receivers required to send acknowledgements as soon as possible."
+  },
+  {
+    "type": "paragraph",
+    "text": "For example, in Fig. when the first 2 KB of data came in, TCP, knowing that it had a 4-KB window, would have been completely correct in just buffering the data until another 2 KB came in, to be able to transmit a segment with a 4-KB payload. This freedom can be used to improve performance"
+  },
+  {
+    "type": "header",
+    "text": "Host with Telnet client"
+  },
+  {
+    "type": "header",
+    "text": "send echo of character and/or output"
+  },
+  {
+    "type": "paragraph",
+    "text": "1."
+  },
+  {
+    "type": "header",
+    "text": "send character"
+  },
+  {
+    "type": "header",
+    "text": "2.interpret character2.interpret character"
+  },
+  {
+    "type": "paragraph",
+    "text": "2."
+  },
+  {
+    "type": "header",
+    "text": "interpret character"
+  },
+  {
+    "type": "paragraph",
+    "text": "2."
+  },
+  {
+    "type": "header",
+    "text": "interpret character"
+  },
+  {
+    "type": "header",
+    "text": "Host with Telnet server"
+  },
+  {
+    "type": "paragraph",
+    "text": "Remote terminal applications (e.g., Telnet) send characters to a server."
+  },
+  {
+    "type": "paragraph",
+    "text": "The server interprets the character and sends the output at the server to the client."
+  },
+  {
+    "type": "paragraph",
+    "text": "For each character typed, you see three packets:"
+  },
+  {
+    "type": "header",
+    "text": "Client \uf0e0 Server: Send typed character"
+  },
+  {
+    "type": "paragraph",
+    "text": "Server \uf0e0 Client: Echo of character (or user output) and acknowledgement for first packet"
+  },
+  {
+    "type": "header",
+    "text": "Client \uf0e0 Server: Acknowledgement for second packet"
+  },
+  {
+    "type": "header",
+    "text": "Delayed Acknowledgement"
+  },
+  {
+    "type": "header",
+    "text": "TCP delays transmission of ACKs for up to 500ms"
+  },
+  {
+    "type": "paragraph",
+    "text": "Avoid to send ACK packets that do not carry data."
+  },
+  {
+    "type": "paragraph",
+    "text": "\u2013 The hope is that, within the delay, the receiver will have data ready to be sent to the receiver. Then, the ACK can be piggybacked with a data segment"
+  },
+  {
+    "type": "paragraph",
+    "text": "Exceptions:"
+  },
+  {
+    "type": "header",
+    "text": "ACK should be sent for every full sized segment"
+  },
+  {
+    "type": "header",
+    "text": "Delayed ACK is not used when packets arrive out of order"
+  },
+  {
+    "type": "paragraph",
+    "text": "Although delayed acknowledgements reduce the load placed on the network by the receiver, a sender that sends multiple short packets (e.g., 41-byte packets containing 1 byte of data) is still operating inefficiently. A way to reduce this usage is known as Nagle\u2019s algorithm (Nagle, 1984)."
+  },
+  {
+    "type": "header",
+    "text": "59"
+  },
+  {
+    "type": "header",
+    "text": "Nagel\u2019s Rule"
+  },
+  {
+    "type": "paragraph",
+    "text": "Send one byte and buffer all subsequent bytes until acknowledgement is received. Then send all buffered bytes in a single TCP segment and start buffering again until the sent segment is acknowledged."
+  },
+  {
+    "type": "paragraph",
+    "text": "Nagle\u2019s algorithm will put the many pieces in one segment, greatly reducing the bandwidth used"
+  },
+  {
+    "type": "paragraph",
+    "text": "Nagle\u2019s algorithm is widely used by TCP implementations, but there are times when it is better to disable it. In particular, in interactive games that are run over the Internet."
+  },
+  {
+    "type": "paragraph",
+    "text": "A more subtle problem is that Nagle\u2019s algorithm can sometimes interact with delayed acknowledgements to cause a temporary deadlock: the receiver waits for data on which to piggyback an acknowledgement, and the sender waits on the acknowledgement to send more data."
+  },
+  {
+    "type": "paragraph",
+    "text": "Because of these problems, Nagle\u2019s algorithm can be disabled (which is called the TCP NODELAY option)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Another problem that can degrade TCP performance is the silly window syndrome (Clark, 1982)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Clark\u2019s solution is to prevent the receiver from sending a window update for 1 byte. Instead, it is forced to wait until it has a decent amount of space available and advertise that instead. Specifically, the receiver should not send a window update until it can handle the maximum segment size it advertised when the connection was established or until its buffer is half empty, whichever is smaller."
+  },
+  {
+    "type": "paragraph",
+    "text": "Furthermore, the sender can also help by not sending tiny segments. Instead, it should wait until it can send a full segment, or at least one containing half of the receiver\u2019s buffer size."
+  },
+  {
+    "type": "paragraph",
+    "text": "The goal is for the sender not to send small segments and the receiver not to ask for them. (Nagel + Clark). Both are used to improve TCP performance"
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiver will buffer the data until it can be passed up to the application in order (handling out of order segments)"
+  },
+  {
+    "type": "header",
+    "text": "Cumulative acknowledgements"
+  },
+  {
+    "type": "header",
+    "text": "Error Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a reliable transport layer protocol. This means that an application program that delivers a stream of data to TCP relies on TCP to deliver the entire stream to the application program on the other end in order, without error, and without any part lost or duplicated."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP provides reliability using error control. Error control includes mechanisms for detecting corrupted segments, lost segments, out-of-order segments, and duplicated segments. Error control also includes a mechanism for correcting errors after they are detected. Error detection and correction in TCP is achieved through the use of three simple tools: checksum, acknowledgment, and time-out."
+  },
+  {
+    "type": "header",
+    "text": "Checksum"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each segment includes a checksum field which is used to check for a corrupted segment. If the segment is corrupted, it is discarded by the destination TCP and is considered as lost. TCP uses a 16-bit checksum that is mandatory in every segment"
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure 23.11 Checksum calculation of a simple UDP user datagram"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image41.webp",
+    "caption": "Figure 4-41"
+  },
+  {
+    "type": "header",
+    "text": "23.64"
+  },
+  {
+    "type": "header",
+    "text": "Acknowledgment"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP uses acknowledgments to confirm the receipt of data segments. Control segments that carry no data but consume a sequence number are also acknowledged. ACK segments are never acknowledged."
+  },
+  {
+    "type": "paragraph",
+    "text": "ACK segments do not consume sequence numbers and are not acknowledged."
+  },
+  {
+    "type": "header",
+    "text": "Retransmission"
+  },
+  {
+    "type": "paragraph",
+    "text": "The heart of the error control mechanism is the retransmission of segments. When a segment is corrupted, lost, or delayed, it is retransmitted."
+  },
+  {
+    "type": "paragraph",
+    "text": "In modern implementations, a retransmission occurs if the retransmission timer expires or three duplicate ACK segments have arrived."
+  },
+  {
+    "type": "paragraph",
+    "text": "Retransmission After RTO (retransmission time out)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Retransmission After Three Duplicate ACK Segments (also called fast retransmission)"
+  },
+  {
+    "type": "header",
+    "text": "Out-of-Order Segments"
+  },
+  {
+    "type": "paragraph",
+    "text": "Data may arrive out of order and be temporarily stored by the receiving TCP, but yet guarantees that no out-of-order segment is delivered to the process"
+  },
+  {
+    "type": "header",
+    "text": "TCP Congestion Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "When the load offered to any network is more than it can handle, congestion builds up."
+  },
+  {
+    "type": "paragraph",
+    "text": "The network layer detects congestion when queues grow large at routers and tries to manage it, if only by dropping packets. It is up to the transport layer to receive congestion feedback from the network layer and slow down the rate of traffic that it is sending into the network."
+  },
+  {
+    "type": "paragraph",
+    "text": "For Congestion control, transport protocol uses an AIMD (Additive Increase Multiplicative Decrease) control law."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP congestion control is based on implementing this approach using a window called congestion window. TCP adjusts the size of the window according to the AIMD rule."
+  },
+  {
+    "type": "paragraph",
+    "text": "The window size at the sender is set as follows:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Send Window = MIN (flow control window, congestion window)"
+  },
+  {
+    "type": "header",
+    "text": "where"
+  },
+  {
+    "type": "paragraph",
+    "text": "congestion window is adjusted based on feedback from thecongestion window is adjusted based on feedback from theflow control window is advertised by the receiver (rwnd)"
+  },
+  {
+    "type": "header",
+    "text": "congestion window is adjusted based on feedback from the"
+  },
+  {
+    "type": "header",
+    "text": "congestion window is adjusted based on feedback from the"
+  },
+  {
+    "type": "paragraph",
+    "text": "Modern congestion control was added to TCP largely through the efforts of Van Jacobson (1988). It is a fascinating story. Starting in 1986, the growing popularity of the early Internet led to the first occurrence of what became known as a congestion collapse, a prolonged period during which good put dropped suddenly (i.e., by more than a factor of 100) due to congestion in the network. Jacobson (and many others) set out to understand what was happening and remedy the situation."
+  },
+  {
+    "type": "paragraph",
+    "text": "To start, he observed that packet loss is a suitable signal of congestion. This signal comes a little late (as the network is already congested) but it is quite dependable"
+  },
+  {
+    "type": "paragraph",
+    "text": "At the beginning how sender knows at what speed receiver can receive the packets?"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image42.webp",
+    "caption": "Figure 4-42"
+  },
+  {
+    "type": "paragraph",
+    "text": "The key observation is this: the acknowledgements return to the sender at about the rate that packets can be sent over the slowest link in the path. This is precisely the rate that the sender wants to use. If it injects new packets into the network at this rate, they will be sent as fast as the slow link permits, but they will not queue up and congest any router along the path. This timing is known as an ack clock. It is an essential part of TCP. By using an ack clock, TCP smoothes out traffic and avoids unnecessary queues at routers. This is first consideration"
+  },
+  {
+    "type": "paragraph",
+    "text": "A second consideration is that the AIMD rule will take a very long time to reach a good operating point on fast networks if the congestion window is started from a small size"
+  },
+  {
+    "type": "paragraph",
+    "text": "Instead, the solution Jacobson chose to handle both of these considerations is a mix of linear and multiplicative increase."
+  },
+  {
+    "type": "header",
+    "text": "SLOW-START"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image43.webp",
+    "caption": "Figure 4-43"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image44.webp",
+    "caption": "Figure 4-44"
+  },
+  {
+    "type": "paragraph",
+    "text": "Whenever a packet loss is detected, for example, by a timeout, the slow start threshold is set to be half of the congestion window and the entire process is restarted."
+  },
+  {
+    "type": "paragraph",
+    "text": "Congestion avoidance phase is started if cwnd has reached the slow start threshold value"
+  },
+  {
+    "type": "paragraph",
+    "text": "Whenever the slow start threshold is crossed, TCP switches from slow start to additive increase. In this mode, the congestion window is increased by one segment every round-trip time."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image45.webp",
+    "caption": "Figure 4-45"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image46.webp",
+    "caption": "Figure 4-46"
+  },
+  {
+    "type": "header",
+    "text": "Responses to Congestion"
+  },
+  {
+    "type": "paragraph",
+    "text": "So, TCP assumes there is congestion if it detects a packet loss"
+  },
+  {
+    "type": "paragraph",
+    "text": "A TCP sender can detect lost packets via:"
+  },
+  {
+    "type": "header",
+    "text": "Timeout of a retransmission timer"
+  },
+  {
+    "type": "header",
+    "text": "Receipt of a duplicate ACK"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP interprets a Timeout as a binary congestion signal. When a timeout occurs, the sender performs:"
+  },
+  {
+    "type": "header",
+    "text": "cwnd is reset to one: cwnd = 1"
+  },
+  {
+    "type": "paragraph",
+    "text": "ssthresh is set to half the current size of the congestion window:"
+  },
+  {
+    "type": "header",
+    "text": "ssthressh = cwnd / 2"
+  },
+  {
+    "type": "header",
+    "text": "and slow-start is entered"
+  },
+  {
+    "type": "header",
+    "text": "Fast Retransmit"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image47.webp",
+    "caption": "Figure 4-47"
+  },
+  {
+    "type": "paragraph",
+    "text": "If three or more duplicate ACKs are received in a row, the TCP sender believes that a segment has been lost."
+  },
+  {
+    "type": "paragraph",
+    "text": "Then TCP performs a retransmission of what seems to be the missing segment, without waiting for a timeout to happen."
+  },
+  {
+    "type": "paragraph",
+    "text": "Enter slow start:"
+  },
+  {
+    "type": "header",
+    "text": "ssthresh = cwnd/2 cwnd = 1"
+  },
+  {
+    "type": "header",
+    "text": "7474"
+  },
+  {
+    "type": "header",
+    "text": "74"
+  },
+  {
+    "type": "header",
+    "text": "74"
+  },
+  {
+    "type": "header",
+    "text": "Flavors of TCP Congestion"
+  },
+  {
+    "type": "header",
+    "text": "Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP Tahoe (1988)"
+  },
+  {
+    "type": "header",
+    "text": "Slow Start"
+  },
+  {
+    "type": "header",
+    "text": "Congestion Avoidance"
+  },
+  {
+    "type": "header",
+    "text": "Fast Retransmit"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP Reno (1990) (TCP Tahoe+FR)"
+  },
+  {
+    "type": "header",
+    "text": "Fast Recovery"
+  },
+  {
+    "type": "paragraph",
+    "text": "New Reno (1996)"
+  },
+  {
+    "type": "paragraph",
+    "text": "SACK (1996) (SACK (Selective ACKnowledgements))"
+  },
+  {
+    "type": "paragraph",
+    "text": "RED (Floyd and Jacobson 1993)"
+  },
+  {
+    "type": "header",
+    "text": "75"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image48.webp",
+    "caption": "Figure 4-48"
+  },
+  {
+    "type": "paragraph",
+    "text": "The use of ECN (Explicit Congestion Notification) in addition to packet loss as a congestion signal. ECN is an IP layer mechanism to notify hosts of congestion."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sender tells the receiver that it has heard the signal by using the CWR (Congestion Window Reduced) flag."
+  },
+  {
+    "type": "header",
+    "text": "USER DATAGRAM PROTOCOL (UDP)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The User Datagram Protocol (UDP) is called a connectionless, unreliable transport protocol. It does not add anything to the services of IP except to provide process-to-process communication instead of host-to- host communication."
+  },
+  {
+    "type": "paragraph",
+    "text": "Topics discussed in this section:"
+  },
+  {
+    "type": "header",
+    "text": "Well-Known Ports for UDP User Datagram"
+  },
+  {
+    "type": "header",
+    "text": "Checksum UDP Operation Use of UDP"
+  },
+  {
+    "type": "header",
+    "text": "Table 23.1 Well-known ports used with UDP"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image49.webp",
+    "caption": "Figure 4-49"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image50.webp",
+    "caption": "Figure 4-50"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.9 User datagram format"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image51.webp",
+    "caption": "Figure 4-51"
+  },
+  {
+    "type": "paragraph",
+    "text": "Checksum (OPTIONAL,IF NOT USED SET ALL 1\u2019S DEFAULT)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The UDP checksum calculation is different from the one for IP and ICMP. Here the checksum includes three sections: a pseudo header, the UDP header, and the data coming from the application layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "The pseudo header is the part of the header of the IP packet in which the user datagram is to be encapsulated with some fields filled with Os"
+  },
+  {
+    "type": "paragraph",
+    "text": "If the checksum does not include the pseudo header, a user datagram may arrive safe and sound. However, if the IP header is corrupted, it may be delivered to the wrong host."
+  },
+  {
+    "type": "paragraph",
+    "text": "The protocol field is added to ensure that the packet belongs to UDP, and not to other transport-layer protocols."
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.10 Pseudoheader for checksum calculation"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image52.webp",
+    "caption": "Figure 4-52"
+  },
+  {
+    "type": "header",
+    "text": "UDP Operation"
+  },
+  {
+    "type": "header",
+    "text": "Connectionless Services"
+  },
+  {
+    "type": "paragraph",
+    "text": "UDP provides a connectionless service. This means that each user datagram sent by UDP is an independent datagram. There is no relationship between the different user datagrams even if they are coming from the same source process and going to the same destination program. The user datagrams are not numbered. Also, there is no connection establishment and no connection termination, as is the case for TCP. This means that each user datagram can travel on a different path."
+  },
+  {
+    "type": "header",
+    "text": "Flow and Error Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "UDP is a very simple, unreliable transport protocol. There is no flow control and hence no window mechanism. The receiver may overflow with incoming messages. There is no error control mechanism in UDP except for the checksum. This means that the sender does not know if a message has been lost or duplicated. When the receiver detects an error through the checksum, the user datagram is silently discarded. The lack of flow control and error control"
+  },
+  {
+    "type": "header",
+    "text": "Encapsulation and Decapsulation"
+  },
+  {
+    "type": "paragraph",
+    "text": "To send a message from one process to another, the UDP protocol encapsulates and decapsulates messages in an IP datagram."
+  },
+  {
+    "type": "header",
+    "text": "Example 23.2Example 23.2"
+  },
+  {
+    "type": "header",
+    "text": "Example 23.2"
+  },
+  {
+    "type": "header",
+    "text": "Example 23.2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure 23.11 shows the checksum calculation for a very small user datagram with only 7 bytes of data. Because the number of bytes of data is odd, padding is added for checksum calculation. The pseudoheader as well as the padding will be dropped when the user datagram is delivered to IP."
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure 23.11 Checksum calculation of a simple UDP user datagram"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image57.webp",
+    "caption": "Figure 4-57"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.12 Queues in UDP"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image58.webp",
+    "caption": "Figure 4-58"
+  },
+  {
+    "type": "header",
+    "text": "Remote Procedure Call"
+  },
+  {
+    "type": "paragraph",
+    "text": "The key work was done by Birrell and Nelson (1984). In a nutshell, what Birrell and Nelson suggested was allowing programs to call procedures located on remote hosts. When a process on machine 1 calls a procedure on machine 2, the calling process on 1 is suspended and execution of the called procedure takes place on 2. Information can be transported from the caller to the callee in the parameters and can come back in the procedure result. No message passing is visible to the application programmer. This technique is known as RPC (Remote Procedure Call). Traditionally, the calling procedure is known as the client and the called procedure is known as the server, and we will use those names here too."
+  },
+  {
+    "type": "paragraph",
+    "text": "to call a remote procedure, the client program must be bound with a small library procedure, called the client stub, that represents the server procedure in the client\u2019s address space. Similarly, the server is bound with a procedure called the server stub. These procedures hide the fact that the procedure call from the client to the server is not local"
+  },
+  {
+    "type": "paragraph",
+    "text": "Step 1 is the client calling the client stub. This call is a local procedure call, with the parameters pushed onto the stack in the normal way."
+  },
+  {
+    "type": "paragraph",
+    "text": "Step 2 is the client stub packing the parameters into a message and making a system call to send the message. Packing the parameters is called marshaling."
+  },
+  {
+    "type": "paragraph",
+    "text": "Step 3 is the operating system sending the message from the client machine to the server machine."
+  },
+  {
+    "type": "paragraph",
+    "text": "Step 4 is the operating system passing the incoming packet to the server stub."
+  },
+  {
+    "type": "paragraph",
+    "text": "Finally, step 5 is the server stub calling the server procedure with the unmarshaled parameters."
+  },
+  {
+    "type": "paragraph",
+    "text": "The reply traces the same path in the other direction."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image59.webp",
+    "caption": "Figure 4-59"
+  },
+  {
+    "type": "paragraph",
+    "text": "Problems with RPC:"
+  },
+  {
+    "type": "paragraph",
+    "text": "With RPC, passing pointers is impossible because the client and server are in different address spaces."
+  },
+  {
+    "type": "paragraph",
+    "text": "It is essentially impossible for the client stub to marshal the parameters: it has no way of determining how large they are."
+  },
+  {
+    "type": "paragraph",
+    "text": "A third problem is that it is not always possible to deduce the types of the parameters, not even from a formal specification or the code itself.(exa: printf)"
+  },
+  {
+    "type": "paragraph",
+    "text": "A fourth problem relates to the use of global variables. Normally, the calling and called procedure can communicate by using global variables, in addition to communicating via parameters. But if the called procedure is moved to a remote machine, the code will fail because the global variables are no longer shared"
+  },
+  {
+    "type": "header",
+    "text": "TCP"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a connection oriented protocol; it creates a virtual connection between two TCPs to send data. In addition, TCP uses flow and error control mechanisms at the transport level. In brief, TCP is called a connection-oriented, reliable transport protocol. It adds connection-oriented and reliability features to the services of IP."
+  },
+  {
+    "type": "paragraph",
+    "text": "Topics discussed in this section:"
+  },
+  {
+    "type": "header",
+    "text": "TCP Services TCP Features Segment"
+  },
+  {
+    "type": "header",
+    "text": "A TCP Connection Flow Control Error Control"
+  },
+  {
+    "type": "header",
+    "text": "TCP Services"
+  },
+  {
+    "type": "header",
+    "text": "Process-to-Process Communication"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP provides process-to-process communication using port numbers. Below Table lists some well-known port numbers used by TCP."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image60.webp",
+    "caption": "Figure 4-60"
+  },
+  {
+    "type": "header",
+    "text": "Stream Delivery Service"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP, on the other hand, allows the sending process to deliver data as a stream of bytes and allows the receiving process to obtain data as a stream of bytes. TCP creates an environment in which the two processes seem to be connected by an imaginary \"tube\u201c that carries their data across the Internet. This imaginary environment is showed in below Figure. The sending process produces (writes to) the stream of bytes, and the receiving process consumes (reads from) them"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image61.webp",
+    "caption": "Figure 4-61"
+  },
+  {
+    "type": "paragraph",
+    "text": "Sending and Receiving Buffers Because the sending and the receiving processes may not write or read data at the same speed, TCP needs buffers for storage. There are two buffers, the sending buffer and the receiving buffer, one for each direction. One way to implement a buffer is to use a circular array of I-byte locations as shown in Figure. For simplicity, we have shown two buffers of 20 bytes each. Normally the buffers are hundreds or thousands of bytes, depending on the implementation. We also show the buffers as the same size, which is not always the case."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image62.webp",
+    "caption": "Figure 4-62"
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure shows the movement of the data in one direction. At the sending site, the buffer has three types of chambers. The white section contains empty chambers that can be filled by the sending process (producer). The gray area holds bytes that have been sent but not yet acknowledged. TCP keeps these bytes in the buffer until it receives an acknowledgment. The colored area contains bytes to be sent by the sending TCP."
+  },
+  {
+    "type": "paragraph",
+    "text": "However, as we will see later in this chapter, TCP may be able to send only part of this colored section. This could be due to the slowness of the receiving process or perhaps to congestion in the network. Also note that after the bytes in the gray chambers are acknowledged, the chambers are recycled and available for use by the sending process."
+  },
+  {
+    "type": "paragraph",
+    "text": "This is why we show a circular buffer."
+  },
+  {
+    "type": "paragraph",
+    "text": "The operation of the buffer at the receiver site is simpler. The circular buffer is divided into two areas (shown as white and colored). The white area contains empty chambers to be filled by bytes received from the network. The colored sections contain received bytes that can be read by the receiving process. When a byte is read by the receiving process, the chamber is recycled and added to the pool of empty chambers."
+  },
+  {
+    "type": "header",
+    "text": "\u200bTCP segments"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image63.webp",
+    "caption": "Figure 4-63"
+  },
+  {
+    "type": "paragraph",
+    "text": "At the transport layer, TCP groups a number of bytes together into a packet called a segment. TCP adds a header to each segment (for control purposes)and delivers the segment to the IP layer for transmission. The segments are encapsulated in IP datagrams and transmitted."
+  },
+  {
+    "type": "paragraph",
+    "text": "This entire operation is transparent to the receiving process. Later we will see that segments may be received out of order, lost, or corrupted and resent. All these are handled by TCP with the receiving process unaware of any activities. Above fig shows how segments are created from the bytes in the buffers"
+  },
+  {
+    "type": "header",
+    "text": "23.6"
+  },
+  {
+    "type": "header",
+    "text": "\u200bFull-Duplex Communication"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP offers full-duplex service, in which data can flow in both directions at the same time. Each TCP then has a sending and receiving buffer, and segments move in both directions"
+  },
+  {
+    "type": "header",
+    "text": "\u200bConnection-Oriented Service"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a connection-oriented protocol. When a process at site A wants to send and receive data from another process at site B, the following occurs:"
+  },
+  {
+    "type": "paragraph",
+    "text": "The two TCPs establish a connection between them."
+  },
+  {
+    "type": "paragraph",
+    "text": "Data are exchanged in both directions."
+  },
+  {
+    "type": "paragraph",
+    "text": "The connection is terminated."
+  },
+  {
+    "type": "header",
+    "text": "\u200bReliable Service"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a reliable transport protocol. It uses an acknowledgment mechanism to check the safe and sound arrival of data. We will discuss this feature further in the section on error control."
+  },
+  {
+    "type": "header",
+    "text": "TCP Features"
+  },
+  {
+    "type": "header",
+    "text": "\u200bNumbering System"
+  },
+  {
+    "type": "paragraph",
+    "text": "There are two fields called the sequence number and the acknowledgment number. These two fields refer to the byte number and not the segment number."
+  },
+  {
+    "type": "paragraph",
+    "text": "Byte Number The bytes of data being transferred in each connection are numbered by TCP. The numbering starts with a randomly generated number. For example, if the random number happens to be 1057 and the total data to be sent are 6000 bytes, the bytes are numbered from 1057 to 7056. We will see that byte numbering is used for flow and error control."
+  },
+  {
+    "type": "paragraph",
+    "text": "Sequence Number After the bytes have been numbered, TCP assigns a sequence number to each segment that is being sent. The sequence number for each segment is the number of the first byte carried in that segment."
+  },
+  {
+    "type": "paragraph",
+    "text": "Acknowledgment Number The value of the acknowledgment field in a segment defines the number of the next byte a party expects to receive. The acknowledgment number is cumulative."
+  },
+  {
+    "type": "header",
+    "text": "Flow Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP, provides flow control. The receiver of the data controls the amount of data that are to be sent by the sender. This is done to prevent the receiver from being overwhelmed with data. The numbering system allows TCP to use a byte-oriented flow control."
+  },
+  {
+    "type": "header",
+    "text": "Error Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "To provide reliable service, TCP implements an error control mechanism. Although error control considers a segment as the unit of data for error detection (loss or corrupted segments), error control is byte-oriented, as we will see later."
+  },
+  {
+    "type": "header",
+    "text": "Congestion Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP takes into account congestion in the network. The amount of data sent by a sender is not only controlled by the receiver (flow control), but is also determined by the level of congestion in the network"
+  },
+  {
+    "type": "header",
+    "text": "TCP segment format"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image64.webp",
+    "caption": "Figure 4-64"
+  },
+  {
+    "type": "header",
+    "text": "23.10"
+  },
+  {
+    "type": "paragraph",
+    "text": "The segment consists of a 20- to 60-byte header,."
+  },
+  {
+    "type": "paragraph",
+    "text": "Source port address. This is a 16-bit field that defines the port number of the application program in the host that is sending the segment."
+  },
+  {
+    "type": "paragraph",
+    "text": "Destination port address. This is a 16-bit field that defines the port number of the application program in the host that is receiving the segment."
+  },
+  {
+    "type": "paragraph",
+    "text": "Sequence number. This 32-bit field defines the number assigned to the first byte of data contained in this segment. As we said before, TCP is a stream transport protocol. To ensure connectivity, each byte to be transmitted is numbered. The sequence number tells the destination which byte in this sequence comprises the first byte in the segment. During connection establishment, each party uses a random number generator to create an initial sequence number (ISN), which is usually different in each direction."
+  },
+  {
+    "type": "paragraph",
+    "text": "Acknowledgment number. This 32-bit field defines the byte number that the receiver of the segment is expecting to receive from the other party. If the receiver of the segment has successfully received byte number x from the other party, it defines x + I as the acknowledgment number. Acknowledgment and data can be piggybacked together."
+  },
+  {
+    "type": "paragraph",
+    "text": "Header length. This 4-bit field indicates the number of 4-byte words in the TCP header. The length of the header can be between 20 and 60 bytes. Therefore, the value of this field can be between 5 (5 x 4 =20) and 15 (15 x 4 =60)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Reserved. This is a 6-bit field reserved for future use."
+  },
+  {
+    "type": "paragraph",
+    "text": "Control. This field defines 6 different control bits or flags as shown in Figure. One or more of these bits can be set at a time."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image65.webp",
+    "caption": "Figure 4-65"
+  },
+  {
+    "type": "paragraph",
+    "text": "These bits enable flow control, connection establishment and termination, connection abortion, and the mode of data transfer in TCP."
+  },
+  {
+    "type": "paragraph",
+    "text": "Window size. This field defines the size of the window, in bytes, that the other party must maintain. Note that the length of this field is 16 bits, which means that the maximum size of the window is 65,535 bytes. This value is normally referred to as the receiving window (rwnd) and is determined by the receiver. The sender must obey the dictation of the receiver in this case."
+  },
+  {
+    "type": "paragraph",
+    "text": "Checksum. This 16-bit field contains the checksum. The calculation of the checksum for TCP follows the same procedure as the one described for UDP. However, the inclusion of the checksum in the UDP datagram is optional, whereas the inclusion of the checksum for TCP is mandatory. The same pseudoheader, serving the same purpose, is added to the segment. For the TCP pseudoheader, the value for the protocol field is 6."
+  },
+  {
+    "type": "paragraph",
+    "text": "Urgent pointer. This l6-bit field, which is valid only if the urgent flag is set, is used when the segment contains urgent data. It defines the number that must be added to the sequence number to obtain the number of the last urgent byte in the data section of the segment. This will be discussed later in this chapter."
+  },
+  {
+    "type": "paragraph",
+    "text": "Options. There can be up to 40 bytes of optional information in the TCP header. We will not discuss these options here; please refer to the reference list for more information."
+  },
+  {
+    "type": "header",
+    "text": "A TCP Connection"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is connection-oriented. A connection-oriented transport protocol establishes a virtual path between the source and destination. All the segments belonging to a message are then sent over this virtual path. Using a single virtual pathway for the entire message facilitates the acknowledgment process as well as retransmission of damaged or lost frames."
+  },
+  {
+    "type": "paragraph",
+    "text": "In TCP, connection-oriented transmission requires three phases:"
+  },
+  {
+    "type": "paragraph",
+    "text": "connection establishment,"
+  },
+  {
+    "type": "paragraph",
+    "text": "data transfer,"
+  },
+  {
+    "type": "paragraph",
+    "text": "connection termination."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP connection establishment(3 way handshaking)"
+  },
+  {
+    "type": "paragraph",
+    "text": "1 The client sends the first segment, a SYN segment, in which only the SYN flag is set."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE:A SYN segment cannot carry data, but it consumes one sequence number."
+  },
+  {
+    "type": "paragraph",
+    "text": "The server sends the second segment, a SYN +ACK segment, with 2 flag bits set: SYN and ACK. This segment has a dual purpose. It is a SYN segmentforcommunicationintheotherdirectionandservesasthe acknowledgment for the SYN segment. It consumes one sequence number. NOTE:A SYN+ACK segment cannotcarry data, but does consume one  sequence number"
+  },
+  {
+    "type": "paragraph",
+    "text": "The client sends the third segment. This is just an ACK segment. It acknowledges the receipt of the second segment with the ACK flag and acknowledgment number field. Note that the sequence number in this segment is the same as the one in the SYN segment; the ACK segment does not consume any sequence numbers."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE: An ACK segment, if carrying no data, consumes no sequence number"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image66.webp",
+    "caption": "Figure 4-66"
+  },
+  {
+    "type": "paragraph",
+    "text": "entire  connection  is  set  up,  using  what  is  called  a  cookie.entire  connection  is  set  up,  using  what  is  called  a  cookie.SYN Flooding Attack"
+  },
+  {
+    "type": "paragraph",
+    "text": "entire  connection  is  set  up,  using  what  is  called  a  cookie."
+  },
+  {
+    "type": "paragraph",
+    "text": "entire  connection  is  set  up,  using  what  is  called  a  cookie."
+  },
+  {
+    "type": "paragraph",
+    "text": "This happens when a malicious attacker sends a large number of SYN segments to a server, pretending that each of them is corning from a different client by faking the source IP addresses in the datagram's."
+  },
+  {
+    "type": "paragraph",
+    "text": "The server, assuming that the clients are issuing an active open, allocates the necessary resources, such as creating communication tables and setting timers. The TCP server then sends the SYN +ACK segments to the fake clients, which are lost. During this time, however, a lot of resources are occupied without being used. If, during this short time, the number of SYN segments is large, the server eventually runs out of resources and may crash. This SYN flooding attack belongs to a type of security attack known as a denial-of-service attack, in which an attacker monopolizes a system with so many service requests that the system collapses and denies service to every request."
+  },
+  {
+    "type": "header",
+    "text": "SOLUTIONS:"
+  },
+  {
+    "type": "paragraph",
+    "text": "1 Some have imposed a limit on connection requests during a specified period of"
+  },
+  {
+    "type": "paragraph",
+    "text": "time."
+  },
+  {
+    "type": "paragraph",
+    "text": "2 Others filter out datagrams coming from unwanted source addresses."
+  },
+  {
+    "type": "paragraph",
+    "text": "3 One recent strategy is to postpone resource allocation until the"
+  },
+  {
+    "type": "header",
+    "text": "Data Transfer"
+  },
+  {
+    "type": "paragraph",
+    "text": "After connection is established, bidirectional data transfer can take place. The client and server can both send data and acknowledgments. Data traveling in the same direction as an acknowledgment are carried on the same segment. The acknowledgment is piggybacked with the data"
+  },
+  {
+    "type": "paragraph",
+    "text": "In this example, after connection is established (not shown in the figure), the client sends 2000 bytes of data in two segments. The server then sends 2000 bytes in one segment. The client sends one more segment. The first three segments carry both data and acknowledgment, but the last segment carries only an acknowledgment because there are no more data to be sent."
+  },
+  {
+    "type": "paragraph",
+    "text": "Note the values of the sequence and acknowledgment numbers. The data segments sent by the client have the PSH (push) flag set so that the server TCP knows to deliver data to the server process as soon as they are received."
+  },
+  {
+    "type": "header",
+    "text": "Data transfer"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image67.webp",
+    "caption": "Figure 4-67"
+  },
+  {
+    "type": "paragraph",
+    "text": "PUSHING DATA: Delayed transmission and delayed delivery of data may not be acceptable by the application program."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP can handle such a situation. The application program at the sending site can request a push operation. This means that the sending TCP must not wait for the window to be filled. It must create a segment and send it immediately. The sending TCP must also set the push bit (PSH) to let the receiving TCP know that the segment includes data that must be delivered to the receiving application program as soon as possible and not to wait for more data to come."
+  },
+  {
+    "type": "paragraph",
+    "text": "Urgent Data : TCP is a stream-oriented protocol. This means that the data are presented from the application program to TCP as a stream of bytes. Each byte of data has a position in the stream. However, sending application program wants a piece of data to be read out of order by the receiving application program."
+  },
+  {
+    "type": "paragraph",
+    "text": "Connection Termination (three-way handshaking and four-way handshaking with a half-close option.)"
+  },
+  {
+    "type": "bullet",
+    "text": "1. In a normal situation, the client TCP, after receiving a close command from the client process, sends the first segment, a FIN segment in which the FIN flag is set."
+  },
+  {
+    "type": "paragraph",
+    "text": "Note that a FIN segment can include the last chunk of data sent by the client, or it can be just a control segment as shown in Figure. If it is only a control segment, it consumes only one sequence number."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE: The FIN segment consumes one sequence number ifit does not carry data."
+  },
+  {
+    "type": "paragraph",
+    "text": "2 The server TCP, after receiving the FIN segment, informs its process of the situation and sends the second segment, a FIN +ACK segment, to confirm the receipt of the FIN segment from the client and at the same time to announce the closing of the connection in the other direction. This segment can also contain the last chunk of data from the server. If it does not carry data, it consumes only one sequence number."
+  },
+  {
+    "type": "paragraph",
+    "text": "NOTE: The FIN +ACK segment consumes one sequence number if it does not carry data."
+  },
+  {
+    "type": "bullet",
+    "text": "3. The client TCP sends the last segment, an ACK segment, to confirm the receipt of the FIN segment from the TCP server. This segment contains the acknowledgment number, which is 1 plus the sequence number received in the FIN segment from the server. This segment cannot carry data and consumes no sequence numbers."
+  },
+  {
+    "type": "paragraph",
+    "text": "Half-Close In TCP, one end can stop sending data while still receiving data. This is called a half-close. Although either end can issue a half-close, it is normally initiated by the client. It can occur when the server needs all the data before processing can begin."
+  },
+  {
+    "type": "paragraph",
+    "text": "A good example is sorting. When the client sends data to the server to be sorted, the server needs to receive all the data before sorting can start. This means the client, after sending all the data, can close the connection in the outbound direction. However, the inbound direction must remain open to receive the sorted data. The server, after receiving the data, still needs time for sorting; its outbound direction must remain open"
+  },
+  {
+    "type": "header",
+    "text": "Connection termination using three-way handshaking"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image68.webp",
+    "caption": "Figure 4-68"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.21 Half-close"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image69.webp",
+    "caption": "Figure 4-69"
+  },
+  {
+    "type": "header",
+    "text": "Flow Control or TCP Sliding Window"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP uses a sliding window, to handle flow control. The sliding window protocol used by TCP, however, is something between the Go-Back-N and Selective Repeat sliding window."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sliding window protocol in TCP looks like the Go-Back-N protocol because it does not use NAKs;"
+  },
+  {
+    "type": "paragraph",
+    "text": "it looks like Selective Repeat because the receiver holds the out-of-order segments until the missing ones arrive."
+  },
+  {
+    "type": "paragraph",
+    "text": "There are two big differences between this sliding window and the one we used at the data link layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "the sliding window of TCP is byte-oriented; the one we discussed in the data link layer is frame-oriented."
+  },
+  {
+    "type": "paragraph",
+    "text": "the TCP's sliding window is of variable size; the one we discussed in the data link layer was of fixed size"
+  },
+  {
+    "type": "header",
+    "text": "Sliding window"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image70.webp",
+    "caption": "Figure 4-70"
+  },
+  {
+    "type": "paragraph",
+    "text": "The window is opened, closed, or shrunk. These three activities, as we will see, are in the control of the receiver (and depend on congestion in the network), not the sender."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sender must obey the commands of the receiver in this matter. Opening a window means moving the right wall to the right. This allows more new bytes in the buffer that are eligible for sending."
+  },
+  {
+    "type": "paragraph",
+    "text": "Closing the window means moving the left wall to the right. This means that some bytes have been acknowledged and the sender need not worry about them anymore."
+  },
+  {
+    "type": "paragraph",
+    "text": "Shrinking the window means moving the right wall to the left."
+  },
+  {
+    "type": "paragraph",
+    "text": "The size of the window at one end is determined by the lesser of two values: receiver window (rwnd) or congestion window (cwnd)."
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiver window is the value advertised by the opposite end in a segment containing acknowledgment. It is the number of bytes the other end can accept before its buffer overflows and data are discarded."
+  },
+  {
+    "type": "paragraph",
+    "text": "The congestion window is a value determined by the network to avoid congestion"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image71.webp",
+    "caption": "Figure 4-71"
+  },
+  {
+    "type": "header",
+    "text": "Window management in TCP"
+  },
+  {
+    "type": "paragraph",
+    "text": "When the window is 0, the sender may not normally send segments, with two exceptions."
+  },
+  {
+    "type": "paragraph",
+    "text": "urgent data may be sent, for example, to allow the user to kill the process running on the remote machine."
+  },
+  {
+    "type": "paragraph",
+    "text": "the sender may send a 1-byte segment to force the receiver to reannounce the next byte expected and the window size. This packet is called a window probe."
+  },
+  {
+    "type": "paragraph",
+    "text": "The TCP standard explicitly provides this option to prevent deadlock if a window update ever gets lost."
+  },
+  {
+    "type": "paragraph",
+    "text": "Senders are not required to transmit data as soon as they come in from the application. Neither are receivers required to send acknowledgements as soon as possible."
+  },
+  {
+    "type": "paragraph",
+    "text": "For example, in Fig. when the first 2 KB of data came in, TCP, knowing that it had a 4-KB window, would have been completely correct in just buffering the data until another 2 KB came in, to be able to transmit a segment with a 4-KB payload. This freedom can be used to improve performance"
+  },
+  {
+    "type": "header",
+    "text": "Host with Telnet client"
+  },
+  {
+    "type": "paragraph",
+    "text": "3."
+  },
+  {
+    "type": "header",
+    "text": "send echo of character and/or output"
+  },
+  {
+    "type": "paragraph",
+    "text": "1."
+  },
+  {
+    "type": "header",
+    "text": "send character"
+  },
+  {
+    "type": "header",
+    "text": "2.interpret character2.interpret character"
+  },
+  {
+    "type": "paragraph",
+    "text": "2."
+  },
+  {
+    "type": "header",
+    "text": "interpret character"
+  },
+  {
+    "type": "paragraph",
+    "text": "2."
+  },
+  {
+    "type": "header",
+    "text": "interpret character"
+  },
+  {
+    "type": "header",
+    "text": "Host with Telnet server"
+  },
+  {
+    "type": "paragraph",
+    "text": "Remote terminal applications (e.g., Telnet) send characters to a server."
+  },
+  {
+    "type": "paragraph",
+    "text": "The server interprets the character and sends the output at the server to the client."
+  },
+  {
+    "type": "paragraph",
+    "text": "For each character typed, you see three packets:"
+  },
+  {
+    "type": "header",
+    "text": "Client \uf0e0 Server: Send typed character"
+  },
+  {
+    "type": "paragraph",
+    "text": "Server \uf0e0 Client: Echo of character (or user output) and acknowledgement for first packet"
+  },
+  {
+    "type": "header",
+    "text": "Client \uf0e0 Server: Acknowledgement for second packet"
+  },
+  {
+    "type": "header",
+    "text": "Delayed Acknowledgement"
+  },
+  {
+    "type": "header",
+    "text": "TCP delays transmission of ACKs for up to 500ms"
+  },
+  {
+    "type": "paragraph",
+    "text": "Avoid to send ACK packets that do not carry data."
+  },
+  {
+    "type": "paragraph",
+    "text": "\u2013 The hope is that, within the delay, the receiver will have data ready to be sent to the receiver. Then, the ACK can be piggybacked with a data segment"
+  },
+  {
+    "type": "paragraph",
+    "text": "Exceptions:"
+  },
+  {
+    "type": "header",
+    "text": "ACK should be sent for every full sized segment"
+  },
+  {
+    "type": "header",
+    "text": "Delayed ACK is not used when packets arrive out of order"
+  },
+  {
+    "type": "paragraph",
+    "text": "Although delayed acknowledgements reduce the load placed on the network by the receiver, a sender that sends multiple short packets (e.g., 41-byte packets containing 1 byte of data) is still operating inefficiently. A way to reduce this usage is known as Nagle\u2019s algorithm (Nagle, 1984)."
+  },
+  {
+    "type": "header",
+    "text": "31"
+  },
+  {
+    "type": "header",
+    "text": "Nagel\u2019s Rule"
+  },
+  {
+    "type": "paragraph",
+    "text": "Send one byte and buffer all subsequent bytes until acknowledgement is received. Then send all buffered bytes in a single TCP segment and start buffering again until the sent segment is acknowledged."
+  },
+  {
+    "type": "paragraph",
+    "text": "Nagle\u2019s algorithm will put the many pieces in one segment, greatly reducing the bandwidth used"
+  },
+  {
+    "type": "paragraph",
+    "text": "Nagle\u2019s algorithm is widely used by TCP implementations, but there are times when it is better to disable it. In particular, in interactive games that are run over the Internet."
+  },
+  {
+    "type": "paragraph",
+    "text": "A more subtle problem is that Nagle\u2019s algorithm can sometimes interact with delayed acknowledgements to cause a temporary deadlock: the receiver waits for data on which to piggyback an acknowledgement, and the sender waits on the acknowledgement to send more data."
+  },
+  {
+    "type": "paragraph",
+    "text": "Because of these problems, Nagle\u2019s algorithm can be disabled (which is called the TCP NODELAY option)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Another problem that can degrade TCP performance is the silly window syndrome (Clark, 1982)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Clark\u2019s solution is to prevent the receiver from sending a window update for 1 byte. Instead, it is forced to wait until it has a decent amount of space available and advertise that instead. Specifically, the receiver should not send a window update until it can handle the maximum segment size it advertised when the connection was established or until its buffer is half empty, whichever is smaller."
+  },
+  {
+    "type": "paragraph",
+    "text": "Furthermore, the sender can also help by not sending tiny segments. Instead, it should wait until it can send a full segment, or at least one containing half of the receiver\u2019s buffer size."
+  },
+  {
+    "type": "paragraph",
+    "text": "The goal is for the sender not to send small segments and the receiver not to ask for them. (Nagel + Clark). Both are used to improve TCP performance"
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiver will buffer the data until it can be passed up to the application in order (handling out of order segments)"
+  },
+  {
+    "type": "header",
+    "text": "Cumulative acknowledgements"
+  },
+  {
+    "type": "header",
+    "text": "Error Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP is a reliable transport layer protocol. This means that an application program that delivers a stream of data to TCP relies on TCP to deliver the entire stream to the application program on the other end in order, without error, and without any part lost or duplicated."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP provides reliability using error control. Error control includes mechanisms for detecting corrupted segments, lost segments, out-of-order segments, and duplicated segments. Error control also includes a mechanism for correcting errors after they are detected. Error detection and correction in TCP is achieved through the use of three simple tools: checksum, acknowledgment, and time-out."
+  },
+  {
+    "type": "header",
+    "text": "Checksum"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each segment includes a checksum field which is used to check for a corrupted segment. If the segment is corrupted, it is discarded by the destination TCP and is considered as lost. TCP uses a 16-bit checksum that is mandatory in every segment"
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure 23.11 Checksum calculation of a simple UDP user datagram"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image79.webp",
+    "caption": "Figure 4-79"
+  },
+  {
+    "type": "header",
+    "text": "23.36"
+  },
+  {
+    "type": "header",
+    "text": "Acknowledgment"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP uses acknowledgments to confirm the receipt of data segments. Control segments that carry no data but consume a sequence number are also acknowledged. ACK segments are never acknowledged."
+  },
+  {
+    "type": "paragraph",
+    "text": "ACK segments do not consume sequence numbers and are not acknowledged."
+  },
+  {
+    "type": "header",
+    "text": "Retransmission"
+  },
+  {
+    "type": "paragraph",
+    "text": "The heart of the error control mechanism is the retransmission of segments. When a segment is corrupted, lost, or delayed, it is retransmitted."
+  },
+  {
+    "type": "paragraph",
+    "text": "In modern implementations, a retransmission occurs if the retransmission timer expires or three duplicate ACK segments have arrived."
+  },
+  {
+    "type": "paragraph",
+    "text": "Retransmission After RTO (retransmission time out)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Retransmission After Three Duplicate ACK Segments (also called fast retransmission)"
+  },
+  {
+    "type": "header",
+    "text": "Out-of-Order Segments"
+  },
+  {
+    "type": "paragraph",
+    "text": "Data may arrive out of order and be temporarily stored by the receiving TCP, but yet guarantees that no out-of-order segment is delivered to the process"
+  },
+  {
+    "type": "header",
+    "text": "TCP Congestion Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "When the load offered to any network is more than it can handle, congestion builds up."
+  },
+  {
+    "type": "paragraph",
+    "text": "The network layer detects congestion when queues grow large at routers and tries to manage it, if only by dropping packets. It is up to the transport layer to receive congestion feedback from the network layer and slow down the rate of traffic that it is sending into the network."
+  },
+  {
+    "type": "paragraph",
+    "text": "For Congestion control, transport protocol uses an AIMD (Additive Increase Multiplicative Decrease) control law."
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP congestion control is based on implementing this approach using a window called congestion window. TCP adjusts the size of the window according to the AIMD rule."
+  },
+  {
+    "type": "paragraph",
+    "text": "The window size at the sender is set as follows:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Send Window = MIN (flow control window, congestion window)"
+  },
+  {
+    "type": "header",
+    "text": "where"
+  },
+  {
+    "type": "paragraph",
+    "text": "congestion window is adjusted based on feedback from thecongestion window is adjusted based on feedback from theflow control window is advertised by the receiver (rwnd)"
+  },
+  {
+    "type": "header",
+    "text": "congestion window is adjusted based on feedback from the"
+  },
+  {
+    "type": "header",
+    "text": "congestion window is adjusted based on feedback from the"
+  },
+  {
+    "type": "paragraph",
+    "text": "Modern congestion control was added to TCP largely through the efforts of Van Jacobson (1988). It is a fascinating story. Starting in 1986, the growing popularity of the early Internet led to the first occurrence of what became known as a congestion collapse, a prolonged period during which good put dropped suddenly (i.e., by more than a factor of 100) due to congestion in the network. Jacobson (and many others) set out to understand what was happening and remedy the situation."
+  },
+  {
+    "type": "paragraph",
+    "text": "To start, he observed that packet loss is a suitable signal of congestion. This signal comes a little late (as the network is already congested) but it is quite dependable"
+  },
+  {
+    "type": "paragraph",
+    "text": "At the beginning how sender knows at what speed receiver can receive the packets?"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image80.webp",
+    "caption": "Figure 4-80"
+  },
+  {
+    "type": "paragraph",
+    "text": "The key observation is this: the acknowledgements return to the sender at about the rate that packets can be sent over the slowest link in the path. This is precisely the rate that the sender wants to use. If it injects new packets into the network at this rate, they will be sent as fast as the slow link permits, but they will not queue up and congest any router along the path. This timing is known as an ack clock. It is an essential part of TCP. By using an ack clock, TCP smoothes out traffic and avoids unnecessary queues at routers. This is first consideration"
+  },
+  {
+    "type": "paragraph",
+    "text": "A second consideration is that the AIMD rule will take a very long time to reach a good operating point on fast networks if the congestion window is started from a small size"
+  },
+  {
+    "type": "paragraph",
+    "text": "Instead, the solution Jacobson chose to handle both of these considerations is a mix of linear and multiplicative increase."
+  },
+  {
+    "type": "header",
+    "text": "SLOW-START"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image81.webp",
+    "caption": "Figure 4-81"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image82.webp",
+    "caption": "Figure 4-82"
+  },
+  {
+    "type": "paragraph",
+    "text": "Whenever a packet loss is detected, for example, by a timeout, the slow start threshold is set to be half of the congestion window and the entire process is restarted."
+  },
+  {
+    "type": "paragraph",
+    "text": "Congestion avoidance phase is started if cwnd has reached the slow start threshold value"
+  },
+  {
+    "type": "paragraph",
+    "text": "Whenever the slow start threshold is crossed, TCP switches from slow start to additive increase. In this mode, the congestion window is increased by one segment every round-trip time."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image83.webp",
+    "caption": "Figure 4-83"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image84.webp",
+    "caption": "Figure 4-84"
+  },
+  {
+    "type": "header",
+    "text": "Responses to Congestion"
+  },
+  {
+    "type": "paragraph",
+    "text": "So, TCP assumes there is congestion if it detects a packet loss"
+  },
+  {
+    "type": "paragraph",
+    "text": "A TCP sender can detect lost packets via:"
+  },
+  {
+    "type": "header",
+    "text": "Timeout of a retransmission timer"
+  },
+  {
+    "type": "header",
+    "text": "Receipt of a duplicate ACK"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP interprets a Timeout as a binary congestion signal. When a timeout occurs, the sender performs:"
+  },
+  {
+    "type": "header",
+    "text": "cwnd is reset to one: cwnd = 1"
+  },
+  {
+    "type": "paragraph",
+    "text": "ssthresh is set to half the current size of the congestion window:"
+  },
+  {
+    "type": "header",
+    "text": "ssthressh = cwnd / 2"
+  },
+  {
+    "type": "header",
+    "text": "and slow-start is entered"
+  },
+  {
+    "type": "header",
+    "text": "Fast Retransmit"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image85.webp",
+    "caption": "Figure 4-85"
+  },
+  {
+    "type": "paragraph",
+    "text": "If three or more duplicate ACKs are received in a row, the TCP sender believes that a segment has been lost."
+  },
+  {
+    "type": "paragraph",
+    "text": "Then TCP performs a retransmission of what seems to be the missing segment, without waiting for a timeout to happen."
+  },
+  {
+    "type": "paragraph",
+    "text": "Enter slow start:"
+  },
+  {
+    "type": "header",
+    "text": "ssthresh = cwnd/2 cwnd = 1"
+  },
+  {
+    "type": "header",
+    "text": "4646"
+  },
+  {
+    "type": "header",
+    "text": "46"
+  },
+  {
+    "type": "header",
+    "text": "46"
+  },
+  {
+    "type": "header",
+    "text": "Flavors of TCP Congestion"
+  },
+  {
+    "type": "header",
+    "text": "Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP Tahoe (1988)"
+  },
+  {
+    "type": "header",
+    "text": "Slow Start"
+  },
+  {
+    "type": "header",
+    "text": "Congestion Avoidance"
+  },
+  {
+    "type": "header",
+    "text": "Fast Retransmit"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP Reno (1990) (TCP Tahoe+FR)"
+  },
+  {
+    "type": "header",
+    "text": "Fast Recovery"
+  },
+  {
+    "type": "paragraph",
+    "text": "New Reno (1996)"
+  },
+  {
+    "type": "paragraph",
+    "text": "SACK (1996) (SACK (Selective ACKnowledgements))"
+  },
+  {
+    "type": "paragraph",
+    "text": "RED (Floyd and Jacobson 1993)"
+  },
+  {
+    "type": "header",
+    "text": "47"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image86.webp",
+    "caption": "Figure 4-86"
+  },
+  {
+    "type": "paragraph",
+    "text": "The use of ECN (Explicit Congestion Notification) in addition to packet loss as a congestion signal. ECN is an IP layer mechanism to notify hosts of congestion."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sender tells the receiver that it has heard the signal by using the CWR (Congestion Window Reduced) flag."
+  },
+  {
+    "type": "header",
+    "text": "USER DATAGRAM PROTOCOL (UDP)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The User Datagram Protocol (UDP) is called a connectionless, unreliable transport protocol. It does not add anything to the services of IP except to provide process-to-process communication instead of host-to- host communication."
+  },
+  {
+    "type": "paragraph",
+    "text": "Topics discussed in this section:"
+  },
+  {
+    "type": "header",
+    "text": "Well-Known Ports for UDP User Datagram"
+  },
+  {
+    "type": "header",
+    "text": "Checksum UDP Operation Use of UDP"
+  },
+  {
+    "type": "header",
+    "text": "Table 23.1 Well-known ports used with UDP"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image87.webp",
+    "caption": "Figure 4-87"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image88.webp",
+    "caption": "Figure 4-88"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.9 User datagram format"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image89.webp",
+    "caption": "Figure 4-89"
+  },
+  {
+    "type": "paragraph",
+    "text": "Checksum (OPTIONAL,IF NOT USED SET ALL 1\u2019S DEFAULT)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The UDP checksum calculation is different from the one for IP and ICMP. Here the checksum includes three sections: a pseudo header, the UDP header, and the data coming from the application layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "The pseudo header is the part of the header of the IP packet in which the user datagram is to be encapsulated with some fields filled with Os"
+  },
+  {
+    "type": "paragraph",
+    "text": "If the checksum does not include the pseudo header, a user datagram may arrive safe and sound. However, if the IP header is corrupted, it may be delivered to the wrong host."
+  },
+  {
+    "type": "paragraph",
+    "text": "The protocol field is added to ensure that the packet belongs to UDP, and not to other transport-layer protocols."
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.10 Pseudoheader for checksum calculation"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image90.webp",
+    "caption": "Figure 4-90"
+  },
+  {
+    "type": "header",
+    "text": "UDP Operation"
+  },
+  {
+    "type": "header",
+    "text": "Connectionless Services"
+  },
+  {
+    "type": "paragraph",
+    "text": "UDP provides a connectionless service. This means that each user datagram sent by UDP is an independent datagram. There is no relationship between the different user datagrams even if they are coming from the same source process and going to the same destination program. The user datagrams are not numbered. Also, there is no connection establishment and no connection termination, as is the case for TCP. This means that each user datagram can travel on a different path."
+  },
+  {
+    "type": "header",
+    "text": "Flow and Error Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "UDP is a very simple, unreliable transport protocol. There is no flow control and hence no window mechanism. The receiver may overflow with incoming messages. There is no error control mechanism in UDP except for the checksum. This means that the sender does not know if a message has been lost or duplicated. When the receiver detects an error through the checksum, the user datagram is silently discarded. The lack of flow control and error control"
+  },
+  {
+    "type": "header",
+    "text": "Encapsulation and Decapsulation"
+  },
+  {
+    "type": "paragraph",
+    "text": "To send a message from one process to another, the UDP protocol encapsulates and decapsulates messages in an IP datagram."
+  },
+  {
+    "type": "header",
+    "text": "Example 23.2Example 23.2"
+  },
+  {
+    "type": "header",
+    "text": "Example 23.2"
+  },
+  {
+    "type": "header",
+    "text": "Example 23.2"
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure 23.11 shows the checksum calculation for a very small user datagram with only 7 bytes of data. Because the number of bytes of data is odd, padding is added for checksum calculation. The pseudoheader as well as the padding will be dropped when the user datagram is delivered to IP."
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure 23.11 Checksum calculation of a simple UDP user datagram"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image95.webp",
+    "caption": "Figure 4-95"
+  },
+  {
+    "type": "header",
+    "text": "Figure 23.12 Queues in UDP"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter4/image96.webp",
+    "caption": "Figure 4-96"
+  },
+  {
+    "type": "header",
+    "text": "Remote Procedure Call"
+  },
+  {
+    "type": "paragraph",
+    "text": "The key work was done by Birrell and Nelson (1984). In a nutshell, what Birrell and Nelson suggested was allowing programs to call procedures located on remote hosts. When a process on machine 1 calls a procedure on machine 2, the calling process on 1 is suspended and execution of the called procedure takes place on 2. Information can be transported from the caller to the callee in the parameters and can come back in the procedure result. No message passing is visible to the application programmer. This technique is known as RPC (Remote Procedure Call). Traditionally, the calling procedure is known as the client and the called procedure is known as the server, and we will use those names here too."
+  },
+  {
+    "type": "paragraph",
+    "text": "to call a remote procedure, the client program must be bound with a small library procedure, called the client stub, that represents the server procedure in the client\u2019s address space. Similarly, the server is bound with a procedure called the server stub. These procedures hide the fact that the procedure call from the client to the server is not local"
+  }
+]

@@ -55,6 +55,7 @@ import SystemDesignBookChapter from './books/systemdesign/SystemDesignBookChapte
 import MySQLBookChapter from './books/mysql/MySQLBookChapter';
 import DockerBookChapter from './books/docker/DockerBookChapter';
 import MLBookChapter from './books/ml/MLBookChapter';
+import NetworkingBookChapter from './books/networking/NetworkingBookChapter';
 
 
 // Admin Features
@@ -295,6 +296,7 @@ function App() {
             <Route path="/books/mysql/:topicname" element={<MySQLBookChapter />} />
             <Route path="/books/docker/:topicname" element={<DockerBookChapter />} />
             <Route path="/books/ml/:topicname" element={<MLBookChapter />} />
+            <Route path="/books/computernetworks/:topicname" element={<NetworkingBookChapter />} />
 
 
             <Route path="/profile" element={<ProfilePage />} />

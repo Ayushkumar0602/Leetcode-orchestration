@@ -543,6 +543,12 @@ export default function MySQLBookChapter() {
       <Helmet>
         <title>{currentChapterInfo.title} | Whizan MySQL Handbook</title>
         <meta name="description" content={`Master MySQL with ${currentChapterInfo.title}. Comprehensive guide for database engineering.`} />
+        <meta name="keywords" content="MySQL handbook, SQL tutorial, database engineering, query optimization, relational database design" />
+        <link rel="canonical" href={`https://whizan.xyz/books/mysql/${topicname}`} />
+        <meta property="og:title" content={`${currentChapterInfo.title} | Whizan MySQL Handbook`} />
+        <meta property="og:description" content={`Master MySQL with ${currentChapterInfo.title}. Comprehensive guide for database engineering.`} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://whizan.xyz/books/mysql/${topicname}`} />
       </Helmet>
       <style>{styles}</style>
 

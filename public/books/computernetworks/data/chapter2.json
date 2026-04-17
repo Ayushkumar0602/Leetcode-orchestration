@@ -1,0 +1,1914 @@
+[
+  {
+    "type": "paragraph",
+    "text": "Typical protocols:"
+  },
+  {
+    "type": "header",
+    "text": "FTP \u2013 File Transfer Protocol"
+  },
+  {
+    "type": "header",
+    "text": "For file transfer"
+  },
+  {
+    "type": "header",
+    "text": "Telnet \u2013 Remote terminal protocol"
+  },
+  {
+    "type": "header",
+    "text": "For remote login on any other computer on the network"
+  },
+  {
+    "type": "header",
+    "text": "SMTP \u2013 Simple Mail Transfer Protocol"
+  },
+  {
+    "type": "header",
+    "text": "For mail transfer"
+  },
+  {
+    "type": "header",
+    "text": "HTTP \u2013 Hypertext Transfer Protocol"
+  },
+  {
+    "type": "header",
+    "text": "For Web browsing"
+  },
+  {
+    "type": "paragraph",
+    "text": "EncompassessamefunctionsastheseOSIModellayersApplication Presentation Session"
+  },
+  {
+    "type": "header",
+    "text": "Transport Layer"
+  },
+  {
+    "type": "header",
+    "text": "TCP is a connection-oriented protocol"
+  },
+  {
+    "type": "paragraph",
+    "text": "Does not mean it has a physical connection between sender and receiver"
+  },
+  {
+    "type": "paragraph",
+    "text": "TCP provides the function to allow a connection virtually exists \u2013 also called virtual circuit"
+  },
+  {
+    "type": "paragraph",
+    "text": "UDP provides the functions:"
+  },
+  {
+    "type": "header",
+    "text": "Dividing a chunk of data into segments"
+  },
+  {
+    "type": "header",
+    "text": "Reassembly segments into the original chunk"
+  },
+  {
+    "type": "paragraph",
+    "text": "Provide further the functions such as reordering and data resend"
+  },
+  {
+    "type": "header",
+    "text": "Offering a reliable byte-stream delivery service"
+  },
+  {
+    "type": "header",
+    "text": "Functions the same as the Transport layer in OSI"
+  },
+  {
+    "type": "paragraph",
+    "text": "Synchronize source and destination computers to set up the session between the respective computers"
+  },
+  {
+    "type": "header",
+    "text": "Internet Layer"
+  },
+  {
+    "type": "paragraph",
+    "text": "The network layer, also called the internet layer, deals with packets and connects independent networks to transport the packets across network boundaries. The network layer protocols are the IP and the Internet Control Message Protocol (ICMP), which is used for error reporting."
+  },
+  {
+    "type": "header",
+    "text": "Host-to-network layer"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Host-to-network layer is the lowest layer of the TCP/IP reference model. It combines the link layer and the physical layer of the ISO/OSI model. At this layer, data is transferred between adjacent network nodes in a WAN or between nodes on the same LAN."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image1.webp",
+    "caption": "Figure 2-1"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image2.webp",
+    "caption": "Figure 2-2"
+  },
+  {
+    "type": "header",
+    "text": "THE INTERNET"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Internet has revolutionized many aspects of our daily lives. It has affected the way we do business as well as the way we spend our leisure time. Count the ways you've used the Internet recently. Perhaps you've sent electronic mail (e-mail) to a business associate, paid a utility bill, read a newspaper from a distant city, or looked up a local movie schedule-all by using the Internet. Or maybe you researched a medical topic, booked a hotel reservation, chatted with a fellow Trekkie, or comparison-shopped for a car. The Internet is a communication system that has brought a wealth of information to our fingertips and organized it for our use."
+  },
+  {
+    "type": "header",
+    "text": "A Brief History"
+  },
+  {
+    "type": "paragraph",
+    "text": "A network is a group of connected communicating devices such as computers and printers. An internet (note the lowercase letter i) is two or more networks that can communicate with each other. The most notable internet is called the Internet (uppercase letter I), a collaboration of more than hundreds of thousands of interconnected networks. Private individuals as well as various organizations such as government agencies, schools, research facilities, corporations, and libraries in more than 100 countries use the Internet. Millions of people are users. Yet this extraordinary communication system only came into being in 1969."
+  },
+  {
+    "type": "paragraph",
+    "text": "In the mid-1960s, mainframe computers in research organizations were standalone devices. Computers from different manufacturers were unable to communicate with one another. The Advanced Research Projects Agency"
+  },
+  {
+    "type": "paragraph",
+    "text": "(ARPA) in the Department of Defense (DoD) was interested in finding a way to connect computers so that the researchers they funded could share their findings, thereby reducing costs and eliminating duplication of effort."
+  },
+  {
+    "type": "paragraph",
+    "text": "In 1967, at an Association for Computing Machinery (ACM) meeting, ARPA presented its ideas for ARPANET, a small network of connected computers. The idea was that each host computer (not necessarily from the same manufacturer) would be attached to a specialized computer, called an inteiface message processor (IMP). The IMPs, in tum, would be connected to one another. Each IMP had to be able to communicate with other IMPs as well as with its own attached host. By 1969, ARPANET was a reality. Four nodes, at the University of California at Los Angeles (UCLA), the University of California at Santa Barbara (UCSB), Stanford Research Institute (SRI), and the University of Utah, were connected via the IMPs to form a network. Software called the Network Control Protocol (NCP) provided communication between the hosts."
+  },
+  {
+    "type": "paragraph",
+    "text": "In 1972, Vint Cerf and Bob Kahn, both of whom were part of the core ARPANET group, collaborated on what they called the Internetting Projec1. Cerf and Kahn's landmark 1973 paper outlined the protocols to achieve end- to-end delivery of packets. This paper on Transmission Control Protocol (TCP) included concepts such as encapsulation, the datagram, and the functions of a gateway. Shortly thereafter, authorities made a decision to split TCP into two protocols: Transmission Control Protocol (TCP) and Internetworking Protocol (lP). IP would handle datagram routing while TCP would be responsible for higher-level functions such as segmentation, reassembly, and error detection. The internetworking protocol became known as TCPIIP."
+  },
+  {
+    "type": "header",
+    "text": "The Internet Today"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Internet has come a long way since the 1960s. The Internet today is not a simple hierarchical structure. It is made up of many wide- and local-area networks joined by connecting devices and switching stations. It is difficult to give an accurate representation of the Internet because it is continually changing-new networks are being added, existing networks are adding addresses, and networks of defunct companies are being removed. Today most end users who want Internet connection use the services of Internet service providers (lSPs). There are international service providers, national service providers, regional service providers, and local service providers. The Internet today is run by private companies, not the government. Figure 1.13 shows a conceptual (not geographic) view of the Internet."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image3.webp",
+    "caption": "Figure 2-3"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image4.webp",
+    "caption": "Figure 2-4"
+  },
+  {
+    "type": "paragraph",
+    "text": "International Internet Service Providers:"
+  },
+  {
+    "type": "paragraph",
+    "text": "At the top of the hierarchy are the international service providers that connect nations together."
+  },
+  {
+    "type": "paragraph",
+    "text": "National Internet Service Providers:"
+  },
+  {
+    "type": "paragraph",
+    "text": "The national Internet service providers are backbone networks created and maintained by specialized companies. There are many national ISPs operating in North America; some of the most well known are SprintLink, PSINet, UUNet Technology, AGIS, and internet Mel. To provide connectivity between the end users, these backbone networks are connected by complex switching stations (normally run by a third party) called network access points (NAPs). Some national ISP networks are also connected to one another by private switching stations called peering points. These normally operate at a high data rate (up to 600 Mbps)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Regional Internet Service Providers:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Regional internet service providers or regional ISPs are smaller ISPs that are connected to one or more national ISPs. They are at the third level of the hierarchy with a smaller data rate. Local Internet Service Providers:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Local Internet service providers provide direct service to the end users. The local ISPs can be connected to regional ISPs or directly to national ISPs. Most end users are connected to the local ISPs. Note that in this sense, a local ISP can be a company that just provides Internet services, a corporation with a network that supplies services to its own employees, or a nonprofit organization, such as a college or a university, that runs its own network. Each of these local ISPs can be connected to a regional or national service provider."
+  },
+  {
+    "type": "header",
+    "text": "UNIT- II"
+  },
+  {
+    "type": "header",
+    "text": "DATA LINK LAYER FUNCTIONS (SERVICES)"
+  },
+  {
+    "type": "paragraph",
+    "text": "Providing services to the network layer:"
+  },
+  {
+    "type": "paragraph",
+    "text": "1 Unacknowledged connectionless service."
+  },
+  {
+    "type": "paragraph",
+    "text": "Appropriate for low error rate and real-time traffic. Ex: Ethernet"
+  },
+  {
+    "type": "paragraph",
+    "text": "Acknowledged connectionless service."
+  },
+  {
+    "type": "header",
+    "text": "Useful in unreliable channels, WiFi. Ack/Timer/Resend"
+  },
+  {
+    "type": "paragraph",
+    "text": "Acknowledged connection-oriented service."
+  },
+  {
+    "type": "paragraph",
+    "text": "Guarantee frames are received exactly once and in the right order. Appropriate over long, unreliable links such as a satellite channel or a long- distance telephone circuit"
+  },
+  {
+    "type": "paragraph",
+    "text": "Framing: Frames are the streams of bits received from the network layer into manageable data units. This division of stream of bits is done by Data Link Layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "Physical Addressing: The Data Link layer adds a header to the frame in order to define physical address of the sender or receiver of the frame, if the frames are to be distributed to different systems on the network."
+  },
+  {
+    "type": "paragraph",
+    "text": "Flow Control: A receiving node can receive the frames at a faster rate than it can process the frame. Without flow control, the receiver's buffer can overflow, and frames can get lost. To overcome this problem, the data link layer uses the flow control to prevent the sending node on one side of the link from overwhelming the receiving node on another side of the link. This prevents traffic jam at the receiver side."
+  },
+  {
+    "type": "paragraph",
+    "text": "Error Control: Error control is achieved by adding a trailer at the end of the frame. Duplication of frames are also prevented by using this mechanism. Data Link Layers adds mechanism to prevent duplication of frames."
+  },
+  {
+    "type": "paragraph",
+    "text": "Error detection: Errors can be introduced by signal attenuation and noise. Data Link Layer protocol provides a mechanism to detect one or more errors. This is achieved by adding error detection bits in the frame and then receiving node can perform an error check."
+  },
+  {
+    "type": "paragraph",
+    "text": "Error correction: Error correction is similar to the Error detection, except that receiving node not only detects the errors but also determine where the errors have occurred in the frame."
+  },
+  {
+    "type": "paragraph",
+    "text": "Access Control: Protocols of this layer determine which of the devices has control over the link at any given time, when two or more devices are connected to the same link."
+  },
+  {
+    "type": "paragraph",
+    "text": "Reliable delivery: Data Link Layer provides a reliable delivery service, i.e., transmits the network layer datagram without any error. A reliable delivery service is accomplished with transmissions and acknowledgements. A data link layer mainly provides the reliable delivery"
+  },
+  {
+    "type": "paragraph",
+    "text": "service over the links as they have higher error rates and they can be corrected locally, link at which an error occurs rather than forcing to retransmit the data."
+  },
+  {
+    "type": "paragraph",
+    "text": "Half-Duplex & Full-Duplex: In a Full-Duplex mode, both the nodes can transmit the data at the same time. In a Half-Duplex mode, only one node can transmit the data at the same time."
+  },
+  {
+    "type": "header",
+    "text": "FRAMING:"
+  },
+  {
+    "type": "paragraph",
+    "text": "To provide service to the network layer, the data link layer must use the service provided to it by the physical layer. What the physical layer does is accept a raw bit stream and attempt to deliver it to the destination. This bit stream is not guaranteed to be error free. The number of bits received may be less than, equal to, or more than the number of bits transmitted, and they may have different values. It is up to the data link layer to detect and, if necessary, correct errors. The usual approach is for the data link layer to break the bit stream up into discrete frames and compute the checksum for each frame (framing). When a frame arrives at the destination, the checksum is recomputed. If the newly computed checksum is different from the one contained in the frame, the data link layer knows that an error has occurred and takes steps to deal with it (e.g., discarding the bad frame and possibly also sending back an error report).We will look at four framing methods:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Character count."
+  },
+  {
+    "type": "paragraph",
+    "text": "Flag bytes with byte stuffing."
+  },
+  {
+    "type": "paragraph",
+    "text": "Starting and ending flags, with bit stuffing."
+  },
+  {
+    "type": "paragraph",
+    "text": "Physical layer coding violations."
+  },
+  {
+    "type": "paragraph",
+    "text": "Character count method uses a field in the header to specify the number of characters in the frame. When the data link layer at the destination sees the character count, it knows how many characters follow and hence where the end of the frame is. This technique is shown in Fig. (a) For four frames of sizes 5, 5, 8, and 8 characters, respectively."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image5.webp",
+    "caption": "Figure 2-5"
+  },
+  {
+    "type": "header",
+    "text": "A character stream. (a) Without errors. (b) With one error"
+  },
+  {
+    "type": "paragraph",
+    "text": "The trouble with this algorithm is that the count can be garbled by a transmission error. For example, if the character count of 5 in the second frame of Fig. (b) becomes a 7, the destination will get out of synchronization and will be unable to locate the start of the next frame. Even if the checksum is incorrect so the destination knows that the frame is bad, it still has no way of telling where the next frame starts. Sending a frame back to the source asking for a retransmission does not help either, since the destination does not know how many characters to skip over to get to the start of the retransmission. For this reason, the character count method is rarely used anymore."
+  },
+  {
+    "type": "paragraph",
+    "text": "Flag bytes with byte stuffing method gets around the problem of resynchronization after an error by having each frame start and end with special bytes. In the past, the starting and ending bytes were different, but in recent years most protocols have used the same byte, called a flag byte, as both the starting and ending delimiter, as shown in Fig. (a) as FLAG. In this way, if the receiver ever loses synchronization, it can just search for the flag byte to find the end of the current frame. Two consecutive flag bytes indicate the end of one frame and start of the next one."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image6.webp",
+    "caption": "Figure 2-6"
+  },
+  {
+    "type": "paragraph",
+    "text": "(a)A frame delimited by flag bytes (b) Four examples of byte sequences"
+  },
+  {
+    "type": "header",
+    "text": "before and after byte stuffing"
+  },
+  {
+    "type": "paragraph",
+    "text": "It may easily happen that the flag byte's bit pattern occurs in the data. This situation will usually interfere with the framing. One way to solve this problem is to have the sender's data link layer insert a special escape byte (ESC) just before each ''accidental'' flag byte in the data. The data link layer on the receiving end removes the escape byte before the data are given to the network layer. This technique is called byte stuffing or character stuffing."
+  },
+  {
+    "type": "paragraph",
+    "text": "Thus, a framing flag byte can be distinguished from one in the data by the absence or presence of an escape byte before it."
+  },
+  {
+    "type": "paragraph",
+    "text": "What happens if an escape byte occurs in the middle of the data? The answer is that, it too is stuffed with an escape byte. Thus, any single escape byte is part of an escape sequence, whereas a doubled one indicates that a single escape occurred naturally in the data. Some examples are shown in Fig. (b). In all cases, the byte sequence delivered after de stuffing is exactly the same as the original byte sequence."
+  },
+  {
+    "type": "paragraph",
+    "text": "A major disadvantage of using this framing method is that it is closely tied to the use of 8-bit characters. Not all character codes use 8-bit characters. For example UNICODE uses 16-bit characters, so a new technique had to be developed to allow arbitrary sized characters"
+  },
+  {
+    "type": "paragraph",
+    "text": "Starting and ending flags, with bit stuffing allows data frames to contain an arbitrary number of bits and allows character codes with an arbitrary number of bits per character. It works like this. Each frame begins and ends with a special bit pattern, 01111110 (in fact, a flag byte). Whenever the sender's data link layer encounters five consecutive 1s in the data, it automatically stuffs a 0 bit into the outgoing bit stream. This bit stuffing is analogous to byte stuffing, in which an escape byte is stuffed into the outgoing character stream before a flag byte in the data."
+  },
+  {
+    "type": "paragraph",
+    "text": "When the receiver sees five consecutive incoming 1 bits, followed by a 0 bit, it automatically de- stuffs (i.e., deletes) the 0 bit. Just as byte stuffing is completely transparent to the network layer in both computers, so is bit stuffing. If the user data contain the flag pattern, 01111110, this flag is transmitted as 011111010 but stored in the receiver's memory as 01111110."
+  },
+  {
+    "type": "paragraph",
+    "text": "Fig:Bit stuffing. (a) The original data. (b) The data as they appear on the line."
+  },
+  {
+    "type": "paragraph",
+    "text": "(c) The data as they are stored in the receiver's memory after destuffing."
+  },
+  {
+    "type": "paragraph",
+    "text": "With bit stuffing, the boundary between two frames can be unambiguously recognized by the flag pattern. Thus, if the receiver loses track of where it is, all it has to do is scan the input for flag sequences, since they can only occur at frame boundaries and never within the data."
+  },
+  {
+    "type": "paragraph",
+    "text": "Physical layer coding violations method of framing is only applicable to networks in which the encoding on the physical medium contains some redundancy. For example, some LANs encode 1 bit of data by using 2 physical bits. Normally, a 1 bit is a high-low pair and a 0 bit is a low-high pair. The scheme means that every data bit has a transition in the middle, making it easy for the receiver to locate the bit boundaries. The combinations high-"
+  },
+  {
+    "type": "paragraph",
+    "text": "high and low-low are not used for data but are used for delimiting frames in some protocols."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image8.webp",
+    "caption": "Figure 2-8"
+  },
+  {
+    "type": "paragraph",
+    "text": "As a final note on framing, many data link protocols use combination of a character count with one of the other methods for extra safety. When a frame arrives, the count field is used to locate the end of the frame. Only if the appropriate delimiter is present at that position and the checksum is correct is the frame accepted as valid. Otherwise, the input stream is scanned for the next delimiter"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image9.webp",
+    "caption": "Figure 2-9"
+  },
+  {
+    "type": "header",
+    "text": "ELEMENTARY DATA LINK PROTOCOLS"
+  },
+  {
+    "type": "header",
+    "text": "Simplest Protocol"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image10.webp",
+    "caption": "Figure 2-10"
+  },
+  {
+    "type": "paragraph",
+    "text": "It is very simple. The sender sends a sequence of frames without even thinking about the receiver. Data are transmitted in one direction only. Both sender & receiver always ready. Processing time can be ignored. Infinite buffer space is available. And best of all, the communication channel between the data link layers never damages or loses frames. This thoroughly unrealistic protocol, which we will nickname \u2018\u2018Utopia,\u2019\u2019 .The utopia protocol is unrealistic because it does not handle either flow control or error correction"
+  },
+  {
+    "type": "header",
+    "text": "Stop-and-wait Protocol"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image11.webp",
+    "caption": "Figure 2-11"
+  },
+  {
+    "type": "paragraph",
+    "text": "It is still very simple. The sender sends one frame and waits for feedback from the receiver. When the ACK arrives, the sender sends the next frame"
+  },
+  {
+    "type": "paragraph",
+    "text": "It is Stop-and-Wait Protocol because the sender sends one frame, stops until it receives confirmation from the receiver (okay to go ahead), and then sends the next frame. We still have unidirectional communication for data frames, but auxiliary ACK frames (simple tokens of acknowledgment) travel from the other direction. We add flow control to our previous protocol."
+  },
+  {
+    "type": "header",
+    "text": "NOISY CHANNELS"
+  },
+  {
+    "type": "paragraph",
+    "text": "Although the Stop-and-Wait Protocol gives us an idea of how to add flow control to its predecessor, noiseless channels are nonexistent. We can ignore the error (as we sometimes do), or we need to add error control to our protocols. We discuss three protocols in this section that use error control."
+  },
+  {
+    "type": "paragraph",
+    "text": "Sliding Window Protocols:"
+  },
+  {
+    "type": "header",
+    "text": "Stop-and-WaitAutomaticRepeat Request"
+  },
+  {
+    "type": "header",
+    "text": "Go-Back-NAutomaticRepeat Request"
+  },
+  {
+    "type": "header",
+    "text": "Selective Repeat Automatic Repeat Request"
+  },
+  {
+    "type": "header",
+    "text": "1 Stop-and-Wait Automatic Repeat Request"
+  },
+  {
+    "type": "paragraph",
+    "text": "To detect and correct corrupted frames, we need to add redundancy bits to our data frame. When the frame arrives at the receiver site, it is checked and if it is corrupted, it is silently discarded. The detection of errors in this protocol is manifested by the silence of the receiver."
+  },
+  {
+    "type": "paragraph",
+    "text": "Lost frames are more difficult to handle than corrupted ones. In our previous protocols, there was no way to identify a frame. The received frame could be the correct one, or a duplicate, or a frame out of order. The solution is to number the frames. When the receiver receives a data frame that is out of order, this means that frames were either lost or duplicated"
+  },
+  {
+    "type": "paragraph",
+    "text": "The lost frames need to be resent in this protocol. If the receiver does not respond when there is an error, how can the sender know which frame to resend? To remedy this problem, the sender keeps a copy of the sent frame. At the same time, it starts a timer. If the timer expires and there is no ACK for the sent frame, the frame is resent, the copy is held, and the timer is restarted. Since the protocol uses the stop-and-wait mechanism, there is only one specific frame that needs an ACK"
+  },
+  {
+    "type": "paragraph",
+    "text": "Error correction in Stop-and-Wait ARQ is done by keeping a copy of the sent frame and retransmitting of the frame when the timer expires"
+  },
+  {
+    "type": "paragraph",
+    "text": "In Stop-and-Wait ARQ, we use sequence numbers to number the frames. The sequence numbers are based on modulo-2 arithmetic."
+  },
+  {
+    "type": "paragraph",
+    "text": "In Stop-and-Wait ARQ, the acknowledgment number always announces in modulo-2 arithmetic the sequence number of the next frame expected."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image12.webp",
+    "caption": "Figure 2-12"
+  },
+  {
+    "type": "paragraph",
+    "text": "Bandwidth Delay Product:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Assume that, in a Stop-and-Wait ARQ system, the bandwidth of the line is 1 Mbps, and 1 bit takes 20 ms to make a round trip. What is the bandwidth-delay product? If the system data frames are 1000 bits in length, what is the utilization percentage of the link?"
+  },
+  {
+    "type": "paragraph",
+    "text": "The link utilization is only 1000/20,000, or 5 percent. For this reason, for a link with a high bandwidth or long delay, the use of Stop-and-Wait ARQ wastes the capacity of the link."
+  },
+  {
+    "type": "header",
+    "text": "2. Go-Back-N Automatic Repeat Request"
+  },
+  {
+    "type": "paragraph",
+    "text": "To improve the efficiency of transmission (filling the pipe), multiple frames must be in transition while waiting for acknowledgment. In other words, we need to let more than one frame be outstanding to keep the channel busy while the sender is waiting for acknowledgment."
+  },
+  {
+    "type": "paragraph",
+    "text": "The first is called Go-Back-N Automatic Repeat. In this protocol we can send several frames before receiving acknowledgments; we keep a copy of these frames until the acknowledgments arrive."
+  },
+  {
+    "type": "paragraph",
+    "text": "In the Go-Back-N Protocol, the sequence numbers are modulo 2m, where m is the size of the sequence number field in bits. The sequence numbers range from 0 to 2 power m- 1. For example, if m is 4, the only sequence numbers are 0 through 15 inclusive."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image14.webp",
+    "caption": "Figure 2-14"
+  },
+  {
+    "type": "paragraph",
+    "text": "The sender window at any time divides the possible sequence numbers into four regions."
+  },
+  {
+    "type": "paragraph",
+    "text": "The first region, from the far left to the left wall of the window, defines the sequence numbers belonging to frames that are already acknowledged. The sender does not worry about these frames and keeps no copies of them."
+  },
+  {
+    "type": "paragraph",
+    "text": "The second region, colored in Figure (a), defines the range of sequence numbers belonging to the frames that are sent and have an unknown status. The sender needs to wait to find out if these frames have been received or were lost. We call these outstanding frames."
+  },
+  {
+    "type": "paragraph",
+    "text": "The third range, white in the figure, defines the range of sequence numbers for frames that can be sent; however, the corresponding data packets have not yet been received from the network layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "Finally, the fourth region defines sequence numbers that cannot be used until the window slides"
+  },
+  {
+    "type": "paragraph",
+    "text": "The send window is an abstract concept defining an imaginary box of size 2m \u2212 1 with three variables: Sf, Sn, and Ssize. The variable Sf defines the sequence number of the first (oldest) outstanding frame. The variable Sn holds the sequence number that will be assigned to the next frame to be sent. Finally, the variable Ssize defines the size of the window."
+  },
+  {
+    "type": "paragraph",
+    "text": "Figure (b) shows how a send window can slide one or more slots to the right when an acknowledgment arrives from the other end. The acknowledgments in this protocol are cumulative, meaning that more than one frame can be acknowledged by an ACK frame. In Figure, frames 0, I, and 2 are"
+  },
+  {
+    "type": "paragraph",
+    "text": "acknowledged, so the window has slide to the right three slots. Note that the value of Sf is 3 because frame 3 is now the first outstanding frame.The send window can slide one or more slots when a valid acknowledgment arrives."
+  },
+  {
+    "type": "paragraph",
+    "text": "Receiver window: variable Rn (receive window, next frame expected) ."
+  },
+  {
+    "type": "paragraph",
+    "text": "The sequence numbers to the left of the window belong to the frames already received and acknowledged; the sequence numbers to the right of this window define the frames that cannot be received. Any received frame with a sequence number in these two regions is discarded. Only a frame with a sequence number matching the value of Rn is accepted and acknowledged. The receive window also slides, but only one slot at a time. When a correct frame is received (and a frame is received only one at a time), the window slides.( see below figure for receiving window)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The receive window is an abstract concept defining an imaginary box of size 1 with one single variable Rn. The window slides when a correct frame has arrived; sliding occurs one slot at a time"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image15.webp",
+    "caption": "Figure 2-15"
+  },
+  {
+    "type": "paragraph",
+    "text": "Fig: Receiver window (before sliding (a), After sliding (b))"
+  },
+  {
+    "type": "header",
+    "text": "Timers"
+  },
+  {
+    "type": "paragraph",
+    "text": "Although there can be a timer for each frame that is sent, in our protocol we use only one. The reason is that the timer for the first outstanding frame always expires first; we send all outstanding frames when this timer expires."
+  },
+  {
+    "type": "header",
+    "text": "Acknowledgment"
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiver sends a positive acknowledgment if a frame has arrived safe and sound and in order. If a frame is damaged or is received out of order, the receiver is silent and will discard all subsequent frames until it receives the one it is expecting. The silence of the receiver causes the timer of the unacknowledged frame at the sender side to expire. This, in turn, causes the sender to go back and resend all frames, beginning with the one with the expired timer. The receiver does not have to acknowledge each frame received. It can send one cumulative acknowledgment for several frames."
+  },
+  {
+    "type": "header",
+    "text": "Resending a Frame"
+  },
+  {
+    "type": "paragraph",
+    "text": "When the timer expires, the sender resends all outstanding frames. For example, suppose the sender has already sent frame 6, but the timer for frame 3 expires. This means that frame 3 has not been acknowledged; the sender goes back and sends frames 3,4,5, and 6 again. That is why the protocol is called Go-Back-N ARQ."
+  },
+  {
+    "type": "paragraph",
+    "text": "Below figure is an example(if ack lost) of a case where the forward channel is reliable, but the reverse is not. No data frames are lost, but some ACKs are delayed and one is lost. The example also shows how cumulative acknowledgments can help if acknowledgments are delayed or lost"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image16.webp",
+    "caption": "Figure 2-16"
+  },
+  {
+    "type": "paragraph",
+    "text": "Below figure is an example(if frame lost)"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image17.webp",
+    "caption": "Figure 2-17"
+  },
+  {
+    "type": "paragraph",
+    "text": "Stop-and-Wait ARQ is a special case of Go-Back-N ARQ in which the size of the send window is 1."
+  },
+  {
+    "type": "header",
+    "text": "3 Selective Repeat Automatic Repeat Request"
+  },
+  {
+    "type": "paragraph",
+    "text": "In Go-Back-N ARQ, The receiver keeps track of only one variable, and there is no need to buffer out-of- order frames; they are simply discarded. However, this protocol is very inefficient for a noisy link."
+  },
+  {
+    "type": "paragraph",
+    "text": "In a noisy link a frame has a higher probability of damage, which means the resending of multiple frames. This resending uses up the bandwidth and slows down the transmission."
+  },
+  {
+    "type": "paragraph",
+    "text": "For noisy links, there is another mechanism that does not resend N frames when just one frame is damaged; only the damaged frame is resent. This mechanism is called Selective Repeat ARQ."
+  },
+  {
+    "type": "paragraph",
+    "text": "It is more efficient for noisy links, but the processing at the receiver is more complex."
+  },
+  {
+    "type": "paragraph",
+    "text": "Sender Window (explain go-back N sender window concept (before & after sliding.) The only difference in sender window between Go-back N and Selective Repeat is Window size)"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image18.webp",
+    "caption": "Figure 2-18"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image19.webp",
+    "caption": "Figure 2-19"
+  },
+  {
+    "type": "header",
+    "text": "Receiver window"
+  },
+  {
+    "type": "paragraph",
+    "text": "The receiver window in Selective Repeat is totally different from the one in Go Back-N. First, the size of the receive window is the same as the size of the send window (2m-1)."
+  },
+  {
+    "type": "paragraph",
+    "text": "The Selective Repeat Protocol allows as many frames as the size of the receiver window to arrive out of order and be kept until there is a set of in- order frames to be delivered to the network layer. Because the sizes of the send window and receive window are the same, all the frames in the send frame can arrive out of order and be stored until they can be delivered. However the receiver never delivers packets out of order to the network layer. Above Figure shows the receive window. Those slots inside the window that are colored define frames that have arrived out of order and are waiting for their neighbors to arrive before delivery to the network layer."
+  },
+  {
+    "type": "paragraph",
+    "text": "In Selective Repeat ARQ, the size of the sender and receiver window must be at most one-half of 2m"
+  },
+  {
+    "type": "paragraph",
+    "text": "Delivery of Data in Selective Repeat ARQ:"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image20.webp",
+    "caption": "Figure 2-20"
+  },
+  {
+    "type": "header",
+    "text": "Flow Diagram"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image21.webp",
+    "caption": "Figure 2-21"
+  },
+  {
+    "type": "header",
+    "text": "Differences between Go-Back N & Selective Repeat"
+  },
+  {
+    "type": "paragraph",
+    "text": "One main difference is the number of timers. Here, each frame sent or resent needs a timer, which means that the timers need to be numbered (0, 1,2, and 3). The timer for frame 0 starts at the first request, but stops when the ACK for this frame arrives."
+  },
+  {
+    "type": "paragraph",
+    "text": "There are two conditions for the delivery of frames to the network layer: First, a set of consecutive frames must have arrived. Second, the set starts from the beginning of the window. After the first arrival, there was only one frame and it started from the beginning of the window. After the last arrival, there are three frames and the first one starts from the beginning of the window."
+  },
+  {
+    "type": "paragraph",
+    "text": "Another important point is that a NAK is sent."
+  },
+  {
+    "type": "paragraph",
+    "text": "The next point is about the ACKs. Notice that only two ACKs are sent here. The first one acknowledges only the first frame; the second one acknowledges three frames. In Selective Repeat, ACKs are sent when data are delivered to the network layer. If the data belonging to n frames are delivered in one shot, only one ACK is sent for all of them."
+  },
+  {
+    "type": "header",
+    "text": "Piggybacking"
+  },
+  {
+    "type": "paragraph",
+    "text": "A technique called piggybacking is used to improve the efficiency of the bidirectional protocols. When a frame is carrying data from A to B, it can also carry control information about arrived (or lost) frames from B; when a frame is carrying data from B to A, it can also carry control information about the arrived (or lost) frames from A."
+  },
+  {
+    "type": "header",
+    "text": "RANDOM ACCESS PROTOCOLS"
+  },
+  {
+    "type": "paragraph",
+    "text": "We can consider the data link layer as two sub layers. The upper sub layer is responsible for data link control, and the lower sub layer is responsible for resolving access to the shared media"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image22.webp",
+    "caption": "Figure 2-22"
+  },
+  {
+    "type": "paragraph",
+    "text": "The upper sub layer that is responsible for flow and error control is called the logical link control (LLC) layer; the lower sub layer that is mostly responsible for multiple access resolution is called the media access control (MAC) layer. When nodes or stations are connected and use a common link, called a multipoint or broadcast link, we need a multiple-access protocol to coordinate access to the link."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image23.webp",
+    "caption": "Figure 2-23"
+  },
+  {
+    "type": "header",
+    "text": "Taxonomy of multiple-access protocols"
+  },
+  {
+    "type": "header",
+    "text": "RANDOM ACCESS"
+  },
+  {
+    "type": "paragraph",
+    "text": "In random access or contention methods, no station is superior to another station and none is assigned the control over another."
+  },
+  {
+    "type": "paragraph",
+    "text": "Two features give this method its name. First, there is no scheduled time for a station to transmit. Transmission is random among the stations. That is why these methods are called random access. Second, no rules specify which station should send next. Stations compete with one another to access the medium. That is why these methods are also called contention methods."
+  },
+  {
+    "type": "header",
+    "text": "ALOHA"
+  },
+  {
+    "type": "header",
+    "text": "1 Pure ALOHA"
+  },
+  {
+    "type": "paragraph",
+    "text": "The original ALOHA protocol is called pure ALOHA. This is a simple, but elegant protocol. The idea is that each station sends a frame whenever it has a frame to send. However, since there is only one channel to share, there is the possibility of collision between frames from different stations. Below Figure shows an example of frame collisions in pure ALOHA."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image24.webp",
+    "caption": "Figure 2-24"
+  },
+  {
+    "type": "header",
+    "text": "Frames in a pure ALOHA network"
+  },
+  {
+    "type": "paragraph",
+    "text": "In pure ALOHA, the stations transmit frames whenever they have data to send."
+  },
+  {
+    "type": "paragraph",
+    "text": "When two or more stations transmit simultaneously, there is collision and the frames are destroyed."
+  },
+  {
+    "type": "paragraph",
+    "text": "In pure ALOHA, whenever any station transmits a frame, it expects the"
+  },
+  {
+    "type": "paragraph",
+    "text": "acknowledgement from the receiver."
+  },
+  {
+    "type": "paragraph",
+    "text": "If acknowledgement is not received within specified time, the station assumes that the frame (or acknowledgement) has been destroyed."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the frame is destroyed because of collision the station waits for a random"
+  },
+  {
+    "type": "paragraph",
+    "text": "amount of time and sends it again. This waiting time must be random otherwise same frames will collide again and again."
+  },
+  {
+    "type": "paragraph",
+    "text": "Therefore pure ALOHA dictates that when time-out period passes, each station"
+  },
+  {
+    "type": "paragraph",
+    "text": "must wait for a random amount of time before resending its frame. This randomness will help avoid more collisions."
+  },
+  {
+    "type": "paragraph",
+    "text": "Vulnerable time Let us find the length of time, the vulnerable time, in which there is a possibility of collision. We assume that the stations send fixed- length frames with each frame taking Tfr S to send. Below Figure shows the vulnerable time for station A."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image25.webp",
+    "caption": "Figure 2-25"
+  },
+  {
+    "type": "paragraph",
+    "text": "Station A sends a frame at time t. Now imagine station B has already sent a frame between t - Tfr and t. This leads to a collision between the frames from station A and station B. The end of B's frame collides with the beginning of A's frame. On the other hand, suppose that station C sends a frame between t and t + Tfr . Here, there is a collision between frames from station A and station C. The beginning of C's frame collides with the end of A's frame"
+  },
+  {
+    "type": "paragraph",
+    "text": "Looking at Figure, we see that the vulnerable time, during which a collision may occur in pure ALOHA, is 2 times the frame transmission time. Pure ALOHA vulnerable time = 2 x Tfr"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image26.webp",
+    "caption": "Figure 2-26"
+  },
+  {
+    "type": "header",
+    "text": "Procedure for pure ALOHA protocol"
+  },
+  {
+    "type": "header",
+    "text": "Example"
+  },
+  {
+    "type": "paragraph",
+    "text": "A pure ALOHA network transmits 200-bit frames on a shared channel of 200 kbps. What is the requirement to make this frame collision-free?"
+  },
+  {
+    "type": "header",
+    "text": "Solution"
+  },
+  {
+    "type": "paragraph",
+    "text": "Average frame transmission time Tfr is 200 bits/200 kbps or 1 ms. The vulnerable time is 2 x 1 ms =2 ms. This means no station should send later than 1 ms before this station starts transmission and no station should start sending during the one I-ms period that this station is sending."
+  },
+  {
+    "type": "paragraph",
+    "text": "The throughput for pure ALOHA is S = G \u00d7 e \u22122G . The maximum throughput Smax = 0.184 when G= (1/2)."
+  },
+  {
+    "type": "header",
+    "text": "PROBLEM"
+  },
+  {
+    "type": "paragraph",
+    "text": "A pure ALOHA network transmits 200-bit frames on a shared channel of 200 kbps. What is the throughput if the system (all stations together) produces a. 1000 frames per second b. 500 frames per second c. 250 frames per second."
+  },
+  {
+    "type": "paragraph",
+    "text": "The frame transmission time is 200/200 kbps or 1 ms."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the system creates 1000 frames per second, this is 1 frame per"
+  },
+  {
+    "type": "paragraph",
+    "text": "millisecond. The load is 1. In this case S = G\u00d7 e\u22122 G or S = 0.135 (13.5 percent). This means that the throughput is 1000 \u00d7 0.135 = 135 frames. Only 135 frames out of 1000 will probably survive."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the system creates 500 frames per second, this is (1/2)  frame  per millisecond. The load is (1/2). In this case S = G \u00d7 e \u22122G or S = 0.184 (18.4 percent). Thismeans that the throughput is 500 \u00d7"
+  },
+  {
+    "type": "paragraph",
+    "text": "0.184 = 92 and that  only 92 frames out of 500 will probably survive. Note that this is the maximum throughput case, percentage wise."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the system creates 250 frames per second, this is (1/4) frameper millisecond. The load is (1/4). In this case S = G \u00d7 e \u22122G or S = 0.152 (15.2 percent). This means that the throughput is 250 \u00d7 0.152 = 38. Only 38 frames out of 250 will probably survive."
+  },
+  {
+    "type": "header",
+    "text": "2 Slotted ALOHA"
+  },
+  {
+    "type": "paragraph",
+    "text": "Pure ALOHA has a vulnerable time of 2 x Tfr . This is so because there is no rule that defines when the station can send. A station may send soon after another station has started or soon before another station has finished. Slotted ALOHA was invented to improve the efficiency of pure ALOHA."
+  },
+  {
+    "type": "paragraph",
+    "text": "In slotted ALOHA we divide the time into slots of Tfr s and force the station to send only at the beginning of the time slot. Figure 3 shows an example of frame collisions in slotted ALOHA"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image27.webp",
+    "caption": "Figure 2-27"
+  },
+  {
+    "type": "header",
+    "text": "FIG:3"
+  },
+  {
+    "type": "paragraph",
+    "text": "Because a station is allowed to send only at the beginning of the synchronized time slot, if a station misses this moment, it must wait until the beginning of the next time slot. This means that the station which started at the beginning of this slot has already finished sending its frame. Of course, there is still the possibility of collision if two stations try to send at the beginning of the same time slot. However, the vulnerable time is now reduced to one-half, equal to Tfr Figure 4 shows the situation"
+  },
+  {
+    "type": "paragraph",
+    "text": "Below fig shows that the vulnerable time for slotted ALOHA is one-half that of pure ALOHA. Slotted ALOHA vulnerable time = Tfr"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image28.webp",
+    "caption": "Figure 2-28"
+  },
+  {
+    "type": "paragraph",
+    "text": "The throughput for slotted ALOHA is S = G \u00d7 e\u2212G . The maximum throughput Smax = 0.368 when G = 1."
+  },
+  {
+    "type": "paragraph",
+    "text": "A slotted ALOHA network transmits 200-bit frames using a shared channel with a 200- Kbps bandwidth. Find the throughput if the system (all stations together) produces"
+  },
+  {
+    "type": "paragraph",
+    "text": "a. 1000 frames per second b. 500 frames per second c. 250 frames per second"
+  },
+  {
+    "type": "header",
+    "text": "Solution"
+  },
+  {
+    "type": "paragraph",
+    "text": "This situation is similar to the previous exercise except that the network is using slotted ALOHA instead of pure ALOHA. The frame transmission time is 200/200 kbps or 1 ms."
+  },
+  {
+    "type": "paragraph",
+    "text": "In this case G is 1. So S =G x e-G or S =0.368 (36.8 percent). This means that the throughput is 1000 x 0.0368 =368 frames. Only 368 out of 1000 frames will probably survive. Note that this is the maximum throughput case, percentagewise."
+  },
+  {
+    "type": "paragraph",
+    "text": "Here G is 1/2 In this case S =G x e-G or S =0.303 (30.3 percent). This means that the throughput is 500 x 0.0303 =151. Only 151 frames out of 500 will probably survive."
+  },
+  {
+    "type": "paragraph",
+    "text": "Now G is 1/4. In this case S =G x e-G or S =0.195 (19.5 percent). This means that the throughput is 250 x 0.195 = 49. Only 49 frames out of 250 will probably survive"
+  },
+  {
+    "type": "header",
+    "text": "Comparison between Pure Aloha & Slotted Aloha"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image29.webp",
+    "caption": "Figure 2-29"
+  },
+  {
+    "type": "paragraph",
+    "text": "Carrier Sense Multiple Access (CSMA)"
+  },
+  {
+    "type": "paragraph",
+    "text": "To minimize the chance of collision and, therefore, increase the performance, the CSMA method was developed. The chance of collision can be reduced if a station senses the medium before trying to use it. Carrier sense multiple access (CSMA) requires that each station first listen to the medium (or check the state of the medium) before sending. In other words, CSMA is based on the principle \"sense before transmit\" or \"listen before talk.\""
+  },
+  {
+    "type": "paragraph",
+    "text": "CSMA can reduce the possibility of collision, but it cannot eliminate it. The reason for this is shown in below Figure. Stations are connected to a shared channel (usually a dedicated medium)."
+  },
+  {
+    "type": "paragraph",
+    "text": "The possibility of collision still exists because of propagation delay; station may sense the medium and find it idle, only because the first bit sent by another station has not yet been received."
+  },
+  {
+    "type": "paragraph",
+    "text": "At time tI' station B senses the medium and finds it idle, so it sends a frame. At time t2 (t2> tI)' station C senses the medium and finds it idle because, at this time, the first bits from station B"
+  },
+  {
+    "type": "paragraph",
+    "text": "have not reached station C. Station C also sends a frame. The two signals collide and both frames are destroyed."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image30.webp",
+    "caption": "Figure 2-30"
+  },
+  {
+    "type": "header",
+    "text": "Space/time model of the collision in CSMA"
+  },
+  {
+    "type": "header",
+    "text": "Vulnerable Time"
+  },
+  {
+    "type": "paragraph",
+    "text": "The vulnerable time for CSMA is the propagation time Tp . This is the time needed for a signal to propagate from one end of the medium to the other. When a station sends a frame, and any other station tries to send a frame during this time, a collision will result. But if the first bit of the frame reaches the end of the medium, every station will already have heard the bit and will refrain from sending"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image31.webp",
+    "caption": "Figure 2-31"
+  },
+  {
+    "type": "header",
+    "text": "Vulnerable time in CSMA"
+  },
+  {
+    "type": "header",
+    "text": "Persistence Methods"
+  },
+  {
+    "type": "paragraph",
+    "text": "What should a station do if the channel is busy? What should a station do if the channel is idle? Three methods have been devised to answer these questions: the 1-persistent method, the non-persistent method, and the p-persistent method"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image32.webp",
+    "caption": "Figure 2-32"
+  },
+  {
+    "type": "paragraph",
+    "text": "1-Persistent: In this method, after the station finds the line idle, it sends its frame immediately (with probability 1). This method has the highest chance of collision because two or more stations may find the line idle and send their frames immediately."
+  },
+  {
+    "type": "paragraph",
+    "text": "Non-persistent: a station that has a frame to send senses the line. If the line is idle, it sends immediately. If the line is not idle, it waits a random amount of time and then senses the line again. This approach reduces the chance of collision because it is unlikely that two or more stations will wait the same amount of time and retry to send simultaneously. However, this method reduces the efficiency of the network because the medium remains idle when there may be stations with frames to send."
+  },
+  {
+    "type": "paragraph",
+    "text": "p-Persistent: This is used if the channel has time slots with a slot duration equal to or greater than the maximum propagation time. The p-persistent approach combines the advantages of the other two strategies. It reduces the chance of collision and improves efficiency."
+  },
+  {
+    "type": "paragraph",
+    "text": "In this method, after the station finds the line idle it follows these steps:"
+  },
+  {
+    "type": "paragraph",
+    "text": "With probability p, the station sends its frame."
+  },
+  {
+    "type": "paragraph",
+    "text": "With probability q = 1 - p, the station waits for the beginning of the next time slot and checks the line again."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the line is idle, it goes to step 1."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the line is busy, it acts as though a collision has occurred and uses the backoff procedure."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image33.webp",
+    "caption": "Figure 2-33"
+  },
+  {
+    "type": "paragraph",
+    "text": "Carrier Sense Multiple Access with Collision Detection (CSMA/CD)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The CSMA method does not specify the procedure following a collision. Carrier sense multiple access with collision detection (CSMA/CD) augments the algorithm to handle the collision."
+  },
+  {
+    "type": "paragraph",
+    "text": "In this method, a station monitors the medium after it sends a frame to see if the transmission was successful. If so, the station is finished. If, however, there is a collision, the frame is sent again."
+  },
+  {
+    "type": "paragraph",
+    "text": "To better understand CSMA/CD, let us look at the first bits transmitted by the two stations involved in the collision. Although each station continues to send bits in the frame until it detects the collision, we show what happens as the first bits collide. In below Figure, stations A and C are involved in the collision."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image34.webp",
+    "caption": "Figure 2-34"
+  },
+  {
+    "type": "header",
+    "text": "Collision of the first bit in CSMA/CD"
+  },
+  {
+    "type": "paragraph",
+    "text": "At time t 1, station A has executed its persistence procedure and starts sending the bits of its frame. At time t2, station C has not yet sensed the first bit sent by A. Station C executes its persistence procedure and starts sending the bits in its frame, which propagate both to the left and to the right. The collision occurs sometime after time t2.Station C detects a collision at time t3 when it receives the first bit of A's frame. Station C immediately (or after a short time, but we assume immediately) aborts transmission."
+  },
+  {
+    "type": "paragraph",
+    "text": "Station A detects collision at time t4 when it receives the first bit of C's frame; it also immediately aborts transmission. Looking at the figure, we see that A"
+  },
+  {
+    "type": "paragraph",
+    "text": "transmits for the duration t4 - tl; C transmits for the duration t3 - t2."
+  },
+  {
+    "type": "header",
+    "text": "Minimum Frame Size"
+  },
+  {
+    "type": "paragraph",
+    "text": "For CSMAlCD to work, we need a restriction on the frame size. Before sending the last bit of the frame, the sending station must detect a collision, if any, and abort the transmission. This is so because the station, once the entire frame is sent, does not keep a copy of the frame and does not monitor the line for collision detection. Therefore, the frame transmission time Tfr must be at least two times the maximum propagation time Tp. To understand the reason, let us think about the worst-case scenario. If the two stations involved in a collision are the maximum distance apart, the signal from the first takes time Tp to reach the second, and the effect of the collision takes another time Tp to reach the first. So the requirement is that the first station must still be transmitting after 2Tp ."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image35.webp",
+    "caption": "Figure 2-35"
+  },
+  {
+    "type": "header",
+    "text": "Collision and abortion in CSMA/CD"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image36.webp",
+    "caption": "Figure 2-36"
+  },
+  {
+    "type": "header",
+    "text": "Flow diagram for the CSMA/CD"
+  },
+  {
+    "type": "header",
+    "text": "PROBLEM"
+  },
+  {
+    "type": "paragraph",
+    "text": "A network using CSMA/CD has a bandwidth of 10 Mbps. If the maximum propagation time (including the delays in the devices and ignoring the time needed to send a jamming signal, as we see later) is 25.6 \u03bcs, what is the minimum size of the frame?"
+  },
+  {
+    "type": "header",
+    "text": "SOL"
+  },
+  {
+    "type": "paragraph",
+    "text": "The frame transmission time is Tfr = 2 \u00d7 Tp = 51.2 \u03bcs. This means, in the worst case, a station needs to transmit for a period of 51.2 \u03bcs to detect the collision. The minimum size of the frame is 10 Mbps \u00d7 51.2 \u03bcs = 512 bits or 64 bytes. This is actually the minimum size of the frame for Standard Ethernet."
+  },
+  {
+    "type": "header",
+    "text": "DIFFERENCES BETWEEN ALOHA & CSMA/CD"
+  },
+  {
+    "type": "paragraph",
+    "text": "The first difference is the addition of the persistence process. We need to sense the channel before we start sending the frame by using one of the persistence processes"
+  },
+  {
+    "type": "paragraph",
+    "text": "The second difference is the frame transmission. In ALOHA, we first transmit the entire frame and then wait for an acknowledgment. In CSMA/CD, transmission and collision detection is a continuous process. We do not send the entire frame and then look for a collision. The station transmits and receives continuously and simultaneously"
+  },
+  {
+    "type": "paragraph",
+    "text": "The third difference is the sending of a short jamming signal that enforces the collision in case other stations have not yet sensed the collision."
+  },
+  {
+    "type": "paragraph",
+    "text": "Carrier Sense Multiple Access with Collision Avoidance (CSMA/CA)"
+  },
+  {
+    "type": "paragraph",
+    "text": "We need to avoid collisions on wireless networks because they cannot be detected. Carrier sense multiple access with collision avoidance (CSMAlCA) was invented for wirelesss network. Collisions are avoided through the use of CSMA/CA's three strategies: the inter frame space, the contention window, and"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image37.webp",
+    "caption": "Figure 2-37"
+  },
+  {
+    "type": "header",
+    "text": "acknowledgments, as shown in Figure"
+  },
+  {
+    "type": "header",
+    "text": "Timing in CSMA/CA"
+  },
+  {
+    "type": "paragraph",
+    "text": "Inter frame Space (IFS)"
+  },
+  {
+    "type": "paragraph",
+    "text": "First, collisions are avoided by deferring transmission even if the channel is found idle. When an idle channel is found, the station does not send immediately. It waits for a period of time called the inter frame space or IFS."
+  },
+  {
+    "type": "paragraph",
+    "text": "Even though the channel may appear idle when it is sensed, a distant station may have already started transmitting. The distant station's signal has not yet reached this station. The IFS time allows the front of the transmitted signal by the distant station to reach this station. If after the IFS time the channel is still idle, the station can send, but it still needs to wait a time equal to the contention time. The IFS variable can also be used to prioritize stations or frame types. For example, a station that is assigned shorter IFS has a higher priority."
+  },
+  {
+    "type": "paragraph",
+    "text": "In CSMA/CA, the IFS can also be used to define the priority of a station or a frame."
+  },
+  {
+    "type": "header",
+    "text": "Contention Window"
+  },
+  {
+    "type": "paragraph",
+    "text": "The contention window is an amount of time divided into slots. A station that is ready to send chooses a random number of slots as its wait time. The number of slots in the window changes according to the binary exponential back-off strategy. This means that it is set to one slot the first time and then doubles each time the station cannot detect an idle channel after the IFS time. This is very similar to the p-persistent method except that a random outcome defines the number of slots taken by the waiting station."
+  },
+  {
+    "type": "paragraph",
+    "text": "One interesting point about the contention window is that the station needs to sense the channel after each time slot. However, if the station finds the channel busy, it does not restart the process; it just stops the timer and restarts it when the channel is sensed as idle. This gives priority to the station with the longest waiting time."
+  },
+  {
+    "type": "paragraph",
+    "text": "In CSMA/CA, if the station finds the channel busy, it does not restart the timer of the contention window; it stops the timer and restarts it when the channel becomes idle."
+  },
+  {
+    "type": "header",
+    "text": "Acknowledgment"
+  },
+  {
+    "type": "paragraph",
+    "text": "With all these precautions, there still may be a collision resulting in destroyed data. In addition, the data may be corrupted during the transmission. The positive acknowledgment and the time-out timer can help guarantee that the receiver has received the frame."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image38.webp",
+    "caption": "Figure 2-38"
+  },
+  {
+    "type": "paragraph",
+    "text": "This is the CSMA protocol with collision avoidance."
+  },
+  {
+    "type": "paragraph",
+    "text": "The station ready to transmit, senses the line by using one of the persistent strategies."
+  },
+  {
+    "type": "paragraph",
+    "text": "As soon as it finds the line to be idle, the station waits for an IFS (Inter frame"
+  },
+  {
+    "type": "paragraph",
+    "text": "space) amount of time."
+  },
+  {
+    "type": "paragraph",
+    "text": "If then waits for some random time and sends the frame."
+  },
+  {
+    "type": "paragraph",
+    "text": "After sending the frame, it sets a timer and waits for the acknowledgement from the receiver."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the acknowledgement is received before expiry of the timer, then the"
+  },
+  {
+    "type": "paragraph",
+    "text": "transmission is successful."
+  },
+  {
+    "type": "paragraph",
+    "text": "Butifthetransmittingstationdoesnotreceivetheexpected acknowledgement before the timer expiry then it increments the back off"
+  },
+  {
+    "type": "paragraph",
+    "text": "parameter, waits for the back off time and re senses the line"
+  },
+  {
+    "type": "header",
+    "text": "Controlled Access Protocols"
+  },
+  {
+    "type": "paragraph",
+    "text": "In controlled access, the stations seek information from one another to find which station has the right to send. It allows only one node to send at a time, to avoid    collision    of    messages    on    shared    medium. The three controlled-access methods are:"
+  },
+  {
+    "type": "header",
+    "text": "1 Reservation 2 Polling 3 Token Passing"
+  },
+  {
+    "type": "header",
+    "text": "Reservation"
+  },
+  {
+    "type": "paragraph",
+    "text": "In the reservation method, a station needs to make a reservation before sending data."
+  },
+  {
+    "type": "paragraph",
+    "text": "The time line has two kinds of periods:"
+  },
+  {
+    "type": "header",
+    "text": "Reservation interval of fixed time length"
+  },
+  {
+    "type": "paragraph",
+    "text": "Data transmission period of variable frames."
+  },
+  {
+    "type": "paragraph",
+    "text": "If there are M stations, the reservation interval is divided into M slots, and each station has one slot."
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose if station 1 has a frame to send, it transmits 1 bit during the slot"
+  },
+  {
+    "type": "paragraph",
+    "text": "No other station is allowed to transmit during this slot."
+  },
+  {
+    "type": "paragraph",
+    "text": "In general, i th station may announce that it has a frame to send by inserting a 1 bit into i th slot. After all N slots have been checked, each station knows which stations wish to transmit."
+  },
+  {
+    "type": "paragraph",
+    "text": "The stations which have reserved their slots transfer their frames in that order."
+  },
+  {
+    "type": "paragraph",
+    "text": "After data transmission period, next reservation interval begins."
+  },
+  {
+    "type": "paragraph",
+    "text": "Since everyone agrees on who goes next, there will never be any collisions."
+  },
+  {
+    "type": "paragraph",
+    "text": "The following figure shows a situation with five stations and a five slot reservation frame. In the first interval, only stations 1, 3, and 4 have made reservations. In the second interval, only station 1 has made a reservation."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image39.webp",
+    "caption": "Figure 2-39"
+  },
+  {
+    "type": "header",
+    "text": "Polling"
+  },
+  {
+    "type": "paragraph",
+    "text": "Polling process is similar to the roll-call performed in class. Just like the teacher, a controller sends a message to each node in turn."
+  },
+  {
+    "type": "paragraph",
+    "text": "In this, one acts as a primary station(controller) and the others are secondary stations. All data exchanges must be made through the controller."
+  },
+  {
+    "type": "paragraph",
+    "text": "The message sent by the controller contains the address of the node being selected for granting access."
+  },
+  {
+    "type": "paragraph",
+    "text": "Although all nodes receive the message but the addressed one responds to it and sends data, if any. If there is no data, usually a \u201cpoll reject\u201d(NAK) message is sent back."
+  },
+  {
+    "type": "paragraph",
+    "text": "Problems include high overhead of the polling messages and high dependence on the reliability of the controller."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image41.webp",
+    "caption": "Figure 2-41"
+  },
+  {
+    "type": "header",
+    "text": "Token Passing"
+  },
+  {
+    "type": "paragraph",
+    "text": "In token passing scheme, the stations are connected logically to each other in form of ring and access of stations is governed by tokens."
+  },
+  {
+    "type": "paragraph",
+    "text": "A token is a special bit pattern or a small message, which circulate from one station to the next in the some predefined order."
+  },
+  {
+    "type": "paragraph",
+    "text": "In Token ring, token is passed from one station to another adjacent station in   the   ring   whereas   incase   of   Token   bus,   each   station uses the bus to send the token to the next station in some predefined order."
+  },
+  {
+    "type": "paragraph",
+    "text": "In both cases, token represents permission to send. If a station has a frame queued for transmission when it receives the token, it can send that frame before it passes the token to the next station. If it has no queued frame, it passes the token simply."
+  },
+  {
+    "type": "paragraph",
+    "text": "After sending a frame, each station must wait for all N stations (including itself) to send the token to their neighbors and the other N \u2013 1 stations to send a frame, if they have one."
+  },
+  {
+    "type": "paragraph",
+    "text": "There exists problems like duplication of token or token is lost or insertion of new station, removal of a station, which need be tackled for correct and reliable operation of this scheme."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image42.webp",
+    "caption": "Figure 2-42"
+  },
+  {
+    "type": "header",
+    "text": "Error Detection"
+  },
+  {
+    "type": "header",
+    "text": "Error"
+  },
+  {
+    "type": "paragraph",
+    "text": "A condition when the receiver\u2019s information does not matches with the sender\u2019s information. During transmission, digital signals suffer from noise that can introduce errors in the binary bits travelling from sender to receiver. That means  a  0  bit  may  change  to  1  or  a  1  bit  may  change  to  0. Error Detecting Codes (Implemented either at Data link layer or TransportLayerofOSIModel) Whenever a message is transmitted, it may get scrambled by noise or data may get corrupted. To avoid this, we use error-detecting codes which are additional data added to a given digital message to help us detect if any error has   occurred    during   transmission   of   the    message."
+  },
+  {
+    "type": "paragraph",
+    "text": "Basic approach used for error detection is the use of redundancy bits, where"
+  },
+  {
+    "type": "paragraph",
+    "text": "additional bits are added to facilitate detection of errors. Some popular techniques for error detection are:"
+  },
+  {
+    "type": "header",
+    "text": "Simple Parity check"
+  },
+  {
+    "type": "header",
+    "text": "Two-dimensional Parity check"
+  },
+  {
+    "type": "header",
+    "text": "Checksum"
+  },
+  {
+    "type": "header",
+    "text": "Cyclic redundancy check"
+  },
+  {
+    "type": "header",
+    "text": "Simple Parity check"
+  },
+  {
+    "type": "paragraph",
+    "text": "Blocks of data from the source are subjected to a check bit or parity bit generator form, where a parity of :  1 is added to the block if it contains odd number of 1\u2019s, and"
+  },
+  {
+    "type": "header",
+    "text": "0 is added if it contains even number of 1\u2019s"
+  },
+  {
+    "type": "paragraph",
+    "text": "This scheme makes the total number of 1\u2019s even, that is why it is called even parity checking."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image43.webp",
+    "caption": "Figure 2-43"
+  },
+  {
+    "type": "header",
+    "text": "Two-dimensional Parity check"
+  },
+  {
+    "type": "paragraph",
+    "text": "Parity check bits are calculated for each row, which is equivalent to a simple parity check bit. Parity check bits are also calculated for all columns, then both are sent along with the data. At the receiving end these are compared with the parity bits calculated on the received data."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image44.webp",
+    "caption": "Figure 2-44"
+  },
+  {
+    "type": "header",
+    "text": "Checksum"
+  },
+  {
+    "type": "paragraph",
+    "text": "In checksum error detection scheme, the data is divided into k segments each of m bits."
+  },
+  {
+    "type": "header",
+    "text": "Inthesender\u2019sendthesegmentsareaddedusing1\u2019scomplement"
+  },
+  {
+    "type": "paragraph",
+    "text": "arithmetic to get the sum. The sum is complemented to get the checksum."
+  },
+  {
+    "type": "paragraph",
+    "text": "The checksum segment is sent along with the data segments."
+  },
+  {
+    "type": "paragraph",
+    "text": "At the receiver\u2019s end, all received segments are added using 1\u2019s complement arithmetic to get the sum. The sum is complemented."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the result is zero, the received data is accepted; otherwise discarded."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image45.webp",
+    "caption": "Figure 2-45"
+  },
+  {
+    "type": "paragraph",
+    "text": "Cyclic redundancy check (CRC)"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image46.webp",
+    "caption": "Figure 2-46"
+  },
+  {
+    "type": "paragraph",
+    "text": "Unlike checksum scheme, which is based on addition, CRC is based on binary division."
+  },
+  {
+    "type": "paragraph",
+    "text": "In CRC, a sequence of redundant bits, called cyclic redundancy check bits,"
+  },
+  {
+    "type": "paragraph",
+    "text": "are appended to the end of data unit so that the resulting data unit becomes exactly divisible by a second, predetermined binary number."
+  },
+  {
+    "type": "paragraph",
+    "text": "At the destination, the incoming data unit is divided by the same number. If"
+  },
+  {
+    "type": "paragraph",
+    "text": "at this step there is no remainder, the data unit is assumed to be correct and is therefore accepted."
+  },
+  {
+    "type": "paragraph",
+    "text": "A remainder indicates that the data unit has been damaged in transit and"
+  },
+  {
+    "type": "paragraph",
+    "text": "therefore must be rejected."
+  },
+  {
+    "type": "header",
+    "text": "Error Correction"
+  },
+  {
+    "type": "paragraph",
+    "text": "Error Correction codes are used to detect and correct the errors when data is transmitted from the sender to the receiver."
+  },
+  {
+    "type": "paragraph",
+    "text": "Error Correction can be handled in two ways:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Backward error correction: Once the error is discovered, the receiver requests the sender to retransmit the entire data unit."
+  },
+  {
+    "type": "paragraph",
+    "text": "Forward error correction: In this case, the receiver uses the error-correcting"
+  },
+  {
+    "type": "paragraph",
+    "text": "code which automatically corrects the errors."
+  },
+  {
+    "type": "paragraph",
+    "text": "A single additional bit can detect the error, but cannot correct it."
+  },
+  {
+    "type": "paragraph",
+    "text": "For correcting the errors, one has to know the exact position of the error. For example, If we want to calculate a single-bit error, the error correction code will determine which one of seven bits is in error. To achieve this, we have to add some additional redundant bits."
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose r is the number of redundant bits and d is the total number of the data bits. The number of redundant bits r can be calculated by using the formula:"
+  },
+  {
+    "type": "header",
+    "text": "2r >=d+r+1"
+  },
+  {
+    "type": "paragraph",
+    "text": "The value of r is calculated by using the above formula. For example, if the value of d is 4, then the possible smallest value that satisfies the above relation would be 3."
+  },
+  {
+    "type": "paragraph",
+    "text": "To determine the position of the bit which is in error, a technique developed by"
+  },
+  {
+    "type": "paragraph",
+    "text": "R.W Hamming is Hamming code which can be applied to any length of the data unit and uses the relationship between data units and redundant units."
+  },
+  {
+    "type": "header",
+    "text": "Hamming Code"
+  },
+  {
+    "type": "paragraph",
+    "text": "Parity bits: The bit which is appended to the original data of binary bits so that the total number of 1s is even or odd."
+  },
+  {
+    "type": "paragraph",
+    "text": "Even parity: To check for even parity, if the total number of 1s is even, then the"
+  },
+  {
+    "type": "paragraph",
+    "text": "value of the parity bit is 0. If the total number of 1s occurrences is odd, then the value of the parity bit is 1."
+  },
+  {
+    "type": "paragraph",
+    "text": "Odd Parity: To check for odd parity, if the total number of 1s is even, then the"
+  },
+  {
+    "type": "paragraph",
+    "text": "value of parity bit is 1. If the total number of 1s is odd, then the value of parity bit is 0."
+  },
+  {
+    "type": "paragraph",
+    "text": "Algorithm of Hamming code:"
+  },
+  {
+    "type": "paragraph",
+    "text": "An information of 'd' bits are added to the redundant bits 'r' to form d+r. The location of each of the (d+r) digits is assigned a decimal value."
+  },
+  {
+    "type": "header",
+    "text": "The 'r' bits are placed in the positions 1,2,2k-1"
+  },
+  {
+    "type": "paragraph",
+    "text": "At the receiving end, the parity bits are recalculated. The decimal value of the parity bits determines the position of an error."
+  },
+  {
+    "type": "paragraph",
+    "text": "Relationship b/w Error position & binary number."
+  },
+  {
+    "type": "paragraph",
+    "text": "Let's understand the concept of Hamming code through an example: Suppose the original data is 1010 which is to be sent."
+  },
+  {
+    "type": "header",
+    "text": "Total number of data bits 'd' = 4"
+  },
+  {
+    "type": "header",
+    "text": "Number of redundant bits r : 2r >= d+r+1"
+  },
+  {
+    "type": "header",
+    "text": "2r  >= 4+r+1"
+  },
+  {
+    "type": "paragraph",
+    "text": "Therefore, the value of r is 3 that satisfies the above relation. Total number of bits = d+r = 4+3 = 7;"
+  },
+  {
+    "type": "header",
+    "text": "Determining the position of the redundant bits"
+  },
+  {
+    "type": "paragraph",
+    "text": "The number of redundant bits is 3. The three bits are represented by r1, r2, r4. The position of the redundant bits is calculated with corresponds to the raised power of 2. Therefore, their corresponding positions are 1, 21, 22."
+  },
+  {
+    "type": "paragraph",
+    "text": "The position of r1 = 1, The position of r2 = 2 , The position of r4 = 4"
+  },
+  {
+    "type": "paragraph",
+    "text": "Representation of Data on the addition of parity bits:"
+  },
+  {
+    "type": "header",
+    "text": "Determining the Parity bits"
+  },
+  {
+    "type": "paragraph",
+    "text": "Determining the r1 bit: The r1 bit is calculated by performing a parity check on the bit positions whose binary representation includes 1 in the first position."
+  },
+  {
+    "type": "paragraph",
+    "text": "We observe from the above figure that the bit position that includes 1 in the first position are 1, 3, 5, 7. Now, we perform the even-parity check at these bit positions. The total number of 1 at these bit positions corresponding to r1 is even, therefore, the value of the r1 bit is 0."
+  },
+  {
+    "type": "paragraph",
+    "text": "Determining r2 bit: The r2 bit is calculated by performing a parity check on the bit positions whose binary representation includes 1 in the second position"
+  },
+  {
+    "type": "paragraph",
+    "text": "."
+  },
+  {
+    "type": "paragraph",
+    "text": "We observe from the above figure that the bit positions that includes 1 in the second position are 2, 3, 6, 7. Now, we perform the even-parity check at these"
+  },
+  {
+    "type": "paragraph",
+    "text": "bit positions. The total number of 1 at these bit positions corresponding to r2 is odd, therefore, the value of the r2 bit is 1."
+  },
+  {
+    "type": "paragraph",
+    "text": "Determining r4 bit: The r4 bit is calculated by performing a parity check on the bit positions whose binary representation includes 1 in the third position."
+  },
+  {
+    "type": "paragraph",
+    "text": "We observe from the above figure that the bit positions that includes 1 in the third position are 4, 5, 6, 7. Now, we perform the even-parity check at these bit positions. The total number of 1 at these bit positions corresponding to r4 is even, therefore, the value of the r4 bit is 0."
+  },
+  {
+    "type": "paragraph",
+    "text": "Data transferred is given below:"
+  },
+  {
+    "type": "paragraph",
+    "text": "Suppose the 4th bit is changed from 0 to 1 at the receiving end, then parity bits are recalculated."
+  },
+  {
+    "type": "header",
+    "text": "R1 bit"
+  },
+  {
+    "type": "header",
+    "text": "The bit positions of the r1 bit are 1,3,5,7"
+  },
+  {
+    "type": "paragraph",
+    "text": "We observe from the above figure that the binary representation of r1 is 1100. Now, we perform the even-parity check, the total number of 1s appearing in the r1 bit is an even number. Therefore, the value of r1 is 0."
+  },
+  {
+    "type": "header",
+    "text": "R2 bit"
+  },
+  {
+    "type": "paragraph",
+    "text": "The bit positions of r2 bit are 2,3,6,7."
+  },
+  {
+    "type": "paragraph",
+    "text": "We observe from the above figure that the binary representation of r2 is 1001. Now, we perform the even-parity check, the total number of 1s appearing in the r2 bit is an even number. Therefore, the value of r2 is 0."
+  },
+  {
+    "type": "header",
+    "text": "R4 bit"
+  },
+  {
+    "type": "paragraph",
+    "text": "The bit positions of r4 bit are 4,5,6,7."
+  },
+  {
+    "type": "paragraph",
+    "text": "We observe from the above figure that the binary representation of r4 is 1011. Now, we perform the even-parity check, the total number of 1s appearing in the r4 bit is an odd number. Therefore, the value of r4 is 1."
+  },
+  {
+    "type": "paragraph",
+    "text": "The binary representation of redundant bits, i.e., r4r2r1 is 100, and its corresponding decimal value is 4. Therefore, the error occurs in a 4th bit position. The bit value must be changed from 1 to 0 to correct the error."
+  },
+  {
+    "type": "header",
+    "text": "Wired LANs: Ethernet"
+  },
+  {
+    "type": "paragraph",
+    "text": "In 1985, the Computer Society of the IEEE started a project, called Project 802, to set standards to enable intercommunication among equipment from a variety of manufacturers. Project 802 is a way of specifying functions of the physical layer and the data link layer of major LAN protocols."
+  },
+  {
+    "type": "paragraph",
+    "text": "The relationship of the 802 Standard to the traditional OSI model is shown in below Figure. The IEEE has subdivided the data link layer into two sub layers: logical link control (LLC) and media access control)."
+  },
+  {
+    "type": "paragraph",
+    "text": "IEEE has also created several physical layer standards for different LAN protocols"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image56.webp",
+    "caption": "Figure 2-56"
+  },
+  {
+    "type": "header",
+    "text": "IEEE standard for LANs"
+  },
+  {
+    "type": "header",
+    "text": "STANDARD ETHERNET"
+  },
+  {
+    "type": "paragraph",
+    "text": "The original Ethernet was created in 1976 at Xerox\u2019s Palo Alto Research Center (PARC). Since then, it has gone through four generations."
+  },
+  {
+    "type": "paragraph",
+    "text": "Standard Ethernet (l0 Mbps), Fast Ethernet (100 Mbps), Gigabit Ethernet (l Gbps), and Ten-Gigabit Ethernet (l0 Gbps),"
+  },
+  {
+    "type": "paragraph",
+    "text": "We briefly discuss the Standard (or traditional) Ethernet in this section"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image57.webp",
+    "caption": "Figure 2-57"
+  },
+  {
+    "type": "header",
+    "text": "Ethernet evolution through four generations"
+  },
+  {
+    "type": "header",
+    "text": "MAC Sublayer"
+  },
+  {
+    "type": "paragraph",
+    "text": "In Standard Ethernet, the MAC sublayer governs the operation of the access method. It also frames data received from the upper layer and passes them to the physical layer."
+  },
+  {
+    "type": "header",
+    "text": "Frame Format"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Ethernet frame contains seven fields: preamble, SFD, DA, SA, length or type of protocol data unit (PDU), upper-layer data, and the CRC. Ethernet does not provide any mechanism for acknowledging received frames, making it what is known as an unreliable medium. Acknowledgments must be implemented at the higher layers. The format of the MAC frame is shown in below figure"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image58.webp",
+    "caption": "Figure 2-58"
+  },
+  {
+    "type": "header",
+    "text": "802.3 MAC frame"
+  },
+  {
+    "type": "paragraph",
+    "text": "Preamble. The first field of the 802.3 frame contains 7 bytes (56 bits) of alternating 0s and 1s that alerts the receiving system to the coming frame and enables it to synchronize its input timing. The pattern provides only an alert and a timing pulse. The 56-bit pattern allows the stations to miss some bits at the beginning of the frame. The preamble is actually added at the physical layer and is not (formally) part of the frame."
+  },
+  {
+    "type": "paragraph",
+    "text": "Start frame delimiter (SFD). The second field (l byte: 10101011) signals the beginning of the frame. The SFD warns the station or stations that this is the last chance for synchronization. The last 2 bits is 11 and alerts the receiver that the next field is the destination address."
+  },
+  {
+    "type": "paragraph",
+    "text": "Destination address (DA). The DA field is 6 bytes and contains the physical address of the destination station or stations to receive the packet."
+  },
+  {
+    "type": "paragraph",
+    "text": "Source address (SA). The SA field is also 6 bytes and contains the physical address of the sender of the packet."
+  },
+  {
+    "type": "paragraph",
+    "text": "Length or type. This field is defined as a type field or length field. The original Ethernet used this field as the type field to define the upper-layer protocol using the MAC frame. The IEEE standard used it as the length field to define the number of bytes in the data field. Both uses are common today."
+  },
+  {
+    "type": "paragraph",
+    "text": "Data. This field carries data encapsulated from the upper-layer protocols. It is a minimum of 46 and a maximum of 1500 bytes."
+  },
+  {
+    "type": "paragraph",
+    "text": "CRC. The last field contains error detection information, in this case a CRC-32"
+  },
+  {
+    "type": "header",
+    "text": "Frame Length"
+  },
+  {
+    "type": "paragraph",
+    "text": "Ethernet has imposed restrictions on both the minimum and maximum lengths of a frame, as shown in below Figure"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image59.webp",
+    "caption": "Figure 2-59"
+  },
+  {
+    "type": "header",
+    "text": "Minimum and maximum lengths"
+  },
+  {
+    "type": "paragraph",
+    "text": "An Ethernet frame needs to have a minimum length of 512 bits or 64 bytes. Part of this length is the header and the trailer. If we count 18 bytes of header and trailer (6 bytes of source address, 6 bytes of destination address, 2 bytes of length or type, and 4 bytes of CRC), then the minimum length of data from the upper layer is 64 - 18 = 46 bytes. If the upper-layer packet is less than 46 bytes, padding is added to make up the difference"
+  },
+  {
+    "type": "paragraph",
+    "text": "The standard defines the maximum length of a frame (without preamble and SFD field) as 1518 bytes. If we subtract the 18 bytes of header and trailer,"
+  },
+  {
+    "type": "paragraph",
+    "text": "the maximum length of the payload is 1500 bytes."
+  },
+  {
+    "type": "paragraph",
+    "text": "The maximum length restriction has two historical reasons."
+  },
+  {
+    "type": "paragraph",
+    "text": "First, memory was very expensive when Ethernet was designed: a maximum length restriction helped to reduce the size of the buffer."
+  },
+  {
+    "type": "paragraph",
+    "text": "Second, the maximum length restriction prevents one station from monopolizing the shared medium, blocking other stations that have data to send."
+  },
+  {
+    "type": "header",
+    "text": "Addressing"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Ethernet address is 6 bytes (48 bits), normally written in hexadecimal notation, with a colon between the bytes."
+  },
+  {
+    "type": "header",
+    "text": "Example of an Ethernet address in hexadecimal notation"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter2/image60.webp",
+    "caption": "Figure 2-60"
+  },
+  {
+    "type": "paragraph",
+    "text": "Unicast, Multicast, and Broadcast Addresses A source address is always a unicast address-the frame comes from only one station. The destination address, however, can be unicast, multicast, or broadcast. Below Figure shows how to distinguish a unicast address from a multicast address."
+  },
+  {
+    "type": "paragraph",
+    "text": "If the least significant bit of the first byte in a destination address is 0, the address is unicast; otherwise, it is multicast."
+  },
+  {
+    "type": "header",
+    "text": "Unicast and multicast addresses"
+  },
+  {
+    "type": "paragraph",
+    "text": "A unicast destination address defines only one recipient; the relationship between the sender and the receiver is one-to-one."
+  }
+]

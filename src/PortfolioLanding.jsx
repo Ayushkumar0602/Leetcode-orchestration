@@ -10,10 +10,34 @@ import NavProfile from './NavProfile';
 const S = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
     
-    .pl-main { background: #030408; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; position: relative; }
+    .pl-main { 
+        background-color: #030408; 
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.12), transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.1), transparent 40%),
+            radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05), transparent 50%),
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Cfilter id='noiseFilter'%3%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3%3C/filter%3%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3%3C/svg%3");
+        background-blend-mode: overlay;
+        color: #fff; 
+        font-family: 'Inter', sans-serif; 
+        min-height: 100vh; 
+        overflow-x: hidden; 
+        position: relative; 
+    }
     
     /* Subtle Animated Grid Background */
-    .pl-bg-grid { position: fixed; inset: 0; background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; mask-image: radial-gradient(circle at top center, black 30%, transparent 100%); -webkit-mask-image: radial-gradient(circle at top center, black 30%, transparent 100%); }
+    .pl-bg-grid { 
+        position: fixed; 
+        inset: 0; 
+        background-image: 
+            linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), 
+            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); 
+        background-size: 40px 40px; 
+        pointer-events: none; 
+        z-index: 0; 
+        mask-image: radial-gradient(circle at center, black 40%, transparent 100%); 
+        -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%); 
+    }
     
     /* Navigation */
     .pl-nav { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(3,4,8,0.7); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 50; }

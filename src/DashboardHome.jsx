@@ -184,6 +184,8 @@ const styles = `
     .dash-nav-links { display: none !important; }
     .dash-featured-inner { flex-direction: column !important; align-items: flex-start !important; }
     .mobile-nav-toggle { display: flex !important; }
+    .featured-content-wrap { flex-direction: column !important; gap: 1.5rem !important; align-items: flex-start !important; }
+    .featured-cta-button { width: 100% !important; justify-content: center !important; }
 }
 
 .mobile-nav-overlay {
@@ -665,28 +667,30 @@ export default function DashboardHome() {
                         <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '300px', height: '300px', background: 'rgba(168,85,247,0.2)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
                         <div style={{ position: 'absolute', bottom: '-50%', left: '-10%', width: '300px', height: '300px', background: 'rgba(59,130,246,0.15)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
 
-                        <div style={{
-                            width: '64px', height: '64px', borderRadius: '16px',
-                            background: 'linear-gradient(135deg, #a855f7, #3b82f6)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: '#fff', flexShrink: 0, boxShadow: '0 8px 20px rgba(168,85,247,0.3)'
-                        }}>
-                            <Brain size={32} />
-                        </div>
+                        <div className="featured-content-wrap" style={{ flex: 1, position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                            <div style={{
+                                width: '64px', height: '64px', borderRadius: '16px',
+                                background: 'linear-gradient(135deg, #a855f7, #3b82f6)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#fff', flexShrink: 0, boxShadow: '0 8px 20px rgba(168,85,247,0.3)'
+                            }}>
+                                <Brain size={32} />
+                            </div>
 
-                        <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
-                            <h3 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 700, margin: '0 0 8px 0' }}>Practice DSA in Interview Format</h3>
-                            <p style={{ color: 'var(--txt2)', fontSize: '1rem', lineHeight: 1.6, margin: 0, maxWidth: '600px' }}>
-                                Experience a realistic technical interview environment with our AI Staff Engineer. Get real-time feedback, behavioral analysis, and a comprehensive performance report.
-                            </p>
-                        </div>
+                            <div style={{ flex: 1 }}>
+                                <h3 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 700, margin: '0 0 8px 0' }}>Practice DSA in Interview Format</h3>
+                                <p style={{ color: 'var(--txt2)', fontSize: '1rem', lineHeight: 1.6, margin: 0, maxWidth: '600px' }}>
+                                    Experience a realistic technical interview environment with our AI Staff Engineer. Get real-time feedback, behavioral analysis, and a comprehensive performance report.
+                                </p>
+                            </div>
 
-                        <div style={{
-                            padding: '12px 24px', borderRadius: '12px', background: '#fff', color: '#000',
-                            fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px',
-                            transition: 'all 0.2s', flexShrink: 0, zIndex: 1
-                        }}>
-                            Go to Interview <ArrowRight size={16} />
+                            <div className="featured-cta-button" style={{
+                                padding: '12px 24px', borderRadius: '12px', background: '#fff', color: '#000',
+                                fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px',
+                                transition: 'all 0.2s', flexShrink: 0, zIndex: 1
+                            }}>
+                                Go to Interview <ArrowRight size={16} />
+                            </div>
                         </div>
                     </div>
                 </div>

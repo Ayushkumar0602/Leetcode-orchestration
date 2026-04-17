@@ -1,0 +1,996 @@
+[
+  {
+    "type": "paragraph",
+    "text": "Step 1 is the client calling the client stub. This call is a local procedure call, with the parameters pushed onto the stack in the normal way."
+  },
+  {
+    "type": "paragraph",
+    "text": "Step 2 is the client stub packing the parameters into a message and making a system call to send the message. Packing the parameters is called marshaling."
+  },
+  {
+    "type": "paragraph",
+    "text": "Step 3 is the operating system sending the message from the client machine to the server machine."
+  },
+  {
+    "type": "paragraph",
+    "text": "Step 4 is the operating system passing the incoming packet to the server stub."
+  },
+  {
+    "type": "paragraph",
+    "text": "Finally, step 5 is the server stub calling the server procedure with the unmarshaled parameters."
+  },
+  {
+    "type": "paragraph",
+    "text": "The reply traces the same path in the other direction."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image1.webp",
+    "caption": "Figure 5-1"
+  },
+  {
+    "type": "paragraph",
+    "text": "Problems with RPC:"
+  },
+  {
+    "type": "paragraph",
+    "text": "With RPC, passing pointers is impossible because the client and server are in different address spaces."
+  },
+  {
+    "type": "paragraph",
+    "text": "It is essentially impossible for the client stub to marshal the parameters: it has no way of determining how large they are."
+  },
+  {
+    "type": "paragraph",
+    "text": "A third problem is that it is not always possible to deduce the types of the parameters, not even from a formal specification or the code itself.(exa: printf)"
+  },
+  {
+    "type": "paragraph",
+    "text": "A fourth problem relates to the use of global variables. Normally, the calling and called procedure can communicate by using global variables, in addition to communicating via parameters. But if the called procedure is moved to a remote machine, the code will fail because the global variables are no longer shared"
+  },
+  {
+    "type": "header",
+    "text": "Real-Time Transport Protocols"
+  },
+  {
+    "type": "paragraph",
+    "text": "Client-server RPC is one area in which UDP is widely used. Another one is for real-time multimedia applications."
+  },
+  {
+    "type": "paragraph",
+    "text": "Internet radio, Internet telephony, music-on-demand, videoconferencing, video-on-demand,"
+  },
+  {
+    "type": "paragraph",
+    "text": "and other multimedia applications became more commonplace, people have discovered that each application was reinventing more or less the same real-time transport protocol."
+  },
+  {
+    "type": "paragraph",
+    "text": "It gradually became clear that having a generic real-time transport protocol for multiple applications would be a good idea."
+  },
+  {
+    "type": "paragraph",
+    "text": "Thus was RTP (Real-time Transport Protocol) born. It is described in RFC 3550 and is now in widespread use for multimedia applications. We will describe two aspects of real-time transport."
+  },
+  {
+    "type": "paragraph",
+    "text": "The first is the RTP protocol for transporting audio and video data in packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "The second is the processing that takes place, mostly at the receiver, to play out the audio and video at the right time.."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image2.webp",
+    "caption": "Figure 5-2"
+  },
+  {
+    "type": "paragraph",
+    "text": "RTP normally runs in user space over UDP (in the operating system)."
+  },
+  {
+    "type": "paragraph",
+    "text": "It operates as follows. The multimedia application consists of multiple audio, video, text, and possibly other streams. These are fed into the RTP library, which is in user space along with the application. This library multiplexes the streams and encodes them in RTP packets, which it stuffs into a socket."
+  },
+  {
+    "type": "paragraph",
+    "text": "On the operating system side of the socket, UDP packets are generated to wrap the RTP packets and handed to IP for transmission over a link such as Ethernet."
+  },
+  {
+    "type": "paragraph",
+    "text": "The reverse process happens at the receiver. The multimedia application eventually receives multimedia data from the RTP library. It is responsible for playing out the media. The protocol stack for this situation is shown in Fig. 6-30(a). The packet nesting is shown in Fig. 6-30(b)."
+  },
+  {
+    "type": "header",
+    "text": "RTP\u2014The Real-time Transport Protocol"
+  },
+  {
+    "type": "paragraph",
+    "text": "The basic function of RTP is to multiplex several real-time data streams onto"
+  },
+  {
+    "type": "paragraph",
+    "text": "a single stream of UDP packets. The UDP stream can be sent to a single destination (unicasting) or to multiple destinations (multicasting)."
+  },
+  {
+    "type": "paragraph",
+    "text": "Because RTP just uses normal UDP, its packets are not treated specially by the routers unless some normal IP quality-of-service features are enabled. In particular, there are no special guarantees about delivery, and packets may be lost, delayed, corrupted, etc."
+  },
+  {
+    "type": "paragraph",
+    "text": "The RTP format contains several features."
+  },
+  {
+    "type": "paragraph",
+    "text": "Each packet sent in an RTP stream is given a number one higher than its predecessor. This numbering allows the destination to determine if any packets are missing."
+  },
+  {
+    "type": "paragraph",
+    "text": "RTP has no acknowledgements, and no mechanism to request retransmissions."
+  },
+  {
+    "type": "paragraph",
+    "text": "Each RTP payload may contain multiple samples, and they may be coded any way that the application wants. To allow for interworking, RTP defines several profiles (e.g., a single audio stream), and for each profile, multiple encoding formats may be allowed"
+  },
+  {
+    "type": "paragraph",
+    "text": "Another facility many real-time applications need is time stamping. Not only does time stamping reduce the effects of variation in network delay, but it"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image3.webp",
+    "caption": "Figure 5-3"
+  },
+  {
+    "type": "paragraph",
+    "text": "It consists of three 32-bit words and potentially some extensions. The first word contains the Version field, which is already at 2."
+  },
+  {
+    "type": "paragraph",
+    "text": "The P bit indicates that the packet has been padded to a multiple of 4 bytes. The last padding byte tells how many bytes were added."
+  },
+  {
+    "type": "paragraph",
+    "text": "The X bit indicates that an extension header is present."
+  },
+  {
+    "type": "paragraph",
+    "text": "The CC field tells how many contributing sources are present, from 0 to 15"
+  },
+  {
+    "type": "paragraph",
+    "text": "The M bit is an application-specific marker bit. It can be used to mark the start of a video frame, the start of a word in an audio channel, or something else that the application understands."
+  },
+  {
+    "type": "paragraph",
+    "text": "The Payload type field tells which encoding algorithm has been used (e.g., uncompressed 8-bit audio, MP3, etc.). Since every packet carries this field, the encoding can change during transmission."
+  },
+  {
+    "type": "paragraph",
+    "text": "The Sequence number is just a counter that is incremented on each RTP packet sent. It is used to detect lost packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "The Timestamp, this value can help reduce timing variability called jitter at the receiver by decoupling the playback from the packet arrival time."
+  },
+  {
+    "type": "paragraph",
+    "text": "The Synchronization source identifier tells which stream the packet belongs to. It is the method used to multiplex and demultiplex multiple data streams onto a single stream of UDP packets."
+  },
+  {
+    "type": "paragraph",
+    "text": "Finally,  the  Contributing  source  identifiers,  if  any,  are  used  when"
+  },
+  {
+    "type": "header",
+    "text": "RTCP\u2014The Real-time Transport Control Protocol"
+  },
+  {
+    "type": "paragraph",
+    "text": "RTP has a little sister protocol (little sibling protocol?) called RTCP (Real time Transport Control Protocol). It is defined along with RTP in RFC 3550 and handles feedback, synchronization, and the user interface. It does not transport any media samples."
+  },
+  {
+    "type": "paragraph",
+    "text": "The first function can be used to provide feedback on delay, variation in delay or jitter, bandwidth, congestion, and other network properties to the sources. This information can be used by the encoding process to increase the data rate (and give better quality) when the network is functioning well and to cut back the data rate when there is trouble in the network. By providing continuous feedback, It provides the best quality"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Payload type field is used to tell the destination what encoding algorithm is used for the current packet, making it possible to vary it on demand."
+  },
+  {
+    "type": "paragraph",
+    "text": "RTCP also handles inter stream synchronization. The problem is that different streams may use different clocks, with different granularities and different drift rates. RTCP can be used to keep them in sync."
+  },
+  {
+    "type": "paragraph",
+    "text": "Finally, RTCP provides a way for naming the various sources (e.g., in ASCII text). This information can be displayed on the receiver\u2019s screen to indicate who is talking at the moment."
+  },
+  {
+    "type": "header",
+    "text": "Playout with Buffering and Jitter Control"
+  },
+  {
+    "type": "paragraph",
+    "text": "Once the media information reaches the receiver, it must be played out at the right time. Even if the packets are injected with exactly the right intervals between them at the sender, they will reach the receiver with different relative times. This variation in delay is called jitter. Even a small amount of packet jitter can cause distracting media artifacts, such as jerky video frames and unintelligible audio, if the media is simply played out as it arrives."
+  },
+  {
+    "type": "paragraph",
+    "text": "The solution to this problem is to buffer packets at the receiver before they are played out to reduce the jitter."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image4.webp",
+    "caption": "Figure 5-4"
+  },
+  {
+    "type": "paragraph",
+    "text": "A key consideration for smooth playout is the playback point, or how long to wait at the receiver for media before playing it out. Deciding how long to wait depends on the jitter. The difference between a low-jitter and high-jitter connection is shown in Fig. The average delay may not differ greatly between the two, but if there is high jitter the playback point may need to be much further out to capture 99% of the packets than if there is low jitter."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image5.webp",
+    "caption": "Figure 5-5"
+  },
+  {
+    "type": "paragraph",
+    "text": "One way to avoid this problem for audio is to adapt the playback point between talk spurts, in the gaps in a conversation. No one will notice the difference between a short and slightly longer silence"
+  },
+  {
+    "type": "header",
+    "text": "TELNET"
+  },
+  {
+    "type": "paragraph",
+    "text": "It is client/server application program. TELNET is an abbreviation for TErminaL NETwork. TELNET enables the establishment of a connection to a remote system in such a way that the local terminal appears to be a terminal at the remote system."
+  },
+  {
+    "type": "header",
+    "text": "Timesharing Environment"
+  },
+  {
+    "type": "paragraph",
+    "text": "A large computer supports multiple users. The interaction between a user and the computer occurs through a terminal, which is usually a combination of keyboard, monitor, and mouse."
+  },
+  {
+    "type": "header",
+    "text": "Logging"
+  },
+  {
+    "type": "paragraph",
+    "text": "To access the system, the user logs into the system with a user id or log-in name. The system also includes password checking to prevent an unauthorized user from accessing the resources."
+  },
+  {
+    "type": "header",
+    "text": "Local login Remote login"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image6.webp",
+    "caption": "Figure 5-6"
+  },
+  {
+    "type": "paragraph",
+    "text": "When a user logs into a local timesharing system, it is called local log-in. As a user types at a terminal or at a workstation running a terminal emulator, the keystrokes are accepted by the terminal driver. The terminal driver passes the characters to the operating system. The operating system, in turn, interprets the combination of characters and invokes the desired application program or utility."
+  },
+  {
+    "type": "paragraph",
+    "text": "When a user wants to access an application program or utility located on a remote Machine, it is called remote log-in. Here the TELNET client and server programs come into use. The user sends the keystrokes to the terminal driver, where the local operating system accepts the characters but does not interpret them. The characters are sent to the TELNET client, which transforms the characters to a universal character set called network virtual terminal (NVT) characters and delivers them to the local TCP/IP protocol stack."
+  },
+  {
+    "type": "paragraph",
+    "text": "receive characters from a terminal driver. The solution is to add a piece ofreceive characters from a terminal driver. The solution is to add a piece ofThe commands or text, in NVT form, travel through the Internet and arrive at the TCP/IP stack at the remote machine. Here the characters are delivered to the operating system and passed to the TELNET server, which changes the characters to the corresponding characters understandable by the remote computer. However, the characters cannot be passed directly to the operating system because the remote operating system is not designed to receive characters from a TELNET server: It is designed to"
+  },
+  {
+    "type": "paragraph",
+    "text": "receive characters from a terminal driver. The solution is to add a piece of"
+  },
+  {
+    "type": "paragraph",
+    "text": "receive characters from a terminal driver. The solution is to add a piece of"
+  },
+  {
+    "type": "paragraph",
+    "text": "Concept of NVT(network virtual terminal)"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image7.webp",
+    "caption": "Figure 5-7"
+  },
+  {
+    "type": "header",
+    "text": "26.75"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image8.webp",
+    "caption": "Figure 5-8"
+  },
+  {
+    "type": "header",
+    "text": "WWW and HTTP"
+  },
+  {
+    "type": "header",
+    "text": "27.76"
+  },
+  {
+    "type": "paragraph",
+    "text": "Copyright \u00a9 The McGraw-Hill Companies, Inc. Permission required for reproduction or display."
+  },
+  {
+    "type": "header",
+    "text": "ARCHITECTURE"
+  },
+  {
+    "type": "paragraph",
+    "text": "The WWW today is a distributed client/server service, in which a client using a browser can access a service using a server. However, the service provided is distributed over many locations called sites as shown in fig."
+  },
+  {
+    "type": "paragraph",
+    "text": "Topics discussed in this section:"
+  },
+  {
+    "type": "header",
+    "text": "Client (Browser) Server"
+  },
+  {
+    "type": "header",
+    "text": "Uniform Resource Locator Cookies"
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.1 Architecture of WWW"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image9.webp",
+    "caption": "Figure 5-9"
+  },
+  {
+    "type": "paragraph",
+    "text": "Client (Browser)"
+  },
+  {
+    "type": "paragraph",
+    "text": "A variety of vendors offer commercial browsers that interpret and display a Web document,and all use nearly the same architecture."
+  },
+  {
+    "type": "paragraph",
+    "text": "Each browser usually consists of three parts: a controller, client protocol, and interpreters."
+  },
+  {
+    "type": "paragraph",
+    "text": "The controller receives input from the keyboard or the mouse and uses the client programs to access the document."
+  },
+  {
+    "type": "paragraph",
+    "text": "After the document has been accessed, the controller uses one of the interpreters to display the document on the screen. The interpreter can be HTML, Java, or JavaScript, depending on the type of document"
+  },
+  {
+    "type": "paragraph",
+    "text": "The client protocol can be one of the protocols described previously such as FTP or HTTP."
+  },
+  {
+    "type": "header",
+    "text": "Server"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Web page is stored at the server. Each time a client request arrives, the corresponding document is sent to the client. To improve efficiency, servers normally store requested files in a cache in memory; memory is faster to access than disk. A server can also become more efficient through multithreading or multiprocessing. In this case, a server can answer more than one"
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.2 Browser"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image10.webp",
+    "caption": "Figure 5-10"
+  },
+  {
+    "type": "header",
+    "text": "27.80"
+  },
+  {
+    "type": "header",
+    "text": "Uniform Resource Locator"
+  },
+  {
+    "type": "paragraph",
+    "text": "A client that wants to access a Web page needs the address. To facilitate the access of documents distributed throughout the world, HTTP uses locators. The uniform resource locator (URL) is a standard for specifying any kind of information on the Internet. The URL defines four things: protocol, host computer, port, and path."
+  },
+  {
+    "type": "paragraph",
+    "text": "The protocol is the client/server program used to retrieve the document. Many different protocols can retrieve a document; among them are FTP or HTTP. The most common today is HTTP."
+  },
+  {
+    "type": "paragraph",
+    "text": "The host is the computer on which the information is located, although the name of the computer can be an alias. Web pages are usually stored in computers, and computers are given alias names that usually begin with the characters \"www\"."
+  },
+  {
+    "type": "paragraph",
+    "text": "The URL can optionally contain the port number of the server. If the port is included, it is inserted between the host and the path, and it is separated from the host by a colon."
+  },
+  {
+    "type": "paragraph",
+    "text": "Path is the pathname of the file where the information is located. Note that the path can itself contain slashes that, in the UNIX operating system, separate the directories from the subdirectories and files."
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.3 URL"
+  },
+  {
+    "type": "paragraph",
+    "text": "An  HTTP cookie (also  called  web cookie,  Internetcookie, browser cookie or simply cookie, the latter which is not to be confused with the literal definition), is a small piece of data sent from a website and stored in a user's web browser while the user is browsing that website"
+  },
+  {
+    "type": "header",
+    "text": "WEB DOCUMENTS"
+  },
+  {
+    "type": "paragraph",
+    "text": "The documents in the WWW can be grouped into three broad categories: static, dynamic, and active. The category is based on the time at which the contents of the document are determined."
+  },
+  {
+    "type": "paragraph",
+    "text": "Topics discussed in this section:"
+  },
+  {
+    "type": "header",
+    "text": "Static Documents Dynamic Documents Active Documents"
+  },
+  {
+    "type": "header",
+    "text": "Static Documents"
+  },
+  {
+    "type": "paragraph",
+    "text": "Static documents are fixed-content documents that are created and stored in a server. The client can get only a copy of the document. When a client accesses the document, a copy of the document is sent. The user can then use a browsing program to display the document"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image12.webp",
+    "caption": "Figure 5-12"
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.5 Boldface tags"
+  },
+  {
+    "type": "header",
+    "text": "HTML"
+  },
+  {
+    "type": "paragraph",
+    "text": "Hypertext Markup Language (HTML) is a language for creating Web pages."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image13.webp",
+    "caption": "Figure 5-13"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image14.webp",
+    "caption": "Figure 5-14"
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.7 Beginning and ending tags"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image15.webp",
+    "caption": "Figure 5-15"
+  },
+  {
+    "type": "header",
+    "text": "Dynamic Documents"
+  },
+  {
+    "type": "paragraph",
+    "text": "A dynamic document is created by a Web server whenever a browser requests the document. When a request arrives, the Web server runs an application program or a script that creates the dynamic document. The server returns the output of the program or script as a response to the browser that requested the document."
+  },
+  {
+    "type": "paragraph",
+    "text": "A very simple example of a dynamic document is the retrieval of the time and date from a server. Time and date are kinds of information that are dynamic in that they change from moment to moment. The client can ask the server to run a program such as the date program in UNIX and send the result of the program to"
+  },
+  {
+    "type": "paragraph",
+    "text": "the client."
+  },
+  {
+    "type": "paragraph",
+    "text": "Common Gateway Interface (CGI)"
+  },
+  {
+    "type": "paragraph",
+    "text": "The Common Gateway Interface (CGI) is a technology that creates and handles dynamic documents."
+  },
+  {
+    "type": "paragraph",
+    "text": "Hypertext Preprocessor (pHP), which uses the Perl language; Java Server Pages (JSP), which uses the Java language for scripting; Active Server Pages (ASP), a Microsoft product which uses Visual Basic language for scripting; and ColdFusion, which embeds SQL database queries in the HTML document"
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.8 Dynamic document using CGI"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image16.webp",
+    "caption": "Figure 5-16"
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.9 Dynamic document using server-site script"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image17.webp",
+    "caption": "Figure 5-17"
+  },
+  {
+    "type": "paragraph",
+    "text": "NoteNoteDynamic documents are sometimes referred to as server-site dynamic documents.Dynamic documents are sometimes referred to as server-site dynamic documents."
+  },
+  {
+    "type": "header",
+    "text": "Note"
+  },
+  {
+    "type": "header",
+    "text": "Note"
+  },
+  {
+    "type": "paragraph",
+    "text": "Dynamic documents are sometimes referred to as server-site dynamic documents."
+  },
+  {
+    "type": "paragraph",
+    "text": "Dynamic documents are sometimes referred to as server-site dynamic documents."
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.10 Active document using Java applet"
+  },
+  {
+    "type": "header",
+    "text": "Active Documents"
+  },
+  {
+    "type": "paragraph",
+    "text": "For many applications, we need a program or a script to be run at the client site. These are called active documents"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image23.webp",
+    "caption": "Figure 5-23"
+  },
+  {
+    "type": "header",
+    "text": "Figure 27.11 Active document using client-site script"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image24.webp",
+    "caption": "Figure 5-24"
+  },
+  {
+    "type": "paragraph",
+    "text": "NoteNoteActive documents are sometimes referred to as client-site dynamic documents.Active documents are sometimes referred to as client-site dynamic documents."
+  },
+  {
+    "type": "header",
+    "text": "Note"
+  },
+  {
+    "type": "header",
+    "text": "Note"
+  },
+  {
+    "type": "paragraph",
+    "text": "Active documents are sometimes referred to as client-site dynamic documents."
+  },
+  {
+    "type": "paragraph",
+    "text": "Active documents are sometimes referred to as client-site dynamic documents."
+  },
+  {
+    "type": "header",
+    "text": "NoteNote"
+  },
+  {
+    "type": "header",
+    "text": "Note"
+  },
+  {
+    "type": "header",
+    "text": "Note"
+  },
+  {
+    "type": "paragraph",
+    "text": "HTTP version 1.1 specifies a persistent connection by default."
+  },
+  {
+    "type": "paragraph",
+    "text": "DNS (Domain Name System)"
+  },
+  {
+    "type": "paragraph",
+    "text": "To identify an entity, TCP/IP protocols use the IP address, which uniquely identifies the connection of a host to the Internet. However, people prefer to use names instead of numeric addresses. Therefore, we need a system that can map a name to an address or an address to a name."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image35.webp",
+    "caption": "Figure 5-35"
+  },
+  {
+    "type": "header",
+    "text": "NAME SPACE"
+  },
+  {
+    "type": "paragraph",
+    "text": "A name space that maps each address to a unique name can be organized in two ways: fiat or hierarchical."
+  },
+  {
+    "type": "header",
+    "text": "Flat Name Space"
+  },
+  {
+    "type": "paragraph",
+    "text": "In a flat name space, a name is assigned to an address. A name in this space is a sequence of characters without structure."
+  },
+  {
+    "type": "header",
+    "text": "Hierarchical Name Space"
+  },
+  {
+    "type": "paragraph",
+    "text": "In a hierarchical name space, each name is made of several parts. The first part can define the nature of the organization, the second part can define the name of an organization, the third part can define departments in the organization, and so on."
+  },
+  {
+    "type": "paragraph",
+    "text": "Exa: challenger.jhda.edu, challenger.berkeley.edu, and challenger.smart.com"
+  },
+  {
+    "type": "header",
+    "text": "DOMAIN NAME SPACE"
+  },
+  {
+    "type": "paragraph",
+    "text": "To have a hierarchical name space, a domain name space was designed. In this design the names are defined in an inverted-tree structure with the root at the top. The tree can have only 128 levels: level 0 (root) to level 127."
+  },
+  {
+    "type": "header",
+    "text": "spacespaceDomain name"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image36.webp",
+    "caption": "Figure 5-36"
+  },
+  {
+    "type": "header",
+    "text": "space"
+  },
+  {
+    "type": "header",
+    "text": "space"
+  },
+  {
+    "type": "header",
+    "text": "Label"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each node in the tree has a label, which is a string with a maximum of 63 characters. The root label is a null string (empty string). DNS requires that children of a node (nodes that branch from the same node) have different labels, which guarantees the uniqueness of the domain names."
+  },
+  {
+    "type": "header",
+    "text": "Domain Name"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each node in the tree has a domain name. A full domain name is a sequence of labels separated by dots (.). The domain names are always read from the node up to the root. The last label is the label of the root (null). This means that a full domain name always ends in a null label, which means the last character is a dot because the null string is nothing. Below Figure shows some domain names"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image37.webp",
+    "caption": "Figure 5-37"
+  },
+  {
+    "type": "header",
+    "text": "Domain names and labels"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image38.webp",
+    "caption": "Figure 5-38"
+  },
+  {
+    "type": "header",
+    "text": "Domain"
+  },
+  {
+    "type": "paragraph",
+    "text": "A domain is a subtree of the domain name space. The name of the domain is the domain name of the node at the top of the subtree."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image39.webp",
+    "caption": "Figure 5-39"
+  },
+  {
+    "type": "header",
+    "text": "DISTRIBUTION OF NAME SPACE:"
+  },
+  {
+    "type": "paragraph",
+    "text": "The information contained in the domain name space must be stored. However, it is very inefficient and also unreliable to have just one computer store such a huge amount of information. In this section, we discuss the distribution of the domain name space"
+  },
+  {
+    "type": "header",
+    "text": "Hierarchy of Name Servers"
+  },
+  {
+    "type": "paragraph",
+    "text": "distribute the information among many computers called DNS servers. we let the root stand alone and create as many domains (subtrees) as there are first-level nodes"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image40.webp",
+    "caption": "Figure 5-40"
+  },
+  {
+    "type": "header",
+    "text": "\u200bZone"
+  },
+  {
+    "type": "paragraph",
+    "text": "Since the complete domain name hierarchy cannot be stored on a single server, it is divided among many servers. What a server is responsible for or has authority over is called a zone. We can define a zone as a contiguous part of the entire tree"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image41.webp",
+    "caption": "Figure 5-41"
+  },
+  {
+    "type": "header",
+    "text": "Root Server"
+  },
+  {
+    "type": "paragraph",
+    "text": "A root server is a server whose zone consists of the whole tree. A root server usually does not store any information about domains but delegates its authority to other servers, keeping references to those servers. There are several root servers, each covering the whole domain name space. The servers are distributed all around the world."
+  },
+  {
+    "type": "header",
+    "text": "Primary and Secondary Servers"
+  },
+  {
+    "type": "paragraph",
+    "text": "A primary server is a server that stores a file about the zone for which it is an authority. It is responsible for creating, maintaining, and updating the zone file. It stores the zone file on a local disk"
+  },
+  {
+    "type": "paragraph",
+    "text": "A secondary server is a server that transfers the complete information about a zone from another server (primary or secondary) and stores the file on its local disk. The secondary server neither creates nor updates the zone files"
+  },
+  {
+    "type": "header",
+    "text": "DNS IN THE INTERNET"
+  },
+  {
+    "type": "paragraph",
+    "text": "DNS is a protocol that can be used in different platforms. In the Internet, the domain name space (tree) is divided into three different sections: generic domains, country domains, and the inverse domain"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image42.webp",
+    "caption": "Figure 5-42"
+  },
+  {
+    "type": "header",
+    "text": "\u200bGeneric Domains"
+  },
+  {
+    "type": "paragraph",
+    "text": "The generic domains define registered hosts according to their generic behavior. Each node in the tree defines a domain, which is an index to the domain name space database"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image43.webp",
+    "caption": "Figure 5-43"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image44.webp",
+    "caption": "Figure 5-44"
+  },
+  {
+    "type": "header",
+    "text": "\u200bCountry Domains"
+  },
+  {
+    "type": "paragraph",
+    "text": "The country domains section uses two-character country abbreviations (e.g., us for United States). Second labels can be organizational, or they can be more specific, national designations. The United States, for example, uses state abbreviations as a subdivision of us (e.g., ca.us.)."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image45.webp",
+    "caption": "Figure 5-45"
+  },
+  {
+    "type": "header",
+    "text": "\u200bInverse Domain"
+  },
+  {
+    "type": "paragraph",
+    "text": "The inverse domain is used to map an address to a name."
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image46.webp",
+    "caption": "Figure 5-46"
+  },
+  {
+    "type": "header",
+    "text": "RESOLUTION"
+  },
+  {
+    "type": "paragraph",
+    "text": "Mapping a name to an address or an address to a name is called name- address resolution"
+  },
+  {
+    "type": "header",
+    "text": "Resolver"
+  },
+  {
+    "type": "paragraph",
+    "text": "DNS is designed as a client/server application. A host that needs to map an address to a name or a name to an address calls a DNS client called a resolver. The resolver accesses the closest DNS server with a mapping request. If the server has the information, it satisfies the resolver; otherwise, it either refers the resolver to other servers or asks other servers to provide the information."
+  },
+  {
+    "type": "header",
+    "text": "Mapping Names to Addresses"
+  },
+  {
+    "type": "paragraph",
+    "text": "In this case, the server checks the generic domains or the country domains to find the mapping."
+  },
+  {
+    "type": "header",
+    "text": "Mapping Addresses to Names"
+  },
+  {
+    "type": "paragraph",
+    "text": "To answer queries of this kind, DNS uses the inverse domain 4 Recursive Resolution"
+  },
+  {
+    "type": "paragraph",
+    "text": "The client (resolver) can ask for a recursive answer from a name server. This means that the resolver expects the server to supply the final answer.. When the query is finally resolved, the response travels back until it finally reaches the requesting client. This is called recursive resolution and is shown in FIG"
+  },
+  {
+    "type": "header",
+    "text": "Recursive resolutionRecursive resolution"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image47.webp",
+    "caption": "Figure 5-47"
+  },
+  {
+    "type": "header",
+    "text": "Recursive resolution"
+  },
+  {
+    "type": "header",
+    "text": "Recursive resolution"
+  },
+  {
+    "type": "header",
+    "text": "Iterative Resolution"
+  },
+  {
+    "type": "paragraph",
+    "text": "If the client does not ask for a recursive answer, the mapping can be done iteratively. If the server is an authority for the name, it sends the answer. If it is not, it returns (to the client) the IP address of the server that it thinks can resolve the query"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image48.webp",
+    "caption": "Figure 5-48"
+  },
+  {
+    "type": "header",
+    "text": "Caching"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each time a server receives a query for a name that is not in its domain, it needs to search its database for a server IP address. Reduction of this search time would increase efficiency. DNS handles this with a mechanism called caching"
+  },
+  {
+    "type": "header",
+    "text": "DNS MESSAGES"
+  },
+  {
+    "type": "paragraph",
+    "text": "DNS has two types of messages: query and response. Both types have the same format."
+  },
+  {
+    "type": "paragraph",
+    "text": "The query message consists of a header,"
+  },
+  {
+    "type": "paragraph",
+    "text": "and question records; the response message consists of a header,"
+  },
+  {
+    "type": "paragraph",
+    "text": "question records, answer records, authoritative records, and additional records"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image49.webp",
+    "caption": "Figure 5-49"
+  },
+  {
+    "type": "header",
+    "text": "Header"
+  },
+  {
+    "type": "paragraph",
+    "text": "Both query and response messages have the same header format with some fields set to zero for the query messages. The header is 12 bytes,"
+  },
+  {
+    "type": "image",
+    "src": "/books/computernetworks/chapter5/image50.webp",
+    "caption": "Figure 5-50"
+  },
+  {
+    "type": "header",
+    "text": "TYPES OF RECORDS"
+  },
+  {
+    "type": "paragraph",
+    "text": "The question records are used in the question section of the query and response messages. The resource records are used in the answer, authoritative, and additional information sections of the response message."
+  },
+  {
+    "type": "header",
+    "text": "Question Record"
+  },
+  {
+    "type": "paragraph",
+    "text": "A question record is used by the client to get information from a server.. Resource Record"
+  },
+  {
+    "type": "paragraph",
+    "text": "Each domain name (each node on the tree) is associated with a record called the resource record. The server database consists of resource records. Resource records are also what is returned by the server to the client."
+  },
+  {
+    "type": "header",
+    "text": "REGISTRARS"
+  },
+  {
+    "type": "paragraph",
+    "text": "How are new domains added to DNS? This is done through a registrar, a commercial entity accredited by ICANN. A registrar first verifies that the requested domain name is unique and then enters it into the DNS database. A fee is charged. Today, there are many registrars; their names and addresses can be found at http://www.intenic.net"
+  },
+  {
+    "type": "header",
+    "text": "DYNAMIC DOMAIN NAME SYSTEM (DDNS)"
+  },
+  {
+    "type": "paragraph",
+    "text": "In DNS, when there is a change, such as adding a new host, removing a host, or changing an IP address, the change must be made to the DNS master file. The size of today's Internet does not allow for this kind of manual operation."
+  },
+  {
+    "type": "paragraph",
+    "text": "The DNS master file must be updated dynamically. The Dynamic Domain Name System (DDNS) therefore was devised to respond to this need."
+  },
+  {
+    "type": "header",
+    "text": "ENCAPSULATION"
+  },
+  {
+    "type": "paragraph",
+    "text": "DNS can use either UDP or TCP. In both cases the well-known port used by the server is port 53."
+  }
+]

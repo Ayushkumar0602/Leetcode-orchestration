@@ -5487,4 +5487,1174 @@
       <image:title>Extensibility</image:title>
     </image:image>
   </url>
+  <url>
+    <loc>https://whizan.xyz/books/computernetworks/chapter1</loc>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image1.webp</image:loc>
+      <image:caption>A data communications system has five components. Protocol.</image:caption>
+      <image:title>A data communications system has five components</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image2.webp</image:loc>
+      <image:caption>Data Flow. Communication between two devices can be simplex, half-duplex, or full-duplex as shown in Figure. Simplex In simplex mode, the communication is unidirectional, as on a one- way street. Only one of the two devices on a link can transmit; the other can only receive (Figure a). Keyboards and traditional monitors are examples of simplex devices</image:caption>
+      <image:title>Data Flow</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image3.webp</image:loc>
+      <image:caption>Type of Connection. In a multipoint environment, the capacity of the channel is shared, either spatially or temporally. If several devices can use the link simultaneously, it is a spatially shared connection. If users must take turns, it is a timeshared connection</image:caption>
+      <image:title>Type of Connection</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image5.webp</image:loc>
+      <image:caption>MESH. A mesh topology is the one where every node is connected to every other node in the network. A mesh topology can be a full mesh topology or a partially connected mesh topology</image:caption>
+      <image:title>MESH</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image6.webp</image:loc>
+      <image:caption>STAR. The chance of redundant connections is high, which adds to the high costs and potential for reduced efficiency. A star network, star topology is one of the most common network setups.</image:caption>
+      <image:title>STAR</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image7.webp</image:loc>
+      <image:caption>BUS. If the central computer, hub, or switch fails, the entire network goes down and all computers are disconnected from the network. a line topology, a bus topology is a network setup in which each computer and network device are connected to a single cable or backbone</image:caption>
+      <image:title>BUS</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image8.webp</image:loc>
+      <image:caption>RING. If a main cable is damaged, the network fails or splits into two. A ring topology is a network configuration in which device connections create a circular data path.</image:caption>
+      <image:title>RING</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image9.webp</image:loc>
+      <image:caption>Disadvantages of ring topology. Hybrid Topology A network can be hybrid. For example, we can have a main star topology with each branch connecting several stations in a bus topology as shown in Figure</image:caption>
+      <image:title>Disadvantages of ring topology</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image10.webp</image:loc>
+      <image:caption>Other types. A transmission medium can be broadly defined as anything that can carry information from a source to a destination</image:caption>
+      <image:title>Other types</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image11.webp</image:loc>
+      <image:caption>Classes of transmission media. A transmission medium can be broadly defined as anything that can carry information from a source to a destination. Guided Media: Guided media, which are those that provide a medium from one device to another, include twisted-pair cable, coaxial cable, and fiber-optic cable</image:caption>
+      <image:title>Classes of transmission media</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image12.webp</image:loc>
+      <image:caption>Classes of transmission media. Twisted-Pair Cable: A twisted pair consists of two conductors (normally copper), each with its own plastic insulation, twisted together. One of the wires is used to carry signals to the receiver, and the other is used only as a ground reference</image:caption>
+      <image:title>Classes of transmission media</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image13.webp</image:loc>
+      <image:caption>Classes of transmission media. Twisted-Pair Cable: A twisted pair consists of two conductors (normally copper), each with its own plastic insulation, twisted together. One of the wires is used to carry signals to the receiver, and the other is used only as a ground reference</image:caption>
+      <image:title>Classes of transmission media</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image14.webp</image:loc>
+      <image:caption>Unshielded Versus Shielded Twisted-Pair Cable. The most common twisted-pair cable used in communications is referred to as unshielded twisted-pair (UTP). The most common UTP connector is RJ45 (RJ stands for registered jack)</image:caption>
+      <image:title>Unshielded Versus Shielded Twisted-Pair Cable</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image15.webp</image:loc>
+      <image:caption>Coaxial Cable. Coaxial cable (or coax) carries signals of higher frequency ranges than those in twisted pair cable.</image:caption>
+      <image:title>Coaxial Cable</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image16.webp</image:loc>
+      <image:caption>Coaxial Cable. Coaxial cable (or coax) carries signals of higher frequency ranges than those in twisted pair cable. The most common type of connector used today is the Bayone-Neill-Concelman (BNe), connector</image:caption>
+      <image:title>Coaxial Cable</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image17.webp</image:loc>
+      <image:caption>Bending of light ray. If a ray of light traveling through one substance suddenly enters another substance(of a different density), the ray changes direction. Optical fibers use reflection to guide light through a channel. A glass or plastic core is surrounded by a cladding of less dense glass or plastic</image:caption>
+      <image:title>Bending of light ray</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image18.webp</image:loc>
+      <image:caption>Bending of light ray. Optical fibers use reflection to guide light through a channel. A glass or plastic core is surrounded by a cladding of less dense glass or plastic</image:caption>
+      <image:title>Bending of light ray</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image19.webp</image:loc>
+      <image:caption>Propagation Modes. Optical fibers use reflection to guide light through a channel. A glass or plastic core is surrounded by a cladding of less dense glass or plastic. Multimode is so named because multiple beams from a light source move through the core in different paths. How these beams move within the cable depends on the structure of the core, as shown in Figure</image:caption>
+      <image:title>Propagation Modes</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image20.webp</image:loc>
+      <image:caption>Propagation Modes. Multimode is so named because multiple beams from a light source move through the core in different paths. How these beams move within the cable depends on the structure of the core, as shown in Figure. In multimode step-index fiber, the density of the core remains constant from the center to the edges.</image:caption>
+      <image:title>Propagation Modes</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image21.webp</image:loc>
+      <image:caption>Fiber Construction. Single-Mode: Single-mode uses step-index fiber and a highly focused source of light that limits beams to a small range of angles, all close to the horizontal. The subscriber channel (SC) connector, The straight-tip (ST) connector, MT-RJ(mechanical transfer registered jack) is a connector</image:caption>
+      <image:title>Fiber Construction</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image22.webp</image:loc>
+      <image:caption>Radio Waves Microwaves Infrared. Unguided media transport electromagnetic waves without using a physical conductor. This type of communication is often referred to as wireless communication. Unguided signals can travel from the source to destination in several ways: ground propagation, sky propagation, and line-of-sight propagation, as shown in Figure</image:caption>
+      <image:title>Radio Waves Microwaves Infrared</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image23.webp</image:loc>
+      <image:caption>Radio Waves Microwaves Infrared. Unguided signals can travel from the source to destination in several ways: ground propagation, sky propagation, and line-of-sight propagation, as shown in Figure</image:caption>
+      <image:title>Radio Waves Microwaves Infrared</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image24.webp</image:loc>
+      <image:caption>Radio Waves Microwaves Infrared. Unguided signals can travel from the source to destination in several ways: ground propagation, sky propagation, and line-of-sight propagation, as shown in Figure</image:caption>
+      <image:title>Radio Waves Microwaves Infrared</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image25.webp</image:loc>
+      <image:caption>Omni directional Antenna. Radio waves use omnidirectional antennas that send out signals in all directions. Based on the wavelength, strength, and the purpose of transmission, we can have several types of antennas. Figure shows an omnidirectional antenna</image:caption>
+      <image:title>Omni directional Antenna</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image26.webp</image:loc>
+      <image:caption>Unidirectional Antenna. Microwaves need unidirectional antennas that send out signals in one direction. Two types of antennas are used for microwave communications: the parabolic dish and the horn. Applications</image:caption>
+      <image:title>Unidirectional Antenna</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image27.webp</image:loc>
+      <image:caption>Switching. A better solution is switching. We can then divide today&apos;s networks into three broad categories: circuit- switched networks, packet-switched networks, and message-switched.</image:caption>
+      <image:title>Switching</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image28.webp</image:loc>
+      <image:caption>Switching. We can then divide today&apos;s networks into three broad categories: circuit- switched networks, packet-switched networks, and message-switched.</image:caption>
+      <image:title>Switching</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image29.webp</image:loc>
+      <image:caption>CIRCUIT-SWITCHED NETWORKS. the resources remain dedicated for the entire duration of data transfer until the teardown phase</image:caption>
+      <image:title>CIRCUIT-SWITCHED NETWORKS</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image30.webp</image:loc>
+      <image:caption>uses the circuit-switching approach. DATAGRAM NETWORKS. A switch in a datagram network uses a routing table that is based on the destination address. The destination address in the header of a packet in a datagram network remains the same during the entire journey of the packet</image:caption>
+      <image:title>uses the circuit-switching approach. DATAGRAM NETWORKS</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image31.webp</image:loc>
+      <image:caption>VIRTUAL-CIRCUIT NETWORKS. A virtual-circuit network is a cross between a circuit-switched network and a datagram network. It has some characteristics of both. As in a circuit-switched network, there are setup and teardown phases in addition to the data transfer phase</image:caption>
+      <image:title>VIRTUAL-CIRCUIT NETWORKS</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image32.webp</image:loc>
+      <image:caption>Virtual-Circuit Identifier. Figure shows how the VCI in a data frame changes from one switch to another. Note that a VCI does not need to be a large number since each switch can use its own unique set of VCls</image:caption>
+      <image:title>Virtual-Circuit Identifier</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image33.webp</image:loc>
+      <image:caption>Data Transfer Phase. Three phases in a virtual-circuit network: setup, data transfer, and teardown. We first discuss the data transfer phase, which is more straightforward; we then talk about the setup and teardown phases. To transfer a frame from a source to its destination, all switches need to have a table entry for this virtual circuit. The table, in its simplest form, has four columns</image:caption>
+      <image:title>Data Transfer Phase</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image34.webp</image:loc>
+      <image:caption>Data Transfer Phase. Figure shows how a frame from source A reaches destination B and how its VCI changes during the trip. Each switch changes the VCI and routes the frame</image:caption>
+      <image:title>Data Transfer Phase</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image35.webp</image:loc>
+      <image:caption>Setup Phase. Setup Request A setup request frame is sent from the source to the destination. Figure shows the process. Source A sends a setup frame to switch 1</image:caption>
+      <image:title>Setup Phase</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image36.webp</image:loc>
+      <image:caption>Setup Phase. Figure shows the process. The destination sends an acknowledgment to switch 3.</image:caption>
+      <image:title>Setup Phase</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image37.webp</image:loc>
+      <image:caption>Delay. In a virtual-circuit network, there is a one-time delay for setup and a one-time delay for teardown. Switching at the data link layer in a switched WAN is normally implemented by using</image:caption>
+      <image:title>Delay</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image38.webp</image:loc>
+      <image:caption>Comparison. virtual-circuit techniques</image:caption>
+      <image:title>Comparison</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image39.webp</image:loc>
+      <image:caption>Diagrams from Tanenbaum Textbook</image:caption>
+      <image:title>Diagrams from Tanenbaum Textbook</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image40.webp</image:loc>
+      <image:caption>Diagrams from Tanenbaum Textbook</image:caption>
+      <image:title>Diagrams from Tanenbaum Textbook</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image41.webp</image:loc>
+      <image:caption>Each layer has specific functions it is responsible for. All layers work together in the correct order to move data around a network</image:caption>
+      <image:title>Each layer has specific functions it is responsible for</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image42.webp</image:loc>
+      <image:caption>–Please Do Not Throw Sausage Pizza Away</image:caption>
+      <image:title>–Please Do Not Throw Sausage Pizza Away</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image43.webp</image:loc>
+      <image:caption>Concerned with how data is presented to the network. Handles three primary tasks: –Translation , –Compression , –Encryption</image:caption>
+      <image:title>Concerned with how data is presented to the network</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image44.webp</image:loc>
+      <image:caption>The interaction between layers in the OSI model. –E-mail program may use POP3 (Post Office Protocol version 3) to read e-mails and SMTP (Simple Mail Transport Protocol) to send e-mails</image:caption>
+      <image:title>The interaction between layers in the OSI model</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image45.webp</image:loc>
+      <image:caption>An exchange using the OSI model</image:caption>
+      <image:title>An exchange using the OSI model</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image46.webp</image:loc>
+      <image:caption>An exchange using the OSI model. TCP/IP Model (Transmission Control Protocol/Internet Protocol)</image:caption>
+      <image:title>An exchange using the OSI model</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter1/image47.webp</image:loc>
+      <image:caption>An exchange using the OSI model. –A protocol suite is a large number of related protocols that work together to allow networked computers to communicate</image:caption>
+      <image:title>An exchange using the OSI model</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/books/computernetworks/chapter2</loc>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image1.webp</image:loc>
+      <image:caption>Host-to-network layer. The Host-to-network layer is the lowest layer of the TCP/IP reference model.</image:caption>
+      <image:title>Host-to-network layer</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image2.webp</image:loc>
+      <image:caption>Host-to-network layer. The Host-to-network layer is the lowest layer of the TCP/IP reference model.</image:caption>
+      <image:title>Host-to-network layer</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image3.webp</image:loc>
+      <image:caption>The Internet Today. The Internet has come a long way since the 1960s.</image:caption>
+      <image:title>The Internet Today</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image4.webp</image:loc>
+      <image:caption>The Internet Today. The Internet has come a long way since the 1960s. International Internet Service Providers</image:caption>
+      <image:title>The Internet Today</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image5.webp</image:loc>
+      <image:caption>FRAMING. Character count method uses a field in the header to specify the number of characters in the frame.</image:caption>
+      <image:title>FRAMING</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image6.webp</image:loc>
+      <image:caption>A character stream. (a) Without errors. (b) With one error. Flag bytes with byte stuffing method gets around the problem of resynchronization after an error by having each frame start and end with special bytes. (a)A frame delimited by flag bytes (b) Four examples of byte sequences</image:caption>
+      <image:title>A character stream. (a) Without errors. (b) With one error</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image8.webp</image:loc>
+      <image:caption>before and after byte stuffing. high and low-low are not used for data but are used for delimiting frames in some protocols. As a final note on framing, many data link protocols use combination of a character count with one of the other methods for extra safety.</image:caption>
+      <image:title>before and after byte stuffing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image9.webp</image:loc>
+      <image:caption>before and after byte stuffing. As a final note on framing, many data link protocols use combination of a character count with one of the other methods for extra safety.</image:caption>
+      <image:title>before and after byte stuffing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image10.webp</image:loc>
+      <image:caption>Simplest Protocol. It is very simple.</image:caption>
+      <image:title>Simplest Protocol</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image11.webp</image:loc>
+      <image:caption>Stop-and-wait Protocol. It is very simple. It is still very simple. The sender sends one frame and waits for feedback from the receiver. When the ACK arrives, the sender sends the next frame</image:caption>
+      <image:title>Stop-and-wait Protocol</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image12.webp</image:loc>
+      <image:caption>1 Stop-and-Wait Automatic Repeat Request. In Stop-and-Wait ARQ, the acknowledgment number always announces in modulo-2 arithmetic the sequence number of the next frame expected. Bandwidth Delay Product</image:caption>
+      <image:title>1 Stop-and-Wait Automatic Repeat Request</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image14.webp</image:loc>
+      <image:caption>2. Go-Back-N Automatic Repeat Request. In the Go-Back-N Protocol, the sequence numbers are modulo 2m, where m is the size of the sequence number field in bits. The sequence numbers range from 0 to 2 power m- 1. For example, if m is 4, the only sequence numbers are 0 through 15 inclusive. The sender window at any time divides the possible sequence numbers into four regions</image:caption>
+      <image:title>2. Go-Back-N Automatic Repeat Request</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image15.webp</image:loc>
+      <image:caption>2. Go-Back-N Automatic Repeat Request. The receive window is an abstract concept defining an imaginary box of size 1 with one single variable Rn. The window slides when a correct frame has arrived; sliding occurs one slot at a time. Fig: Receiver window (before sliding (a), After sliding (b))</image:caption>
+      <image:title>2. Go-Back-N Automatic Repeat Request</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image16.webp</image:loc>
+      <image:caption>Resending a Frame. Below figure is an example(if ack lost) of a case where the forward channel is reliable, but the reverse is not. Below figure is an example(if frame lost)</image:caption>
+      <image:title>Resending a Frame</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image17.webp</image:loc>
+      <image:caption>Resending a Frame. Below figure is an example(if frame lost). Stop-and-Wait ARQ is a special case of Go-Back-N ARQ in which the size of the send window is 1</image:caption>
+      <image:title>Resending a Frame</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image18.webp</image:loc>
+      <image:caption>3 Selective Repeat Automatic Repeat Request. Sender Window (explain go-back N sender window concept (before &amp; after sliding.) The only difference in sender window between Go-back N and Selective Repeat is Window size)</image:caption>
+      <image:title>3 Selective Repeat Automatic Repeat Request</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image19.webp</image:loc>
+      <image:caption>3 Selective Repeat Automatic Repeat Request. Sender Window (explain go-back N sender window concept (before &amp; after sliding.) The only difference in sender window between Go-back N and Selective Repeat is Window size)</image:caption>
+      <image:title>3 Selective Repeat Automatic Repeat Request</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image20.webp</image:loc>
+      <image:caption>Receiver window. Delivery of Data in Selective Repeat ARQ</image:caption>
+      <image:title>Receiver window</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image21.webp</image:loc>
+      <image:caption>Flow Diagram. Delivery of Data in Selective Repeat ARQ</image:caption>
+      <image:title>Flow Diagram</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image22.webp</image:loc>
+      <image:caption>RANDOM ACCESS PROTOCOLS. We can consider the data link layer as two sub layers. The upper sub layer is responsible for data link control, and the lower sub layer is responsible for resolving access to the shared media. The upper sub layer that is responsible for flow and error control is called the logical link control (LLC) layer; the lower sub layer that is mostly responsible for multiple access resolution is called the media access control (MAC) layer.</image:caption>
+      <image:title>RANDOM ACCESS PROTOCOLS</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image23.webp</image:loc>
+      <image:caption>RANDOM ACCESS PROTOCOLS. The upper sub layer that is responsible for flow and error control is called the logical link control (LLC) layer; the lower sub layer that is mostly responsible for multiple access resolution is called the media access control (MAC) layer.</image:caption>
+      <image:title>RANDOM ACCESS PROTOCOLS</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image24.webp</image:loc>
+      <image:caption>1 Pure ALOHA. The original ALOHA protocol is called pure ALOHA.</image:caption>
+      <image:title>1 Pure ALOHA</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image25.webp</image:loc>
+      <image:caption>Frames in a pure ALOHA network. Vulnerable time Let us find the length of time, the vulnerable time, in which there is a possibility of collision. Station A sends a frame at time t.</image:caption>
+      <image:title>Frames in a pure ALOHA network</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image26.webp</image:loc>
+      <image:caption>Frames in a pure ALOHA network. Looking at Figure, we see that the vulnerable time, during which a collision may occur in pure ALOHA, is 2 times the frame transmission time. Pure ALOHA vulnerable time = 2 x Tfr</image:caption>
+      <image:title>Frames in a pure ALOHA network</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image27.webp</image:loc>
+      <image:caption>2 Slotted ALOHA. In slotted ALOHA we divide the time into slots of Tfr s and force the station to send only at the beginning of the time slot.shows an example of frame collisions in slotted ALOHA</image:caption>
+      <image:title>2 Slotted ALOHA</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image28.webp</image:loc>
+      <image:caption>FIG:3. Below fig shows that the vulnerable time for slotted ALOHA is one-half that of pure ALOHA. Slotted ALOHA vulnerable time = Tfr. The throughput for slotted ALOHA is S = G × e−G . The maximum throughput Smax = 0.368 when G = 1</image:caption>
+      <image:title>FIG:3</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image29.webp</image:loc>
+      <image:caption>Comparison between Pure Aloha &amp; Slotted Aloha. Now G is 1/4. In this case S =G x e-G or S =0.195 (19.5 percent). This means that the throughput is 250 x 0.195 = 49. Only 49 frames out of 250 will probably survive. Carrier Sense Multiple Access (CSMA)</image:caption>
+      <image:title>Comparison between Pure Aloha &amp; Slotted Aloha</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image30.webp</image:loc>
+      <image:caption>Comparison between Pure Aloha &amp; Slotted Aloha. have not reached station C. Station C also sends a frame. The two signals collide and both frames are destroyed</image:caption>
+      <image:title>Comparison between Pure Aloha &amp; Slotted Aloha</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image31.webp</image:loc>
+      <image:caption>Vulnerable Time. The vulnerable time for CSMA is the propagation time Tp .</image:caption>
+      <image:title>Vulnerable Time</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image32.webp</image:loc>
+      <image:caption>Persistence Methods. What should a station do if the channel is busy? What should a station do if the channel is idle? Three methods have been devised to answer these questions: the 1-persistent method, the non-persistent method, and the p-persistent method. 1-Persistent: In this method, after the station finds the line idle, it sends its frame immediately (with probability 1).</image:caption>
+      <image:title>Persistence Methods</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image33.webp</image:loc>
+      <image:caption>Persistence Methods. If the line is busy, it acts as though a collision has occurred and uses the backoff procedure. Carrier Sense Multiple Access with Collision Detection (CSMA/CD)</image:caption>
+      <image:title>Persistence Methods</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image34.webp</image:loc>
+      <image:caption>Persistence Methods. To better understand CSMA/CD, let us look at the first bits transmitted by the two stations involved in the collision.</image:caption>
+      <image:title>Persistence Methods</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image35.webp</image:loc>
+      <image:caption>Minimum Frame Size. For CSMAlCD to work, we need a restriction on the frame size.</image:caption>
+      <image:title>Minimum Frame Size</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image36.webp</image:loc>
+      <image:caption>Collision and abortion in CSMA/CD. For CSMAlCD to work, we need a restriction on the frame size.</image:caption>
+      <image:title>Collision and abortion in CSMA/CD</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image37.webp</image:loc>
+      <image:caption>DIFFERENCES BETWEEN ALOHA &amp; CSMA/CD. We need to avoid collisions on wireless networks because they cannot be detected.</image:caption>
+      <image:title>DIFFERENCES BETWEEN ALOHA &amp; CSMA/CD</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image38.webp</image:loc>
+      <image:caption>Acknowledgment. With all these precautions, there still may be a collision resulting in destroyed data. This is the CSMA protocol with collision avoidance</image:caption>
+      <image:title>Acknowledgment</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image39.webp</image:loc>
+      <image:caption>Reservation interval of fixed time length. The following figure shows a situation with five stations and a five slot reservation frame. In the first interval, only stations 1, 3, and 4 have made reservations. In the second interval, only station 1 has made a reservation</image:caption>
+      <image:title>Reservation interval of fixed time length</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image41.webp</image:loc>
+      <image:caption>Polling. Problems include high overhead of the polling messages and high dependence on the reliability of the controller</image:caption>
+      <image:title>Polling</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image42.webp</image:loc>
+      <image:caption>Token Passing. There exists problems like duplication of token or token is lost or insertion of new station, removal of a station, which need be tackled for correct and reliable operation of this scheme</image:caption>
+      <image:title>Token Passing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image43.webp</image:loc>
+      <image:caption>0 is added if it contains even number of 1’s. This scheme makes the total number of 1’s even, that is why it is called even parity checking</image:caption>
+      <image:title>0 is added if it contains even number of 1’s</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image44.webp</image:loc>
+      <image:caption>Two-dimensional Parity check. Parity check bits are calculated for each row, which is equivalent to a simple parity check bit.</image:caption>
+      <image:title>Two-dimensional Parity check</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image45.webp</image:loc>
+      <image:caption>Inthesender’sendthesegmentsareaddedusing1’scomplement. If the result is zero, the received data is accepted; otherwise discarded. Cyclic redundancy check (CRC)</image:caption>
+      <image:title>Inthesender’sendthesegmentsareaddedusing1’scomplement</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image46.webp</image:loc>
+      <image:caption>Inthesender’sendthesegmentsareaddedusing1’scomplement. Cyclic redundancy check (CRC). Unlike checksum scheme, which is based on addition, CRC is based on binary division</image:caption>
+      <image:title>Inthesender’sendthesegmentsareaddedusing1’scomplement</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image56.webp</image:loc>
+      <image:caption>Wired LANs: Ethernet. IEEE has also created several physical layer standards for different LAN protocols</image:caption>
+      <image:title>Wired LANs: Ethernet</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image57.webp</image:loc>
+      <image:caption>STANDARD ETHERNET. We briefly discuss the Standard (or traditional) Ethernet in this section</image:caption>
+      <image:title>STANDARD ETHERNET</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image58.webp</image:loc>
+      <image:caption>Frame Format. The Ethernet frame contains seven fields: preamble, SFD, DA, SA, length or type of protocol data unit (PDU), upper-layer data, and the CRC.</image:caption>
+      <image:title>Frame Format</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image59.webp</image:loc>
+      <image:caption>Frame Length. Ethernet has imposed restrictions on both the minimum and maximum lengths of a frame, as shown in below Figure</image:caption>
+      <image:title>Frame Length</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter2/image60.webp</image:loc>
+      <image:caption>Example of an Ethernet address in hexadecimal notation. The Ethernet address is 6 bytes (48 bits), normally written in hexadecimal notation, with a colon between the bytes. Unicast, Multicast, and Broadcast Addresses A source address is always a unicast address-the frame comes from only one station.</image:caption>
+      <image:title>Example of an Ethernet address in hexadecimal notation</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/books/computernetworks/chapter3</loc>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image1.webp</image:loc>
+      <image:caption>Physical Layer. The Standard Ethernet defines several physical layer implementations; four of the most common, are shown in Figure</image:caption>
+      <image:title>Physical Layer</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image2.webp</image:loc>
+      <image:caption>Encoding and Decoding. All standard implementations use digital signaling (baseband) at 10 Mbps. In Manchester encoding, the transition at the middle of the bit is used for synchronization</image:caption>
+      <image:title>Encoding and Decoding</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image3.webp</image:loc>
+      <image:caption>Encoding and Decoding. In Manchester encoding, the transition at the middle of the bit is used for synchronization</image:caption>
+      <image:title>Encoding and Decoding</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image4.webp</image:loc>
+      <image:caption>lOBase5: Thick Ethernet. The first implementation is called 10Base5, thick Ethernet, or Thicknet.</image:caption>
+      <image:title>lOBase5: Thick Ethernet</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image5.webp</image:loc>
+      <image:caption>10Base2: Thin Ethernet. The second implementation is called 10 Base2, thin Ethernet, or Cheapernet. 10Base2 also uses a bus topology, but the cable is much thinner and more flexible. Figure shows the schematic diagram of a 10Base2 implementation</image:caption>
+      <image:title>10Base2: Thin Ethernet</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image6.webp</image:loc>
+      <image:caption>1OBase-T: Twisted-Pair Ethernet. The maximum length of the twisted cable here is defined as 100 m, to minimize the effect of attenuation in the twisted cable</image:caption>
+      <image:title>1OBase-T: Twisted-Pair Ethernet</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image7.webp</image:loc>
+      <image:caption>10Base-T implementation. Although there are several types of optical fiber 10-Mbps Ethernet, the most common is called 10Base-F.10Base-F uses a star topology to connect stations to a hub. The stations are connected to the hub using two fiber-optic cables, as shown in Figure</image:caption>
+      <image:title>10Base-T implementation</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image8.webp</image:loc>
+      <image:caption>Store-and-forward packet switching. A host with a packet to send transmits it to the nearest router, either on its own LAN or over a point-to-point link to the ISP.</image:caption>
+      <image:title>Store-and-forward packet switching</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image9.webp</image:loc>
+      <image:caption>Implementation of connectionless service. datagram network. A’s table (initially) A’s table (later) C’s TableE’s Table</image:caption>
+      <image:title>Implementation of connectionless service</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image10.webp</image:loc>
+      <image:caption>Implementation of connectionless service. A’s table (initially) A’s table (later) C’s TableE’s Table. Let us assume for this example that the message is four times longer than the maximum packet size, so the network layer has to break it into four packets, 1, 2, 3, and 4, and send each of them in turn to router A</image:caption>
+      <image:title>Implementation of connectionless service</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image11.webp</image:loc>
+      <image:caption>Implementation of connection-oriented service. The algorithm that manages the tables and makes the routing decisions is called the routing algorithm</image:caption>
+      <image:title>Implementation of connection-oriented service</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image13.webp</image:loc>
+      <image:caption>Comparison of virtual-circuit and datagram networks. In some contexts, this process is called label switching. An example of a connection-oriented network service is MPLS (Multi Protocol Label Switching)</image:caption>
+      <image:title>Comparison of virtual-circuit and datagram networks</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image14.webp</image:loc>
+      <image:caption>The Optimality Principle. As a direct consequence of the optimality principle, we can see that the set of optimal routes from all sources to a given destination form a tree rooted at the destination. (a) A network.(b) A sink tree for router B</image:caption>
+      <image:title>The Optimality Principle</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image15.webp</image:loc>
+      <image:caption>Repeat steps 2 to 4 until every node becomes permanent. If a node can be reached from more than one route then select the route with the shortest cumulative cost</image:caption>
+      <image:title>Repeat steps 2 to 4 until every node becomes permanent</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image16.webp</image:loc>
+      <image:caption>Repeat steps 2 to 4 until every node becomes permanent. If a node can be reached from more than one route then select the route with the shortest cumulative cost</image:caption>
+      <image:title>Repeat steps 2 to 4 until every node becomes permanent</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image17.webp</image:loc>
+      <image:caption>Intra- and Inter domain Routing. Routing between autonomous systems is referred to as inter domain routing.</image:caption>
+      <image:title>Intra- and Inter domain Routing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image18.webp</image:loc>
+      <image:caption>Initialization of tables in distance vector routing. Each node can know only the distance between itself and its immediate neighbors, those directly connected to it.</image:caption>
+      <image:title>Initialization of tables in distance vector routing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image19.webp</image:loc>
+      <image:caption>Updating in distance vector routing. For example, suppose node C has previously advertised a route to node X with distance 3.</image:caption>
+      <image:title>Updating in distance vector routing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image20.webp</image:loc>
+      <image:caption>Final Diagram</image:caption>
+      <image:title>Final Diagram</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image21.webp</image:loc>
+      <image:caption>Two-node instability. A node detects some failure in the neighboring links which results in a distance change to infinity</image:caption>
+      <image:title>Two-node instability</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image22.webp</image:loc>
+      <image:caption>Three-node instability</image:caption>
+      <image:title>Three-node instability</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image23.webp</image:loc>
+      <image:caption>The Count-to-Infinity Problem. Split Horizon and Poison Reverse Using the split horizon strategy has one drawback.</image:caption>
+      <image:title>The Count-to-Infinity Problem</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image24.webp</image:loc>
+      <image:caption>Link State Routing. Link state routing is based on the assumption that, although the global knowledge about the topology is not clear, each node has partial knowledge: it knows the state (type, condition, and cost) of its links.</image:caption>
+      <image:title>Link State Routing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image25.webp</image:loc>
+      <image:caption>Formation of Shortest Path Tree: Dijkstra Algorithm. The Dijkstra algorithm creates a shortest path tree from a graph.</image:caption>
+      <image:title>Formation of Shortest Path Tree: Dijkstra Algorithm</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image26.webp</image:loc>
+      <image:caption>Formation of Shortest Path Tree: Dijkstra Algorithm. The Dijkstra algorithm creates a shortest path tree from a graph.</image:caption>
+      <image:title>Formation of Shortest Path Tree: Dijkstra Algorithm</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image28.webp</image:loc>
+      <image:caption>Initial routing tables in path vector routing. Path vector routing proved to be useful for inter domain routing.</image:caption>
+      <image:title>Initial routing tables in path vector routing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image29.webp</image:loc>
+      <image:caption>Sharing. and C1. Node C1 shares its table with nodes D1, B1, and A1. Node B1 shares its table with C1 and A1. Node D1 shares its table with C1. Updating When a speaker node receives a two-column table from a neighbor, it updates its own table by adding the nodes that are not in its routing table and adding its own autonomous system and the autonomous system that sent the table.</image:caption>
+      <image:title>Sharing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image30.webp</image:loc>
+      <image:caption>Hierarchical Routing. For huge networks, a two-level hierarchy may be insufficient; it may be necessary to group the regions into clusters, the clusters into zones, the zones into groups, and so on, until we run out of names for aggregations. When a single network becomes very large, an interesting question is ‘‘how many levels</image:caption>
+      <image:title>Hierarchical Routing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter3/image31.webp</image:loc>
+      <image:caption>CONGESTION CONTROL ALGORITHMS. However, the most effective way to control congestion is to reduce the load that the transport layer is placing on the network. When too much traffic is offered, congestion sets in and performance degrades sharply</image:caption>
+      <image:title>CONGESTION CONTROL ALGORITHMS</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/books/computernetworks/chapter4</loc>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image1.webp</image:loc>
+      <image:caption>Leaky Bucket Token Bucket. The Leaky Bucket Algorithm used to control rate in a network. It is implemented as a single- server queue with constant service time. If the bucket (buffer) overflows then packets are discarded. (a) A leaky bucket with water.(b) a leaky bucket with packets</image:caption>
+      <image:title>Leaky Bucket Token Bucket</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image2.webp</image:loc>
+      <image:caption>Token Bucket Algorithm. Idle hosts can capture and save up tokens (up to the max. size of the bucket) in order to send larger bursts later. Before.(b) After</image:caption>
+      <image:title>Token Bucket Algorithm</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image3.webp</image:loc>
+      <image:caption>Services Provided to the Upper Layers. To achieve this, the transport layer makes use of the services provided by the network layer. The software and/or hardware within the transport layer that does the work is called the transport entity. The network, transport, and application layers</image:caption>
+      <image:title>Services Provided to the Upper Layers</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image4.webp</image:loc>
+      <image:caption>Addressing and flow control. The connectionless transport service</image:caption>
+      <image:title>Addressing and flow control</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image5.webp</image:loc>
+      <image:caption>Addressing and flow control. The connectionless transport service</image:caption>
+      <image:title>Addressing and flow control</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image6.webp</image:loc>
+      <image:caption>IP addresses versus port numbers</image:caption>
+      <image:title>IP addresses versus port numbers</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image7.webp</image:loc>
+      <image:caption>IP addresses versus port numbers</image:caption>
+      <image:title>IP addresses versus port numbers</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image8.webp</image:loc>
+      <image:caption>6 Multiplexing and demultiplexing</image:caption>
+      <image:title>6 Multiplexing and demultiplexing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image9.webp</image:loc>
+      <image:caption>7 Error control</image:caption>
+      <image:title>7 Error control</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image10.webp</image:loc>
+      <image:caption>8 Position of UDP, TCP, and SCTP in TCP/IP suite</image:caption>
+      <image:title>8 Position of UDP, TCP, and SCTP in TCP/IP suite</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image11.webp</image:loc>
+      <image:caption>Transport Service Primitives</image:caption>
+      <image:title>Transport Service Primitives</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image12.webp</image:loc>
+      <image:caption>The primitives for a simple transport. In the symmetric variant, each direction is closed separately, independently of the other one.</image:caption>
+      <image:title>The primitives for a simple transport</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image13.webp</image:loc>
+      <image:caption>Transport Service Primitives. In the symmetric variant, each direction is closed separately, independently of the other one. A state diagram for a simple connection management scheme. Transitions labeled in italics are caused by packet arrivals. The solid lines show the client&apos;s state sequence.The dashed lines show the server&apos;s state sequence</image:caption>
+      <image:title>Transport Service Primitives</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image14.webp</image:loc>
+      <image:caption>Transport Protocol. Environment of the data link layer</image:caption>
+      <image:title>Transport Protocol</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image15.webp</image:loc>
+      <image:caption>Addressing. When an application (e.g., a user) process wishes to set up a connection to a remote application process, it must specify which one to connect to.</image:caption>
+      <image:title>Addressing</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image16.webp</image:loc>
+      <image:caption>Connection Establishment. To solve this specific problem,(DELAYED DUPLICATES) Tomlinson (1975) introduced the three-way handshake.</image:caption>
+      <image:title>Connection Establishment</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image17.webp</image:loc>
+      <image:caption>Connection Establishment. To solve this specific problem,(DELAYED DUPLICATES) Tomlinson (1975) introduced the three-way handshake. Three protocol scenarios for establishing a connection using a three-way handshake.CR denotes CONNECTION REQUEST</image:caption>
+      <image:title>Connection Establishment</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image18.webp</image:loc>
+      <image:caption>Connection Release. The worst case is when both a delayed CONNECTION REQUEST and an ACK are floating around in the subnet. Abrupt disconnection with loss of data</image:caption>
+      <image:title>Connection Release</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image19.webp</image:loc>
+      <image:caption>Connection Release. The two-army problem</image:caption>
+      <image:title>Connection Release</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image20.webp</image:loc>
+      <image:caption>Connection Release. The two-army problem</image:caption>
+      <image:title>Connection Release</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image21.webp</image:loc>
+      <image:caption>Connection Release. Four protocol scenarios for releasing a connection. (a) Normal case of a three-way handshake. (b) final ACK lost</image:caption>
+      <image:title>Connection Release</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image22.webp</image:loc>
+      <image:caption>Process-to-Process Communication. TCP provides process-to-process communication using port numbers. Below Table lists some well-known port numbers used by TCP</image:caption>
+      <image:title>Process-to-Process Communication</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image23.webp</image:loc>
+      <image:caption>Stream Delivery Service. TCP, on the other hand, allows the sending process to deliver data as a stream of bytes and allows the receiving process to obtain data as a stream of bytes. Sending and Receiving Buffers Because the sending and the receiving processes may not write or read data at the same speed, TCP needs buffers for storage.</image:caption>
+      <image:title>Stream Delivery Service</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image24.webp</image:loc>
+      <image:caption>Stream Delivery Service. Sending and Receiving Buffers Because the sending and the receiving processes may not write or read data at the same speed, TCP needs buffers for storage. Figure shows the movement of the data in one direction.</image:caption>
+      <image:title>Stream Delivery Service</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image25.webp</image:loc>
+      <image:caption>​TCP segments. The operation of the buffer at the receiver site is simpler. At the transport layer, TCP groups a number of bytes together into a packet called a segment.</image:caption>
+      <image:title>​TCP segments</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image26.webp</image:loc>
+      <image:caption>TCP segment format. TCP takes into account congestion in the network. The amount of data sent by a sender is not only controlled by the receiver (flow control), but is also determined by the level of congestion in the network</image:caption>
+      <image:title>TCP segment format</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image27.webp</image:loc>
+      <image:caption>23.38. Control. This field defines 6 different control bits or flags as shown in Figure. One or more of these bits can be set at a time. These bits enable flow control, connection establishment and termination, connection abortion, and the mode of data transfer in TCP</image:caption>
+      <image:title>23.38</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image28.webp</image:loc>
+      <image:caption>A TCP Connection. NOTE: An ACK segment, if carrying no data, consumes no sequence number. entire connection is set up, using what is called a cookie.entire connection is set up, using what is called a cookie.SYN Flooding Attack</image:caption>
+      <image:title>A TCP Connection</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image29.webp</image:loc>
+      <image:caption>Data transfer. Note the values of the sequence and acknowledgment numbers. The data segments sent by the client have the PSH (push) flag set so that the server TCP knows to deliver data to the server process as soon as they are received. PUSHING DATA: Delayed transmission and delayed delivery of data may not be acceptable by the application program</image:caption>
+      <image:title>Data transfer</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image30.webp</image:loc>
+      <image:caption>Connection termination using three-way handshaking. A good example is sorting.</image:caption>
+      <image:title>Connection termination using three-way handshaking</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image31.webp</image:loc>
+      <image:caption>21 Half-close</image:caption>
+      <image:title>21 Half-close</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image32.webp</image:loc>
+      <image:caption>Sliding window. the TCP&apos;s sliding window is of variable size; the one we discussed in the data link layer was of fixed size. The window is opened, closed, or shrunk. These three activities, as we will see, are in the control of the receiver (and depend on congestion in the network), not the sender</image:caption>
+      <image:title>Sliding window</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image33.webp</image:loc>
+      <image:caption>Sliding window. The congestion window is a value determined by the network to avoid congestion</image:caption>
+      <image:title>Sliding window</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image41.webp</image:loc>
+      <image:caption>Checksum. 11 Checksum calculation of a simple UDP user datagram</image:caption>
+      <image:title>Checksum</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image42.webp</image:loc>
+      <image:caption>congestion window is adjusted based on feedback from the. At the beginning how sender knows at what speed receiver can receive the packets?. The key observation is this: the acknowledgements return to the sender at about the rate that packets can be sent over the slowest link in the path.</image:caption>
+      <image:title>congestion window is adjusted based on feedback from the</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image43.webp</image:loc>
+      <image:caption>SLOW-START. Instead, the solution Jacobson chose to handle both of these considerations is a mix of linear and multiplicative increase</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image44.webp</image:loc>
+      <image:caption>SLOW-START. Instead, the solution Jacobson chose to handle both of these considerations is a mix of linear and multiplicative increase. Whenever a packet loss is detected, for example, by a timeout, the slow start threshold is set to be half of the congestion window and the entire process is restarted</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image45.webp</image:loc>
+      <image:caption>SLOW-START. Whenever the slow start threshold is crossed, TCP switches from slow start to additive increase. In this mode, the congestion window is increased by one segment every round-trip time</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image46.webp</image:loc>
+      <image:caption>SLOW-START. Whenever the slow start threshold is crossed, TCP switches from slow start to additive increase. In this mode, the congestion window is increased by one segment every round-trip time</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image47.webp</image:loc>
+      <image:caption>Fast Retransmit. If three or more duplicate ACKs are received in a row, the TCP sender believes that a segment has been lost</image:caption>
+      <image:title>Fast Retransmit</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image48.webp</image:loc>
+      <image:caption>75. RED (Floyd and Jacobson 1993). The use of ECN (Explicit Congestion Notification) in addition to packet loss as a congestion signal. ECN is an IP layer mechanism to notify hosts of congestion</image:caption>
+      <image:title>75</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image49.webp</image:loc>
+      <image:caption>Table 23.1 Well-known ports used with UDP</image:caption>
+      <image:title>Table 23.1 Well-known ports used with UDP</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image50.webp</image:loc>
+      <image:caption>Table 23.1 Well-known ports used with UDP</image:caption>
+      <image:title>Table 23.1 Well-known ports used with UDP</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image51.webp</image:loc>
+      <image:caption>9 User datagram format. Checksum (OPTIONAL,IF NOT USED SET ALL 1’S DEFAULT)</image:caption>
+      <image:title>9 User datagram format</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image52.webp</image:loc>
+      <image:caption>10 Pseudoheader for checksum calculation. The protocol field is added to ensure that the packet belongs to UDP, and not to other transport-layer protocols</image:caption>
+      <image:title>10 Pseudoheader for checksum calculation</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image57.webp</image:loc>
+      <image:caption>Example 23.2. 11 Checksum calculation of a simple UDP user datagram</image:caption>
+      <image:title>Example 23.2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image58.webp</image:loc>
+      <image:caption>12 Queues in UDP. 11 Checksum calculation of a simple UDP user datagram</image:caption>
+      <image:title>12 Queues in UDP</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image59.webp</image:loc>
+      <image:caption>Remote Procedure Call. The reply traces the same path in the other direction. Problems with RPC</image:caption>
+      <image:title>Remote Procedure Call</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image60.webp</image:loc>
+      <image:caption>Process-to-Process Communication. TCP provides process-to-process communication using port numbers. Below Table lists some well-known port numbers used by TCP</image:caption>
+      <image:title>Process-to-Process Communication</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image61.webp</image:loc>
+      <image:caption>Stream Delivery Service. TCP, on the other hand, allows the sending process to deliver data as a stream of bytes and allows the receiving process to obtain data as a stream of bytes. Sending and Receiving Buffers Because the sending and the receiving processes may not write or read data at the same speed, TCP needs buffers for storage.</image:caption>
+      <image:title>Stream Delivery Service</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image62.webp</image:loc>
+      <image:caption>Stream Delivery Service. Sending and Receiving Buffers Because the sending and the receiving processes may not write or read data at the same speed, TCP needs buffers for storage. Figure shows the movement of the data in one direction.</image:caption>
+      <image:title>Stream Delivery Service</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image63.webp</image:loc>
+      <image:caption>​TCP segments. The operation of the buffer at the receiver site is simpler. At the transport layer, TCP groups a number of bytes together into a packet called a segment.</image:caption>
+      <image:title>​TCP segments</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image64.webp</image:loc>
+      <image:caption>TCP segment format. TCP takes into account congestion in the network. The amount of data sent by a sender is not only controlled by the receiver (flow control), but is also determined by the level of congestion in the network</image:caption>
+      <image:title>TCP segment format</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image65.webp</image:loc>
+      <image:caption>23.10. Control. This field defines 6 different control bits or flags as shown in Figure. One or more of these bits can be set at a time. These bits enable flow control, connection establishment and termination, connection abortion, and the mode of data transfer in TCP</image:caption>
+      <image:title>23.10</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image66.webp</image:loc>
+      <image:caption>A TCP Connection. NOTE: An ACK segment, if carrying no data, consumes no sequence number. entire connection is set up, using what is called a cookie.entire connection is set up, using what is called a cookie.SYN Flooding Attack</image:caption>
+      <image:title>A TCP Connection</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image67.webp</image:loc>
+      <image:caption>Data transfer. Note the values of the sequence and acknowledgment numbers. The data segments sent by the client have the PSH (push) flag set so that the server TCP knows to deliver data to the server process as soon as they are received. PUSHING DATA: Delayed transmission and delayed delivery of data may not be acceptable by the application program</image:caption>
+      <image:title>Data transfer</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image68.webp</image:loc>
+      <image:caption>Connection termination using three-way handshaking. A good example is sorting.</image:caption>
+      <image:title>Connection termination using three-way handshaking</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image69.webp</image:loc>
+      <image:caption>21 Half-close</image:caption>
+      <image:title>21 Half-close</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image70.webp</image:loc>
+      <image:caption>Sliding window. the TCP&apos;s sliding window is of variable size; the one we discussed in the data link layer was of fixed size. The window is opened, closed, or shrunk. These three activities, as we will see, are in the control of the receiver (and depend on congestion in the network), not the sender</image:caption>
+      <image:title>Sliding window</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image71.webp</image:loc>
+      <image:caption>Sliding window. The congestion window is a value determined by the network to avoid congestion</image:caption>
+      <image:title>Sliding window</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image79.webp</image:loc>
+      <image:caption>Checksum. 11 Checksum calculation of a simple UDP user datagram</image:caption>
+      <image:title>Checksum</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image80.webp</image:loc>
+      <image:caption>congestion window is adjusted based on feedback from the. At the beginning how sender knows at what speed receiver can receive the packets?. The key observation is this: the acknowledgements return to the sender at about the rate that packets can be sent over the slowest link in the path.</image:caption>
+      <image:title>congestion window is adjusted based on feedback from the</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image81.webp</image:loc>
+      <image:caption>SLOW-START. Instead, the solution Jacobson chose to handle both of these considerations is a mix of linear and multiplicative increase</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image82.webp</image:loc>
+      <image:caption>SLOW-START. Instead, the solution Jacobson chose to handle both of these considerations is a mix of linear and multiplicative increase. Whenever a packet loss is detected, for example, by a timeout, the slow start threshold is set to be half of the congestion window and the entire process is restarted</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image83.webp</image:loc>
+      <image:caption>SLOW-START. Whenever the slow start threshold is crossed, TCP switches from slow start to additive increase. In this mode, the congestion window is increased by one segment every round-trip time</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image84.webp</image:loc>
+      <image:caption>SLOW-START. Whenever the slow start threshold is crossed, TCP switches from slow start to additive increase. In this mode, the congestion window is increased by one segment every round-trip time</image:caption>
+      <image:title>SLOW-START</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image85.webp</image:loc>
+      <image:caption>Fast Retransmit. If three or more duplicate ACKs are received in a row, the TCP sender believes that a segment has been lost</image:caption>
+      <image:title>Fast Retransmit</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image86.webp</image:loc>
+      <image:caption>47. RED (Floyd and Jacobson 1993). The use of ECN (Explicit Congestion Notification) in addition to packet loss as a congestion signal. ECN is an IP layer mechanism to notify hosts of congestion</image:caption>
+      <image:title>47</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image87.webp</image:loc>
+      <image:caption>Table 23.1 Well-known ports used with UDP</image:caption>
+      <image:title>Table 23.1 Well-known ports used with UDP</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image88.webp</image:loc>
+      <image:caption>Table 23.1 Well-known ports used with UDP</image:caption>
+      <image:title>Table 23.1 Well-known ports used with UDP</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image89.webp</image:loc>
+      <image:caption>9 User datagram format. Checksum (OPTIONAL,IF NOT USED SET ALL 1’S DEFAULT)</image:caption>
+      <image:title>9 User datagram format</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image90.webp</image:loc>
+      <image:caption>10 Pseudoheader for checksum calculation. The protocol field is added to ensure that the packet belongs to UDP, and not to other transport-layer protocols</image:caption>
+      <image:title>10 Pseudoheader for checksum calculation</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image95.webp</image:loc>
+      <image:caption>Example 23.2. 11 Checksum calculation of a simple UDP user datagram</image:caption>
+      <image:title>Example 23.2</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter4/image96.webp</image:loc>
+      <image:caption>12 Queues in UDP. 11 Checksum calculation of a simple UDP user datagram</image:caption>
+      <image:title>12 Queues in UDP</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://whizan.xyz/books/computernetworks/chapter5</loc>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image1.webp</image:loc>
+      <image:caption>COMPUTERNETWORKS - Chapter5. The reply traces the same path in the other direction. Problems with RPC</image:caption>
+      <image:title>COMPUTERNETWORKS - Chapter5</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image2.webp</image:loc>
+      <image:caption>Real-Time Transport Protocols. The second is the processing that takes place, mostly at the receiver, to play out the audio and video at the right time. RTP normally runs in user space over UDP (in the operating system)</image:caption>
+      <image:title>Real-Time Transport Protocols</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image3.webp</image:loc>
+      <image:caption>RTP—The Real-time Transport Protocol. Another facility many real-time applications need is time stamping. Not only does time stamping reduce the effects of variation in network delay, but it. It consists of three 32-bit words and potentially some extensions. The first word contains the Version field, which is already at 2</image:caption>
+      <image:title>RTP—The Real-time Transport Protocol</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image4.webp</image:loc>
+      <image:caption>Playout with Buffering and Jitter Control. The solution to this problem is to buffer packets at the receiver before they are played out to reduce the jitter. A key consideration for smooth playout is the playback point, or how long to wait at the receiver for media before playing it out.</image:caption>
+      <image:title>Playout with Buffering and Jitter Control</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image5.webp</image:loc>
+      <image:caption>Playout with Buffering and Jitter Control. A key consideration for smooth playout is the playback point, or how long to wait at the receiver for media before playing it out. One way to avoid this problem for audio is to adapt the playback point between talk spurts, in the gaps in a conversation. No one will notice the difference between a short and slightly longer silence</image:caption>
+      <image:title>Playout with Buffering and Jitter Control</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image6.webp</image:loc>
+      <image:caption>Local login Remote login. To access the system, the user logs into the system with a user id or log-in name. The system also includes password checking to prevent an unauthorized user from accessing the resources. When a user logs into a local timesharing system, it is called local log-in.</image:caption>
+      <image:title>Local login Remote login</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image7.webp</image:loc>
+      <image:caption>Local login Remote login. Concept of NVT(network virtual terminal)</image:caption>
+      <image:title>Local login Remote login</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image8.webp</image:loc>
+      <image:caption>26.75. Concept of NVT(network virtual terminal)</image:caption>
+      <image:title>26.75</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image9.webp</image:loc>
+      <image:caption>1 Architecture of WWW. Client (Browser)</image:caption>
+      <image:title>1 Architecture of WWW</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image10.webp</image:loc>
+      <image:caption>2 Browser. The Web page is stored at the server.</image:caption>
+      <image:title>2 Browser</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image12.webp</image:loc>
+      <image:caption>Static Documents. Static documents are fixed-content documents that are created and stored in a server.</image:caption>
+      <image:title>Static Documents</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image13.webp</image:loc>
+      <image:caption>HTML. Hypertext Markup Language (HTML) is a language for creating Web pages</image:caption>
+      <image:title>HTML</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image14.webp</image:loc>
+      <image:caption>HTML. Hypertext Markup Language (HTML) is a language for creating Web pages</image:caption>
+      <image:title>HTML</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image15.webp</image:loc>
+      <image:caption>7 Beginning and ending tags</image:caption>
+      <image:title>7 Beginning and ending tags</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image16.webp</image:loc>
+      <image:caption>8 Dynamic document using CGI. Hypertext Preprocessor (pHP), which uses the Perl language; Java Server Pages (JSP), which uses the Java language for scripting; Active Server Pages (ASP), a Microsoft product which uses Visual Basic language for scripting; and ColdFusion, which embe</image:caption>
+      <image:title>8 Dynamic document using CGI</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image17.webp</image:loc>
+      <image:caption>9 Dynamic document using server-site script. NoteNoteDynamic documents are sometimes referred to as server-site dynamic documents.Dynamic documents are sometimes referred to as server-site dynamic documents</image:caption>
+      <image:title>9 Dynamic document using server-site script</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image23.webp</image:loc>
+      <image:caption>Active Documents. For many applications, we need a program or a script to be run at the client site. These are called active documents</image:caption>
+      <image:title>Active Documents</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image24.webp</image:loc>
+      <image:caption>11 Active document using client-site script. For many applications, we need a program or a script to be run at the client site. These are called active documents. NoteNoteActive documents are sometimes referred to as client-site dynamic documents.Active documents are sometimes referred to as client-site dynamic documents</image:caption>
+      <image:title>11 Active document using client-site script</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image35.webp</image:loc>
+      <image:caption>Note. To identify an entity, TCP/IP protocols use the IP address, which uniquely identifies the connection of a host to the Internet.</image:caption>
+      <image:title>Note</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image36.webp</image:loc>
+      <image:caption>spacespaceDomain name. To have a hierarchical name space, a domain name space was designed. In this design the names are defined in an inverted-tree structure with the root at the top. The tree can have only 128 levels: level 0 (root) to level 127</image:caption>
+      <image:title>spacespaceDomain name</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image37.webp</image:loc>
+      <image:caption>Domain Name. Each node in the tree has a domain name.</image:caption>
+      <image:title>Domain Name</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image38.webp</image:loc>
+      <image:caption>Domain names and labels. Each node in the tree has a domain name.</image:caption>
+      <image:title>Domain names and labels</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image39.webp</image:loc>
+      <image:caption>Domain. A domain is a subtree of the domain name space. The name of the domain is the domain name of the node at the top of the subtree</image:caption>
+      <image:title>Domain</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image40.webp</image:loc>
+      <image:caption>Hierarchy of Name Servers. distribute the information among many computers called DNS servers. we let the root stand alone and create as many domains (subtrees) as there are first-level nodes</image:caption>
+      <image:title>Hierarchy of Name Servers</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image41.webp</image:loc>
+      <image:caption>​Zone. Since the complete domain name hierarchy cannot be stored on a single server, it is divided among many servers. What a server is responsible for or has authority over is called a zone. We can define a zone as a contiguous part of the entire tree</image:caption>
+      <image:title>​Zone</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image42.webp</image:loc>
+      <image:caption>DNS IN THE INTERNET. DNS is a protocol that can be used in different platforms. In the Internet, the domain name space (tree) is divided into three different sections: generic domains, country domains, and the inverse domain</image:caption>
+      <image:title>DNS IN THE INTERNET</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image43.webp</image:loc>
+      <image:caption>​Generic Domains. The generic domains define registered hosts according to their generic behavior. Each node in the tree defines a domain, which is an index to the domain name space database</image:caption>
+      <image:title>​Generic Domains</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image44.webp</image:loc>
+      <image:caption>​Generic Domains. The generic domains define registered hosts according to their generic behavior. Each node in the tree defines a domain, which is an index to the domain name space database</image:caption>
+      <image:title>​Generic Domains</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image45.webp</image:loc>
+      <image:caption>​Country Domains. The country domains section uses two-character country abbreviations (e.g., us for United States).</image:caption>
+      <image:title>​Country Domains</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image46.webp</image:loc>
+      <image:caption>​Inverse Domain. The inverse domain is used to map an address to a name</image:caption>
+      <image:title>​Inverse Domain</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image47.webp</image:loc>
+      <image:caption>Recursive resolutionRecursive resolution. The client (resolver) can ask for a recursive answer from a name server.</image:caption>
+      <image:title>Recursive resolutionRecursive resolution</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image48.webp</image:loc>
+      <image:caption>Iterative Resolution. If the client does not ask for a recursive answer, the mapping can be done iteratively.</image:caption>
+      <image:title>Iterative Resolution</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image49.webp</image:loc>
+      <image:caption>DNS MESSAGES. question records, answer records, authoritative records, and additional records</image:caption>
+      <image:title>DNS MESSAGES</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://whizan.xyz/books/computernetworks/chapter5/image50.webp</image:loc>
+      <image:caption>Header. Both query and response messages have the same header format with some fields set to zero for the query messages. The header is 12 bytes</image:caption>
+      <image:title>Header</image:title>
+    </image:image>
+  </url>
 </urlset>

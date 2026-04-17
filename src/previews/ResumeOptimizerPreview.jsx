@@ -4,7 +4,8 @@ import {
   Bot, FileCheck, Zap, ArrowRight, UploadCloud, Star, BarChart,
   CheckCircle, Shield, Clock, Users, TrendingUp, Award, ChevronDown,
   Target, Layers, RefreshCw, Download, Briefcase, GraduationCap,
-  Building2, Sparkles, Lock, Globe
+  Building2, Sparkles, Lock, Globe, LayoutTemplate, Rocket, ListChecks,
+  Library, Play, MessageSquare, Cpu, Search
 } from 'lucide-react';
 import './ResumeOptimizerPreview.css';
 import { Helmet } from 'react-helmet';
@@ -114,17 +115,17 @@ const ResumeOptimizerPreview = () => {
         <meta property="og:title" content="Free AI Resume Optimizer & ATS Scorer | Whizan AI" />
         <meta property="og:description" content="Stop getting auto-rejected. Our AI scores your resume, rewrites bullet points, and injects missing keywords until you score 95%+ on ATS. Free for students and job seekers." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://whizan.com/resume-optimizer-preview" />
+        <meta property="og:url" content="https://whizan.xyz/resume-optimizer-preview" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Free AI Resume Optimizer & ATS Scorer | Whizan AI" />
         <meta name="twitter:description" content="Score and rewrite your resume with AI. Beat ATS filters and land more interviews." />
-        <link rel="canonical" href="https://whizan.com/resume-optimizer-preview" />
+        <link rel="canonical" href="https://whizan.xyz/resume-optimizer-preview" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             "name": "Whizan AI Resume Optimizer",
-            "url": "https://whizan.com/resume-optimizer-preview",
+            "url": "https://whizan.xyz/resume-optimizer-preview",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "offers": {
@@ -151,7 +152,7 @@ const ResumeOptimizerPreview = () => {
             "provider": {
               "@type": "Organization",
               "name": "Whizan AI",
-              "url": "https://whizan.com"
+              "url": "https://whizan.xyz"
             }
           })}
         </script>
@@ -417,6 +418,44 @@ const ResumeOptimizerPreview = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ── Career Ecosystem ── */}
+        <section className="rop-ecosystem-section" aria-labelledby="eco-heading">
+          <div className="rop-section-header">
+            <h2 id="eco-heading" className="rop-section-title">The Whizan Career Ecosystem</h2>
+            <p className="rop-section-sub">A complete suite of AI-powered tools to manage your entire engineering career lifecycle.</p>
+          </div>
+
+          <div className="rop-eco-grid">
+            <div className="rop-eco-card" onClick={() => navigate('/portfolio')}>
+              <div className="rop-eco-icon-wrap"><LayoutTemplate size={24} color="#34d399" /></div>
+              <h3 className="rop-eco-title">Auto-Portfolio</h3>
+              <p className="rop-eco-desc">Generate a stunning, public-facing portfolio directly from your Whizan activity and resume data.</p>
+              <div className="rop-eco-link">Explore Portfolio <ArrowRight size={14} /></div>
+            </div>
+
+            <div className="rop-eco-card" onClick={() => navigate('/jobapplier')}>
+              <div className="rop-eco-icon-wrap"><Rocket size={24} color="#f59e0b" /></div>
+              <h3 className="rop-eco-title">Job Auto-Apply</h3>
+              <p className="rop-eco-desc">Our AI agent autonomously searches and applies to jobs, tailoring your resume for every submission.</p>
+              <div className="rop-eco-link">Launch Jobs Scout <ArrowRight size={14} /></div>
+            </div>
+
+            <div className="rop-eco-card" onClick={() => navigate('/sheets')}>
+              <div className="rop-eco-icon-wrap"><ListChecks size={24} color="#60a5fa" /></div>
+              <h3 className="rop-eco-title">DSA Sheets</h3>
+              <p className="rop-eco-desc">Curated problem sets from Blind 75, NeetCode, and top tech companies to master algorithms.</p>
+              <div className="rop-eco-link">Practice Sheets <ArrowRight size={14} /></div>
+            </div>
+
+            <div className="rop-eco-card" onClick={() => navigate('/books')}>
+              <div className="rop-eco-icon-wrap"><Library size={24} color="#f472b6" /></div>
+              <h3 className="rop-eco-title">Premium Books</h3>
+              <p className="rop-eco-desc">Deep-dive into the books that define senior engineers, with interactive code and AI explanations.</p>
+              <div className="rop-eco-link">Browse Library <ArrowRight size={14} /></div>
+            </div>
           </div>
         </section>
 

@@ -9,7 +9,7 @@ import {
     Flame, ArrowUp, ArrowDown,
     Minus, Star, Shield,
     Zap, ChevronRight, ArrowRight, RotateCcw,
-    Sparkles, BookOpen, Target, TrendingUp, AlertCircle
+    Sparkles, BookOpen, Target, TrendingUp, AlertCircle, Menu, X
 } from 'lucide-react';
 import { useSEO } from './hooks/useSEO';
 
@@ -178,13 +178,13 @@ function scoreColor(s) {
 
 function StatCard({ icon, label, value, sub, color = '#818cf8', trend }) {
     return (
-        <div style={{
-            background: 'rgba(255,255,255,0.025)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '18px',
-            padding: '1.25rem 1.5rem',
-            display: 'flex', flexDirection: 'column', gap: '8px',
-        }}>
+                <div className="stat-card-padding" style={{
+                    background: 'rgba(255,255,255,0.025)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '18px',
+                    padding: '1.25rem 1.5rem',
+                    display: 'flex', flexDirection: 'column', gap: '8px',
+                }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{
                     width: 36, height: 36, borderRadius: '10px',
@@ -413,6 +413,8 @@ export default function RecommendationPage() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
 
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
     useSEO({
         title: 'AI Problem Recommendations | Whizan AI',
         description: 'Personalized DSA problem recommendations powered by AI, tailored to your interview performance and skill level.',
@@ -468,10 +470,10 @@ export default function RecommendationPage() {
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 0' }} onClick={() => navigate('/dashboard')}>
                     <img src="/logo.jpeg" alt="Logo" style={{ height: 32, width: 32, borderRadius: 8, objectFit: 'cover' }} />
-                    <span style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Whizan AI</span>
+                    <span className="nav-logo-text" style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Whizan AI</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
+                <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '4px' }}>
                     {[
                         { label: 'Problems', path: '/dsaquestion' },
                         { label: '✦ AI Picks', path: '/recommendation', active: true },
@@ -492,10 +494,46 @@ export default function RecommendationPage() {
                     ))}
                 </div>
 
-                <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end' }}>
-                    <NavProfile />
+                <div style={{ flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
+                    <div className="desktop-nav-profile">
+                        <NavProfile />
+                    </div>
+                    <button
+                        className="mobile-nav-toggle"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        style={{
+                            display: 'none',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            padding: '8px',
+                            zIndex: 110
+                        }}
+                    >
+                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
                 </div>
             </nav>
+
+            {/* ── Mobile Menu Overlay ── */}
+            {isMenuOpen && (
+                <div className="mobile-nav-overlay" style={{
+                    position: 'fixed', top: '64px', left: 0, right: 0, bottom: 0,
+                    background: 'rgba(5,5,5,0.95)', backdropFilter: 'blur(20px)', zIndex: 99,
+                    padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/dsaquestion'); setIsMenuOpen(false); }}>Problems</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/recommendation'); setIsMenuOpen(false); }}>✦ AI Picks</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/analytics'); setIsMenuOpen(false); }}>📊 Analytics</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/aiinterview'); setIsMenuOpen(false); }}>DSA Interview</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/systemdesign'); setIsMenuOpen(false); }}>System Design</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/submissions'); setIsMenuOpen(false); }}>My Submissions</button>
+                    {currentUser && (
+                        <button className="mobile-nav-link" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}>My Profile</button>
+                    )}
+                </div>
+            )}
 
             {/* ── Content ── */}
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3.5rem 1.5rem', position: 'relative', zIndex: 1 }}>
@@ -515,7 +553,7 @@ export default function RecommendationPage() {
                             <Brain size={32} color="#a5b4fc" style={{ filter: 'drop-shadow(0 0 10px rgba(129,140,248,0.7))' }} />
                         </div>
                         <div>
-                            <h1 style={{ margin: 0, fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                            <h1 className="recommendation-page-title" style={{ margin: 0, fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                                 AI Picks For You
                             </h1>
                             <p style={{ margin: '6px 0 0', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
@@ -721,19 +759,50 @@ export default function RecommendationPage() {
 
             <style>{`
                 @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
                 .rec-layout {
                     display: grid;
                     grid-template-columns: 2fr 1fr;
                     gap: 32px;
                     align-items: start;
                 }
+
+                .mobile-nav-link {
+                    background: transparent;
+                    border: none;
+                    color: #fff;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    text-align: left;
+                    padding: 0.75rem 0;
+                    border-bottom: 1px solid rgba(255,255,255,0.05);
+                    cursor: pointer;
+                }
+
                 @media (max-width: 960px) {
                     .rec-layout {
                         grid-template-columns: 1fr;
                     }
                     .rec-sidebar {
-                        order: -1; /* Pushes the analytics gauges above recommendations on mobile */
+                        order: -1;
                     }
+                }
+
+                @media (max-width: 850px) {
+                    .nav-links { display: none !important; }
+                    .mobile-nav-toggle { display: block !important; }
+                    .desktop-nav-profile { display: none !important; }
+                }
+
+                @media (max-width: 600px) {
+                    .nav-logo-text { display: none !important; }
+                    .recommendation-page-title { font-size: 1.8rem !important; }
+                    .stat-card-padding { padding: 1.25rem !important; }
+                }
+
+                @media (max-width: 480px) {
+                    .rec-problems-col { gap: 15px !important; }
                 }
             `}</style>
         </div>

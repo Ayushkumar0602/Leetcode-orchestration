@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import NavProfile from './NavProfile';
-import { Youtube, Lock, Play, Clock, BookOpen, Layers, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { Youtube, Lock, Play, Clock, BookOpen, Layers, CheckCircle, ArrowLeft, Loader2, Menu, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -49,6 +49,7 @@ export default function CourseDetail() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     const queryClient = useQueryClient();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // ── Queries ──────────────────────────────────────────────────────────────
 
@@ -156,17 +157,49 @@ export default function CourseDetail() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
-            <nav style={{ height: '70px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 100 }}>
+            <nav style={{ height: '70px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 100 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flex: '1 1 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
                         <img src="/logo.jpeg" alt="Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} />
-                        <span style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.5px', background: 'linear-gradient(to right, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Whizan AI</span>
+                        <span className="nav-logo-text" style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.5px', background: 'linear-gradient(to right, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Whizan AI</span>
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: '1 1 0', justifyContent: 'flex-end' }}>
-                    <NavProfile />
+                    <div className="desktop-nav-profile">
+                        <NavProfile />
+                    </div>
+                    <button
+                        className="mobile-nav-toggle"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        style={{
+                            display: 'none',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            padding: '8px',
+                            zIndex: 110
+                        }}
+                    >
+                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
                 </div>
             </nav>
+
+            {/* ── Mobile Menu Overlay ── */}
+            {isMenuOpen && (
+                <div style={{
+                    position: 'fixed', top: '70px', left: 0, right: 0, bottom: 0,
+                    background: 'rgba(5,5,5,0.95)', backdropFilter: 'blur(20px)', zIndex: 99,
+                    padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/dashboard'); setIsMenuOpen(false); }}>Dashboard</button>
+                    <button className="mobile-nav-link" onClick={() => { navigate('/courses'); setIsMenuOpen(false); }}>Courses</button>
+                    {currentUser && (
+                        <button className="mobile-nav-link" onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}>My Profile</button>
+                    )}
+                </div>
+            )}
 
             <main style={{ flex: 1, position: 'relative' }}>
                 <style>{`
@@ -194,6 +227,31 @@ export default function CourseDetail() {
                             font-size: 2.2rem !important;
                         }
                     }
+
+                    @media (max-width: 768px) {
+                        .nav-links { display: none !important; }
+                        .desktop-nav-profile { display: none !important; }
+                        .mobile-nav-toggle { display: block !important; }
+                    }
+
+                    @media (max-width: 480px) {
+                        .nav-logo-text { display: none !important; }
+                        .course-title-text { font-size: 1.8rem !important; }
+                    }
+
+                    .mobile-nav-link {
+                        background: transparent;
+                        border: none;
+                        color: #fff;
+                        font-size: 1.2rem;
+                        font-weight: 600;
+                        text-align: left;
+                        padding: 1rem 0;
+                        border-bottom: 1px solid rgba(255,255,255,0.05);
+                        cursor: pointer;
+                    }
+
+                    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
                 `}</style>
 
                 <div className="course-detail-layout" style={{ maxWidth: '1250px', margin: '0 auto', padding: '40px 2rem 80px', position: 'relative', zIndex: 1 }}>

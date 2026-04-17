@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
-import { useAuth } from './contexts/AuthContext';
+import { useSEO } from './hooks/useSEO';
 import NavProfile from './NavProfile';
-import NotificationBell from './components/NotificationBell';
 import { 
     Brain, Code2, BookOpen, Briefcase, HelpCircle, 
     ChevronDown, Search, Orbit, Zap, Bot, 
@@ -158,7 +156,6 @@ const FAQ_DATA = [
 ];
 
 const FAQ = () => {
-    const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [openIndex, setOpenIndex] = useState(null);
@@ -186,13 +183,49 @@ const FAQ = () => {
         setOpenIndex(openIndex === id ? null : id);
     };
 
+    useSEO({
+        title: 'FAQ Center | Whizan AI',
+        description: 'Explore detailed answers about Whizan AI interviews, courses, career tools, technical library, and platform workflows.',
+        canonical: '/faq',
+        keywords: 'whizan faq, ai interview platform faq, system design course faq, resume optimizer faq, technical interview prep questions',
+        jsonLd: [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'FAQPage',
+                mainEntity: FAQ_DATA.flatMap((section) =>
+                    section.questions.map((item) => ({
+                        '@type': 'Question',
+                        name: item.q,
+                        acceptedAnswer: {
+                            '@type': 'Answer',
+                            text: item.a.replace(/\*\*/g, '').replace(/\n+/g, ' ').trim(),
+                        },
+                    }))
+                ),
+            },
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    {
+                        '@type': 'ListItem',
+                        position: 1,
+                        name: 'Home',
+                        item: 'https://whizan.xyz/',
+                    },
+                    {
+                        '@type': 'ListItem',
+                        position: 2,
+                        name: 'FAQ',
+                        item: 'https://whizan.xyz/faq',
+                    },
+                ],
+            },
+        ],
+    });
+
     return (
         <div className="faq-vibrant-root" style={{ '--active-color': activeCategory.color, '--active-secondary': activeCategory.secondary }}>
-            <Helmet>
-                <title>FAQ Center | Vibrant AI Career Ecosystem | Whizan AI</title>
-                <meta name="description" content="Explore the colorful world of Whizan AI. Deep technical answers about interviews, courses, and career automation." />
-            </Helmet>
-
             {/* ── Dynamic Mesh Background ── */}
             <div className="vibrant-bg">
                 <div className="mesh-blob blob-1" />

@@ -6,7 +6,7 @@ BASE_URL = "https://whizan.xyz"
 BOOKS_DATA_DIR = "public/books"
 OUTPUT_FILE = "public/sitemap-images.xml"
 
-BOOKS = ["ml", "docker", "mysql", "systemdesign"]
+BOOKS = ["ml", "docker", "mysql", "systemdesign", "computernetworks"]
 
 def escape_xml(text):
     if not text:

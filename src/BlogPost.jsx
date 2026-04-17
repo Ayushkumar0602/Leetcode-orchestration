@@ -18,20 +18,49 @@ export default function BlogPost() {
         title: post ? post.metaTitle : 'Post Not Found | Whizan AI',
         description: post ? post.metaDescription : '',
         canonical: `/blog/${slug}`,
-        jsonLd: post ? {
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: post.title,
-            image: post.featuredImage,
-            author: { '@type': 'Person', name: post.author.name },
-            datePublished: new Date(post.date).toISOString(), // Naive transform assuming valid date
-            description: post.metaDescription,
-            publisher: {
-                '@type': 'Organization',
-                name: 'Whizan AI',
-                logo: { '@type': 'ImageObject', url: 'https://whizan.xyz/logo.jpeg' } // Adjust real path
-            }
-        } : null
+        image: post?.featuredImage,
+        imageAlt: post?.title,
+        type: 'article',
+        jsonLd: post ? [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BlogPosting',
+                headline: post.title,
+                image: post.featuredImage,
+                author: { '@type': 'Person', name: post.author.name },
+                datePublished: new Date(post.date).toISOString(),
+                description: post.metaDescription,
+                publisher: {
+                    '@type': 'Organization',
+                    name: 'Whizan AI',
+                    logo: { '@type': 'ImageObject', url: 'https://whizan.xyz/logo.jpeg' }
+                },
+                mainEntityOfPage: `https://whizan.xyz/blog/${slug}`,
+            },
+            ...(post.faq?.length
+                ? [{
+                    '@context': 'https://schema.org',
+                    '@type': 'FAQPage',
+                    mainEntity: post.faq.map((item) => ({
+                        '@type': 'Question',
+                        name: item.question,
+                        acceptedAnswer: {
+                            '@type': 'Answer',
+                            text: item.answer,
+                        },
+                    })),
+                }]
+                : []),
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://whizan.xyz/' },
+                    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://whizan.xyz/blog' },
+                    { '@type': 'ListItem', position: 3, name: post.title, item: `https://whizan.xyz/blog/${slug}` },
+                ],
+            },
+        ] : null
     });
 
     // Handle 404

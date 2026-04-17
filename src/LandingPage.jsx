@@ -9,7 +9,10 @@ import {
     Brain, Code2, Server, Zap, Play, Mic, Terminal, 
     ArrowRight, CheckCircle, Orbit, FileText, Briefcase, 
     BookOpen, Layers, Bot, MessageSquare, ShieldCheck, 
-    BarChart3, Globe, Users, Trophy
+    BarChart3, Globe, Users, Trophy, Eye, ScanFace,
+    AlertTriangle, Sparkles, GitBranch, Activity, Award,
+    FileCheck, Search, UploadCloud, Rocket, LayoutTemplate,
+    ListChecks, Library, Cpu
 } from 'lucide-react';
 import './LandingPage.css';
 
@@ -38,6 +41,37 @@ const SEO_SCHEMA = {
     ]
 };
 
+const HOME_FAQS = [
+    {
+        question: 'What is Whizan AI?',
+        answer: 'Whizan AI is a web-based technical interview preparation platform for software engineers. It combines AI-assisted mock interviews, coding practice, system design learning, developer tools, and career-focused portfolio and resume experiences in one product.'
+    },
+    {
+        question: 'Who is Whizan AI for?',
+        answer: 'Whizan AI is designed for software engineers, computer science students, interview candidates, and developers who want structured practice for coding rounds, system design interviews, and public professional showcasing.'
+    },
+    {
+        question: 'What can you do on Whizan AI?',
+        answer: 'Users can practice DSA problems, explore system design learning paths, browse engineering courses, read technical books, use browser-based code tools, view company-wise preparation pages, and explore preview pages for resume optimization and developer portfolios.'
+    },
+    {
+        question: 'Where should new users start?',
+        answer: 'Good public starting points are the homepage, the AI interview overview page, the DSA practice page, the system design hub, the FAQ page, and the preview pages for DSA practice and resume optimization.'
+    }
+];
+
+const HOME_FAQ_SCHEMA = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": HOME_FAQS.map((item) => ({
+        "@type": "Question",
+        "name": item.question,
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.answer
+        }
+    }))
+};
 // ── Components ────────────────────────────────────────────
 const FeatureCard = ({ icon: Icon, title, desc, tag, tagColor, delay }) => (
     <motion.div 
@@ -118,8 +152,10 @@ export default function LandingPage() {
                 <meta property="og:title" content="Whizan AI - Intelligent Technical Interview Ecosystem" />
                 <meta property="og:description" content="Master technical interviews with Whizan AI. Real-time mock interviews, system design practice, live coding in 7 languages, and automated job applications." />
                 <meta property="og:type" content="website" />
+                <meta property="og:image:alt" content="Whizan AI homepage showing AI interview preparation, coding practice, and developer career tools." />
                 <link rel="canonical" href="https://whizan.xyz/" />
                 <script type="application/ld+json">{JSON.stringify(SEO_SCHEMA)}</script>
+                <script type="application/ld+json">{JSON.stringify(HOME_FAQ_SCHEMA)}</script>
             </Helmet>
 
             <div className="wh-bg-mesh" aria-hidden="true" />
@@ -150,8 +186,19 @@ export default function LandingPage() {
             </nav>
 
             <main>
-                {/* ── Hero Section ────────────────────────────────────── */}
+                {/* ── Hero Section ─────────────────────────────────────── */}
                 <section className="wh-hero">
+                    {/* Moving Aura Background */}
+                    <div className="wh-aura-bg" aria-hidden="true">
+                        <div className="aura-orb aura-purple-1" />
+                        <div className="aura-orb aura-magenta" />
+                        <div className="aura-orb aura-teal" />
+                        <div className="aura-orb aura-blue" />
+                        <div className="aura-orb aura-purple-2" />
+                        <div className="aura-line aura-line-1" />
+                        <div className="aura-line aura-line-2" />
+                        <div className="aura-line aura-line-3" />
+                    </div>
                     <div className="wh-hero-glow glow-1" />
                     <div className="wh-hero-glow glow-2" />
                     <div className="wh-container">
@@ -245,143 +292,409 @@ export default function LandingPage() {
                 </section>
 
                 {/* ── Core Features ───────────────────────────────────────── */}
-                <section id="features" className="wh-section wh-section-dark">
+                <section id="features" className="wh-section wh-section-dark wh-caps-section">
+                    {/* Aura bg + animated overlay */}
+                    <div className="wh-caps-bg" aria-hidden="true">
+                        {/* Reuse aura orbs for visual continuity */}
+                        <div className="aura-orb aura-caps-purple" />
+                        <div className="aura-orb aura-caps-magenta" />
+                        <div className="aura-orb aura-caps-teal" />
+                        <div className="aura-line aura-caps-line-1" />
+                        <div className="wh-caps-grid-lines" />
+                        <div className="wh-caps-scan-line" />
+                        <div className="wh-caps-particles">
+                            {Array.from({ length: 20 }).map((_, i) => (
+                                <div key={i} className="wh-particle" style={{
+                                    left: `${5 + (i * 4.8) % 92}%`,
+                                    animationDelay: `${(i * 0.41) % 5}s`,
+                                    animationDuration: `${4 + (i * 0.37) % 5}s`
+                                }} />
+                            ))}
+                        </div>
+                    </div>
                     <div className="wh-container">
                         <SectionHeader 
                             tag="Core Capabilities" 
-                            title="Everything You Need to Ace Technical Rounds" 
-                            desc="Whizan AI replaces 5 different tools. Get everything from coding sandboxes to system design drawing boards in one unified, intelligent platform."
+                            title="A Real Interview. Powered by AI." 
+                            desc="Whizan AI doesn't just quiz you — it simulates the full FAANG-level interview experience with proctoring, voice AI, live code analysis, and a comprehensive scorecard."
                         />
-                        
-                        <div className="wh-features-grid">
-                            <FeatureCard 
-                                icon={Mic} 
-                                tag="Real-Time Voice" 
-                                tagColor="#a855f7" 
-                                title="Conversational AI Mock Interviews" 
-                                desc="Practice with 6 different voice personalities. The AI uses the Socratic method to provide live hints and perfectly mimics FAANG interview conditions without giving away the answers." 
-                                delay={0.1}
-                            />
-                            <FeatureCard 
-                                icon={Terminal} 
-                                tag="Containerized" 
-                                tagColor="#3b82f6" 
-                                title="7-Language Code Execution" 
-                                desc="Write code directly in the browser using the Monaco editor. Execute instantly against 15+ automated test cases in an isolated Docker sandbox with real-time SSE streaming." 
-                                delay={0.2}
-                            />
-                            <FeatureCard 
-                                icon={Layers} 
-                                tag="Architecture" 
-                                tagColor="#f43f5e" 
-                                title="System Design Interviewing" 
-                                desc="Interactive whiteboard to architect scalable systems (HLD) and clean code patterns (LLD). Get evaluated on your technical decisions, caching strategies, and load balancing insights." 
-                                delay={0.3}
-                            />
-                            <FeatureCard 
-                                icon={Briefcase} 
-                                tag="Automation" 
-                                tagColor="#10b981" 
-                                title="Autonomous Job Application" 
-                                desc="Let our AI agent apply to jobs across LinkedIn, Indeed, and company portals on your behalf. Smartly scrapes roles matching your profile and auto-fills complex applications." 
-                                delay={0.4}
-                            />
-                            <FeatureCard 
-                                icon={FileText} 
-                                tag="Intelligence" 
-                                tagColor="#f59e0b" 
-                                title="Resume Parsing & Portfolio" 
-                                desc="Upload your PDF resume. Gemini Vision automatically parses your skills, fetches your GitHub activity, and builds a stunning, customizable public portfolio website instantly." 
-                                delay={0.5}
-                            />
-                            <FeatureCard 
-                                icon={BarChart3} 
-                                tag="Analytics" 
-                                tagColor="#0ea5e9" 
-                                title="Detailed Performance Reports" 
-                                desc="Receive a comprehensive 6-dimension skill breakdown after every session. See a definitive 'Hire/No-Hire' recommendation, pinpoint strengths, and identify red flags immediately." 
-                                delay={0.6}
-                            />
+
+                        {/* Top 2-col bento */}
+                        <div className="wh-caps-grid">
+
+                            {/* --- Proctoring Card (wide) --- */}
+                            <motion.div
+                                className="wh-cap-card wh-cap-proctor"
+                                initial={{ opacity: 0, y: 24 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                <div className="wh-cap-badge"><ScanFace size={14}/> AI Proctor</div>
+                                <h3>Real-Time Violation Detection</h3>
+                                <p>Face &amp; head pose analysis via TinyFaceDetector. Detects multiple faces, phone/tablet objects (COCO-SSD), and OS-level cheating like PrintScreen or tab-switching. Violations blur the screen and log malpractice strikes in real-time.</p>
+                                <div className="wh-cap-pills">
+                                    <span><Eye size={12}/> Face Detection</span>
+                                    <span><AlertTriangle size={12}/> Object Detection</span>
+                                    <span><ShieldCheck size={12}/> OS Monitoring</span>
+                                </div>
+                                <div className="wh-cap-proctor-visual">
+                                    <div className="wh-proctor-bar">
+                                        <div className="wh-proctor-dot green"/>
+                                        <span>No violations detected</span>
+                                        <span className="wh-proctor-mode">Strict Mode</span>
+                                    </div>
+                                    <div className="wh-proctor-hud">
+                                        <div className="wh-hud-box">
+                                            <span className="wh-hud-label">Face Status</span>
+                                            <span className="wh-hud-val green">1 Face ✓</span>
+                                        </div>
+                                        <div className="wh-hud-box">
+                                            <span className="wh-hud-label">Objects</span>
+                                            <span className="wh-hud-val green">Clear ✓</span>
+                                        </div>
+                                        <div className="wh-hud-box">
+                                            <span className="wh-hud-label">Violations</span>
+                                            <span className="wh-hud-val amber">0 / 3</span>
+                                        </div>
+                                        <div className="wh-hud-box">
+                                            <span className="wh-hud-label">Focus</span>
+                                            <span className="wh-hud-val green">Active ✓</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            {/* --- Strictness Modes Card --- */}
+                            <motion.div
+                                className="wh-cap-card wh-cap-modes"
+                                initial={{ opacity: 0, y: 24 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.1 }}
+                            >
+                                <div className="wh-cap-badge purple"><Zap size={14}/> Strictness Modes</div>
+                                <h3>4 Levels of Interview Pressure</h3>
+                                <p>From relaxed learning to real-world pressure — escalate from Low to Real Interview mode as you progress.</p>
+                                <div className="wh-modes-list">
+                                    <div className="wh-mode-row low">
+                                        <span className="wh-mode-dot"/>
+                                        <div>
+                                            <strong>Low</strong>
+                                            <span>Chill &amp; helpful, no proctoring</span>
+                                        </div>
+                                    </div>
+                                    <div className="wh-mode-row mid">
+                                        <span className="wh-mode-dot"/>
+                                        <div>
+                                            <strong>Mid</strong>
+                                            <span>Blocks right-click, flags alt-tab</span>
+                                        </div>
+                                    </div>
+                                    <div className="wh-mode-row strict">
+                                        <span className="wh-mode-dot"/>
+                                        <div>
+                                            <strong>Strict</strong>
+                                            <span>Fullscreen + AI Proctor active</span>
+                                        </div>
+                                    </div>
+                                    <div className="wh-mode-row real">
+                                        <span className="wh-mode-dot"/>
+                                        <div>
+                                            <strong>Real Interview</strong>
+                                            <span>Terminates on multiple violations</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            {/* --- Voice AI Card --- */}
+                            <motion.div
+                                className="wh-cap-card wh-cap-voice"
+                                initial={{ opacity: 0, y: 24 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.15 }}
+                            >
+                                <div className="wh-cap-badge blue"><Mic size={14}/> Conversational AI</div>
+                                <h3>6 AI Interviewer Voices</h3>
+                                <p>The AI conducts a 6-phase interview — Opening → Brute-Force → Optimization → Coding → Wrap-Up → End — with real-time speech recognition and Sarvam TTS lip-sync.</p>
+                                <div className="wh-voice-phases">
+                                    {['Opening','Brute Force','Optimize','Coding','Wrap-Up','End'].map((phase, i) => (
+                                        <div key={phase} className={`wh-phase-chip ${i === 3 ? 'active' : ''}`}>{phase}</div>
+                                    ))}
+                                </div>
+                            </motion.div>
+
+                            {/* --- Live Code Analysis Card --- */}
+                            <motion.div
+                                className="wh-cap-card wh-cap-code"
+                                initial={{ opacity: 0, y: 24 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                                <div className="wh-cap-badge teal"><Activity size={14}/> Live Analysis</div>
+                                <h3>AI Feedback Inside Your Editor</h3>
+                                <p>3 seconds after you stop typing, the AI analyzes complexity, edge cases, and structure. It injects inline hints, highlights bug lines, and drops socratic banners — all without breaking flow.</p>
+                                <div className="wh-code-feedback-demo">
+                                    <div className="wh-code-line highlight-warn">
+                                        <span className="ln">12</span>
+                                        <span className="code">  <span className="kw">for</span> i <span className="kw">in</span> range(n):</span>
+                                        <span className="wh-inline-hint">⚠ O(n²) detected</span>
+                                    </div>
+                                    <div className="wh-code-line">
+                                        <span className="ln">13</span>
+                                        <span className="code">    res.append(arr[i])</span>
+                                    </div>
+                                    <div className="wh-code-banner">
+                                        <Bot size={12}/> Can you reduce this to O(n) using a HashMap?
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            {/* --- Scorecard Card (full width) --- */}
+                            <motion.div
+                                className="wh-cap-card wh-cap-scorecard"
+                                initial={{ opacity: 0, y: 24 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.25 }}
+                            >
+                                <div className="wh-cap-badge amber"><Award size={14}/> Evaluation</div>
+                                <h3>Comprehensive Hire / No-Hire Report</h3>
+                                <p>Every session ends with a detailed scorecard: a hire recommendation, score out of 100, 6-dimension skill breakdown, strengths, red flags, full voice transcript, and final complexity analysis.</p>
+                                <div className="wh-scorecard-demo">
+                                    <div className="wh-sc-verdict strong-hire">
+                                        <Trophy size={18}/> STRONG HIRE
+                                    </div>
+                                    <div className="wh-sc-axes">
+                                        {[
+                                            { label: 'Problem Decomposition', val: 88 },
+                                            { label: 'Communication', val: 92 },
+                                            { label: 'Code Quality', val: 79 },
+                                            { label: 'Edge Cases', val: 85 },
+                                            { label: 'Optimization', val: 74 },
+                                            { label: 'Algo Thinking', val: 91 },
+                                        ].map(ax => (
+                                            <div key={ax.label} className="wh-sc-axis">
+                                                <span>{ax.label}</span>
+                                                <div className="wh-sc-bar-track">
+                                                    <div className="wh-sc-bar-fill" style={{ width: `${ax.val}%` }}/>
+                                                </div>
+                                                <span className="wh-sc-val">{ax.val}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </motion.div>
+
                         </div>
                     </div>
                 </section>
 
-                {/* ── The Ecosystem (Learning & Community) ──────────────── */}
-                <section id="ecosystem" className="wh-section">
+                {/* ── The Ecosystem ────────────────────────────────────── */}
+                <section id="ecosystem" className="wh-section wh-section-dark wh-eco-section">
+                    <div className="wh-aura-bg" aria-hidden="true">
+                        <div className="aura-orb aura-eco-blue" />
+                        <div className="aura-orb aura-eco-teal" />
+                        <div className="aura-line aura-eco-line" />
+                    </div>
+
                     <div className="wh-container">
                         <SectionHeader 
                             tag="The Ecosystem" 
-                            title="Beyond Just Interviews" 
-                            desc="Whizan AI isn't just for practice. It is a complete educational ecosystem designed to accelerate your engineering career."
+                            title="One Platform. Every Tool You Need." 
+                            desc="From resume to offer letter — Whizan AI is your complete engineering career operating system."
                         />
                         
-                        <div className="wh-bento-grid">
-                            <motion.div className="wh-bento-box bento-large bento-library"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                            >
-                                <div className="wh-bento-content">
-                                    <div className="wh-bento-icon"><Code2 size={24}/></div>
-                                    <h3>1000+ Problem Library</h3>
-                                    <p>A massive, curated database of coding problems grouped by difficulty, company, and topic. Filter by acceptance rate and track your submission history securely in the cloud.</p>
-                                    <button className="wh-bento-link" onClick={() => handleCtaClick('/dsaquestion/1')}>Browse Library <ArrowRight size={14}/></button>
-                                </div>
-                                <div className="wh-bento-visual bg-mesh-purple"/>
-                            </motion.div>
+                        {/* ── Row 1: Resume + Portfolio + Job Apply ── */}
+                        <div className="wh-eco-grid wh-eco-row-1">
 
-                            <motion.div className="wh-bento-box bento-medium bento-sandboxes"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.1 }}
+                            {/* Resume Optimizer — large */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-resume"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5 }}
                             >
-                                <div className="wh-bento-content">
-                                    <div className="wh-bento-icon"><Server size={24}/></div>
-                                    <h3>Hands-On Sandboxes</h3>
-                                    <p>Practice in real environments. Spin up a full React/Next.js Web Dev Sandbox or jump into the Git Playground to master branching, rebasing, and resolving complex merge conflicts.</p>
-                                    <ul className="wh-bento-list">
-                                        <li><CheckCircle size={14}/> Live Web Editors</li>
-                                        <li><CheckCircle size={14}/> Visual Git Commits</li>
-                                    </ul>
-                                </div>
-                            </motion.div>
-
-                            <motion.div className="wh-bento-box bento-medium bento-courses"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.2 }}
-                            >
-                                <div className="wh-bento-content">
-                                    <div className="wh-bento-icon"><BookOpen size={24}/></div>
-                                    <h3>Interactive Courses</h3>
-                                    <p>Structured video lectures combined with live code samples. Learn deeply by pausing the video to immediately write and execute code within the same view.</p>
-                                    <button className="wh-bento-link" onClick={() => handleCtaClick('/courses')}>View Courses <ArrowRight size={14}/></button>
-                                </div>
-                            </motion.div>
-                            
-                            <motion.div className="wh-bento-box bento-wide bento-jarvis"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.3 }}
-                            >
-                                <div className="wh-bento-split">
-                                    <div className="wh-bento-content">
-                                        <div className="wh-bento-icon"><MessageSquare size={24}/></div>
-                                        <h3>Jarvis: Your AI Co-Pilot</h3>
-                                        <p>A context-aware global AI assistant available on every page. Ask Jarvis to explain binary search, recommend a specific course, or summarize your weak areas based on your past mock interview performances.</p>
+                                <div className="wh-cap-badge purple"><FileCheck size={13}/> ATS Intelligence</div>
+                                <h3>AI Resume Optimizer</h3>
+                                <p>Upload your resume, paste a job description. Our multi-agent AI scores it against real ATS parsers, rewrites bullet points iteratively up to 5× until you hit 95%+ — with 9 one-click PDF templates.</p>
+                                <div className="wh-eco-ats-bar">
+                                    <div className="wh-ats-before">
+                                        <span>Before</span>
+                                        <div className="wh-ats-track"><div className="wh-ats-fill" style={{width:'38%', background:'#f87171'}}/></div>
+                                        <span className="wh-ats-pct bad">38%</span>
                                     </div>
-                                    <div className="wh-bento-visual jarvis-chat-demo">
-                                        <div className="chat-bubble user">Hey Jarvis, how is my Dynamic Programming?</div>
-                                        <div className="chat-bubble ai">Based on your recent 4 interviews, your DP score averages 62/100. I recommend practicing "Knapsack" next!</div>
+                                    <div className="wh-ats-after">
+                                        <span>After AI</span>
+                                        <div className="wh-ats-track"><div className="wh-ats-fill" style={{width:'97%', background:'#34d399'}}/></div>
+                                        <span className="wh-ats-pct good">97%</span>
                                     </div>
                                 </div>
+                                <button className="wh-btn-outline small" onClick={() => handleCtaClick('/resume-optimizer-preview')}>
+                                    Optimize Resume <ArrowRight size={14}/>
+                                </button>
                             </motion.div>
+
+                            {/* Portfolio — medium */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-portfolio"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}
+                            >
+                                <div className="wh-cap-badge teal"><LayoutTemplate size={13}/> Auto-Generated</div>
+                                <h3>Developer Portfolio</h3>
+                                <p>Your public profile is auto-built from your Whizan activity — pinned projects, solved problems, interview badges, and scores. Share a single link to recruiters.</p>
+                                <div className="wh-eco-list">
+                                    <div className="wh-eco-item"><div className="wh-item-icon teal"><Globe size={12}/></div><span>Public shareable profile link</span></div>
+                                    <div className="wh-eco-item"><div className="wh-item-icon teal"><Trophy size={12}/></div><span>Interview badges & achievement wall</span></div>
+                                    <div className="wh-eco-item"><div className="wh-item-icon teal"><Activity size={12}/></div><span>Live activity heatmap</span></div>
+                                </div>
+                                <button className="wh-btn-outline small" onClick={() => handleCtaClick('/portfolio')}>
+                                    View Portfolio <ArrowRight size={14}/>
+                                </button>
+                            </motion.div>
+
+                            {/* Job Auto-Apply — medium */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-jobs"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                                <div className="wh-cap-badge amber"><Rocket size={13}/> Autonomous</div>
+                                <h3>Job Auto-Apply</h3>
+                                <p>Set desired role, location, and salary range. Whizan scrapes live listings and autonomously submits applications — tailoring your resume to each JD automatically.</p>
+                                <div className="wh-eco-job-stat">
+                                    <div className="wh-job-pulse"><span className="wh-job-dot"/><span>Applying to jobs live…</span></div>
+                                    <div className="wh-job-count"><span className="wh-job-num">247</span><span>applications sent today</span></div>
+                                </div>
+                                <button className="wh-btn-outline small" onClick={() => handleCtaClick('/jobapplier')}>
+                                    Start Applying <ArrowRight size={14}/>
+                                </button>
+                            </motion.div>
+                        </div>
+
+                        {/* ── Row 2: DSA Sheets + Books + Library ── */}
+                        <div className="wh-eco-grid wh-eco-row-2">
+
+                            {/* DSA Sheets — medium */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-sheets"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
+                            >
+                                <div className="wh-cap-badge blue"><ListChecks size={13}/> Curated Paths</div>
+                                <h3>DSA Practice Sheets</h3>
+                                <p>Company-wise and topic-wise curated problem sheets. Track progress across Blind 75, NeetCode 150, company sheets for Google, Amazon, Meta, and more.</p>
+                                <div className="wh-eco-sheet-tags">
+                                    {['Blind 75','NeetCode 150','Striver','Google','Meta','Amazon'].map(t => (
+                                        <span key={t} className="wh-sheet-tag">{t}</span>
+                                    ))}
+                                </div>
+                                <button className="wh-btn-outline small" onClick={() => handleCtaClick('/sheets')}>
+                                    Browse Sheets <ArrowRight size={14}/>
+                                </button>
+                            </motion.div>
+
+                            {/* Premium Books — large */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-books"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.15 }}
+                            >
+                                <div className="wh-cap-badge pink"><Library size={13}/> Premium</div>
+                                <h3>Engineering Books</h3>
+                                <p>Deep, chapter-by-chapter breakdowns of the books every senior engineer reads. Interactive, code-annotated, and paired with hands-on exercises.</p>
+                                <div className="wh-eco-books-shelf">
+                                    {[
+                                        { title: 'System Design Interview', color: '#a855f7' },
+                                        { title: 'MySQL Mastery', color: '#3b82f6' },
+                                        { title: 'Docker & K8s', color: '#14b8a6' },
+                                        { title: 'Machine Learning', color: '#f59e0b' },
+                                    ].map(b => (
+                                        <div key={b.title} className="wh-book-spine" style={{'--book-color': b.color}}>
+                                            <span>{b.title}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button className="wh-btn-outline small" onClick={() => handleCtaClick('/books')}>
+                                    Read Books <ArrowRight size={14}/>
+                                </button>
+                            </motion.div>
+
+                            {/* Problem Library — medium */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-library"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.25 }}
+                            >
+                                <div className="wh-cap-badge purple"><Code2 size={13}/> Topic Explorer</div>
+                                <h3>Problem Library</h3>
+                                <p>1200+ problems with multi-tag filtering. Solve directly in the browser with 7-language code execution and real-time test cases.</p>
+                                <div className="wh-eco-stats">
+                                    <div className="wh-stat-box"><span className="wh-stat-val">1.2k+</span><span className="wh-stat-label">Problems</span></div>
+                                    <div className="wh-stat-box"><span className="wh-stat-val">7</span><span className="wh-stat-label">Languages</span></div>
+                                    <div className="wh-stat-box"><span className="wh-stat-val">50+</span><span className="wh-stat-label">Topics</span></div>
+                                </div>
+                                <button className="wh-btn-outline small" onClick={() => handleCtaClick('/dsaquestion/1')}>
+                                    Solve Problems <ArrowRight size={14}/>
+                                </button>
+                            </motion.div>
+                        </div>
+
+                        {/* ── Row 3: Sandboxes full-width + Jarvis ── */}
+                        <div className="wh-eco-grid wh-eco-row-3">
+
+                            {/* Sandboxes */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-sandboxes"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5 }}
+                            >
+                                <div className="wh-cap-badge teal"><Cpu size={13}/> Cloud Env</div>
+                                <h3>Hands-On Sandboxes</h3>
+                                <p>Spin up isolated cloud environments instantly for full-stack practice, Git mastery, or ML experimentation — all inside the browser.</p>
+                                <div className="wh-eco-list">
+                                    <div className="wh-eco-item"><div className="wh-item-icon teal"><Zap size={12}/></div><span>React / Next.js Sandbox</span></div>
+                                    <div className="wh-eco-item"><div className="wh-item-icon teal"><GitBranch size={12}/></div><span>Git & Terminal Playground</span></div>
+                                    <div className="wh-eco-item"><div className="wh-item-icon teal"><Brain size={12}/></div><span>ML Notebook Environment</span></div>
+                                </div>
+                            </motion.div>
+
+                            {/* Courses */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-courses"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}
+                            >
+                                <div className="wh-cap-badge blue"><BookOpen size={13}/> Skill Paths</div>
+                                <h3>Interactive Courses</h3>
+                                <p>Video lectures paired with live code editors. Pause, write code, run it, continue — real learning, not passive watching.</p>
+                                <button className="wh-eco-course-peek" onClick={() => handleCtaClick('/courses')}>
+                                    <Play size={14} /> Browse Courses
+                                </button>
+                            </motion.div>
+
+                            {/* Jarvis */}
+                            <motion.div 
+                                className="wh-cap-card wh-eco-jarvis"
+                                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                                <div className="wh-cap-badge amber"><MessageSquare size={13}/> AI Co-Pilot</div>
+                                <h3>Jarvis Assistant</h3>
+                                <p>Context-aware AI on every page. Explains patterns, recommends problems, scores your weak areas.</p>
+                                <div className="wh-jarvis-chat-demo">
+                                    <div className="wh-chat-msg user">How do I improve my Graph BFS?</div>
+                                    <div className="wh-chat-msg ai">Try 'Rotting Oranges' next — it's your key gap based on your last 3 interviews. 🎯</div>
+                                </div>
+                            </motion.div>
+
                         </div>
                     </div>
                 </section>
+
 
                 {/* ── Pricing ─────────────────────────────────────────────── */}
                 <section id="pricing" className="wh-section wh-section-dark">

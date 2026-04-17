@@ -1,8 +1,20 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /analytics
+Disallow: /chat
 Disallow: /dashboard
+Disallow: /evaluation
 Disallow: /aiinterview
 Disallow: /aiinterviewselect
+Disallow: /aiinterviewschedule
+Disallow: /login
+Disallow: /notifications
+Disallow: /oaround
+Disallow: /profile
+Disallow: /recommendation
+Disallow: /signup
+Disallow: /submissions
 
 Sitemap: https://whizan.xyz/sitemap.xml
 Sitemap: https://whizan.xyz/atom.xml

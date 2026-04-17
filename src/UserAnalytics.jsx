@@ -35,21 +35,23 @@ function trendColor(trend) {
 
 function StatCard({ icon, label, value, sub, color = '#818cf8', trend }) {
     return (
-        <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '20px',
-            padding: '1.5rem',
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex', flexDirection: 'column', gap: '12px',
-            transition: 'transform 0.2s',
-            cursor: 'default'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
+        <div
+            className="stat-card-padding"
+            style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                padding: '1.5rem',
+                position: 'relative',
+                overflow: 'hidden',
+                display: 'flex', flexDirection: 'column', gap: '12px',
+                transition: 'transform 0.2s',
+                cursor: 'default'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
         >
             <div style={{ position: 'absolute', top: -30, right: -30, width: 100, height: 100, background: color, filter: 'blur(50px)', opacity: 0.15, borderRadius: '50%' }} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -85,7 +87,7 @@ function ReadinessGauge({ score, readinessLog }) {
     const dash = circ * pct;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(255,255,255,0.06)`, borderRadius: 24, padding: '2rem', height: '100%', position: 'relative', overflow: 'hidden' }}>
+        <div className="gauge-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(255,255,255,0.06)`, borderRadius: 24, padding: '2rem', height: '100%', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 250, height: 150, background: color, filter: 'blur(90px)', opacity: 0.15 }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, alignSelf: 'flex-start' }}>
                 <Shield size={18} color={color} />
@@ -170,8 +172,8 @@ function ScoreTrendChartEnhanced({ trend }) {
     const [hovered, setHovered] = useState(null);
 
     return (
-        <div style={{ position: 'relative', width: '100%', overflowX: 'auto', paddingBottom: 10 }}>
-            <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', minWidth: 600, height: '100%', display: 'block' }}>
+        <div style={{ position: 'relative', width: '100%', paddingBottom: 10 }}>
+            <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
                 <defs>
                     <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4"/>
@@ -238,7 +240,7 @@ function DetailedDonut({ dataObj }) {
     const [hovered, setHovered] = useState(null);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, width: '100%' }}>
+        <div className="donut-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, width: '100%' }}>
             <div style={{ position: 'relative', width: size, height: size }}>
                 <svg width={size} height={size}>
                     <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.02)" strokeWidth={strokeW} />
@@ -279,8 +281,8 @@ function PulseTimeline({ interviews }) {
     const navigate = useNavigate();
 
     return (
-        <div style={{ width: '100%', overflowX: 'auto', padding: '2.5rem 1rem', WebkitOverflowScrolling: 'touch' }} className="custom-scrollbar">
-            <div style={{ position: 'relative', minWidth: 'min(100%, 600px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 auto' }}>
+        <div style={{ width: '100%', overflowX: 'auto', padding: '2.5rem 0.5rem', WebkitOverflowScrolling: 'touch' }} className="custom-scrollbar">
+            <div style={{ position: 'relative', minWidth: '500px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 auto' }}>
                 {/* Glowing horizontal laser line */}
                 <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, #8b5cf6, #3b82f6, transparent)', boxShadow: '0 0 15px #8b5cf6', transform: 'translateY(-50%)', zIndex: 0 }} />
                 
@@ -362,7 +364,7 @@ function IntelligenceSynthesis({ stats, analytics }) {
                     <h4 style={{ margin: '0 0 4px', fontWeight: 800, color: '#fff' }}>Endurance Rating</h4>
                     <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>Calculated from {stats.userStats?.Total || 0} solved concepts & {analytics.totalInterviews || 0} intense mock rounds.</p>
                 </div>
-                <div style={{ margin: 'auto 0 auto auto', fontSize: '2.5rem', fontWeight: 900, color: '#8b5cf6' }}>
+                <div className="ai-synthesis-val" style={{ margin: 'auto 0 auto auto', fontSize: '2.5rem', fontWeight: 900, color: '#8b5cf6' }}>
                     {endurance}
                 </div>
             </div>
@@ -375,7 +377,7 @@ function IntelligenceSynthesis({ stats, analytics }) {
                     <h4 style={{ margin: '0 0 4px', fontWeight: 800, color: '#fff' }}>Algorithmic Consistency</h4>
                     <p style={{ margin: 0, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>Your performance variance across recent AI interviews is dynamically rated at {consistencyScore}/100.</p>
                 </div>
-                <div style={{ margin: 'auto 0 auto auto', fontSize: '2.5rem', fontWeight: 900, color: '#10b981' }}>
+                <div className="ai-synthesis-val" style={{ margin: 'auto 0 auto auto', fontSize: '2.5rem', fontWeight: 900, color: '#10b981' }}>
                     {consistencyScore}
                 </div>
             </div>
@@ -603,35 +605,60 @@ export default function UserAnalytics() {
                 /* SMARTPHONE STYLES */
                 @media (max-width: 800px) {
                     .analytics-wrapper {
-                        padding: 2rem 1.25rem;
+                        padding: 1.5rem 1rem;
                     }
                     .responsive-grid-2 {
                         grid-template-columns: 1fr;
+                        gap: 1.25rem;
                     }
                     .responsive-grid-kpi {
-                        grid-template-columns: 1fr !important;
+                        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                        gap: 1rem;
                     }
                     .ai-synthesis-col {
                         flex-direction: column;
                         align-items: flex-start;
                         text-align: left;
-                        gap: 0.5rem;
+                        gap: 1rem;
+                        padding: 1.5rem !important;
                     }
                     .ai-synthesis-col > div:first-child {
                         margin-bottom: 0px;
+                        width: 48px;
+                        height: 48px;
                     }
                     .ai-synthesis-col > div:last-child {
-                        margin: 0 auto 0 0 !important;
-                        font-size: 2rem !important;
-                    }
-                    .ai-synthesis-col p {
-                        font-size: 0.8rem !important;
+                        margin: 0 !important;
+                        font-size: 2.2rem !important;
+                        line-height: 1;
                     }
                     .stat-col-val {
-                        font-size: 2rem !important;
+                        font-size: 2.22rem !important;
                     }
-                    .timeline-tooltip {
-                        transform: translateX(-50%) scale(0.9) !important;
+                    .ai-synthesis-val {
+                        margin: 0 !important;
+                    }
+                    .gauge-container, .donut-container {
+                        padding: 1.5rem !important;
+                        transform: scale(0.9);
+                        transform-origin: center top;
+                        margin-bottom: -20px;
+                    }
+                }
+
+                @media (max-width: 500px) {
+                    .responsive-grid-kpi {
+                        grid-template-columns: 1fr;
+                    }
+                    .analytics-header-title {
+                        font-size: 1.8rem !important;
+                    }
+                    .stat-card-padding {
+                        padding: 1.25rem !important;
+                    }
+                    .gauge-container, .donut-container {
+                        transform: scale(0.85);
+                        margin-bottom: -40px;
                     }
                 }
             `}</style>
@@ -738,7 +765,7 @@ export default function UserAnalytics() {
                                     <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500, display: 'block', marginBottom: '2rem' }}>
                                         ML-identified strengths and weaknesses
                                     </span>
-                                    <div style={{ background: '#0a0f1c', borderRadius: 16, border: '1px solid rgba(255,255,255,0.03)', padding: '1.5rem' }}>
+                                    <div style={{ background: '#0a0f1c', borderRadius: 16, border: '1px solid rgba(255,255,255,0.03)', padding: '1.25rem', overflow: 'hidden' }}>
                                         <TopicRadar strengths={analytics.topicStrengths} weaknesses={analytics.topicWeaknesses} />
                                     </div>
                                 </div>

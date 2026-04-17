@@ -1,14 +1,30 @@
-/* ── Base Foundation ── */
 .resume-preview-container {
   min-height: 100vh;
-  background-color: #050505;
+  background-color: #030408;
   background-image: 
-    radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 45%),
-    radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.1), transparent 45%),
-    linear-gradient(to bottom, rgba(5,5,5,0.4) 0%, #050505 100%);
+    radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.1), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.05), transparent 50%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Cfilter id='noiseFilter'%3%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3%3C/filter%3%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3%3C/svg%3");
+  background-blend-mode: overlay;
   color: #ffffff;
   font-family: 'Inter', sans-serif;
   position: relative;
+  overflow-x: hidden;
+}
+
+.resume-preview-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .resume-preview-nav {
@@ -18,7 +34,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 5%;
-  background: rgba(5, 5, 5, 0.65);
+  background: rgba(3, 4, 8, 0.75);
   backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
@@ -243,30 +259,30 @@
 }
 
 .rop-orb-1 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(165, 180, 252, 0.18) 0%, transparent 70%);
-  top: -80px;
-  left: -120px;
-  animation: rop-drift 14s ease-in-out infinite alternate;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1), transparent 70%);
+  top: -100px;
+  left: -200px;
+  animation: rop-drift 20s ease-in-out infinite alternate;
 }
 
 .rop-orb-2 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.14) 0%, transparent 70%);
-  top: 100px;
-  right: -100px;
-  animation: rop-drift 18s ease-in-out infinite alternate-reverse;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.08), transparent 70%);
+  top: 15%;
+  right: -150px;
+  animation: rop-drift 24s ease-in-out infinite alternate-reverse;
 }
 
 .rop-orb-3 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(244, 114, 182, 0.12) 0%, transparent 70%);
-  top: 300px;
-  left: 40%;
-  animation: rop-drift 22s ease-in-out infinite alternate;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.06), transparent 70%);
+  top: 40%;
+  left: 30%;
+  animation: rop-drift 28s ease-in-out infinite alternate;
 }
 
 .rop-orb-cta {
@@ -280,13 +296,9 @@
 }
 
 @keyframes rop-drift {
-  from {
-    transform: translate(0, 0);
-  }
-
-  to {
-    transform: translate(30px, 40px);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, 60px) scale(1.1); }
+  100% { transform: translate(-20px, 30px) scale(0.95); }
 }
 
 /* ── Gradient text ── */
@@ -971,4 +983,87 @@
   .rop-templates-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* ── Ecosystem Section ── */
+.rop-ecosystem-section {
+  max-width: 1100px;
+  margin: 0 auto 6rem;
+  padding: 0 5%;
+}
+
+.rop-eco-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .rop-eco-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .rop-eco-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rop-eco-card {
+  background: rgba(20, 22, 30, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.rop-eco-card:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.rop-eco-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.rop-eco-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.rop-eco-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.rop-eco-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #818cf8;
+  transition: gap 0.2s;
+}
+
+.rop-eco-card:hover .rop-eco-link {
+  gap: 12px;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Book, Cpu, Database, Terminal, ChevronRight, Layout, BookOpen, Clock, Star } from 'lucide-react';
+import { Book, Cpu, Database, Terminal, ChevronRight, Layout, BookOpen, Clock, Star, Network } from 'lucide-react';
 import NavProfile from './NavProfile';
 import { useSEO } from './hooks/useSEO';
 
@@ -52,6 +52,18 @@ const BOOKS_DATA = [
         stats: 'Coming Soon',
         level: 'Beginner',
         tag: 'Database'
+    },
+    {
+        id: 'computernetworks',
+        title: 'Computer Networks',
+        subtitle: 'Foundations & Protocols',
+        description: 'Master the layers of networking: Physical, Data Link, Network, Transport, and Application. Includes comprehensive notes on TCP/IP, DNS, and more.',
+        icon: <Network size={24} />,
+        color: '#22c55e',
+        path: '/books/computernetworks/chapter1',
+        stats: '5 Chapters',
+        level: 'Fundamental',
+        tag: 'Networking'
     }
 ];
 

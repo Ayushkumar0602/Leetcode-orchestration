@@ -123,7 +123,7 @@ export default function AIInterview() {
     const [problemSearch, setProblemSearch] = useState('');
     const [selectedTopics, setSelectedTopics] = useState([]);
     const [selectedCompanies, setSelectedCompanies] = useState([]);
-    
+
     const debouncedSearch = useDebounce(problemSearch, 300);
 
     const { data: metadata = { topics: [], companies: [] } } = useQuery({
@@ -244,8 +244,8 @@ export default function AIInterview() {
 
             // Detect generic Windows/Linux PrintScreen and explicit fallbacks
             if (
-                e.code === 'PrintScreen' || 
-                (metaDown && shiftDown && ['Digit3', 'Digit4', 'Digit5', 'KeyS'].includes(e.code)) || 
+                e.code === 'PrintScreen' ||
+                (metaDown && shiftDown && ['Digit3', 'Digit4', 'Digit5', 'KeyS'].includes(e.code)) ||
                 (e.altKey && e.code === 'PrintScreen')
             ) {
                 setIsBlurry(true);
@@ -1446,7 +1446,7 @@ export default function AIInterview() {
                                     <p style={{ color: 'var(--txt2)', fontSize: '0.95rem', margin: 0, textAlign: 'left' }}>Select a problem and tell us about your target role.</p>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <button 
+                                    <button
                                         onClick={() => navigate('/companyinterviewselect')}
                                         style={{ background: 'rgba(168,85,247,0.1)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
                                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
@@ -1454,7 +1454,7 @@ export default function AIInterview() {
                                     >
                                         <Building size={18} /> Company Sheets
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => navigate('/courses')}
                                         style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
                                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
@@ -1486,7 +1486,7 @@ export default function AIInterview() {
                                         onBlur={e => e.target.style.borderColor = 'var(--border)'}
                                     />
                                 </div>
-                                
+
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
                                     <Select
                                         isMulti
@@ -1993,13 +1993,13 @@ export default function AIInterview() {
                         <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.85rem' }}>Practice Fairly</h2>
                         <p style={{ color: '#a0a0a0', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2rem' }}>
                             {aiProctorMsg ? (
-                                <span style={{ color: '#ef4743', fontWeight: 'bold' }}>AI Proctor Alert: {aiProctorMsg}<br/><br/></span>
+                                <span style={{ color: '#ef4743', fontWeight: 'bold' }}>AI Proctor Alert: {aiProctorMsg}<br /><br /></span>
                             ) : null}
-                            Please do not use unsupported keyboard shortcuts or switch application windows. This platform is a practice tool designed to help you build true confidence for your real interviews. 
-                            <br/><br/>
-                            <span style={{fontSize: '0.85rem', color: 'var(--txt3)'}}>(Note: Standard copy/pasting using `Cmd+C` and `Cmd+V` inside the code editor is permitted, but switching windows to copy external code will trigger security features).</span>
+                            Please do not use unsupported keyboard shortcuts or switch application windows. This platform is a practice tool designed to help you build true confidence for your real interviews.
+                            <br /><br />
+                            <span style={{ fontSize: '0.85rem', color: 'var(--txt3)' }}>(Note: Standard copy/pasting using `Cmd+C` and `Cmd+V` inside the code editor is permitted, but switching windows to copy external code will trigger security features).</span>
                         </p>
-                        <button 
+                        <button
                             onClick={() => { setShowMalpracticePopup(false); setAiProctorMsg(''); }}
                             style={{ background: 'var(--ai)', color: '#fff', padding: '0.85rem 2.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(168,85,247,0.3)' }}
                         >
@@ -2016,11 +2016,11 @@ export default function AIInterview() {
                     </div>
                     <h1 style={{ color: '#fff', fontSize: '2.2rem', fontWeight: 800, marginBottom: '1rem', textAlign: 'center', letterSpacing: '-0.02em' }}>Fullscreen Exited</h1>
                     <p style={{ color: '#a0a0a0', fontSize: '1.1rem', marginBottom: '2.5rem', textAlign: 'center', maxWidth: '600px', lineHeight: 1.6 }}>
-                        You are in a strict interview mode. Exiting fullscreen or minimizing this window is prohibited. Leaving this window counts as a malpractice against your evaluation. <br/><br/>
+                        You are in a strict interview mode. Exiting fullscreen or minimizing this window is prohibited. Leaving this window counts as a malpractice against your evaluation. <br /><br />
                         <b>You must return to fullscreen immediately to continue.</b>
                     </p>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button 
+                        <button
                             onClick={() => {
                                 if (document.documentElement.requestFullscreen) {
                                     document.documentElement.requestFullscreen().catch(e => setSetupError('Could not enter fullscreen'));
@@ -2035,7 +2035,7 @@ export default function AIInterview() {
             )}
 
             {['strict', 'real'].includes(strictness) && !isFullscreenCheating && appPhase === 'interview' && (
-                <AIProctor 
+                <AIProctor
                     onViolationDetected={(msg, forceBlur = false) => {
                         const now = Date.now();
                         // Debounce by 5000ms
@@ -2046,7 +2046,7 @@ export default function AIInterview() {
                             setMalpracticeCount(prev => prev + 1);
                             if (forceBlur) setIsBlurry(true);
                         }
-                    }} 
+                    }}
                 />
             )}
 
@@ -2126,8 +2126,8 @@ export default function AIInterview() {
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
                 {/* LEFT: Problem panel */}
-                <div 
-                    style={{ 
+                <div
+                    style={{
                         width: leftWidth, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0, background: '#11131a',
                         filter: isBlurry ? 'blur(12px)' : 'none',
                         transition: 'filter 0.2s',

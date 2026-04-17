@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft, Terminal } from 'lucide-react';
+import { useSEO } from './hooks/useSEO';
 
 const NotFound = () => {
   const navigate = useNavigate();
   const [terminalText, setTerminalText] = useState('');
   const fullText = "System Error: Neural pathways offline. Sector 404 unmapped.";
+
+  useSEO({
+    title: '404 Page Not Found',
+    description: 'The requested page could not be found on Whizan AI.',
+    robots: 'noindex, nofollow',
+  });
 
   useEffect(() => {
     let i = 0;
