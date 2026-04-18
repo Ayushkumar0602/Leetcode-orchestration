@@ -23,7 +23,8 @@ let _firestoreOps = null;
 
 function getFirestore() {
     if (!_db) {
-        const { db, doc, getDoc, setDoc, collection, getDocs } = require('../firebase');
+        const { db } = require('../firebase');
+        const { doc, getDoc, setDoc, collection, getDocs } = require('firebase/firestore');
         _db = db;
         _firestoreOps = { doc, getDoc, setDoc, collection, getDocs };
     }
