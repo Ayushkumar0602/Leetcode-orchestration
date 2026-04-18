@@ -13,17 +13,23 @@
 
 const express = require('express');
 const router = express.Router();
-const { db, doc, getDoc, setDoc, collection, getDocs } = require('../firebase');
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'https://leetcode-orchestration-55z3.onrender.com';
 
 // ─── Helper: Firestore refs ────────────────────────────────────────────────
 
-// Simple passthrough so existing code calling getFirestore() still works
-function getFirestore() {
-    return { db, doc, getDoc, setDoc, collection, getDocs };
-}
+let _db = null;
+let _firestoreOps = null;
 
+function getFirestore() {
+    if (!_db) {
+        const { db } = require('../firebase');
+        const { doc, getDoc, setDoc, collection, getDocs } = require('firebase/firestore');
+        _db = db;
+        _firestoreOps = { doc, getDoc, setDoc, collection, getDocs };
+    }
+    return { db: _db, ..._firestoreOps };
+}
 
 // ─── GET /api/ml/status ────────────────────────────────────────────────────
 
