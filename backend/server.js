@@ -98,6 +98,27 @@ setInterval(async () => {
 
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
+// Temporary diagnostic endpoint — diagnose production Admin SDK init
+app.get('/api/debug/firebase', async (req, res) => {
+    const { admin, db, getDoc, doc } = require('./firebase');
+    const result = {
+        adminAppsCount: admin.apps.length,
+        adminProjectId: admin.apps[0]?.options?.credential?.projectId || null,
+        hasServiceAccountKey: !!process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+        hasDatabaseUrl: !!process.env.FIREBASE_DATABASE_URL,
+        firestoreRead: null,
+        firestoreError: null,
+    };
+    try {
+        const snap = await getDoc(doc(db, 'ml_jobs', 'global'));
+        result.firestoreRead = snap.exists() ? 'exists' : 'not found (but no error)';
+    } catch (e) {
+        result.firestoreError = e.message;
+    }
+    res.json(result);
+});
+
+
 // JobSpy Job Search Integration (Python bridge)
 app.get('/api/jobs', async (req, res) => {
     try {
