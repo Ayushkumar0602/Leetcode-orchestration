@@ -6,7 +6,22 @@ const { generateCodeAndTests, extractProjectDetails, chatWithAgent } = require('
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
 const { parseResumeWithAI } = require('./resumeParser');
-const { db, rtdb, doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where, ref: rtdbRef, push, set, remove, get } = require('./firebase');
+const { db, rtdb, doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where, limit, ref: rtdbRef, push, set, remove, get } = require('./firebase');
+
+// ── Lightweight In-Memory TTL Cache ──────────────────────────────────────────
+// Reduces Firestore reads for high-traffic read-only endpoints.
+const _cache = new Map();
+function cacheGet(key) {
+    const entry = _cache.get(key);
+    if (!entry) return null;
+    if (Date.now() > entry.expiresAt) { _cache.delete(key); return null; }
+    return entry.value;
+}
+function cacheSet(key, value, ttlMs) {
+    _cache.set(key, { value, expiresAt: Date.now() + ttlMs });
+}
+// Clear stale cache entries every 5 minutes
+setInterval(() => { const now = Date.now(); for (const [k, v] of _cache) { if (now > v.expiresAt) _cache.delete(k); } }, 300000);
 const UAParser = require('ua-parser-js');
 const cron = require('node-cron');
 const { execFile } = require('child_process');
@@ -97,27 +112,6 @@ setInterval(async () => {
 }, 120000); // 2 minutes interval is plenty for dashboard freshness
 
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
-
-// Temporary diagnostic endpoint — diagnose production Admin SDK init
-app.get('/api/debug/firebase', async (req, res) => {
-    const { admin, db, getDoc, doc } = require('./firebase');
-    const result = {
-        adminAppsCount: admin.apps.length,
-        adminProjectId: admin.apps[0]?.options?.credential?.projectId || null,
-        hasServiceAccountKey: !!process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
-        hasDatabaseUrl: !!process.env.FIREBASE_DATABASE_URL,
-        firestoreRead: null,
-        firestoreError: null,
-    };
-    try {
-        const snap = await getDoc(doc(db, 'ml_jobs', 'global'));
-        result.firestoreRead = snap.exists() ? 'exists' : 'not found (but no error)';
-    } catch (e) {
-        result.firestoreError = e.message;
-    }
-    res.json(result);
-});
-
 
 // JobSpy Job Search Integration (Python bridge)
 app.get('/api/jobs', async (req, res) => {
@@ -1075,17 +1069,17 @@ app.delete('/api/interviews/:id', async (req, res) => {
 
 // Fetch all interviews for a user (lightweight list)
 app.get('/api/interviews/:uid', async (req, res) => {
+    const uid = String(req.params.uid);
+    const cacheKey = `interviews:${uid}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return res.json(cached);
     try {
-        const snapshot = await getDocs(collection(db, 'interviews'));
-        const interviews = [];
-        snapshot.forEach(d => {
-            const data = d.data();
-            if (data.userId === String(req.params.uid)) {
-                interviews.push({ id: d.id, ...data });
-            }
-        });
-        interviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        res.json({ interviews });
+        const q = query(collection(db, 'interviews'), where('userId', '==', uid), orderBy('createdAt', 'desc'), limit(50));
+        const snapshot = await getDocs(q);
+        const interviews = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const result = { interviews };
+        cacheSet(cacheKey, result, 60_000); // 60s cache
+        res.json(result);
     } catch (err) {
         console.error('Failed to fetch interviews:', err);
         res.status(500).json({ error: 'Failed to fetch interviews' });
@@ -1165,8 +1159,12 @@ app.post('/api/resume/parse', async (req, res) => {
 
 // --- User Profile Routes ---
 app.get('/api/profile/:uid', async (req, res) => {
+    const uid = req.params.uid;
+    const cacheKey = `profile:${uid}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return res.json(cached);
     try {
-        const profileRef = doc(db, 'userProfiles', req.params.uid);
+        const profileRef = doc(db, 'userProfiles', uid);
         const snap = await getDoc(profileRef);
         if (!snap.exists()) return res.json({ profile: {} });
 
@@ -1178,21 +1176,25 @@ app.get('/api/profile/:uid', async (req, res) => {
             const expires = new Date(profileData.planExpiresAt);
             if (now > expires) {
                 profileData = { ...profileData, plan: 'Spark' };
-                await setDoc(profileRef, { plan: 'Spark' }, { merge: true }); // Downgrade in Firestore
+                await setDoc(profileRef, { plan: 'Spark' }, { merge: true });
             }
         }
 
-        res.json({ profile: profileData });
+        const result = { profile: profileData };
+        cacheSet(cacheKey, result, 120_000); // 2 min cache
+        res.json(result);
     } catch (err) {
         console.error('Failed to fetch profile:', err);
         res.status(500).json({ error: 'Failed to fetch profile' });
     }
 });
 
+// Invalidate profile cache on update so next read is fresh
 app.post('/api/profile/:uid', async (req, res) => {
     try {
         const profileRef = doc(db, 'userProfiles', req.params.uid);
         await setDoc(profileRef, { ...req.body, updatedAt: new Date().toISOString() }, { merge: true });
+        _cache.delete(`profile:${req.params.uid}`);
         res.json({ success: true });
     } catch (err) {
         console.error('Failed to save profile:', err);
@@ -1200,12 +1202,18 @@ app.post('/api/profile/:uid', async (req, res) => {
     }
 });
 
+
+
+
 // --- Activity Calendar Route ---
 app.get('/api/activity/:uid', async (req, res) => {
+    const uid = req.params.uid;
+    const cacheKey = `activity:${uid}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return res.json(cached);
     try {
-        const uid = req.params.uid;
-        const submissionsRef = collection(db, "submissions");
-        const snapshot = await getDocs(submissionsRef);
+        const q = query(collection(db, 'submissions'), where('userId', '==', String(uid)));
+        const snapshot = await getDocs(q);
 
         const dailyCounts = {};
         const monthlyData = {};
@@ -1274,7 +1282,9 @@ app.get('/api/activity/:uid', async (req, res) => {
 
         const totalActiveDays = sortedDays.length;
 
-        res.json({ dailyCounts, monthlyData, currentStreak, longestStreak, totalActiveDays, totalSubmissions });
+        const result = { dailyCounts, monthlyData, currentStreak, longestStreak, totalActiveDays, totalSubmissions };
+        cacheSet(cacheKey, result, 300_000); // 5 min cache
+        res.json(result);
     } catch (err) {
         console.error("Failed to fetch activity data:", err);
         res.status(500).json({ error: "Failed to fetch activity data" });
@@ -1331,21 +1341,15 @@ app.post('/api/submissions/save', async (req, res) => {
 app.get('/api/submissions/:uid/:problemId', async (req, res) => {
     try {
         const { uid, problemId } = req.params;
-        const submissionsRef = collection(db, "submissions");
-        // Query top-level collection by userId
-        const q = query(submissionsRef); // For small-scale we can fetch all and filter, or just use Firestore where
+        const q = query(
+            collection(db, 'submissions'),
+            where('userId', '==', String(uid)),
+            where('problemId', '==', String(problemId)),
+            orderBy('submittedAt', 'desc'),
+            limit(20)
+        );
         const snapshot = await getDocs(q);
-
-        const results = [];
-        snapshot.forEach(d => {
-            const data = d.data();
-            if (data.userId === String(uid) && data.problemId === String(problemId)) {
-                results.push({ id: d.id, ...data });
-            }
-        });
-
-        // Sort newest-first in JS (avoids needing Firestore index)
-        results.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+        const results = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         res.json({ submissions: results });
     } catch (err) {
         console.error("Failed to fetch submissions:", err);
@@ -1355,34 +1359,35 @@ app.get('/api/submissions/:uid/:problemId', async (req, res) => {
 
 // Get aggregated list of all user's solved/attempted problems for dashboard
 app.get('/api/user-problems/:uid', async (req, res) => {
+    const uid = req.params.uid;
+    const cacheKey = `user-problems:${uid}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return res.json(cached);
     try {
-        const uid = req.params.uid;
-        const problemsRef = collection(db, "problems");
-        const snapshot = await getDocs(problemsRef);
-
-        const results = [];
-
-        snapshot.forEach(d => {
+        const q = query(
+            collection(db, 'problems'),
+            where('userId', '==', String(uid)),
+            orderBy('updatedAt', 'desc'),
+            limit(500)
+        );
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map(d => {
             const data = d.data();
-            if (data.userId !== String(uid)) return; // filter by user
-
             const pid = parseInt(data.problemId, 10);
             const meta = getProblemById(pid) || {};
-
-            results.push({
+            return {
                 id: pid || data.problemId,
                 docId: d.id,
                 title: meta.title || data.title || `Problem ${pid || data.problemId}`,
-                status: data.status, // 'Solved' or 'Attempting'
+                status: data.status,
                 difficulty: data.difficulty,
                 submissionsCount: data.submissionsCount || 0,
                 updatedAt: data.updatedAt
-            });
+            };
         });
-
-        // Sort by most recently updated
-        results.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-        res.json({ problems: results });
+        const result = { problems: results };
+        cacheSet(cacheKey, result, 120_000); // 2 min cache
+        res.json(result);
     } catch (err) {
         console.error("Failed to fetch user problems:", err);
         res.status(500).json({ error: "Failed to fetch user problems" });
@@ -1409,21 +1414,23 @@ app.post('/api/stats/submit', async (req, res) => {
 });
 
 app.get('/api/stats/user/:uid', async (req, res) => {
+    const uid = req.params.uid;
+    const cacheKey = `stats:${uid}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return res.json(cached);
     try {
-        const uid = req.params.uid;
-        // Read from top-level problems collection
-        const problemsRef = collection(db, "problems");
-        const snapshot = await getDocs(problemsRef);
-
+        const q = query(
+            collection(db, 'problems'),
+            where('userId', '==', String(uid)),
+            limit(2000)
+        );
+        const snapshot = await getDocs(q);
         const userStats = { Easy: 0, Medium: 0, Hard: 0, Total: 0, solvedIds: [], attemptingIds: [] };
-        snapshot.forEach(d => {
+        snapshot.docs.forEach(d => {
             const data = d.data();
-            if (data.userId !== String(uid)) return;
-
             if (data.status === 'Solved') {
                 userStats.solvedIds.push(data.problemId);
                 userStats.Total++;
-
                 if (data.difficulty === 'Easy') userStats.Easy++;
                 else if (data.difficulty === 'Medium') userStats.Medium++;
                 else if (data.difficulty === 'Hard') userStats.Hard++;
@@ -1431,9 +1438,10 @@ app.get('/api/stats/user/:uid', async (req, res) => {
                 userStats.attemptingIds.push(data.problemId);
             }
         });
-
         const totalCounts = getTotalCounts();
-        res.json({ userStats, totalCounts });
+        const result = { userStats, totalCounts };
+        cacheSet(cacheKey, result, 120_000); // 2 min cache
+        res.json(result);
     } catch (err) {
         console.error("Failed to fetch user stats", err);
         res.status(500).json({ error: "Failed to fetch user stats" });
