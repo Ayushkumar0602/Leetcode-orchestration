@@ -1,8 +1,6 @@
 require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { db } = require('./firebase');
-const axios = require('axios');
-const { doc, getDoc, setDoc, collection, getDocs, query, where } = require('firebase/firestore');
+const { db, doc, getDoc, setDoc, collection, getDocs, query, where, addDoc } = require('./firebase');
 const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase for RAG Vector Database queries
