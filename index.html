@@ -14,9 +14,11 @@
   <meta name="author" content="Whizan AI" />
   <meta name="robots" content="index, follow" />
 
+
+
   <!-- SPA Canonical Injection: Set before React loads to prevent false Google duplicates -->
   <script>
-    (function() {
+    (function () {
       var link = document.createElement('link');
       link.rel = 'canonical';
       var url = new URL(window.location.href);
@@ -141,7 +143,8 @@
   <div id="root">
     <!-- Fallback SEO content for non-JS web crawlers -->
     <noscript>
-      <p>Whizan AI is an AI Interview Simulator for Software Engineers. Practice coding, system design, and mock interviews. Enable JavaScript to access the platform.</p>
+      <p>Whizan AI is an AI Interview Simulator for Software Engineers. Practice coding, system design, and mock
+        interviews. Enable JavaScript to access the platform.</p>
     </noscript>
   </div>
   <script type="module" src="/src/main.jsx"></script>

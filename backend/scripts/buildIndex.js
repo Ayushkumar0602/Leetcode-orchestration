@@ -1,8 +1,7 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }); // load backend env
 const { createClient } = require('@supabase/supabase-js');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { db } = require('../firebase');
-const { collection, getDocs } = require('firebase/firestore');
+const { db, collection, getDocs } = require('../firebase');
 
 // Add these to backend/.env or just hardcode for the script since they are public in your other files
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vnnkhcqswoeqnghztpvh.supabase.co';

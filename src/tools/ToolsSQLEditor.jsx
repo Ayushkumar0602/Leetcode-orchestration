@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../contexts/AuthContext';
-import ToolsNavbar from '../components/ToolsNavbar';
 
 // ── Backend API ─────────────────────────────────────────────────────────────
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
@@ -405,9 +404,7 @@ export default function ToolsSQLEditor() {
                 </script>
             </Helmet>
 
-            <ToolsNavbar />
-
-            <div style={{ padding: '100px 20px 40px', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
                 <div style={{ padding: '0 10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                         <span style={{ padding: '4px 10px', borderRadius: '20px', background: 'rgba(6,182,212,0.1)', color: '#22d3ee', fontSize: '0.75rem', fontWeight: 700, border: '1px solid rgba(6,182,212,0.2)' }}>

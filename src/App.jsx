@@ -74,6 +74,24 @@ import ToolsSandbox from './tools/ToolsSandbox';
 import ToolsSQLEditor from './tools/ToolsSQLEditor';
 import ToolsGitPlayground from './tools/ToolsGitPlayground';
 import ToolsMLSandbox from './tools/ToolsMLSandbox';
+import ToolsAPITester from './tools/ToolsAPITester';
+import ToolsJWTDecoder from './tools/ToolsJWTDecoder';
+import ToolsRegexTester from './tools/ToolsRegexTester';
+import ToolsJSONFormatter from './tools/ToolsJSONFormatter';
+import ToolsBase64 from './tools/ToolsBase64';
+import ToolsDataConverter from './tools/ToolsDataConverter';
+import ToolsGraphQL from './tools/ToolsGraphQL';
+import ToolsAPISniper from './tools/ToolsAPISniper';
+import ToolsWebhook from './tools/ToolsWebhook';
+import ToolsCORSTester from './tools/ToolsCORSTester';
+import ToolsCSPGenerator from './tools/ToolsCSPGenerator';
+import ToolsPortChecker from './tools/ToolsPortChecker';
+import ToolsMetaPreview from './tools/ToolsMetaPreview';
+import ToolsCodeScreenshot from './tools/ToolsCodeScreenshot';
+import ToolsDockerCompose from './tools/ToolsDockerCompose';
+import ToolsK8sValidator from './tools/ToolsK8sValidator';
+import ToolsNginxConfig from './tools/ToolsNginxConfig';
+import ToolsLayout from './components/ToolsLayout';
 // DSA Notes
 import Introduction from './dsa/notes/Introduction';
 import BigONotation from './dsa/notes/BigONotation';
@@ -275,10 +293,33 @@ function App() {
             <Route path="/topicswise/bit-manipulation/:page?" element={<BitManipulation />} />
 
             {/* Standalone Tools Routes */}
-            <Route path="/tools/codesandbox" element={<ToolsSandbox />} />
-            <Route path="/tools/sql-editor" element={<ToolsSQLEditor />} />
-            <Route path="/tools/git-playground" element={<ToolsGitPlayground />} />
-            <Route path="/tools/ml-sandbox" element={<ToolsMLSandbox />} />
+            <Route path="/tools/*" element={
+              <ToolsLayout>
+                <Routes>
+                  <Route path="codesandbox" element={<ToolsSandbox />} />
+                  <Route path="sql-editor" element={<ToolsSQLEditor />} />
+                  <Route path="git-playground" element={<ToolsGitPlayground />} />
+                  <Route path="ml-sandbox" element={<ToolsMLSandbox />} />
+                  <Route path="api-tester" element={<ToolsAPITester />} />
+                  <Route path="jwt-decoder" element={<ToolsJWTDecoder />} />
+                  <Route path="regex-tester" element={<ToolsRegexTester />} />
+                  <Route path="json-formatter" element={<ToolsJSONFormatter />} />
+                  <Route path="base64" element={<ToolsBase64 />} />
+                  <Route path="data-converter" element={<ToolsDataConverter />} />
+                  <Route path="graphql" element={<ToolsGraphQL />} />
+                  <Route path="api-sniper" element={<ToolsAPISniper />} />
+                  <Route path="webhook" element={<ToolsWebhook />} />
+                  <Route path="cors-tester" element={<ToolsCORSTester />} />
+                  <Route path="csp-generator" element={<ToolsCSPGenerator />} />
+                  <Route path="port-checker" element={<ToolsPortChecker />} />
+                  <Route path="meta-preview" element={<ToolsMetaPreview />} />
+                  <Route path="screenshot-generator" element={<ToolsCodeScreenshot />} />
+                  <Route path="docker-compose" element={<ToolsDockerCompose />} />
+                  <Route path="k8s-validator" element={<ToolsK8sValidator />} />
+                  <Route path="nginx-config" element={<ToolsNginxConfig />} />
+                </Routes>
+              </ToolsLayout>
+            } />
 
             {/* DSA Notes Routes */}
             <Route path="/dsa/notes/introduction" element={<Introduction />} />

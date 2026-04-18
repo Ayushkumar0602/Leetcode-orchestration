@@ -6,7 +6,6 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../contexts/AuthContext';
-import ToolsNavbar from '../components/ToolsNavbar';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
@@ -762,9 +761,7 @@ export default function ToolsSandbox() {
                 </script>
             </Helmet>
 
-            <ToolsNavbar />
-
-            <div style={{ padding: '100px 20px 40px', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
                 <div style={{ padding: '0 10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                         <span style={{ padding: '4px 10px', borderRadius: '20px', background: 'rgba(99,102,241,0.1)', color: '#818cf8', fontSize: '0.75rem', fontWeight: 700, border: '1px solid rgba(99,102,241,0.2)' }}>

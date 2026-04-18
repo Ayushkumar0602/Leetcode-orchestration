@@ -9,7 +9,6 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../contexts/AuthContext';
-import ToolsNavbar from '../components/ToolsNavbar';
 import { GitBranch, Zap, Layers, Share2, History, Save, RotateCcw, BookOpen, X, ChevronDown, Loader2, Terminal } from 'lucide-react';
 
 // ── Pre-built scenarios ────────────────────────────────────────────────────────
@@ -292,9 +291,7 @@ export default function ToolsGitPlayground() {
                 </script>
             </Helmet>
 
-            <ToolsNavbar />
-
-            <div style={{ padding: '100px 20px 40px', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
                 <div style={{ padding: '0 10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                         <span style={{ padding: '4px 10px', borderRadius: '20px', background: 'rgba(236,72,153,0.1)', color: '#f472b6', fontSize: '0.75rem', fontWeight: 700, border: '1px solid rgba(236,72,153,0.2)' }}>

@@ -6,9 +6,11 @@ const { generateCodeAndTests, extractProjectDetails, chatWithAgent } = require('
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
 const { parseResumeWithAI } = require('./resumeParser');
-const { db, rtdb } = require('./firebase');
-const { doc, setDoc, increment, collection, getDocs, getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, arrayRemove, where } = require('firebase/firestore');
-const { ref: rtdbRef, push, set, remove, get } = require('firebase/database');
+const { 
+    db, rtdb, doc, setDoc, increment, collection, getDocs, 
+    getDoc, addDoc, query, orderBy, deleteDoc, arrayUnion, 
+    arrayRemove, where, rtdbRef, push, set, remove, get 
+} = require('./firebase');
 const UAParser = require('ua-parser-js');
 const cron = require('node-cron');
 const { execFile } = require('child_process');
@@ -2380,6 +2382,112 @@ cron.schedule('0 2 * * 0', async () => {
 
 // Start loading the dataset
 loadDataset();
+
+// --- API Tester Proxy Route ---
+app.post('/api/tools/proxy', async (req, res) => {
+    try {
+        const { method, url, headers, data } = req.body;
+        if (!url) {
+            return res.status(400).json({ error: 'URL is required' });
+        }
+
+        const axios = require('axios');
+        const response = await axios({
+            method: method || 'GET',
+            url: url,
+            headers: headers || {},
+            data: data || undefined,
+            validateStatus: () => true, // Handle any status code
+            timeout: 30000 // 30 seconds timeout
+        });
+
+        res.json({
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+            data: response.data
+        });
+    } catch (error) {
+        console.error('API Proxy Error:', error.message);
+        res.status(500).json({ 
+            error: 'Failed to proxy request', 
+            details: error.message
+        });
+    }
+});
+
+// --- TCP Port Checker Route ---
+app.post('/api/tools/port-check', async (req, res) => {
+    try {
+        const { host, port } = req.body;
+        if (!host || !port) {
+            return res.status(400).json({ error: 'Host and port are required' });
+        }
+
+        const net = require('net');
+        const timeout = 3000; // 3 seconds
+
+        const checkPort = () => {
+            return new Promise((resolve) => {
+                const socket = new net.Socket();
+                let status = 'closed';
+                
+                socket.setTimeout(timeout);
+
+                socket.on('connect', () => {
+                    status = 'open';
+                    socket.destroy();
+                });
+
+                socket.on('timeout', () => {
+                    status = 'timeout';
+                    socket.destroy();
+                });
+
+                socket.on('error', (err) => {
+                    status = 'closed';
+                    socket.destroy();
+                });
+
+                socket.on('close', () => {
+                    resolve(status);
+                });
+
+                socket.connect(port, host);
+            });
+        };
+
+        const result = await checkPort();
+        res.json({ status: result, host, port });
+    } catch (err) {
+        console.error('Port Check Error:', err);
+        res.status(500).json({ error: 'Failed to perform port scan' });
+    }
+});
+
+// --- Webhook Capture Route ---
+app.all('/api/tools/webhooks/:webhookId', async (req, res) => {
+    try {
+        const { webhookId } = req.params;
+        const capturedData = {
+            method: req.method,
+            headers: req.headers,
+            query: req.query,
+            body: req.body,
+            timestamp: new Date().toISOString(),
+            ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress
+        };
+
+        const webhookRef = rtdbRef(rtdb, `webhook_hits/${webhookId}`);
+        const newHitRef = push(webhookRef);
+        await set(newHitRef, capturedData);
+
+        res.json({ success: true, message: "Webhook captured successfully" });
+    } catch (err) {
+        console.error('Webhook Capture Error:', err);
+        res.status(500).json({ error: 'Failed to capture webhook' });
+    }
+});
 
 const PORT = process.env.PORT || 3001;
 

@@ -134,7 +134,7 @@ function PasswordField({ value, onChange, placeholder = 'Password', id, autoComp
 
 /* ─── Main Component ──────────────────────────────────────────── */
 export default function Login() {
-    const { loginWithGoogle, loginWithGithub, signupWithEmail, loginWithEmail, sendMagicLink, signInWithMagicLink, updateUserProfile, currentUser } = useAuth();
+    const { checkEmailExists, loginWithGoogle, loginWithGithub, signupWithEmail, loginWithEmail, sendOtpEmail, sendMagicLink, signInWithMagicLink, updateUserProfile, currentUser } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const pollingRef = useRef(null);
@@ -161,10 +161,16 @@ export default function Login() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(true);
 
+    const [signupData, setSignupData] = useState(null);
+    const [generatedOtp, setGeneratedOtp] = useState('');
+    const [enteredOtp, setEnteredOtp] = useState('');
+
     const [error, setError] = useState('');
     const [info, setInfo] = useState('');
     const [loading, setLoading] = useState(false);
     const [pendingEmail, setPendingEmail] = useState('');
+
+    const [name, setName] = useState('');
 
     // Handle Magic Link callback
     useEffect(() => {
@@ -183,32 +189,11 @@ export default function Login() {
     }, []);
 
     useEffect(() => {
-        if (currentUser?.emailVerified) {
-            navigate(redirectUrl, { replace: true });
-        }
-    }, [currentUser]);
-
-    useEffect(() => {
         if (lockoutTime > 0) {
             const t = setTimeout(() => setLockoutTime(l => l - 1), 1000);
             return () => clearTimeout(t);
         }
     }, [lockoutTime]);
-
-    useEffect(() => () => { if (pollingRef.current) clearInterval(pollingRef.current); }, []);
-
-    function startPolling() {
-        if (pollingRef.current) clearInterval(pollingRef.current);
-        pollingRef.current = setInterval(async () => {
-            try {
-                await auth.currentUser?.reload();
-                if (auth.currentUser?.emailVerified) {
-                    clearInterval(pollingRef.current); pollingRef.current = null;
-                    navigate(redirectUrl, { replace: true });
-                }
-            } catch { /* ignore poll errors */ }
-        }, 3000);
-    }
 
     function increaseFailure() {
         const n = failedAttempts + 1;
@@ -245,21 +230,65 @@ export default function Login() {
             const { browserSessionPersistence, browserLocalPersistence, setPersistence } = await import('firebase/auth');
             await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
             const r = await loginWithEmail(email, password);
-            if (!r.user.emailVerified) { setPendingEmail(email); setView('verify-email'); startPolling(); return; }
             navigate(redirectUrl, { replace: true });
         } catch (err) { setError(friendly(err)); increaseFailure(); }
         finally { setLoading(false); }
     }
 
     async function handleSignup(e) {
-        e.preventDefault(); setError(''); if (lockoutTime > 0) return;
+        e.preventDefault(); setError(''); setInfo(''); if (lockoutTime > 0) return;
         if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
         if (password.length < 6) { setError('Password must be 6+ characters.'); return; }
         setLoading(true);
         try {
-            await signupWithEmail(email, password);
+            const exists = await checkEmailExists(email);
+            if (exists) {
+                setError('An account with this email already exists. Please sign in.');
+                return;
+            }
+
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            setGeneratedOtp(otp);
+            setSignupData({ email, password });
+            
+            await sendOtpEmail(email, otp);
+            setPendingEmail(email); 
+            setView('verify-otp');
+        } catch (err) { setError(friendly(err)); }
+        finally { setLoading(false); }
+    }
+
+    async function handleResendOtp() {
+        setError(''); setInfo(''); if (lockoutTime > 0) return;
+        setLoading(true);
+        try {
+            const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            setGeneratedOtp(newOtp);
+            await sendOtpEmail(signupData.email, newOtp);
+            setInfo('A new OTP has been sent to your email.');
+        } catch (err) { setError(friendly(err)); }
+        finally { setLoading(false); }
+    }
+
+    async function handleVerifyOtp(e) {
+        e.preventDefault(); setError(''); setInfo(''); if (lockoutTime > 0) return;
+        if (enteredOtp !== generatedOtp) {
+            setError('Invalid OTP. Please check your email and try again.');
+            return;
+        }
+        setError('');
+        setView('profile-info');
+    }
+
+    async function handleCompleteProfile(e) {
+        e.preventDefault(); setError(''); setInfo(''); if (lockoutTime > 0) return;
+        if (!name.trim()) { setError('Name is required.'); return; }
+        setLoading(true);
+        try {
+            await signupWithEmail(signupData.email, signupData.password);
+            await updateUserProfile({ displayName: name });
             if (typeof window !== 'undefined' && window.gtag) window.gtag('event', 'sign_up', { method: 'password' });
-            setPendingEmail(email); setView('verify-email'); startPolling();
+            navigate(redirectUrl, { replace: true });
         } catch (err) { setError(friendly(err)); }
         finally { setLoading(false); }
     }
@@ -273,22 +302,80 @@ export default function Login() {
     const isLogin = view === 'login';
 
     /* ── Sub-screens ─────────────────────────────────────────────── */
-    if (view === 'verify-email' || view === 'magic-sent') {
+    if (view === 'verify-otp' || view === 'magic-sent' || view === 'profile-info') {
         return (
             <div className="auth-page">
                 <CinemaPanel />
                 <div className="auth-panel">
                     <motion.div className="auth-box" initial="hidden" animate="show" variants={stagger}>
                         <motion.div variants={item} className="auth-fullscreen">
-                            <div className="auth-icon-ring"><Mail size={26} color="#60a5fa" /></div>
-                            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: 8 }}>Check your inbox</h2>
-                            <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
-                                {view === 'magic-sent' ? 'Magic link sent to' : 'Verification email sent to'}
-                            </p>
-                            <div className="auth-email-badge">{pendingEmail}</div>
-                            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, maxWidth: 340 }}>
-                                {view === 'verify-email' ? 'Click the link to verify your email. This page will advance automatically.' : 'Click the link to instantly sign in. You can close this tab.'}
-                            </p>
+                            {view === 'profile-info' ? (
+                                <>
+                                    <div className="auth-icon-ring"><Sparkles size={26} color="#60a5fa" /></div>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: 8 }}>Complete Profile</h2>
+                                    <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>Tell us a bit about yourself.</p>
+                                    
+                                    <form onSubmit={handleCompleteProfile} style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+                                        <Banner message={error} />
+                                        <div className="auth-field" style={{ marginBottom: '1rem' }}>
+                                            <input 
+                                                type="text" 
+                                                className="auth-input" 
+                                                placeholder="Full Name (Required)" 
+                                                value={name} 
+                                                onChange={e => setName(e.target.value)} 
+                                                required 
+                                            />
+                                        </div>
+                                        <button className="auth-primary-btn" type="submit" disabled={loading} style={{ marginTop: '0.5rem' }}>
+                                            {loading ? <Loader2 size={16} className="spin" /> : 'Complete Sign Up'}
+                                        </button>
+                                    </form>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="auth-icon-ring"><Mail size={26} color="#60a5fa" /></div>
+                                    <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: 8 }}>Check your inbox</h2>
+                                    <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
+                                        {view === 'magic-sent' ? 'Magic link sent to' : 'OTP sent to'}
+                                    </p>
+                                    <div className="auth-email-badge">{pendingEmail}</div>
+                                    
+                                    {view === 'verify-otp' ? (
+                                        <form onSubmit={handleVerifyOtp} style={{ width: '100%', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <Banner message={error} />
+                                            {info && <div style={{ color: '#16a34a', fontSize: '0.85rem', marginBottom: '1rem', background: '#dcfce7', padding: '8px 12px', borderRadius: '6px', width: '100%', textAlign: 'center' }}>{info}</div>}
+                                            <div className="auth-field" style={{ marginBottom: '1rem', width: '100%' }}>
+                                                <input 
+                                                    type="text" 
+                                                    className="auth-input" 
+                                                    placeholder="Enter 6-digit OTP" 
+                                                    value={enteredOtp} 
+                                                    onChange={e => setEnteredOtp(e.target.value)} 
+                                                    maxLength={6}
+                                                    required 
+                                                    style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1.2rem' }}
+                                                />
+                                            </div>
+                                            <button className="auth-primary-btn" type="submit" disabled={loading} style={{ width: '100%' }}>
+                                                {loading ? <Loader2 size={16} className="spin" /> : 'Verify Account'}
+                                            </button>
+                                            <div style={{ display: 'flex', width: '100%', gap: '8px', marginTop: '0.5rem' }}>
+                                                <button type="button" className="auth-secondary-btn" onClick={handleResendOtp} disabled={loading} style={{ flex: 1 }}>
+                                                    Resend OTP
+                                                </button>
+                                                <button type="button" className="auth-secondary-btn" onClick={() => { setView('signup'); setError(''); setInfo(''); }} disabled={loading} style={{ flex: 1 }}>
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, maxWidth: 340 }}>
+                                            Click the link to instantly sign in. You can close this tab.
+                                        </p>
+                                    )}
+                                </>
+                            )}
                         </motion.div>
                     </motion.div>
                 </div>

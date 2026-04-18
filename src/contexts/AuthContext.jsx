@@ -10,6 +10,7 @@ import {
     sendEmailVerification,
     updateProfile,
     getAdditionalUserInfo,
+    fetchSignInMethodsForEmail,
 } from 'firebase/auth';
 import { ref, onValue } from 'firebase/database';
 
@@ -46,7 +47,23 @@ async function sendWelcomeEmail(user) {
     }
 }
 
-
+async function sendOtpEmail(email, otp) {
+    try {
+        await emailjs.send(
+            import.meta.env.VITE_EMAILJS_OTP_SERVICE_ID,
+            import.meta.env.VITE_EMAILJS_TEMPLATE_OTP,
+            {
+                to_email: email,
+                otp: otp,
+            },
+            import.meta.env.VITE_EMAILJS_OTP_PUBLIC_KEY
+        );
+        console.log('✅ OTP email sent to', email);
+    } catch (err) {
+        console.error('⚠️  OTP email failed:', err);
+        throw new Error('Failed to send OTP email. Please try again.');
+    }
+}
 
 async function registerSession(uid) {
     try {
@@ -126,10 +143,23 @@ export function AuthProvider({ children }) {
     };
 
     // ── Email Signup (creates account + sends verification email) ─
+    const checkEmailExists = async (email) => {
+        try {
+            const methods = await fetchSignInMethodsForEmail(auth, email);
+            return methods.length > 0;
+        } catch (error) {
+            // Check if it's the specific Error for Email Enumeration Protection
+            if (error.code === 'auth/admin-restricted-operation' || error.code === 'auth/operation-not-allowed') {
+                throw new Error("Unable to verify email due to Firebase 'Email Enumeration Protection'. Please disable it in Firebase Authentication Settings to check email existence before OTP.");
+            }
+            throw error;
+        }
+    };
+
     const signupWithEmail = async (email, password) => {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         if (result.user) {
-            await sendEmailVerification(result.user);
+            // OTP verification was done prior to reaching this point
             // Always a new user when created via email/password
             await sendWelcomeEmail(result.user);
         }
@@ -237,10 +267,12 @@ export function AuthProvider({ children }) {
 
     const value = {
         currentUser,
+        checkEmailExists,
         loginWithGoogle,
         loginWithGithub,
         signupWithEmail,
         loginWithEmail,
+        sendOtpEmail,
         sendMagicLink,
         signInWithMagicLink,
         updateUserProfile,

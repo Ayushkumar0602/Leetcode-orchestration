@@ -1,11 +1,12 @@
 // backend/routes/adminRoutes.js
 const express = require('express');
 const { admin } = require('../firebaseAdmin');
-const { db } = require('../firebase');
-const { rtdb } = require('../firebase');
-const { collection, getDocs, doc, getDoc, setDoc, query, limit, getCountFromServer, addDoc, deleteDoc, updateDoc } = require('firebase/firestore');
+const { 
+    db, rtdb, collection, getDocs, doc, getDoc, setDoc, query, 
+    limit, getCountFromServer, addDoc, deleteDoc, updateDoc,
+    rtdbRef, get: rtdbGet 
+} = require('../firebase');
 const { FieldPath } = require('firebase-admin/firestore');
-const { ref: rtdbRef, get: rtdbGet } = require('firebase/database');
 const { optimizeCourseContent } = require('../ai');
 
 const router = express.Router();

@@ -5,7 +5,6 @@ import { db } from '../firebase';
 import { collection, addDoc, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { Helmet } from 'react-helmet';
 import { useAuth } from '../contexts/AuthContext';
-import ToolsNavbar from '../components/ToolsNavbar';
 import { BrainCircuit, Target, Code2, LineChart } from 'lucide-react';
 import { uploadFile } from '../lib/s3';
 
@@ -223,9 +222,7 @@ export default function ToolsMLSandbox() {
                 </script>
             </Helmet>
 
-            <ToolsNavbar />
-
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '100px 20px 20px' }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
                 <div style={{ background: '#0f172a', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

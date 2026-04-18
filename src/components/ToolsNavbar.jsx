@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NavProfile from '../NavProfile';
 import NotificationBell from './NotificationBell';
-import { Menu, X, Terminal, Database, GitBranch, Home, Zap, BrainCircuit } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import { TOOLS_NAV_LINKS } from '../constants/tools';
 
 export default function ToolsNavbar() {
     const { currentUser } = useAuth();
@@ -12,13 +13,6 @@ export default function ToolsNavbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const isActive = (path) => location.pathname === path;
-
-    const navLinks = [
-        { name: 'Codesandbox', path: '/tools/codesandbox', icon: Terminal },
-        { name: 'SQL Editor', path: '/tools/sql-editor', icon: Database },
-        { name: 'Git Playground', path: '/tools/git-playground', icon: GitBranch },
-        { name: 'ML Sandbox', path: '/tools/ml-sandbox', icon: BrainCircuit },
-    ];
 
     return (
         <nav style={{
@@ -34,10 +28,10 @@ export default function ToolsNavbar() {
             top: 0,
             left: 0,
             right: 0,
-            zIndex: 1000,
+            zIndex: 1002,
             fontFamily: "'Inter', sans-serif"
         }}>
-            {/* Brand */}
+            {/* Header / Brand handled by sidebar on desktop, but keep here for mobile/branding */}
             <div 
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
                 onClick={() => navigate('/')}
@@ -55,45 +49,7 @@ export default function ToolsNavbar() {
                 </span>
             </div>
 
-            {/* Desktop Links */}
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '20px',
-                flex: 1,
-                justifyContent: 'center'
-            }} className="desktop-links">
-                {navLinks.map((link) => (
-                    <button
-                        key={link.path}
-                        onClick={() => navigate(link.path)}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: isActive(link.path) ? '#fff' : '#94a3b8',
-                            fontSize: '0.9rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            transition: 'all 0.2s',
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            backgroundColor: isActive(link.path) ? 'rgba(255,255,255,0.05)' : 'transparent'
-                        }}
-                        onMouseEnter={e => {
-                            if (!isActive(link.path)) e.currentTarget.style.color = '#fff';
-                        }}
-                        onMouseLeave={e => {
-                            if (!isActive(link.path)) e.currentTarget.style.color = '#94a3b8';
-                        }}
-                    >
-                        <link.icon size={16} />
-                        {link.name}
-                    </button>
-                ))}
-            </div>
+            <div style={{ flex: 1 }} />
 
             {/* Actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -105,7 +61,7 @@ export default function ToolsNavbar() {
                 {/* Mobile Toggle */}
                 <button 
                     style={{ 
-                        display: 'none', 
+                        display: 'block', 
                         background: 'transparent', 
                         border: 'none', 
                         color: '#fff', 
@@ -130,11 +86,11 @@ export default function ToolsNavbar() {
                     padding: '1.5rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '1rem',
+                    gap: '0.8rem',
                     zIndex: 999,
                     animation: 'slideDown 0.3s ease'
                 }}>
-                    {navLinks.map((link) => (
+                    {TOOLS_NAV_LINKS.map((link) => (
                         <button
                             key={link.path}
                             onClick={() => { navigate(link.path); setIsMenuOpen(false); }}
@@ -152,7 +108,7 @@ export default function ToolsNavbar() {
                                 fontWeight: 600
                             }}
                         >
-                            <link.icon size={20} />
+                            <link.icon size={20} color={isActive(link.path) ? link.color : 'inherit'} />
                             {link.name}
                         </button>
                     ))}
@@ -165,10 +121,12 @@ export default function ToolsNavbar() {
             )}
 
             <style>{`
+                @media (min-width: 1201px) {
+                    .mobile-toggle { display: none !important; }
+                }
                 @media (max-width: 1200px) {
-                    .desktop-links { display: none !important; }
-                    .mobile-toggle { display: block !important; }
                     .desktop-actions { display: none !important; }
+                    .mobile-toggle { display: block !important; }
                 }
                 @keyframes slideDown {
                     from { opacity: 0; transform: translateY(-10px); }
