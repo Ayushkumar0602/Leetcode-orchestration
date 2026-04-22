@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { COMPANIES } from './companyData';
 import { ChevronRight } from 'lucide-react';
 
-export default function CompanyGrid({ searchQuery = '' }) {
+export default function CompanyGrid({ searchQuery = '', basePath = '/company' }) {
     const filteredCompanies = COMPANIES.filter(c => 
         c.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -182,7 +182,7 @@ export default function CompanyGrid({ searchQuery = '' }) {
                     return (
                         <Link 
                             key={company.slug} 
-                            to={`/company/${company.slug}`} 
+                            to={`${basePath}/${company.slug}`} 
                             className="cg-company-card"
                             onMouseMove={(e) => {
                                 const rect = e.currentTarget.getBoundingClientRect();

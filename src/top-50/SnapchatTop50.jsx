@@ -343,7 +343,7 @@ export default function SnapchatTop50() {
 
                         </div>
 
-                        <CompanyGrid />
+                        <CompanyGrid basePath="/top-50" />
                     </div>
                     <div className="right-sidebar"><DashboardRecommendations userStats={userStats} interviews={validInterviews} /></div>
                 </div>

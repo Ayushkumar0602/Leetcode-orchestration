@@ -262,7 +262,7 @@ export default function Top50Interview() {
                             })}
                         </div>
                         
-                        <CompanyGrid />
+                        <CompanyGrid basePath="/top-50" />
 
                         {/* SEO Authority Content */}
                         <article style={{ color: '#aaa', lineHeight: 1.8, fontSize: '1.05rem', marginTop: '4rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px' }}>
