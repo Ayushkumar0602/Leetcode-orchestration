@@ -130,6 +130,28 @@ import StriverSDESheet from './StriverSDESheet';
 import Toughest70Interview from './softskills/Toughest70Interview';
 import SoftSkills from './softskills/SoftSkills';
 
+// Top 50 Company Interview Sheets
+import GoogleTop50 from './top-50/GoogleTop50';
+import AmazonTop50 from './top-50/AmazonTop50';
+import AppleTop50 from './top-50/AppleTop50';
+import MetaTop50 from './top-50/MetaTop50';
+import MicrosoftTop50 from './top-50/MicrosoftTop50';
+import NetflixTop50 from './top-50/NetflixTop50';
+import UberTop50 from './top-50/UberTop50';
+import TwitterTop50 from './top-50/TwitterTop50';
+import AdobeTop50 from './top-50/AdobeTop50';
+import AirbnbTop50 from './top-50/AirbnbTop50';
+import SalesforceTop50 from './top-50/SalesforceTop50';
+import OracleTop50 from './top-50/OracleTop50';
+import TeslaTop50 from './top-50/TeslaTop50';
+import SpotifyTop50 from './top-50/SpotifyTop50';
+import LinkedInTop50 from './top-50/LinkedInTop50';
+import SnapchatTop50 from './top-50/SnapchatTop50';
+import PalantirTop50 from './top-50/PalantirTop50';
+import CoinbaseTop50 from './top-50/CoinbaseTop50';
+import GoldmanSachsTop50 from './top-50/GoldmanSachsTop50';
+import JPMorganTop50 from './top-50/JPMorganTop50';
+
 // Topic Wise Interview Questions
 import ArraysAndHashing from './topicwise/ArraysAndHashing';
 import TwoPointers from './topicwise/TwoPointers';
@@ -274,6 +296,28 @@ function App() {
             <Route path="/70-toughest-interview-questions" element={<Navigate to="/softskills/70-toughest-interview-questions" replace />} />
             <Route path="/softskills" element={<SoftSkills />} />
             <Route path="/softskills/70-toughest-interview-questions" element={<Toughest70Interview />} />
+            
+            {/* Top 50 Company Sheets Routes */}
+            <Route path="/top-50/google/:page?" element={<GoogleTop50 />} />
+            <Route path="/top-50/amazon/:page?" element={<AmazonTop50 />} />
+            <Route path="/top-50/apple/:page?" element={<AppleTop50 />} />
+            <Route path="/top-50/meta/:page?" element={<MetaTop50 />} />
+            <Route path="/top-50/microsoft/:page?" element={<MicrosoftTop50 />} />
+            <Route path="/top-50/netflix/:page?" element={<NetflixTop50 />} />
+            <Route path="/top-50/uber/:page?" element={<UberTop50 />} />
+            <Route path="/top-50/twitter/:page?" element={<TwitterTop50 />} />
+            <Route path="/top-50/adobe/:page?" element={<AdobeTop50 />} />
+            <Route path="/top-50/airbnb/:page?" element={<AirbnbTop50 />} />
+            <Route path="/top-50/salesforce/:page?" element={<SalesforceTop50 />} />
+            <Route path="/top-50/oracle/:page?" element={<OracleTop50 />} />
+            <Route path="/top-50/tesla/:page?" element={<TeslaTop50 />} />
+            <Route path="/top-50/spotify/:page?" element={<SpotifyTop50 />} />
+            <Route path="/top-50/linkedin/:page?" element={<LinkedInTop50 />} />
+            <Route path="/top-50/snapchat/:page?" element={<SnapchatTop50 />} />
+            <Route path="/top-50/palantir/:page?" element={<PalantirTop50 />} />
+            <Route path="/top-50/coinbase/:page?" element={<CoinbaseTop50 />} />
+            <Route path="/top-50/goldmansachs/:page?" element={<GoldmanSachsTop50 />} />
+            <Route path="/top-50/jpmorgan/:page?" element={<JPMorganTop50 />} />
             
             {/* Company Wise Sheets */}
             <Route path="/company/google/:page?" element={<GoogleSheet />} />

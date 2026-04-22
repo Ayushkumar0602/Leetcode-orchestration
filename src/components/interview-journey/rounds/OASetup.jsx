@@ -117,7 +117,7 @@ export default function OASetup() {
             setSelectedProblems(picked);
 
             // 3. Sequential backend generation (Warming up the cache)
-            const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
             for (let prob of picked) {
                 await fetch(`${API_BASE}/api/generate`, {
                     method: 'POST',

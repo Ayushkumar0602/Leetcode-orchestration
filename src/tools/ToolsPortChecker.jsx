@@ -34,7 +34,7 @@ export default function ToolsPortChecker() {
         const startTime = Date.now();
 
         try {
-            const res = await fetch('http://localhost:3001/api/tools/port-check', {
+            const res = await fetch('https://leetcode-orchestration.onrender.com/api/tools/port-check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ host: targetHost.trim(), port: parseInt(targetPort) })

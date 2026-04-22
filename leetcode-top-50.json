@@ -1,0 +1,6042 @@
+{
+    "Google": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 4,
+            "name": "Median of Two Sorted Arrays",
+            "difficulty": "Hard",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 5,
+            "name": "Longest Palindromic Substring",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 17,
+            "name": "Letter Combinations of a Phone Number",
+            "difficulty": "Medium",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 22,
+            "name": "Generate Parentheses",
+            "difficulty": "Medium",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 32,
+            "name": "Longest Valid Parentheses",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 33,
+            "name": "Search in Rotated Sorted Array",
+            "difficulty": "Medium",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 44,
+            "name": "Wildcard Matching",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 51,
+            "name": "N-Queens",
+            "difficulty": "Hard",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 65,
+            "name": "Valid Number",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 68,
+            "name": "Text Justification",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 85,
+            "name": "Maximal Rectangle",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 139,
+            "name": "Word Break",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 140,
+            "name": "Word Break II",
+            "difficulty": "Hard",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 149,
+            "name": "Max Points on a Line",
+            "difficulty": "Hard",
+            "topic": "Math"
+        },
+        {
+            "number": 155,
+            "name": "Min Stack",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 157,
+            "name": "Read N Characters Given Read4",
+            "difficulty": "Easy",
+            "topic": "String"
+        },
+        {
+            "number": 158,
+            "name": "Read N Characters Given Read4 II",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 208,
+            "name": "Implement Trie",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 212,
+            "name": "Word Search II",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 218,
+            "name": "The Skyline Problem",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 224,
+            "name": "Basic Calculator",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 301,
+            "name": "Remove Invalid Parentheses",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 336,
+            "name": "Palindrome Pairs",
+            "difficulty": "Hard",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 352,
+            "name": "Data Stream as Disjoint Intervals",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 381,
+            "name": "Insert Delete GetRandom O(1) - Duplicates allowed",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 399,
+            "name": "Evaluate Division",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 472,
+            "name": "Concatenated Words",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 642,
+            "name": "Design Search Autocomplete System",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 715,
+            "name": "Range Module",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 843,
+            "name": "Guess the Word",
+            "difficulty": "Hard",
+            "topic": "Array"
+        },
+        {
+            "number": 855,
+            "name": "Exam Room",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1293,
+            "name": "Shortest Path in a Grid with Obstacles Elimination",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        }
+    ],
+    "Amazon": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 25,
+            "name": "Reverse Nodes in k-Group",
+            "difficulty": "Hard",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 46,
+            "name": "Permutations",
+            "difficulty": "Medium",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 73,
+            "name": "Set Matrix Zeroes",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 127,
+            "name": "Word Ladder",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 138,
+            "name": "Copy List with Random Pointer",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 139,
+            "name": "Word Break",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 152,
+            "name": "Maximum Product Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 210,
+            "name": "Course Schedule II",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 212,
+            "name": "Word Search II",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 235,
+            "name": "Lowest Common Ancestor of a BST",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 236,
+            "name": "Lowest Common Ancestor of a Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 269,
+            "name": "Alien Dictionary",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 516,
+            "name": "Longest Palindromic Subsequence",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 588,
+            "name": "Design In-Memory File System",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 767,
+            "name": "Reorganize String",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 863,
+            "name": "All Nodes Distance K in Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 937,
+            "name": "Reorder Data in Log Files",
+            "difficulty": "Medium",
+            "topic": "String"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        }
+    ],
+    "Apple": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 4,
+            "name": "Median of Two Sorted Arrays",
+            "difficulty": "Hard",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 5,
+            "name": "Longest Palindromic Substring",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 7,
+            "name": "Reverse Integer",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 11,
+            "name": "Container With Most Water",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 88,
+            "name": "Merge Sorted Array",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 124,
+            "name": "Binary Tree Maximum Path Sum",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 138,
+            "name": "Copy List with Random Pointer",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 152,
+            "name": "Maximum Product Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 160,
+            "name": "Intersection of Two Linked Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 236,
+            "name": "Lowest Common Ancestor of a Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 253,
+            "name": "Meeting Rooms II",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 394,
+            "name": "Decode String",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 426,
+            "name": "Convert Binary Search Tree to Sorted Doubly Linked List",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 670,
+            "name": "Maximum Swap",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 680,
+            "name": "Valid Palindrome II",
+            "difficulty": "Easy",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 721,
+            "name": "Accounts Merge",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 785,
+            "name": "Is Graph Bipartite?",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 827,
+            "name": "Making A Large Island",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 938,
+            "name": "Range Sum of BST",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1091,
+            "name": "Shortest Path in Binary Matrix",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 1249,
+            "name": "Minimum Remove to Make Valid Parentheses",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        }
+    ],
+    "Meta": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 25,
+            "name": "Reverse Nodes in k-Group",
+            "difficulty": "Hard",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 50,
+            "name": "Pow(x, n)",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 57,
+            "name": "Insert Interval",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 88,
+            "name": "Merge Sorted Array",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 124,
+            "name": "Binary Tree Maximum Path Sum",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 125,
+            "name": "Valid Palindrome",
+            "difficulty": "Easy",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 138,
+            "name": "Copy List with Random Pointer",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 140,
+            "name": "Word Break II",
+            "difficulty": "Hard",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 199,
+            "name": "Binary Tree Right Side View",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 227,
+            "name": "Basic Calculator II",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 236,
+            "name": "Lowest Common Ancestor of a Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 269,
+            "name": "Alien Dictionary",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 314,
+            "name": "Binary Tree Vertical Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 339,
+            "name": "Nested List Weight Sum",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 362,
+            "name": "Design Hit Counter",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 408,
+            "name": "Valid Word Abbreviation",
+            "difficulty": "Easy",
+            "topic": "String"
+        },
+        {
+            "number": 426,
+            "name": "Convert BST to Sorted Doubly Linked List",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 680,
+            "name": "Valid Palindrome II",
+            "difficulty": "Easy",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 721,
+            "name": "Accounts Merge",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 791,
+            "name": "Custom Sort String",
+            "difficulty": "Medium",
+            "topic": "String"
+        },
+        {
+            "number": 827,
+            "name": "Making A Large Island",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 921,
+            "name": "Minimum Add to Make Parentheses Valid",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 938,
+            "name": "Range Sum of BST",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1249,
+            "name": "Minimum Remove to Make Valid Parentheses",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1650,
+            "name": "Lowest Common Ancestor of a Binary Tree III",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        }
+    ],
+    "Microsoft": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 7,
+            "name": "Reverse Integer",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 13,
+            "name": "Roman to Integer",
+            "difficulty": "Easy",
+            "topic": "String"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 46,
+            "name": "Permutations",
+            "difficulty": "Medium",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 48,
+            "name": "Rotate Image",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 62,
+            "name": "Unique Paths",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 104,
+            "name": "Maximum Depth of Binary Tree",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 116,
+            "name": "Populating Next Right Pointers in Each Node",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 124,
+            "name": "Binary Tree Maximum Path Sum",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 151,
+            "name": "Reverse Words in a String",
+            "difficulty": "Medium",
+            "topic": "String"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 206,
+            "name": "Reverse Linked List",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 236,
+            "name": "Lowest Common Ancestor of a Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 328,
+            "name": "Odd Even Linked List",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 341,
+            "name": "Flatten Nested List Iterator",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 394,
+            "name": "Decode String",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 437,
+            "name": "Path Sum III",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 450,
+            "name": "Delete Node in a BST",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 543,
+            "name": "Diameter of Binary Tree",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 572,
+            "name": "Subtree of Another Tree",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 662,
+            "name": "Maximum Width of Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 695,
+            "name": "Max Area of Island",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 763,
+            "name": "Partition Labels",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 785,
+            "name": "Is Graph Bipartite?",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1047,
+            "name": "Remove All Adjacent Duplicates In String",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        }
+    ],
+    "Netflix": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 4,
+            "name": "Median of Two Sorted Arrays",
+            "difficulty": "Hard",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 124,
+            "name": "Binary Tree Maximum Path Sum",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 127,
+            "name": "Word Ladder",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 138,
+            "name": "Copy List with Random Pointer",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 212,
+            "name": "Word Search II",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 218,
+            "name": "The Skyline Problem",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 315,
+            "name": "Count of Smaller Numbers After Self",
+            "difficulty": "Hard",
+            "topic": "Divide & Conquer"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 493,
+            "name": "Reverse Pairs",
+            "difficulty": "Hard",
+            "topic": "Divide & Conquer"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 642,
+            "name": "Design Search Autocomplete System",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 715,
+            "name": "Range Module",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 767,
+            "name": "Reorganize String",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 843,
+            "name": "Guess the Word",
+            "difficulty": "Hard",
+            "topic": "Array"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1032,
+            "name": "Stream of Characters",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 1057,
+            "name": "Campus Bikes",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1094,
+            "name": "Car Pooling",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1166,
+            "name": "Design File System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        }
+    ],
+    "Uber": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 25,
+            "name": "Reverse Nodes in k-Group",
+            "difficulty": "Hard",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 173,
+            "name": "Binary Search Tree Iterator",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 212,
+            "name": "Word Search II",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 253,
+            "name": "Meeting Rooms II",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 269,
+            "name": "Alien Dictionary",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 285,
+            "name": "Inorder Successor in BST",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 317,
+            "name": "Shortest Distance from All Buildings",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 399,
+            "name": "Evaluate Division",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 472,
+            "name": "Concatenated Words",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 489,
+            "name": "Robot Room Cleaner",
+            "difficulty": "Hard",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 588,
+            "name": "Design In-Memory File System",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 642,
+            "name": "Design Search Autocomplete System",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 683,
+            "name": "K Empty Slots",
+            "difficulty": "Hard",
+            "topic": "Array"
+        },
+        {
+            "number": 727,
+            "name": "Minimum Window Subsequence",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 759,
+            "name": "Employee Free Time",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 772,
+            "name": "Basic Calculator III",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 843,
+            "name": "Guess the Word",
+            "difficulty": "Hard",
+            "topic": "Array"
+        },
+        {
+            "number": 855,
+            "name": "Exam Room",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1057,
+            "name": "Campus Bikes",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1094,
+            "name": "Car Pooling",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        }
+    ],
+    "Twitter": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 218,
+            "name": "The Skyline Problem",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 301,
+            "name": "Remove Invalid Parentheses",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 355,
+            "name": "Design Twitter",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 642,
+            "name": "Design Search Autocomplete System",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 716,
+            "name": "Max Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 767,
+            "name": "Reorganize String",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 843,
+            "name": "Guess the Word",
+            "difficulty": "Hard",
+            "topic": "Array"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 920,
+            "name": "Number of Music Playlists",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 937,
+            "name": "Reorder Data in Log Files",
+            "difficulty": "Medium",
+            "topic": "String"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1010,
+            "name": "Pairs of Songs With Total Durations Divisible by 60",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1032,
+            "name": "Stream of Characters",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 1055,
+            "name": "Shortest Way to Form String",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 1152,
+            "name": "Analyze User Website Visit Pattern",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 1326,
+            "name": "Minimum Number of Taps to Open to Water a Garden",
+            "difficulty": "Hard",
+            "topic": "Greedy"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1429,
+            "name": "First Unique Number",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1472,
+            "name": "Design Browser History",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1603,
+            "name": "Design Parking System",
+            "difficulty": "Easy",
+            "topic": "Design"
+        }
+    ],
+    "Adobe": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 5,
+            "name": "Longest Palindromic Substring",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 11,
+            "name": "Container With Most Water",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 48,
+            "name": "Rotate Image",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 54,
+            "name": "Spiral Matrix",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 62,
+            "name": "Unique Paths",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 72,
+            "name": "Edit Distance",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 85,
+            "name": "Maximal Rectangle",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 127,
+            "name": "Word Ladder",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 394,
+            "name": "Decode String",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 416,
+            "name": "Partition Equal Subset Sum",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 438,
+            "name": "Find All Anagrams in a String",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 474,
+            "name": "Ones and Zeroes",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 543,
+            "name": "Diameter of Binary Tree",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 647,
+            "name": "Palindromic Substrings",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 695,
+            "name": "Max Area of Island",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 763,
+            "name": "Partition Labels",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 787,
+            "name": "Cheapest Flights Within K Stops",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 827,
+            "name": "Making A Large Island",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 938,
+            "name": "Range Sum of BST",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1143,
+            "name": "Longest Common Subsequence",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 1249,
+            "name": "Minimum Remove to Make Valid Parentheses",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1312,
+            "name": "Minimum Insertion Steps to Make a String Palindrome",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1423,
+            "name": "Maximum Points You Can Obtain from Cards",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        }
+    ],
+    "Airbnb": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 57,
+            "name": "Insert Interval",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 127,
+            "name": "Word Ladder",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 252,
+            "name": "Meeting Rooms",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 253,
+            "name": "Meeting Rooms II",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 269,
+            "name": "Alien Dictionary",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 317,
+            "name": "Shortest Distance from All Buildings",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 341,
+            "name": "Flatten Nested List Iterator",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 362,
+            "name": "Design Hit Counter",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 399,
+            "name": "Evaluate Division",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 490,
+            "name": "The Maze",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 505,
+            "name": "The Maze II",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 588,
+            "name": "Design In-Memory File System",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 721,
+            "name": "Accounts Merge",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 737,
+            "name": "Sentence Similarity II",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 759,
+            "name": "Employee Free Time",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 843,
+            "name": "Guess the Word",
+            "difficulty": "Hard",
+            "topic": "Array"
+        },
+        {
+            "number": 855,
+            "name": "Exam Room",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1094,
+            "name": "Car Pooling",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1182,
+            "name": "Shortest Distance to Target Color",
+            "difficulty": "Medium",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1462,
+            "name": "Course Schedule IV",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        }
+    ],
+    "Salesforce": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 138,
+            "name": "Copy List with Random Pointer",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 206,
+            "name": "Reverse Linked List",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 236,
+            "name": "Lowest Common Ancestor of a Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 394,
+            "name": "Decode String",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 412,
+            "name": "Fizz Buzz",
+            "difficulty": "Easy",
+            "topic": "Math"
+        },
+        {
+            "number": 437,
+            "name": "Path Sum III",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 543,
+            "name": "Diameter of Binary Tree",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 695,
+            "name": "Max Area of Island",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 721,
+            "name": "Accounts Merge",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 763,
+            "name": "Partition Labels",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 785,
+            "name": "Is Graph Bipartite?",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 827,
+            "name": "Making A Large Island",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1091,
+            "name": "Shortest Path in Binary Matrix",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 1143,
+            "name": "Longest Common Subsequence",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1249,
+            "name": "Minimum Remove to Make Valid Parentheses",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1762,
+            "name": "Buildings With an Ocean View",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        }
+    ],
+    "Oracle": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 7,
+            "name": "Reverse Integer",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 13,
+            "name": "Roman to Integer",
+            "difficulty": "Easy",
+            "topic": "String"
+        },
+        {
+            "number": 14,
+            "name": "Longest Common Prefix",
+            "difficulty": "Easy",
+            "topic": "String"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 62,
+            "name": "Unique Paths",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 88,
+            "name": "Merge Sorted Array",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 155,
+            "name": "Min Stack",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 206,
+            "name": "Reverse Linked List",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 236,
+            "name": "Lowest Common Ancestor of a Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 328,
+            "name": "Odd Even Linked List",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 394,
+            "name": "Decode String",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 437,
+            "name": "Path Sum III",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 450,
+            "name": "Delete Node in a BST",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 543,
+            "name": "Diameter of Binary Tree",
+            "difficulty": "Easy",
+            "topic": "Tree"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 695,
+            "name": "Max Area of Island",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 704,
+            "name": "Binary Search",
+            "difficulty": "Easy",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 785,
+            "name": "Is Graph Bipartite?",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1091,
+            "name": "Shortest Path in Binary Matrix",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 1143,
+            "name": "Longest Common Subsequence",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1249,
+            "name": "Minimum Remove to Make Valid Parentheses",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        }
+    ],
+    "Tesla": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 33,
+            "name": "Search in Rotated Sorted Array",
+            "difficulty": "Medium",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 46,
+            "name": "Permutations",
+            "difficulty": "Medium",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 124,
+            "name": "Binary Tree Maximum Path Sum",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 212,
+            "name": "Word Search II",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 253,
+            "name": "Meeting Rooms II",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 416,
+            "name": "Partition Equal Subset Sum",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 489,
+            "name": "Robot Room Cleaner",
+            "difficulty": "Hard",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 695,
+            "name": "Max Area of Island",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 785,
+            "name": "Is Graph Bipartite?",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 787,
+            "name": "Cheapest Flights Within K Stops",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1091,
+            "name": "Shortest Path in Binary Matrix",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 1143,
+            "name": "Longest Common Subsequence",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1249,
+            "name": "Minimum Remove to Make Valid Parentheses",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1293,
+            "name": "Shortest Path in a Grid with Obstacles Elimination",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 1326,
+            "name": "Minimum Number of Taps to Open to Water a Garden",
+            "difficulty": "Hard",
+            "topic": "Greedy"
+        },
+        {
+            "number": 1584,
+            "name": "Min Cost to Connect All Points",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 1631,
+            "name": "Path With Minimum Effort",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 1851,
+            "name": "Minimum Interval to Include Each Query",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        }
+    ],
+    "Spotify": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 355,
+            "name": "Design Twitter",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 642,
+            "name": "Design Search Autocomplete System",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 767,
+            "name": "Reorganize String",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 920,
+            "name": "Number of Music Playlists",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 937,
+            "name": "Reorder Data in Log Files",
+            "difficulty": "Medium",
+            "topic": "String"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1010,
+            "name": "Pairs of Songs With Total Durations Divisible by 60",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1032,
+            "name": "Stream of Characters",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 1055,
+            "name": "Shortest Way to Form String",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 1152,
+            "name": "Analyze User Website Visit Pattern",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1429,
+            "name": "First Unique Number",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1472,
+            "name": "Design Browser History",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1539,
+            "name": "Kth Missing Positive Number",
+            "difficulty": "Easy",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1603,
+            "name": "Design Parking System",
+            "difficulty": "Easy",
+            "topic": "Design"
+        },
+        {
+            "number": 1628,
+            "name": "Design an Expression Tree With Evaluate Function",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1650,
+            "name": "Lowest Common Ancestor of a Binary Tree III",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 1845,
+            "name": "Seat Reservation Manager",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 2034,
+            "name": "Stock Price Fluctuation",
+            "difficulty": "Medium",
+            "topic": "Design"
+        }
+    ],
+    "LinkedIn": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 33,
+            "name": "Search in Rotated Sorted Array",
+            "difficulty": "Medium",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 46,
+            "name": "Permutations",
+            "difficulty": "Medium",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 210,
+            "name": "Course Schedule II",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 236,
+            "name": "Lowest Common Ancestor of a Binary Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 253,
+            "name": "Meeting Rooms II",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 269,
+            "name": "Alien Dictionary",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 314,
+            "name": "Binary Tree Vertical Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 362,
+            "name": "Design Hit Counter",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 399,
+            "name": "Evaluate Division",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 721,
+            "name": "Accounts Merge",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 785,
+            "name": "Is Graph Bipartite?",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1152,
+            "name": "Analyze User Website Visit Pattern",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1249,
+            "name": "Minimum Remove to Make Valid Parentheses",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1650,
+            "name": "Lowest Common Ancestor of a Binary Tree III",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 1762,
+            "name": "Buildings With an Ocean View",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        }
+    ],
+    "Snapchat": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 355,
+            "name": "Design Twitter",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 362,
+            "name": "Design Hit Counter",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 642,
+            "name": "Design Search Autocomplete System",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 767,
+            "name": "Reorganize String",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 937,
+            "name": "Reorder Data in Log Files",
+            "difficulty": "Medium",
+            "topic": "String"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1010,
+            "name": "Pairs of Songs With Total Durations Divisible by 60",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1032,
+            "name": "Stream of Characters",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 1152,
+            "name": "Analyze User Website Visit Pattern",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1429,
+            "name": "First Unique Number",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1472,
+            "name": "Design Browser History",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1603,
+            "name": "Design Parking System",
+            "difficulty": "Easy",
+            "topic": "Design"
+        },
+        {
+            "number": 1628,
+            "name": "Design an Expression Tree With Evaluate Function",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1650,
+            "name": "Lowest Common Ancestor of a Binary Tree III",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 1762,
+            "name": "Buildings With an Ocean View",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 1845,
+            "name": "Seat Reservation Manager",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 2034,
+            "name": "Stock Price Fluctuation",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 2336,
+            "name": "Smallest Number in Infinite Set",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 2349,
+            "name": "Design a Number Container System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        }
+    ],
+    "Palantir": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 4,
+            "name": "Median of Two Sorted Arrays",
+            "difficulty": "Hard",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 51,
+            "name": "N-Queens",
+            "difficulty": "Hard",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 65,
+            "name": "Valid Number",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 85,
+            "name": "Maximal Rectangle",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 140,
+            "name": "Word Break II",
+            "difficulty": "Hard",
+            "topic": "Backtracking"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 212,
+            "name": "Word Search II",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 218,
+            "name": "The Skyline Problem",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 269,
+            "name": "Alien Dictionary",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 273,
+            "name": "Integer to English Words",
+            "difficulty": "Hard",
+            "topic": "String"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 315,
+            "name": "Count of Smaller Numbers After Self",
+            "difficulty": "Hard",
+            "topic": "Divide & Conquer"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 336,
+            "name": "Palindrome Pairs",
+            "difficulty": "Hard",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 352,
+            "name": "Data Stream as Disjoint Intervals",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 381,
+            "name": "Insert Delete GetRandom O(1) - Duplicates allowed",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 399,
+            "name": "Evaluate Division",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 472,
+            "name": "Concatenated Words",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 493,
+            "name": "Reverse Pairs",
+            "difficulty": "Hard",
+            "topic": "Divide & Conquer"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 588,
+            "name": "Design In-Memory File System",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 642,
+            "name": "Design Search Autocomplete System",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 715,
+            "name": "Range Module",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 843,
+            "name": "Guess the Word",
+            "difficulty": "Hard",
+            "topic": "Array"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1032,
+            "name": "Stream of Characters",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1293,
+            "name": "Shortest Path in a Grid with Obstacles Elimination",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 1345,
+            "name": "Jump Game IV",
+            "difficulty": "Hard",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 1851,
+            "name": "Minimum Interval to Include Each Query",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        }
+    ],
+    "Coinbase": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 23,
+            "name": "Merge k Sorted Lists",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 122,
+            "name": "Best Time to Buy and Sell Stock II",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 123,
+            "name": "Best Time to Buy and Sell Stock III",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 188,
+            "name": "Best Time to Buy and Sell Stock IV",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 239,
+            "name": "Sliding Window Maximum",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 309,
+            "name": "Best Time to Buy and Sell Stock with Cooldown",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 714,
+            "name": "Best Time to Buy and Sell Stock with Transaction Fee",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 767,
+            "name": "Reorganize String",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1268,
+            "name": "Search Suggestions System",
+            "difficulty": "Medium",
+            "topic": "Trie"
+        },
+        {
+            "number": 1326,
+            "name": "Minimum Number of Taps to Open to Water a Garden",
+            "difficulty": "Hard",
+            "topic": "Greedy"
+        },
+        {
+            "number": 1396,
+            "name": "Design Underground System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1429,
+            "name": "First Unique Number",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 1603,
+            "name": "Design Parking System",
+            "difficulty": "Easy",
+            "topic": "Design"
+        },
+        {
+            "number": 1845,
+            "name": "Seat Reservation Manager",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 2034,
+            "name": "Stock Price Fluctuation",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 2104,
+            "name": "Sum of Subarray Ranges",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 2227,
+            "name": "Encrypt and Decrypt Strings",
+            "difficulty": "Hard",
+            "topic": "Trie"
+        },
+        {
+            "number": 2336,
+            "name": "Smallest Number in Infinite Set",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 2349,
+            "name": "Design a Number Container System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 2353,
+            "name": "Design a Food Rating System",
+            "difficulty": "Medium",
+            "topic": "Design"
+        }
+    ],
+    "Goldman Sachs": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 11,
+            "name": "Container With Most Water",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 122,
+            "name": "Best Time to Buy and Sell Stock II",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 123,
+            "name": "Best Time to Buy and Sell Stock III",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 188,
+            "name": "Best Time to Buy and Sell Stock IV",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 218,
+            "name": "The Skyline Problem",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 253,
+            "name": "Meeting Rooms II",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 309,
+            "name": "Best Time to Buy and Sell Stock with Cooldown",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 410,
+            "name": "Split Array Largest Sum",
+            "difficulty": "Hard",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 480,
+            "name": "Sliding Window Median",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 502,
+            "name": "IPO",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 714,
+            "name": "Best Time to Buy and Sell Stock with Transaction Fee",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1326,
+            "name": "Minimum Number of Taps to Open to Water a Garden",
+            "difficulty": "Hard",
+            "topic": "Greedy"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 2034,
+            "name": "Stock Price Fluctuation",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 2104,
+            "name": "Sum of Subarray Ranges",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        }
+    ],
+    "JPMorgan": [
+        {
+            "number": 1,
+            "name": "Two Sum",
+            "difficulty": "Easy",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 2,
+            "name": "Add Two Numbers",
+            "difficulty": "Medium",
+            "topic": "Linked List"
+        },
+        {
+            "number": 3,
+            "name": "Longest Substring Without Repeating Characters",
+            "difficulty": "Medium",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 11,
+            "name": "Container With Most Water",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 15,
+            "name": "3Sum",
+            "difficulty": "Medium",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 20,
+            "name": "Valid Parentheses",
+            "difficulty": "Easy",
+            "topic": "Stack"
+        },
+        {
+            "number": 21,
+            "name": "Merge Two Sorted Lists",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 42,
+            "name": "Trapping Rain Water",
+            "difficulty": "Hard",
+            "topic": "Two Pointers"
+        },
+        {
+            "number": 49,
+            "name": "Group Anagrams",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 53,
+            "name": "Maximum Subarray",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 56,
+            "name": "Merge Intervals",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 62,
+            "name": "Unique Paths",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 70,
+            "name": "Climbing Stairs",
+            "difficulty": "Easy",
+            "topic": "DP"
+        },
+        {
+            "number": 76,
+            "name": "Minimum Window Substring",
+            "difficulty": "Hard",
+            "topic": "Sliding Window"
+        },
+        {
+            "number": 84,
+            "name": "Largest Rectangle in Histogram",
+            "difficulty": "Hard",
+            "topic": "Stack"
+        },
+        {
+            "number": 98,
+            "name": "Validate Binary Search Tree",
+            "difficulty": "Medium",
+            "topic": "Tree"
+        },
+        {
+            "number": 102,
+            "name": "Binary Tree Level Order Traversal",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 121,
+            "name": "Best Time to Buy and Sell Stock",
+            "difficulty": "Easy",
+            "topic": "Array"
+        },
+        {
+            "number": 122,
+            "name": "Best Time to Buy and Sell Stock II",
+            "difficulty": "Medium",
+            "topic": "Greedy"
+        },
+        {
+            "number": 123,
+            "name": "Best Time to Buy and Sell Stock III",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 128,
+            "name": "Longest Consecutive Sequence",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 146,
+            "name": "LRU Cache",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 155,
+            "name": "Min Stack",
+            "difficulty": "Medium",
+            "topic": "Stack"
+        },
+        {
+            "number": 188,
+            "name": "Best Time to Buy and Sell Stock IV",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 200,
+            "name": "Number of Islands",
+            "difficulty": "Medium",
+            "topic": "BFS/DFS"
+        },
+        {
+            "number": 206,
+            "name": "Reverse Linked List",
+            "difficulty": "Easy",
+            "topic": "Linked List"
+        },
+        {
+            "number": 207,
+            "name": "Course Schedule",
+            "difficulty": "Medium",
+            "topic": "Graph"
+        },
+        {
+            "number": 215,
+            "name": "Kth Largest Element in an Array",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 238,
+            "name": "Product of Array Except Self",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 253,
+            "name": "Meeting Rooms II",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 295,
+            "name": "Find Median from Data Stream",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 297,
+            "name": "Serialize and Deserialize Binary Tree",
+            "difficulty": "Hard",
+            "topic": "Tree"
+        },
+        {
+            "number": 309,
+            "name": "Best Time to Buy and Sell Stock with Cooldown",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 322,
+            "name": "Coin Change",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 347,
+            "name": "Top K Frequent Elements",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 380,
+            "name": "Insert Delete GetRandom O(1)",
+            "difficulty": "Medium",
+            "topic": "Design"
+        },
+        {
+            "number": 410,
+            "name": "Split Array Largest Sum",
+            "difficulty": "Hard",
+            "topic": "Binary Search"
+        },
+        {
+            "number": 460,
+            "name": "LFU Cache",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 502,
+            "name": "IPO",
+            "difficulty": "Hard",
+            "topic": "Heap"
+        },
+        {
+            "number": 528,
+            "name": "Random Pick with Weight",
+            "difficulty": "Medium",
+            "topic": "Math"
+        },
+        {
+            "number": 560,
+            "name": "Subarray Sum Equals K",
+            "difficulty": "Medium",
+            "topic": "Hash Map"
+        },
+        {
+            "number": 621,
+            "name": "Task Scheduler",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 692,
+            "name": "Top K Frequent Words",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 714,
+            "name": "Best Time to Buy and Sell Stock with Transaction Fee",
+            "difficulty": "Medium",
+            "topic": "DP"
+        },
+        {
+            "number": 895,
+            "name": "Maximum Frequency Stack",
+            "difficulty": "Hard",
+            "topic": "Design"
+        },
+        {
+            "number": 973,
+            "name": "K Closest Points to Origin",
+            "difficulty": "Medium",
+            "topic": "Heap"
+        },
+        {
+            "number": 1192,
+            "name": "Critical Connections in a Network",
+            "difficulty": "Hard",
+            "topic": "Graph"
+        },
+        {
+            "number": 1235,
+            "name": "Maximum Profit in Job Scheduling",
+            "difficulty": "Hard",
+            "topic": "DP"
+        },
+        {
+            "number": 1570,
+            "name": "Dot Product of Two Sparse Vectors",
+            "difficulty": "Medium",
+            "topic": "Array"
+        },
+        {
+            "number": 2034,
+            "name": "Stock Price Fluctuation",
+            "difficulty": "Medium",
+            "topic": "Design"
+        }
+    ]
+}

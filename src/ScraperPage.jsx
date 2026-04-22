@@ -47,7 +47,7 @@ export default function ScraperPage() {
             body.csrfToken = csrfToken.trim();
         }
 
-        const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
+        const API_BASE = import.meta.env.DEV ? 'https://leetcode-orchestration.onrender.com' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com');
         fetch(`${API_BASE}/api/scraper/run`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

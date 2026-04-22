@@ -23,7 +23,7 @@ export default function ToolsCORSTester() {
 
         try {
             // Test 1: Preflight (OPTIONS)
-            const preflightRes = await fetch('http://localhost:3001/api/tools/proxy', {
+            const preflightRes = await fetch('https://leetcode-orchestration.onrender.com/api/tools/proxy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -38,7 +38,7 @@ export default function ToolsCORSTester() {
             const preflightData = await preflightRes.json();
 
             // Test 2: Actual Request
-            const actualRes = await fetch('http://localhost:3001/api/tools/proxy', {
+            const actualRes = await fetch('https://leetcode-orchestration.onrender.com/api/tools/proxy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

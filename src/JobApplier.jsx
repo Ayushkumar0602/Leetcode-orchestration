@@ -288,7 +288,7 @@ export default function JobApplier() {
            setApiCallCount(prev => prev + 1);
            const controller = new AbortController();
            abortControllerRef.current = controller;
-           const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com');
+           const API_BASE = import.meta.env.DEV ? 'https://leetcode-orchestration.onrender.com' : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com');
            const compactActions = previousActionsRef.current.slice(-20).map((a) => ({
               action: a?.action || a?.command || '',
               selector: a?.selector || undefined,

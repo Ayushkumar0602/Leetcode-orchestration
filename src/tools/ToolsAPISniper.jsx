@@ -25,7 +25,7 @@ export default function ToolsAPISniper() {
         setLoading(true);
         setHeaderResult(null);
         try {
-            const res = await fetch('http://localhost:3001/api/tools/proxy', {
+            const res = await fetch('https://leetcode-orchestration.onrender.com/api/tools/proxy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ method: 'HEAD', url })

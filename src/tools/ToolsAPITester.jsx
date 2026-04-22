@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 
 // ── Backend API ─────────────────────────────────────────────────────────────
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:3001'
+    ? 'https://leetcode-orchestration.onrender.com'
     : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration-55z3.onrender.com');
 
 const METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];

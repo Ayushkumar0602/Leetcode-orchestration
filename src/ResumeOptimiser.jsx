@@ -98,7 +98,7 @@ const ResumeOptimiser = ({ injectedJob, hideNav }) => {
 
   const getApiBase = () =>
   (import.meta.env.DEV
-    ? 'http://localhost:3001'
+    ? 'https://leetcode-orchestration.onrender.com'
     : (import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com'));
 
   const deriveJobRole = (jd) => {

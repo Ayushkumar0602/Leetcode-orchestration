@@ -19,7 +19,7 @@ export default function ToolsWebhook() {
     const [isListening, setIsListening] = useState(false);
 
     const backendBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? 'http://localhost:3001'
+        ? 'https://leetcode-orchestration.onrender.com'
         : 'https://leetcode-orchestration-55z3.onrender.com';
 
     useEffect(() => {
