@@ -7,6 +7,7 @@ import { useSEO } from './hooks/useSEO';
 import Neetcode150Tree from './components/Neetcode150Tree';
 import { neetcode150 } from './data/neetcode150';
 import { neetcode250 } from './data/neetcode250';
+import { shradhAmanDSA } from './data/shradhAmanDSA';
 import NotificationBell from './components/NotificationBell';
 import NavProfile from './NavProfile';
 import { ArrowLeft, Lock } from 'lucide-react';
@@ -66,6 +67,10 @@ export default function SheetDetail() {
         sheetData = neetcode250;
         sheetTitle = "Neetcode 250";
         sheetDesc = "The expanded 250 problem list providing comprehensive coverage for all concepts.";
+    } else if (sheetId === 'shradhaman') {
+        sheetData = shradhAmanDSA;
+        sheetTitle = "DSA by Shradha Aman";
+        sheetDesc = "Complete roadmap by Apna College covering fundamental to advanced DSA.";
     }
 
     // Calculate total progress

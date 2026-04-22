@@ -17,7 +17,7 @@ import NavProfile from './NavProfile';
 import AIProctor from './components/AIProctor';
 import { useSEO } from './hooks/useSEO';
 import { useQuery } from '@tanstack/react-query';
-import { fetchMetadata, fetchProblems, queryKeys } from './lib/api';
+import { fetchMetadata, fetchProblems, fetchInterviews, queryKeys } from './lib/api';
 import Select from 'react-select';
 import { useDebounce } from './hooks/useDebounce';// ─── Constants ───────────────────────────────────────────────────────────────
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
@@ -468,8 +468,12 @@ export default function AIInterview() {
     const rafRef = useRef(null);    // requestAnimationFrame id
 
     // ── Interview history (for setup screen) ──
-    const [pastInterviews, setPastInterviews] = useState([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
+    const { data: pastInterviews = [], isLoading: historyLoading } = useQuery({
+        queryKey: queryKeys.interviews(currentUser?.uid),
+        queryFn: () => fetchInterviews(currentUser.uid),
+        enabled: !!currentUser,
+        staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    });
     const [submissionCount, setSubmissionCount] = useState(0);
     const [transcriptOpen, setTranscriptOpen] = useState(false);
     const [notes, setNotes] = useState('');
@@ -534,17 +538,6 @@ export default function AIInterview() {
 
     // Keep transcriptRef in sync
     useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
-
-    // Fetch past interviews for history panel
-    useEffect(() => {
-        if (!currentUser) return;
-        setHistoryLoading(true);
-        fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${currentUser.uid}`)
-            .then(r => r.json())
-            .then(d => setPastInterviews(d.interviews || []))
-            .catch(console.error)
-            .finally(() => setHistoryLoading(false));
-    }, [currentUser]);
 
     // ─── Auto-Save Ongoing Interview ────────────────────────────────────────
     useEffect(() => {

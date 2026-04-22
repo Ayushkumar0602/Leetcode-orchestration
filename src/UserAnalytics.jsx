@@ -14,7 +14,7 @@ import {
 
 import NotificationBell from './components/NotificationBell';
 
-const BASE_URL = 'https://leetcode-orchestration-55z3.onrender.com';
+const BASE_URL = 'https://leetcode-orchestration.onrender.com';
 
 // ── colour helpers ──────────────────────────────────────────────────────────
 const diffColor = { Easy: '#34d399', Medium: '#fbbf24', Hard: '#f87171' };

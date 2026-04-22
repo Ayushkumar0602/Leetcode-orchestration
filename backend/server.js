@@ -2487,6 +2487,89 @@ app.all('/api/tools/webhooks/:webhookId', async (req, res) => {
     }
 });
 
+// --- OA Appeal AI Route ---
+app.post('/api/oa-appeal', async (req, res) => {
+    try {
+        const { code, problem, language } = req.body;
+        if (!code || !problem) {
+            return res.status(400).json({ error: 'Code and problem are required' });
+        }
+        const { callGemini } = require('./interview');
+        
+        const prompt = `You are a strict technical problem evaluator.
+A candidate has submitted this code (Language: ${language || 'Unknown'}) after failing hidden test cases.
+They are appealing the result. You must evaluate if their code logic is mathematically or algorithmically sound enough to bypass minor edge-case formatting issues, or if their core logic is fundamentally flawed or timing out.
+
+PROBLEM STATEMENT:
+${problem}
+
+CANDIDATE CODE:
+${code}
+
+Return ONLY a JSON object (no markdown, no extra text) with this exact structure:
+{
+  "isValid": true,
+  "reasoning": "A 2-3 sentence explanation of your decision",
+  "scoreAdjustment": 50,
+  "missedEdgeCases": ["edge case 1"]
+}`;
+
+        let text = await callGemini(prompt);
+        text = text.replace(/```json\n?/, '').replace(/```\n?$/, '').trim();
+        const evalData = JSON.parse(text);
+        res.json(evalData);
+    } catch (err) {
+        console.error('OA Appeal Error:', err);
+        res.status(500).json({ error: 'AI processing failed' });
+    }
+});
+
+// --- HireVue Round AI Evaluate Route ---
+app.post('/api/hirevue/evaluate', async (req, res) => {
+    try {
+        const { transcript, question, proctorViolations, resumeSnippet } = req.body;
+        if (!transcript || !question) {
+            return res.status(400).json({ error: 'Transcript and question are required' });
+        }
+        const { callGemini } = require('./interview');
+        
+        const prompt = `You are an expert HireVue behavioral evaluator. 
+QUESTION ASKED: "${question}"
+CANDIDATE TRANSCRIPT: "${transcript}"
+RESUME CONTEXT: "${resumeSnippet || 'None provided'}"
+PROCTORING LOGS: ${proctorViolations || 0} look-aways recorded.
+
+Evaluate the response based on:
+1. Relevance to the question and consistency with Resume Context.
+2. Structure and clarity of speech (STAR framework).
+3. Confidence level.
+Proctoring violations should act as a minor penalty to their "confidence" parameter.
+
+Output JSON schema ONLY (no markdown, no extra text) with numeric values between 0 and 10 for scores:
+{
+  "clarity": 8, 
+  "structure": 7, 
+  "relevance": 9,
+  "confidence": 6,
+  "verdict": "2 sentence summary",
+  "strengths": ["string", "string"],
+  "improvements": ["string", "string"]
+}`;
+
+        let text = await callGemini(prompt);
+        const startIdx = text.indexOf('{');
+        const endIdx = text.lastIndexOf('}');
+        if (startIdx === -1 || Math.abs(endIdx - startIdx) < 10) throw new Error("Invalid format from AI");
+        
+        const jsonStr = text.substring(startIdx, endIdx + 1);
+        const evalData = JSON.parse(jsonStr);
+        res.json(evalData);
+    } catch (err) {
+        console.error('HireVue Evaluate Error:', err);
+        res.status(500).json({ error: 'AI evaluation failed' });
+    }
+});
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {

@@ -5,7 +5,7 @@ import { useSEO } from './hooks/useSEO';
 import NotificationBell from './components/NotificationBell';
 import NavProfile from './NavProfile';
 import CourseRecommendations from './components/CourseRecommendations';
-import { BookOpen, Star, Lock, Clock, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Star, Lock, Clock, CheckCircle2, UserCheck, ArrowRight } from 'lucide-react';
 
 export default function DSASheets() {
     const { currentUser } = useAuth();
@@ -41,13 +41,22 @@ export default function DSASheets() {
             available: false
         },
         {
-            id: 'striver',
+            id: 'striver-sde-sheet',
             title: "Striver's SDE Sheet",
-            description: 'A comprehensive list of problems widely asked in big tech companies and startups.',
-            problemsCount: 190,
+            description: 'A comprehensive 30-day roadmap with 180+ problems widely asked in big tech companies and startups.',
+            problemsCount: 180,
             icon: CheckCircle2,
-            color: '#10b981',
-            available: false
+            color: '#3b82f6',
+            available: true
+        },
+        {
+            id: 'shradhaman',
+            title: "Shradha & Aman",
+            description: 'The complete Apna College DSA roadmap covering fundamentals to advanced algorithmic patterns.',
+            problemsCount: 40,
+            icon: BookOpen,
+            color: '#ef4444',
+            available: true
         }
     ];
 
@@ -131,7 +140,16 @@ export default function DSASheets() {
                         <p style={{ color: 'var(--txt2)', fontSize: '1.1rem', maxWidth: '600px', lineHeight: 1.6, margin: 0 }}>
                             Choose a curated problem list. Track your progress globally and master the patterns needed to ace tech interviews.
                         </p>
+                        <div style={{ marginTop: '2rem' }}>
+                            <button 
+                                onClick={() => navigate('/softskills')}
+                                style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '10px 20px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                            >
+                                Looking for Behavioral & Soft Skills? <ArrowRight size={18} />
+                            </button>
+                        </div>
                     </div>
+
 
                     {/* Sheets Grid */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px', animation: 'fadeScale 0.6s ease-out 0.2s both' }}>
@@ -139,7 +157,13 @@ export default function DSASheets() {
                         <div 
                             key={sheet.id}
                             onClick={() => {
-                                if(sheet.available) navigate(`/sheets/${sheet.id}`);
+                                if(sheet.available) {
+                                  if (sheet.id === 'striver-sde-sheet') {
+                                    navigate('/striver-sde-sheet');
+                                  } else {
+                                    navigate(`/sheets/${sheet.id}`);
+                                  }
+                                }
                             }}
                             style={{
                                 background: 'rgba(20, 22, 30, 0.4)',

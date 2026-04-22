@@ -12,9 +12,6 @@ import UserAnalytics from './UserAnalytics';
 import AIInterview from './AIInterview';
 import AIInterviewSelect from './AIInterviewSelect';
 import CompanyInterviewSelect from './CompanyInterviewSelect';
-import AIInterviewSchedule from './AIInterviewSchedule';
-import OARoundSelect from './OARoundSelect';
-import OARound from './OARound';
 import InfoAIInterview from './InfoAIInterview';
 import Login from './Login';
 import MySubmissions from './MySubmissions';
@@ -35,6 +32,15 @@ import JobApplier from './JobApplier';
 import ResumeOptimizerPreview from './previews/ResumeOptimizerPreview';
 import DSAPracticePreview from './previews/DSAPracticePreview';
 
+// Holistic Interview Experience
+import HolisticInterviewSetup from './components/interview-journey/HolisticInterviewSetup';
+import JourneyDashboard from './components/interview-journey/JourneyDashboard';
+import OASetup from './components/interview-journey/rounds/OASetup';
+import OARound from './components/interview-journey/rounds/OARound';
+import OAResults from './components/interview-journey/rounds/OAResults';
+import HireVueSetup from './components/interview-journey/rounds/HireVueSetup';
+import HireVueRound from './components/interview-journey/rounds/HireVueRound';
+import HireVueResults from './components/interview-journey/rounds/HireVueResults';
 // Course Features
 import Courses from './Courses';
 import CourseDetail from './CourseDetail';
@@ -118,6 +124,11 @@ import PalantirSheet from './companywisesheet/palantir/PalantirSheet';
 import CoinbaseSheet from './companywisesheet/coinbase/CoinbaseSheet';
 import GoldmanSachsSheet from './companywisesheet/goldmansachs/GoldmanSachsSheet';
 import JPMorganSheet from './companywisesheet/jpmorgan/JPMorganSheet';
+
+import Top50Interview from './Top50Interview';
+import StriverSDESheet from './StriverSDESheet';
+import Toughest70Interview from './softskills/Toughest70Interview';
+import SoftSkills from './softskills/SoftSkills';
 
 // Topic Wise Interview Questions
 import ArraysAndHashing from './topicwise/ArraysAndHashing';
@@ -233,10 +244,17 @@ function App() {
             <Route path="/recommendation" element={<RecommendationPage />} />
             <Route path="/analytics" element={<UserAnalytics />} />
             <Route path="/aiinterviewselect" element={<AIInterviewSelect />} />
-            <Route path="/aiinterviewschedule" element={<AIInterviewSchedule />} />
-            <Route path="/oaround" element={<OARoundSelect />} />
-            <Route path="/oaround/:roomId" element={<OARound />} />
             <Route path="/companyinterviewselect" element={<CompanyInterviewSelect />} />
+            
+            {/* Holistic Interview Experience */}
+            <Route path="/interview-journey/setup" element={<HolisticInterviewSetup />} />
+            <Route path="/interview-journey/:journeyId" element={<JourneyDashboard />} />
+            <Route path="/interview-journey/:journeyId/oa-setup" element={<OASetup />} />
+            <Route path="/interview-journey/:journeyId/oa-round" element={<OARound />} />
+            <Route path="/interview-journey/:journeyId/oa-results" element={<OAResults />} />
+            <Route path="/interview-journey/:journeyId/hirevue-setup" element={<HireVueSetup />} />
+            <Route path="/interview-journey/:journeyId/hirevue-round" element={<HireVueRound />} />
+            <Route path="/interview-journey/:journeyId/hirevue-results" element={<HireVueResults />} />            
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />
             <Route path="/aiinterview/:id?" element={<AIInterview />} />
@@ -251,6 +269,11 @@ function App() {
             <Route path="/resumeoptimiser" element={<ResumeOptimiser />} />
             <Route path="/joblisting" element={<JobListing />} />
             <Route path="/jobapplier" element={<JobApplier />} />
+            <Route path="/top-50-interview-questions" element={<Top50Interview />} />
+            <Route path="/striver-sde-sheet" element={<StriverSDESheet />} />
+            <Route path="/70-toughest-interview-questions" element={<Navigate to="/softskills/70-toughest-interview-questions" replace />} />
+            <Route path="/softskills" element={<SoftSkills />} />
+            <Route path="/softskills/70-toughest-interview-questions" element={<Toughest70Interview />} />
             
             {/* Company Wise Sheets */}
             <Route path="/company/google/:page?" element={<GoogleSheet />} />
