@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { db } from '../../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -11,7 +11,14 @@ const MODEL_URL = 'https://vladmandic.github.io/face-api/model/';
 export default function HireVueRound() {
     const { journeyId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { currentUser } = useAuth();
+    
+    useEffect(() => {
+        if (!location.state?.fromSetup) {
+            navigate(`/interview-journey/${journeyId}/hirevue-setup`, { replace: true });
+        }
+    }, [location.state, navigate, journeyId]);
     
     const [journey, setJourney] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -69,8 +76,8 @@ export default function HireVueRound() {
                 // If some evaluations exist, skip those
                 const evaluations = data.hrDetails?.evaluations || {};
                 const answeredCount = Object.keys(evaluations).length;
-                if (answeredCount >= qs.length) {
-                    navigate(`/interview-journey/${journeyId}/hirevue-results`);
+                if (answeredCount >= qs.length || data.hrDetails?.status === 'completed') {
+                    navigate(`/interview-journey/${journeyId}/`, { replace: true });
                     return;
                 } else {
                     setCurrentIndex(answeredCount);

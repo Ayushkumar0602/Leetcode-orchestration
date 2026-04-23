@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { db } from '../../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -13,7 +13,14 @@ const AUTO_SAVE_INTERVAL_MS = 5 * 60 * 1000;
 export default function OARound() {
     const { journeyId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { currentUser } = useAuth();
+    
+    useEffect(() => {
+        if (!location.state?.fromSetup) {
+            navigate(`/interview-journey/${journeyId}/oa-setup`, { replace: true });
+        }
+    }, [location.state, navigate, journeyId]);
     
     const [journey, setJourney] = useState(null);
     const [problems, setProblems] = useState([]);
@@ -39,40 +46,62 @@ export default function OARound() {
             if (jDoc.exists()) {
                 const data = jDoc.data();
                 setJourney(data);
-                if (data.oaDetails?.problemDetails) {
-                    setProblems(data.oaDetails.problemDetails);
-                    // Extract previously saved codes if they exist
-                    const savedCodes = data.oaDetails.savedCodes || {};
-                    setCodes({
-                        0: savedCodes[0] || '',
-                        1: savedCodes[1] || ''
-                    });
-                    const existingScores = data.oaDetails.scores || {};
-                    setScores({
-                        0: existingScores[0] || null,
-                        1: existingScores[1] || null
-                    });
+                    // If somehow already completed, push back to dashboard
+                    if (data.oaDetails?.status === 'completed') {
+                        navigate(`/interview-journey/${journeyId}/`, { replace: true });
+                        return;
+                    }
+
+                    if (data.oaDetails?.expiresAt) {
+                        const remaining = Math.max(0, Math.floor((data.oaDetails.expiresAt - Date.now()) / 1000));
+                        setTimeLeft(remaining);
+                        // Do not immediately call setIsTimeUp(true) here if you rely on effect, 
+                        // but it's safe to let the timer effect handle the zero case.
+                    }
+
+                    if (data.oaDetails?.problemDetails) {
+                        setProblems(data.oaDetails.problemDetails);
+                        // Extract previously saved codes if they exist
+                        const savedCodes = data.oaDetails.savedCodes || {};
+                        setCodes({
+                            0: savedCodes[0] || '',
+                            1: savedCodes[1] || ''
+                        });
+                        const existingScores = data.oaDetails.scores || {};
+                        setScores({
+                            0: existingScores[0] || null,
+                            1: existingScores[1] || null
+                        });
+                    }
                 }
-            }
         };
         fetchJourney();
-    }, [currentUser, journeyId]);
+    }, [currentUser, journeyId, navigate]);
 
     // Timer Effect
     useEffect(() => {
         if (!journey) return;
         const interval = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
+            if (journey.oaDetails?.expiresAt) {
+                const remaining = Math.max(0, Math.floor((journey.oaDetails.expiresAt - Date.now()) / 1000));
+                setTimeLeft(remaining);
+                if (remaining <= 0 && !isTimeUp) {
                     clearInterval(interval);
                     setIsTimeUp(true);
-                    return 0;
                 }
-                return prev - 1;
-            });
+            } else {
+                setTimeLeft(prev => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        setIsTimeUp(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }
         }, 1000);
         return () => clearInterval(interval);
-    }, [journey]);
+    }, [journey, isTimeUp]);
 
     // Trigger auto submission when time is up
     useEffect(() => {

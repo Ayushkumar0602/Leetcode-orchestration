@@ -1286,8 +1286,8 @@ app.post('/api/submissions/save', async (req, res) => {
             submittedAt: now
         });
 
-        // 2. Update the per-problem status doc in top-level 'problems' collection
-        const problemDocRef = doc(db, "problems", `${userId}_${problemId}`);
+        // 2. Update the per-problem status doc in dedicated 'userProblemStats' collection
+        const problemDocRef = doc(db, "userProblemStats", `${userId}_${problemId}`);
         const existingDoc = await getDoc(problemDocRef);
         const alreadySolved = existingDoc.exists() && existingDoc.data().status === 'Solved';
 
@@ -1338,7 +1338,7 @@ app.get('/api/submissions/:uid/:problemId', async (req, res) => {
 app.get('/api/user-problems/:uid', async (req, res) => {
     try {
         const uid = req.params.uid;
-        const problemsRef = collection(db, "problems");
+        const problemsRef = collection(db, "userProblemStats");
         const snapshot = await getDocs(problemsRef);
 
         const results = [];
@@ -1392,8 +1392,8 @@ app.post('/api/stats/submit', async (req, res) => {
 app.get('/api/stats/user/:uid', async (req, res) => {
     try {
         const uid = req.params.uid;
-        // Read from top-level problems collection
-        const problemsRef = collection(db, "problems");
+        // Read from dedicated userProblemStats collection
+        const problemsRef = collection(db, "userProblemStats");
         const snapshot = await getDocs(problemsRef);
 
         const userStats = { Easy: 0, Medium: 0, Hard: 0, Total: 0, solvedIds: [], attemptingIds: [] };
@@ -1451,7 +1451,7 @@ app.post('/api/scraper/run', async (req, res) => {
             const difficulty = meta?.difficulty || 'Unknown';
             if (difficulty in breakdown) breakdown[difficulty]++;
 
-            const problemDocRef = doc(db, 'problems', `${userId}_${problemId}`);
+            const problemDocRef = doc(db, 'userProblemStats', `${userId}_${problemId}`);
             await setDoc(problemDocRef, {
                 userId: String(userId),
                 problemId: String(problemId),
@@ -1472,6 +1472,43 @@ app.post('/api/scraper/run', async (req, res) => {
     } catch (err) {
         console.error('Scraper error:', err);
         res.status(500).json({ error: err.message || 'Scraping failed.' });
+    }
+});
+
+// --- One-time Migration: Move user stats from 'problems' to 'userProblemStats' ---
+app.post('/api/migrate/user-stats', async (req, res) => {
+    try {
+        const problemsRef = collection(db, "problems");
+        const snapshot = await getDocs(problemsRef);
+
+        let migrated = 0;
+        let deleted = 0;
+        let skipped = 0;
+
+        for (const d of snapshot.docs) {
+            const data = d.data();
+            const docId = d.id;
+
+            // User stat docs have a userId field and doc ID pattern "uid_pid"
+            if (data.userId && docId.includes('_')) {
+                // Copy to new collection
+                const newRef = doc(db, "userProblemStats", docId);
+                await setDoc(newRef, data);
+                migrated++;
+
+                // Delete from old collection
+                await deleteDoc(doc(db, "problems", docId));
+                deleted++;
+            } else {
+                skipped++; // This is a problem cache doc — leave it
+            }
+        }
+
+        console.log(`[Migration] Migrated: ${migrated}, Deleted: ${deleted}, Skipped (cache docs): ${skipped}`);
+        res.json({ success: true, migrated, deleted, skipped });
+    } catch (err) {
+        console.error("Migration failed:", err);
+        res.status(500).json({ error: "Migration failed: " + err.message });
     }
 });
 

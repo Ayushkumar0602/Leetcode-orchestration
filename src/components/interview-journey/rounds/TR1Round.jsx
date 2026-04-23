@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { db } from '../../../firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import Editor from '@monaco-editor/react';
 import {
     Play, Mic, MicOff, PhoneOff, Brain, ChevronRight, Search,
@@ -14,12 +12,14 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import { useInterviewSession } from '../../../useInterviewSession';
-import SystemDesignBoard from '../../../components/SystemDesignBoard';
 import NavProfile from '../../../NavProfile';
-import AIProctor from '../../../components/AIProctor';
 import { useSEO } from '../../../hooks/useSEO';
 import { useQuery } from '@tanstack/react-query';
-import { fetchMetadata, fetchProblems, fetchInterviews, queryKeys } from '../../../lib/api';
+import { fetchMetadata, fetchProblems, queryKeys } from '../../../lib/api';
+import { db } from '../../../firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import SystemDesignBoard from '../../SystemDesignBoard';
+import AIProctor from '../../AIProctor';
 import Select from 'react-select';
 import { useDebounce } from '../../../hooks/useDebounce';// ─── Constants ───────────────────────────────────────────────────────────────
 const LANG_OPTIONS = { python: 'Python 3', javascript: 'JavaScript', cpp: 'C++', c: 'C', java: 'Java', go: 'Go', rust: 'Rust' };
@@ -106,16 +106,28 @@ function ScoreBadge({ score }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function TR1Round() {
     useSEO({
-        title: 'AI Mock Interview',
-        description: 'Practice live coding interviews with AI.',
-        canonical: '/aiinterview'
+        title: 'Technical Round 1',
+        description: 'Holistic Technical Round 1 with AI.',
+        canonical: '/tr1-round'
     });
 
     const navigate = useNavigate();
     const location = useLocation();
     const { journeyId } = useParams();
-    const urlId = journeyId;
     const { currentUser, logout } = useAuth();
+    
+    // One-time security guard — only redirect if fromSetup was never set
+    const securityChecked = useRef(false);
+    useEffect(() => {
+        if (securityChecked.current) return;
+        securityChecked.current = true;
+        if (!location.state?.fromSetup) {
+            navigate(`/interview-journey/${journeyId}/tr1-setup`, { replace: true });
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    
+    const urlId = `${journeyId}_tr1`; // Isolated ID mapped precisely to the journey
 
     // ── App phase ──
     const [appPhase, setAppPhase] = useState('setup'); // setup | starting | interview | evaluating | score
@@ -206,8 +218,10 @@ export default function TR1Round() {
     const [liveAnalysis, setLiveAnalysis] = useState(null);
     const [analysisTimer, setAnalysisTimer] = useState(null);
 
-    // ── Timer state ──
-    const [interviewSeconds, setInterviewSeconds] = useState(0);
+    // ── Timer state (absolute countdown) ──
+    const [timeLeftSeconds, setTimeLeftSeconds] = useState(50 * 60); // default 50 min, overwritten on init
+    const expiresAtRef = useRef(null);
+    const autoSubmittedRef = useRef(false);
 
     // ── Whiteboard state ──
     const [whiteboardOpen, setWhiteboardOpen] = useState(false);
@@ -220,18 +234,28 @@ export default function TR1Round() {
     const lastProctorTrap = useRef(0);
     const [malpracticeCount, setMalpracticeCount] = useState(0);
     const [isFullscreenCheating, setIsFullscreenCheating] = useState(false);
+    const [violations, setViolations] = useState([]); // {type, timestamp}
 
-    // ── Timer Effect ──
+    // Helper to record a violation
+    const recordViolation = useCallback((type) => {
+        setViolations(prev => [...prev, { type, timestamp: Date.now() }]);
+        setMalpracticeCount(prev => prev + 1);
+    }, []);
+
+    // ── Absolute Countdown Timer Effect ──
     useEffect(() => {
-        let interval;
-        if (appPhase === 'interview') {
-            interval = setInterval(() => {
-                setInterviewSeconds(Math.floor((Date.now() - (interviewStartTimeRef.current || Date.now())) / 1000));
-            }, 1000);
-        } else {
-            clearInterval(interval);
-        }
+        if (appPhase !== 'interview' || !expiresAtRef.current) return;
+        const interval = setInterval(() => {
+            const remaining = Math.max(0, Math.floor((expiresAtRef.current - Date.now()) / 1000));
+            setTimeLeftSeconds(remaining);
+            if (remaining <= 0 && !autoSubmittedRef.current) {
+                clearInterval(interval);
+                autoSubmittedRef.current = true;
+                handleAutoSubmit();
+            }
+        }, 1000);
         return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [appPhase]);
 
     // ── Strictness Mode Security ──
@@ -253,7 +277,7 @@ export default function TR1Round() {
             ) {
                 setIsBlurry(true);
                 setTimeout(() => setIsBlurry(false), 5000);
-                setMalpracticeCount(prev => prev + 1);
+                recordViolation('screenshot');
             }
         };
 
@@ -266,7 +290,7 @@ export default function TR1Round() {
             // Fired if window loses focus OR tab is hidden (catches Mac screenshot/tab switch)
             if (!document.hasFocus() || document.visibilityState === 'hidden') {
                 setIsBlurry(true);
-                setMalpracticeCount(prev => prev + 1);
+                recordViolation('tab_switch');
             }
         };
 
@@ -278,6 +302,7 @@ export default function TR1Round() {
             // Aggressive visual blinding when mouse leaves the document structure entirely
             if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
                 setIsBlurry(true);
+                recordViolation('mouse_leave');
             }
         };
 
@@ -312,7 +337,7 @@ export default function TR1Round() {
             if (!document.fullscreenElement) {
                 // User exited fullscreen natively
                 setIsFullscreenCheating(true);
-                setMalpracticeCount(prev => prev + 1);
+                recordViolation('fullscreen_exit');
             } else {
                 setIsFullscreenCheating(false);
             }
@@ -471,12 +496,8 @@ export default function TR1Round() {
     const rafRef = useRef(null);    // requestAnimationFrame id
 
     // ── Interview history (for setup screen) ──
-    const { data: pastInterviews = [], isLoading: historyLoading } = useQuery({
-        queryKey: queryKeys.interviews(currentUser?.uid),
-        queryFn: () => fetchInterviews(currentUser.uid),
-        enabled: !!currentUser,
-        staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    });
+    const [pastInterviews, setPastInterviews] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
     const [submissionCount, setSubmissionCount] = useState(0);
     const [transcriptOpen, setTranscriptOpen] = useState(false);
     const [notes, setNotes] = useState('');
@@ -486,55 +507,85 @@ export default function TR1Round() {
     // (TanStack Query handles problem fetching)
 
     // ─── Resume Existing Interview Initialization ──────────────────────────
+    const hasInitializedRef = useRef(false);
     useEffect(() => {
-        if (urlId && currentUser && appPhase === 'setup') {
-            fetch(`https://leetcode-orchestration.onrender.com/api/interviews/detail/${urlId}`)
-                .then(r => r.json())
-                .then(iv => {
-                    if (iv.error) return;
+        if (hasInitializedRef.current) return;
+        if (journeyId && currentUser) {
+            hasInitializedRef.current = true;
+            const initJourney = async () => {
+                const jDoc = await getDoc(doc(db, 'interviewJourneys', journeyId));
+                if (!jDoc.exists()) return;
+                const jData = jDoc.data();
+                
+                if (jData.tr1Details?.status === 'completed') {
+                    navigate(`/interview-journey/${journeyId}/tc1-result`, { replace: true });
+                    return;
+                }
 
-                    // Populate state from saved interview
-                    setRole(iv.role);
-                    setCompany(iv.company);
-                    setLanguage(iv.language);
-                    setCode(iv.finalCode || '');
-                    setTranscript(iv.transcript || []);
-                    setNotes(iv.notes || '');
-                    setSessionId(urlId); // Reconnect RTDB
+                // Expired check — if timer ran out while user was away
+                if (jData.tr1Details?.expiresAt && Date.now() > jData.tr1Details.expiresAt && jData.tr1Details?.status !== 'completed') {
+                    await updateDoc(doc(db, 'interviewJourneys', journeyId), { 'tr1Details.status': 'expired' });
+                    navigate(`/interview-journey/${journeyId}/tr1-setup`, { replace: true });
+                    return;
+                }
 
-                    if (iv.problemId) {
-                        setSelectedProblem({ id: iv.problemId, title: iv.problemTitle, difficulty: iv.problemDifficulty });
-                    }
-                    if (iv.problemData) {
-                        setProblemData(iv.problemData);
-                    } else if (iv.problemId) {
-                        fetch('https://leetcode-orchestration.onrender.com/api/generate', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ problemStatement: iv.problemTitle, language: iv.language || 'python', problemId: iv.problemId })
-                        })
-                            .then(r => r.json())
-                            .then(data => { if (!data.error) setProblemData(data); })
-                            .catch(err => console.error("Fallback problem fetch failed:", err));
-                    }
+                // Inject journey context
+                setRole(jData.role);
+                setCompany(jData.company);
+                setLanguage(jData.language || 'python');
+                setSessionId(`${journeyId}_tr1`);
 
-                    // Deduce phase from transcript or default
-                    const lastMsg = (iv.transcript || []).find(m => m.phase);
-                    if (lastMsg) setInterviewPhase(lastMsg.phase);
+                if (jData.tr1Details?.problemId && !selectedProblem) {
+                    setSelectedProblem({ id: jData.tr1Details.problemId, title: jData.tr1Details.problemTitle, difficulty: jData.tr1Details.problemDifficulty });
+                }
 
-                    // If it was already completed, jump to score
-                    if (iv.status === 'completed' && iv.scoreReport) {
-                        setScoreReport(iv.scoreReport);
-                        setAppPhase('score');
-                    } else {
-                        // Otherwise, drop them right back into the interview
-                        setAppPhase('interview');
-                        interviewStartTimeRef.current = Date.now() - ((iv.durationMinutes || 0) * 60000);
-                    }
-                })
-                .catch(console.error);
+                // Load saved violations if any
+                if (jData.tr1Details?.violations) {
+                    setViolations(jData.tr1Details.violations);
+                    setMalpracticeCount(jData.tr1Details.violations.length);
+                }
+
+                // Set absolute timer from Firestore
+                if (jData.tr1Details?.expiresAt) {
+                    expiresAtRef.current = jData.tr1Details.expiresAt;
+                    const remaining = Math.max(0, Math.floor((jData.tr1Details.expiresAt - Date.now()) / 1000));
+                    setTimeLeftSeconds(remaining);
+                    interviewStartTimeRef.current = jData.tr1Details?.startedAt || Date.now();
+                }
+
+                // Fetch existing backend isolation data 
+                fetch(`https://leetcode-orchestration.onrender.com/api/interviews/detail/${journeyId}_tr1`)
+                    .then(r => r.json())
+                    .then(iv => {
+                        if (!iv.error) {
+                            setCode(iv.finalCode || '');
+                            setTranscript(iv.transcript || []);
+                            setNotes(iv.notes || '');
+                            const lastMsg = (iv.transcript || []).find(m => m.phase);
+                            if (lastMsg) setInterviewPhase(lastMsg.phase);
+                            if (iv.problemData) setProblemData(iv.problemData);
+                        } else if (jData.tr1Details?.problemId) {
+                            // If backend doesn't have it yet, pre-generate Problem Data structurally
+                            fetch('https://leetcode-orchestration.onrender.com/api/generate', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ problemStatement: jData.tr1Details.problemTitle, language: jData.language || 'python', problemId: jData.tr1Details.problemId })
+                            })
+                                .then(r => r.json())
+                                .then(data => { if (!data.error) setProblemData(data); })
+                                .catch(err => console.error("Fallback problem fetch failed:", err));
+                        }
+                    })
+                    .catch(console.error);
+
+                // Auto Start 
+                setAppPhase('starting');
+                setAutoStart(true);
+            };
+            initJourney();
         }
-    }, [urlId, currentUser, appPhase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [journeyId, currentUser]); // intentionally omitting appPhase — init must only run once on mount
 
     // Refetch when search changes
     // (TanStack Query handles search refetching via problemParams dependency)
@@ -542,17 +593,29 @@ export default function TR1Round() {
     // Keep transcriptRef in sync
     useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
 
+    // Fetch past interviews for history panel
+    useEffect(() => {
+        if (!currentUser) return;
+        setHistoryLoading(true);
+        fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${currentUser.uid}`)
+            .then(r => r.json())
+            .then(d => setPastInterviews(d.interviews || []))
+            .catch(console.error)
+            .finally(() => setHistoryLoading(false));
+    }, [currentUser]);
+
     // ─── Auto-Save Ongoing Interview ────────────────────────────────────────
     useEffect(() => {
         // Only auto-save if we are actively in an interview, have a valid urlId (from navigation), and aren't evaluating yet
         if (appPhase !== 'interview' || !urlId || !currentUser) return;
 
         const timer = setTimeout(() => {
+            // Save to orchestration backend
             fetch('https://leetcode-orchestration.onrender.com/api/interviews/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: urlId, // Passing ID triggers an upsert in the backend
+                    id: urlId,
                     userId: currentUser.uid,
                     role, company, language, strictness,
                     problemId: selectedProblem?.id,
@@ -567,11 +630,20 @@ export default function TR1Round() {
                         ? Math.round((Date.now() - interviewStartTimeRef.current) / 60000)
                         : 0
                 })
-            }).catch(err => console.error("Auto-save failed:", err));
-        }, 2000); // 2 second debounce
+            }).catch(err => console.error("Auto-save to backend failed:", err));
+
+            // Also persist to Firestore tr1Details for dashboard/resume
+            updateDoc(doc(db, 'interviewJourneys', journeyId), {
+                'tr1Details.savedCode': code,
+                'tr1Details.transcript': transcriptRef.current,
+                'tr1Details.violations': violations,
+                'tr1Details.malpracticeCount': malpracticeCount,
+                'tr1Details.lastSavedAt': Date.now()
+            }).catch(err => console.error("Auto-save to Firestore failed:", err));
+        }, 3000); // 3 second debounce
 
         return () => clearTimeout(timer);
-    }, [urlId, currentUser, appPhase, transcript, code, interviewPhase, submissionCount, problemData, notes]);
+    }, [urlId, currentUser, appPhase, transcript, code, interviewPhase, submissionCount, problemData, notes, violations, malpracticeCount, journeyId]);
 
     // ─── Sarvam AI TTS ──────────────────────────────────────────────────────
 
@@ -903,7 +975,7 @@ export default function TR1Round() {
 
     const handleRun = async () => {
         if (!currentUser) {
-            navigate(`/login?redirect=/interview-journey/${journeyId}/tr1-round`);
+            navigate('/login?redirect=/aiinterview');
             return;
         }
         const primaryCases = problemData?.primaryTestCases || [];
@@ -931,7 +1003,7 @@ export default function TR1Round() {
 
     const handleSubmit = async () => {
         if (!currentUser) {
-            navigate(`/login?redirect=/interview-journey/${journeyId}/tr1-round`);
+            navigate('/login?redirect=/aiinterview');
             return;
         }
         const primaryCases = problemData?.primaryTestCases || [];
@@ -998,7 +1070,7 @@ export default function TR1Round() {
     // ─── Start Interview ────────────────────────────────────────────────────
     const handleStartInterview = async () => {
         if (!currentUser) {
-            navigate(`/login?redirect=/interview-journey/${journeyId}/tr1-round`);
+            navigate('/login?redirect=/aiinterview');
             return;
         }
 
@@ -1007,9 +1079,16 @@ export default function TR1Round() {
         if (!company.trim()) { setSetupError('Please enter a company name.'); return; }
         setSetupError('');
 
-        if (['strict', 'real'].includes(strictness)) {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(e => console.log('Fullscreen failed on start', e));
+        // Only request fullscreen if triggered by a real user gesture (not autoStart)
+        // Browsers block requestFullscreen() when called programmatically
+        if (['strict', 'real'].includes(strictness) && !autoStart) {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                }
+            } catch (e) {
+                console.warn('Fullscreen not available:', e.message);
+                // Non-fatal — continue without fullscreen
             }
         }
 
@@ -1022,7 +1101,8 @@ export default function TR1Round() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    problemStatement: selectedProblem.description,
+                    // Use description if available, fall back to title (problem objects from Firestore only store title)
+                    problemStatement: selectedProblem.description || selectedProblem.title,
                     language,
                     problemId: selectedProblem.id
                 })
@@ -1058,9 +1138,8 @@ export default function TR1Round() {
             const initData = await initRes.json();
             const initSessionId = initData.id || uuidv4(); // fallback just in case
 
-            // Set up Realtime DB sync session and update URL seamlessly
-            setSessionId(initSessionId);
-            navigate(`/aiinterview/${initSessionId}`, { replace: true });
+            // Stay within the journey pipeline — do NOT navigate away to /aiinterview
+            setSessionId(`${journeyId}_tr1`);
 
             setInterviewPhase('opening');
             setPhaseIndex(0);
@@ -1223,531 +1302,149 @@ export default function TR1Round() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    problem: problemData?.problem || { title: selectedProblem?.title, description: selectedProblem?.description, difficulty: selectedProblem?.difficulty },
+                    problem: problemData?.problem || { title: selectedProblem?.title, description: selectedProblem?.description || selectedProblem?.title, difficulty: selectedProblem?.difficulty },
                     role, company, strictness,
                     transcript: transcriptRef.current,
-                    finalCode: code, language
+                    finalCode: code, language,
+                    violations: violations,
+                    malpracticeCount: malpracticeCount,
+                    durationMinutes: interviewStartTimeRef.current ? Math.round((Date.now() - interviewStartTimeRef.current) / 60000) : 0,
+                    violationSummary: `The candidate committed ${malpracticeCount} proctoring violations during the interview (types: ${[...new Set(violations.map(v => v.type))].join(', ') || 'none'}). Factor these into evaluation at REDUCED weight - only penalize if severe or repeated.\n\nCRITICAL EVALUATION GUIDELINES:\nWait, total interview time context: an interview lasting more than 30 minutes should be considered a 'good' indicator of effort and technical stamina. Explicitly check communication skills: did the candidate proactively ask questions, clarify ambiguous requirements with the interviewer, and verbalize their thought process? Factor these heavily into the score. MUST RETURN a highly detailed report containing exhaustive 'strengths', 'weaknesses', comprehensive 'recommendations', and final 'feedback'.`
                 })
             });
             const report = await res.json();
             if (report.error) throw new Error(report.error);
             setScoreReport(report);
-            // Save interview to Firestore
+            
+            // Background Save interview to Orchestration API
             const durationMins = interviewStartTimeRef.current
                 ? Math.round((Date.now() - interviewStartTimeRef.current) / 60000)
                 : 0;
             if (currentUser) {
-                const jDoc = await getDoc(doc(db, 'interviewJourneys', journeyId));
-                let journeyData = jDoc.data();
-                const updatedRounds = Array.isArray(journeyData.rounds)
-                    ? journeyData.rounds.map((r, index) => {
-                        if (r.type === 'Tech') {
-                            const newR = { ...r, status: 'completed' };
-                            if (index + 1 < journeyData.rounds.length) {
-                                journeyData.rounds[index + 1].locked = false;
-                            }
-                            return newR;
-                        }
-                        return r;
+                fetch('https://leetcode-orchestration.onrender.com/api/interviews/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: urlId, // Push to orchestrated endpoint
+                        userId: currentUser.uid,
+                        role, company, language, strictness,
+                        problemId: selectedProblem?.id,
+                        problemTitle: selectedProblem?.title || problemData?.problem?.title,
+                        problemDifficulty: selectedProblem?.difficulty || problemData?.problem?.difficulty,
+                        problemData: problemData,
+                        finalCode: code,
+                        transcript: transcriptRef.current,
+                        notes,
+                        scoreReport: report,
+                        submissionCount,
+                        durationMinutes: durationMins
                     })
-                    : journeyData.rounds;
-
-                await updateDoc(doc(db, 'interviewJourneys', journeyId), {
-                    'tr1Details.status': 'completed',
-                    'tr1Details.finalCode': code,
-                    'tr1Details.transcript': transcriptRef.current,
-                    'tr1Details.notes': notes,
-                    'tr1Details.scoreReport': report,
-                    'tr1Details.submissionCount': submissionCount,
-                    'tr1Details.durationMinutes': durationMins,
-                    rounds: updatedRounds
-                });
-                navigate('/interview-journey/' + journeyId + '/tr1-results');
+                }).catch(console.error);
             }
+            
+            // Critical Binding: Persist report + mark pipeline completed + unlock next round
+            const jSnap = await getDoc(doc(db, 'interviewJourneys', journeyId));
+            const jData = jSnap.data();
+            const isPassed = report.overallScore >= 65;
+
+            // Update rounds array: mark tech1 completed, unlock tech2 if passed
+            const updatedRounds = Array.isArray(jData.rounds)
+                ? jData.rounds.map(r => {
+                    if (r.id === 'tech1') return { ...r, status: 'completed', locked: false };
+                    if (r.id === 'tech2' && isPassed) return { ...r, locked: false };
+                    return r;
+                })
+                : jData.rounds;
+
+            await updateDoc(doc(db, 'interviewJourneys', journeyId), {
+                'tr1Details.status': 'completed',
+                'tr1Details.scoreReport': report,
+                'tr1Details.completedAt': Date.now(),
+                'tr1Details.savedCode': code,
+                'tr1Details.transcript': transcriptRef.current,
+                'tr1Details.violations': violations,
+                'tr1Details.malpracticeCount': malpracticeCount,
+                'tr1Details.autoSubmitted': false,
+                'tr1Details.durationMinutes': durationMins,
+                rounds: updatedRounds,
+                status: 'tr1'
+            });
+
+            // Redirect to result page
+            navigate(`/interview-journey/${journeyId}/tc1-result`, { replace: true });
+            
         } catch (err) {
             alert('Evaluation failed: ' + err.message);
             setAppPhase('interview');
         }
     };
 
-    // ─── Filtered problems for setup (Now handled by API) ─────────────────────
-    const filteredProblems = problems;
-
-    // ─── Delete & Restart ───────────────────────────────────────────────────
-    const handleDeleteInterview = async (id, e) => {
-        e.stopPropagation();
-        if (!window.confirm("Are you sure you want to delete this interview history?")) return;
+    // ─── Auto-Submit (time expired) ───────────────────────────────────────────
+    const handleAutoSubmit = async () => {
+        stopCurrentSpeech();
+        if (recognitionRef.current) recognitionRef.current.abort();
+        setIsListening(false);
+        setAppPhase('evaluating');
         try {
-            await fetch(`https://leetcode-orchestration.onrender.com/api/interviews/${id}`, { method: 'DELETE' });
-            setPastInterviews(prev => prev.filter(iv => iv.id !== id));
-        } catch (err) {
-            alert("Failed to delete interview.");
-        }
-    };
+            const res = await fetch('https://leetcode-orchestration.onrender.com/api/interview/evaluate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    problem: problemData?.problem || { title: selectedProblem?.title, description: selectedProblem?.description || selectedProblem?.title, difficulty: selectedProblem?.difficulty },
+                    role, company, strictness,
+                    transcript: transcriptRef.current,
+                    finalCode: code, language,
+                    violations: violations,
+                    malpracticeCount: malpracticeCount,
+                    durationMinutes: 50, // full duration used
+                    violationSummary: `Auto-submitted due to time expiry. The candidate committed ${malpracticeCount} proctoring violations (types: ${[...new Set(violations.map(v => v.type))].join(', ') || 'none'}). Factor these into evaluation at REDUCED weight.\n\nCRITICAL EVALUATION GUIDELINES:\nWait, total interview time context: an interview lasting more than 30 minutes should be considered a 'good' indicator of effort and technical stamina. Explicitly check communication skills: did the candidate proactively ask questions, clarify ambiguous requirements with the interviewer, and verbalize their thought process? Factor these heavily into the score. MUST RETURN a highly detailed report containing exhaustive 'strengths', 'weaknesses', comprehensive 'recommendations', and final 'feedback'.`
+                })
+            });
+            const report = await res.json();
+            if (report.error) throw new Error(report.error);
+            setScoreReport(report);
 
-    const handleRestartInterview = (iv, e) => {
-        e.stopPropagation();
-        if (!window.confirm("Restart this interview? This will prep the setup page with the same role and problem.")) return;
-        setRole(iv.role || '');
-        setCompany(iv.company || '');
-        setLanguage(iv.language || 'python');
-        if (iv.problemId) {
-            setSelectedProblem({ id: iv.problemId, title: iv.problemTitle, difficulty: iv.problemDifficulty });
+            const jSnap = await getDoc(doc(db, 'interviewJourneys', journeyId));
+            const jData = jSnap.data();
+            const isPassed = report.overallScore >= 65;
+            const updatedRounds = Array.isArray(jData.rounds)
+                ? jData.rounds.map(r => {
+                    if (r.id === 'tech1') return { ...r, status: 'completed', locked: false };
+                    if (r.id === 'tech2' && isPassed) return { ...r, locked: false };
+                    return r;
+                })
+                : jData.rounds;
+
+            await updateDoc(doc(db, 'interviewJourneys', journeyId), {
+                'tr1Details.status': 'completed',
+                'tr1Details.scoreReport': report,
+                'tr1Details.completedAt': Date.now(),
+                'tr1Details.savedCode': code,
+                'tr1Details.transcript': transcriptRef.current,
+                'tr1Details.violations': violations,
+                'tr1Details.malpracticeCount': malpracticeCount,
+                'tr1Details.autoSubmitted': true,
+                'tr1Details.durationMinutes': 50,
+                rounds: updatedRounds,
+                status: 'tr1'
+            });
+
+            navigate(`/interview-journey/${journeyId}/tc1-result`, { replace: true });
+        } catch (err) {
+            console.error('Auto-submit evaluation failed:', err);
+            // Mark expired since we couldn't evaluate
+            await updateDoc(doc(db, 'interviewJourneys', journeyId), {
+                'tr1Details.status': 'expired'
+            }).catch(console.error);
+            navigate(`/interview-journey/${journeyId}/tr1-setup`, { replace: true });
         }
-        setAppPhase('setup');
-        navigate(`/interview-journey/${journeyId}`, { replace: true });
     };
 
     // ─── Render: SETUP ────────────────────────────────────────────────────────
-    if (appPhase === 'DISABLED_SETUP_FOR_TR1') {
+    if (appPhase === 'setup') {
         return (
-            <div style={{
-                height: '100vh',
-                overflow: 'hidden',
-                background: '#050505',
-                backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(168,85,247,0.05) 0%, transparent 50%)',
-                display: 'flex',
-                flexDirection: 'column'
-            }}>
-                {/* ── Top Nav ──────────── */}
-                <nav style={{
-                    height: '56px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0 1.25rem',
-                    background: 'rgba(5, 5, 5, 0.8)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                    zIndex: 40,
-                    color: 'var(--txt)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-                        <img src="/logo.jpeg" alt="Whizan AI" style={{ height: '24px', width: '24px', borderRadius: '6px', objectFit: 'contain' }} />
-                        <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #fff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Whizan AI Interview
-                        </span>
-                    </div>
-
-                    <div className="ai-setup-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <button onClick={() => navigate('/dsaquestion')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>Problems</button>
-                        <button onClick={() => navigate('/aiinterviewselect')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>AI Interview</button>
-                        <button onClick={() => navigate('/systemdesign')} style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }}>System Design</button>
-                    </div>
-
-                    <NavProfile />
-                </nav>
-
-                <div className="setup-container" style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
-                    {/* LEFT SIDEBAR: Past Interviews (Desktop only, hides or stacks on mobile) */}
-                    {currentUser && (
-                        <div className="setup-sidebar" style={{ width: '300px', flexShrink: 0, borderRight: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                            <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <History size={18} color="var(--ai)" />
-                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)' }}>Past Interviews</span>
-                                    {pastInterviews.length > 0 && (
-                                        <span style={{ fontSize: '0.72rem', background: 'var(--ai-dim)', color: 'var(--ai)', borderRadius: '99px', padding: '1px 8px', fontWeight: 600 }}>
-                                            {pastInterviews.length}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                {historyLoading ? (
-                                    <div style={{ color: 'var(--txt3)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center', padding: '2rem 0' }}>
-                                        <Loader2 size={16} className="spin" /> Loading history…
-                                    </div>
-                                ) : pastInterviews.length === 0 ? (
-                                    <div style={{ color: 'var(--txt3)', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 1rem' }}>
-                                        No past interviews found. Start your first session!
-                                    </div>
-                                ) : (
-                                    pastInterviews.map(iv => {
-                                        const score = iv.overallScore;
-                                        const scoreColor = score >= 75 ? '#00b8a3' : score >= 50 ? '#ffa116' : '#ef4743';
-                                        const hire = iv.scoreReport?.hire || '';
-                                        const hireShort = hire.includes('Strong Hire') ? 'Strong Hire' : hire.includes('No Hire') ? 'No Hire' : hire.includes('Hire') ? 'Hire' : '-';
-                                        const hireColor = hireShort === 'Strong Hire' ? '#00b8a3' : hireShort === 'No Hire' ? '#ef4743' : '#ffa116';
-                                        const date = iv.createdAt ? new Date(iv.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
-                                        const diffColor = { Easy: '#00b8a3', Medium: '#ffa116', Hard: '#ef4743' }[iv.problemDifficulty] || 'var(--txt3)';
-                                        return (
-                                            <div key={iv.id} onClick={() => navigate(iv.status === 'in-progress' ? `/aiinterview/${iv.id}` : `/evaluation/${iv.id}`)} style={{
-                                                background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem',
-                                                display: 'flex', flexDirection: 'column', gap: '8px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-                                            }}
-                                                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ai)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none' }}
-                                            >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                                            <User size={13} color="var(--ai)" />
-                                                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--txt)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{iv.role || 'Unknown Role'}</span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                            <Building size={12} color="var(--txt3)" />
-                                                            <span style={{ fontSize: '0.78rem', color: 'var(--txt2)' }}>{iv.company || '-'}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '4px', opacity: 0.7 }}>
-                                                        <button onClick={(e) => handleRestartInterview(iv, e)} title="Restart Interview" style={{ background: 'transparent', border: 'none', color: 'var(--txt2)', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                                            <RefreshCcw size={14} />
-                                                        </button>
-                                                        <button onClick={(e) => handleDeleteInterview(iv.id, e)} title="Delete Interview" style={{ background: 'transparent', border: 'none', color: 'var(--fail)', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 71, 67, 0.1)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div style={{ fontSize: '0.78rem', color: 'var(--txt2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: 'var(--surface2)', padding: '6px 8px', borderRadius: '6px', marginBottom: '4px' }} title={iv.problemTitle}>
-                                                    {iv.problemTitle || 'Unknown'}
-                                                    {iv.problemDifficulty && <span style={{ marginLeft: '6px', color: diffColor, fontWeight: 600 }}>{iv.problemDifficulty}</span>}
-                                                </div>
-
-                                                {iv.status === 'in-progress' ? (
-                                                    <div style={{ marginTop: '4px', padding: '6px 0', borderTop: '1px dashed var(--border)' }}>
-                                                        <button style={{ width: '100%', background: 'var(--ai)', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 0', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                            <Play size={12} fill="currentColor" /> Resume
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-                                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: scoreColor, lineHeight: 1 }}>
-                                                            {score != null ? score : '-'}
-                                                            <span style={{ fontSize: '0.7rem', color: 'var(--txt3)', fontWeight: 500, marginLeft: '2px' }}>/100</span>
-                                                        </div>
-                                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, background: hireColor + '22', color: hireColor, padding: '3px 10px', borderRadius: '99px' }}>
-                                                            {hireShort}
-                                                        </span>
-                                                    </div>
-                                                )}
-
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--txt3)', marginTop: '2px' }}>
-                                                    <span>{date}</span>
-                                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                                        <span title="Duration"><Clock size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '2px' }} />{iv.durationMinutes || 0}m</span>
-                                                        <span title="Submissions"><Code2 size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '2px' }} />{iv.submissionCount || 0}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* MAIN CONTENT: Setup Form */}
-                    <div className="setup-main" style={{ flex: 1, padding: '2.5rem', display: 'flex', flexDirection: 'column', width: '100%', overflowY: 'auto' }}>
-                        <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '20px' }}>
-                                <div>
-                                    <h1 className="ai-setup-page-title" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--txt)', marginBottom: '0.5rem', letterSpacing: '-0.02em', textAlign: 'left' }}>AI Interview Setup</h1>
-                                    <p style={{ color: 'var(--txt2)', fontSize: '0.95rem', margin: 0, textAlign: 'left' }}>Select a problem and tell us about your target role.</p>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <button
-                                        onClick={() => navigate('/companyinterviewselect')}
-                                        style={{ background: 'rgba(168,85,247,0.1)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(168,85,247,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                                    >
-                                        <Building size={18} /> Company Sheets
-                                    </button>
-                                    <button
-                                        onClick={() => navigate('/courses')}
-                                        style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 20px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                                    >
-                                        <BookOpen size={18} /> Course Catalog
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem', marginBottom: '2.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
-                                <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem', color: 'var(--txt)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Search size={20} color="var(--ai)" /> Search Problem
-                                </h2>
-
-                                <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-                                    <Search size={18} color="var(--txt3)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search LeetCode problems..."
-                                        value={problemSearch}
-                                        onChange={e => setProblemSearch(e.target.value)}
-                                        style={{
-                                            width: '100%', padding: '0.8rem 1rem 0.8rem 2.75rem',
-                                            background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px',
-                                            color: 'var(--txt)', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s'
-                                        }}
-                                        onFocus={e => e.target.style.borderColor = 'var(--ai)'}
-                                        onBlur={e => e.target.style.borderColor = 'var(--border)'}
-                                    />
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
-                                    <Select
-                                        isMulti
-                                        options={metadata.topics}
-                                        value={selectedTopics}
-                                        onChange={setSelectedTopics}
-                                        placeholder="Filter by Topics..."
-                                        styles={{
-                                            control: (base, state) => ({ ...base, background: 'var(--bg)', borderColor: state.isFocused ? 'var(--ai)' : 'var(--border)', minHeight: '42px', boxShadow: 'none', '&:hover': { borderColor: 'var(--ai)' } }),
-                                            menu: (base) => ({ ...base, background: 'var(--surface)', zIndex: 100 }),
-                                            option: (base, state) => ({ ...base, background: state.isFocused ? 'var(--ai-dim)' : 'transparent', color: state.isFocused ? 'var(--ai)' : 'var(--txt)', cursor: 'pointer', '&:active': { background: 'var(--ai)' } }),
-                                            multiValue: (base) => ({ ...base, background: 'var(--ai-dim)', borderRadius: '4px' }),
-                                            multiValueLabel: (base) => ({ ...base, color: 'var(--ai)' }),
-                                            multiValueRemove: (base) => ({ ...base, color: 'var(--ai)', ':hover': { background: 'var(--ai)', color: '#fff' } }),
-                                            input: (base) => ({ ...base, color: 'var(--txt)' })
-                                        }}
-                                    />
-                                    <Select
-                                        isMulti
-                                        options={metadata.companies}
-                                        value={selectedCompanies}
-                                        onChange={setSelectedCompanies}
-                                        placeholder="Filter by Companies..."
-                                        styles={{
-                                            control: (base, state) => ({ ...base, background: 'var(--bg)', borderColor: state.isFocused ? 'var(--ai)' : 'var(--border)', minHeight: '42px', boxShadow: 'none', '&:hover': { borderColor: 'var(--ai)' } }),
-                                            menu: (base) => ({ ...base, background: 'var(--surface)', zIndex: 100 }),
-                                            option: (base, state) => ({ ...base, background: state.isFocused ? 'var(--ai-dim)' : 'transparent', color: state.isFocused ? 'var(--ai)' : 'var(--txt)', cursor: 'pointer', '&:active': { background: 'var(--ai)' } }),
-                                            multiValue: (base) => ({ ...base, background: 'var(--ai-dim)', borderRadius: '4px' }),
-                                            multiValueLabel: (base) => ({ ...base, color: 'var(--ai)' }),
-                                            multiValueRemove: (base) => ({ ...base, color: 'var(--ai)', ':hover': { background: 'var(--ai)', color: '#fff' } }),
-                                            input: (base) => ({ ...base, color: 'var(--txt)' })
-                                        }}
-                                    />
-                                </div>
-
-                                <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '10px', background: 'var(--bg)' }}>
-                                    {problemsLoading ? (
-                                        <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--txt3)', fontSize: '0.85rem' }}><Loader2 size={18} className="spin" /></div>
-                                    ) : filteredProblems.length === 0 ? (
-                                        <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--txt3)', fontSize: '0.85rem' }}>No problems found.</div>
-                                    ) : (
-                                        filteredProblems.slice(0, 50).map(p => (
-                                            <div
-                                                key={p.id}
-                                                onClick={() => setSelectedProblem(p)}
-                                                style={{
-                                                    padding: '0.8rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                                    cursor: 'pointer', borderBottom: '1px solid var(--border-soft)',
-                                                    background: selectedProblem?.id === p.id ? 'var(--ai-dim)' : 'transparent',
-                                                    borderLeft: selectedProblem?.id === p.id ? '4px solid var(--ai)' : '4px solid transparent',
-                                                    transition: 'background 0.15s'
-                                                }}
-                                            >
-                                                <span style={{ fontSize: '0.9rem', fontWeight: selectedProblem?.id === p.id ? 600 : 400, color: selectedProblem?.id === p.id ? 'var(--ai)' : 'var(--txt)' }}>{p.title}</span>
-                                                <span style={{ fontSize: '0.78rem', fontWeight: 700, background: DIFFICULTY_COLOR[p.difficulty] + '22', color: DIFFICULTY_COLOR[p.difficulty], padding: '2px 8px', borderRadius: '4px' }}>{p.difficulty}</span>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                                {selectedProblem && (
-                                    <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.9rem', background: 'var(--ai-dim)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <CheckCircle2 size={14} color="var(--ai)" />
-                                        <span style={{ fontSize: '0.82rem', color: 'var(--ai)' }}>Selected: <strong>{selectedProblem.title}</strong></span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* ── Voice Template Selector ── */}
-                            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem 1.5rem', marginBottom: '2rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-                                    <Volume2 size={17} color="var(--ai)" />
-                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)' }}>AI Interviewer Voice</span>
-                                    <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--txt3)' }}>Click to select · Preview to listen</span>
-                                </div>
-                                <div className="ai-voice-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
-                                    {VOICE_TEMPLATES.map(voice => {
-                                        const isSelected = selectedVoice?.id === voice.id;
-                                        const isPreviewing = previewLoading === voice.id;
-                                        return (
-                                            <div
-                                                key={voice.id}
-                                                onClick={() => setSelectedVoice(voice)}
-                                                style={{
-                                                    border: `1.5px solid ${isSelected ? 'var(--ai)' : 'var(--border)'}`,
-                                                    borderRadius: '10px',
-                                                    padding: '0.65rem 0.85rem',
-                                                    cursor: 'pointer',
-                                                    background: isSelected ? 'rgba(168,85,247,0.08)' : 'var(--bg)',
-                                                    transition: 'all 0.18s',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    userSelect: 'none'
-                                                }}
-                                            >
-                                                <span style={{ fontSize: '1.15rem', lineHeight: 1 }}>{voice.emoji}</span>
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: isSelected ? 'var(--ai)' : 'var(--txt)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {voice.name}
-                                                        {isSelected && <CheckCircle2 size={11} color="var(--ai)" style={{ marginLeft: '5px', verticalAlign: 'middle' }} />}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--txt3)', whiteSpace: 'nowrap' }}>{voice.accent} · <span style={{ color: 'var(--ai)', opacity: 0.85 }}>{voice.tag}</span></div>
-                                                </div>
-                                                <button
-                                                    onClick={async (e) => {
-                                                        e.stopPropagation();
-                                                        if (isPreviewing) return;
-                                                        setPreviewLoading(voice.id);
-                                                        try {
-                                                            const res = await fetch('https://leetcode-orchestration.onrender.com/api/sarvam/tts', {
-                                                                method: 'POST',
-                                                                headers: { 'Content-Type': 'application/json' },
-                                                                body: JSON.stringify({ text: PREVIEW_TEXT, speaker: voice.speaker })
-                                                            });
-                                                            if (!res.ok) throw new Error('TTS failed');
-                                                            // Stream the preview using MediaSource if available
-                                                            if (window.MediaSource && MediaSource.isTypeSupported('audio/mpeg')) {
-                                                                const audio = new Audio();
-                                                                const ms = new MediaSource();
-                                                                audio.src = URL.createObjectURL(ms);
-                                                                ms.addEventListener('sourceopen', async () => {
-                                                                    const sb = ms.addSourceBuffer('audio/mpeg');
-                                                                    const reader = res.body.getReader();
-                                                                    let started = false;
-                                                                    while (true) {
-                                                                        const { done, value } = await reader.read();
-                                                                        if (done) { ms.endOfStream(); break; }
-                                                                        if (sb.updating) await new Promise(r => sb.addEventListener('updateend', r, { once: true }));
-                                                                        sb.appendBuffer(value);
-                                                                        if (!started) { started = true; audio.play(); }
-                                                                    }
-                                                                }, { once: true });
-                                                                audio.onended = () => setPreviewLoading(null);
-                                                            } else {
-                                                                const chunks = [];
-                                                                const reader = res.body.getReader();
-                                                                while (true) {
-                                                                    const { done, value } = await reader.read();
-                                                                    if (done) break;
-                                                                    chunks.push(value);
-                                                                }
-                                                                const blob = new Blob(chunks, { type: 'audio/mpeg' });
-                                                                const url = URL.createObjectURL(blob);
-                                                                const audio = new Audio(url);
-                                                                audio.onended = () => { URL.revokeObjectURL(url); setPreviewLoading(null); };
-                                                                await audio.play();
-                                                            }
-                                                        } catch (err) {
-                                                            console.error('Preview failed:', err);
-                                                            setPreviewLoading(null);
-                                                        }
-                                                    }}
-                                                    title="Preview voice"
-                                                    style={{
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        width: '26px', height: '26px', borderRadius: '6px', flexShrink: 0,
-                                                        background: isPreviewing ? 'var(--ai-dim)' : 'rgba(255,255,255,0.06)',
-                                                        border: `1px solid ${isPreviewing ? 'var(--ai)' : 'rgba(255,255,255,0.1)'}`,
-                                                        color: isPreviewing ? 'var(--ai)' : 'var(--txt3)',
-                                                        cursor: isPreviewing ? 'not-allowed' : 'pointer',
-                                                        transition: 'all 0.18s'
-                                                    }}
-                                                >
-                                                    {isPreviewing ? <Loader2 size={11} className="spin" /> : <Play size={10} fill="currentColor" />}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* ── Strictness Mode Selector ── */}
-                            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem 1.5rem', marginBottom: '2rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-                                    <Brain size={17} color="var(--ai)" />
-                                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--txt)' }}>Strictness Mode</span>
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.6rem' }}>
-                                    {[
-                                        { id: 'low', label: 'Low', desc: 'Chill & helpful' },
-                                        { id: 'mid', label: 'Mid', desc: 'Balanced feedback' },
-                                        { id: 'strict', label: 'Strict', desc: 'Hard constraints' },
-                                        { id: 'real', label: 'Real Interview', desc: 'Professional flow' }
-                                    ].map(mode => (
-                                        <div
-                                            key={mode.id}
-                                            onClick={() => setStrictness(mode.id)}
-                                            style={{
-                                                border: `1.5px solid ${strictness === mode.id ? 'var(--ai)' : 'var(--border)'}`,
-                                                borderRadius: '10px', padding: '0.65rem 0.85rem', cursor: 'pointer',
-                                                background: strictness === mode.id ? 'rgba(168,85,247,0.08)' : 'var(--bg)',
-                                                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px',
-                                                transition: 'all 0.18s', userSelect: 'none'
-                                            }}
-                                        >
-                                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: strictness === mode.id ? 'var(--ai)' : 'var(--txt)' }}>{mode.label}</div>
-                                            <div style={{ fontSize: '0.75rem', color: strictness === mode.id ? 'var(--ai)' : 'var(--txt3)', opacity: strictness === mode.id ? 0.9 : 1 }}>{mode.desc}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
-                                <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--txt)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <User size={20} color="var(--ai)" /> Interview Context
-                                </h2>
-                                <p style={{ color: 'var(--txt2)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Configure your mock interview details.</p>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--txt2)', marginBottom: '0.5rem', fontWeight: 600 }}>Job Role</label>
-                                        <input type="text" placeholder="e.g. SDE-2, ML Engineer"
-                                            value={role} onChange={e => setRole(e.target.value)}
-                                            style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', color: 'var(--txt)', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }}
-                                            onFocus={e => e.target.style.borderColor = 'var(--ai)'}
-                                            onBlur={e => e.target.style.borderColor = 'var(--border)'}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--txt2)', marginBottom: '0.5rem', fontWeight: 600 }}>Company</label>
-                                        <input type="text" placeholder="e.g. Google, Startup"
-                                            value={company} onChange={e => setCompany(e.target.value)}
-                                            style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', color: 'var(--txt)', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }}
-                                            onFocus={e => e.target.style.borderColor = 'var(--ai)'}
-                                            onBlur={e => e.target.style.borderColor = 'var(--border)'}
-                                        />
-                                    </div>
-                                </div>
-
-                                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--txt2)', marginBottom: '0.5rem', fontWeight: 600 }}>Language</label>
-                                <select value={language} onChange={e => setLanguage(e.target.value)}
-                                    style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', color: 'var(--txt)', fontSize: '0.9rem', outline: 'none', marginBottom: '2rem', cursor: 'pointer' }}>
-                                    {Object.entries(LANG_OPTIONS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                                </select>
-
-                                {setupError && (
-                                    <div style={{ marginBottom: '1.5rem', padding: '0.8rem 1rem', background: 'var(--fail-dim)', border: '1px solid rgba(239,71,67,0.3)', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--fail)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <XCircle size={16} /> {setupError}
-                                    </div>
-                                )}
-
-                                <button
-                                    onClick={handleStartInterview}
-                                    disabled={appPhase === 'starting'}
-                                    style={{
-                                        width: '100%', padding: '0.85rem 1rem',
-                                        background: 'linear-gradient(135deg, var(--ai), #7c3aed)',
-                                        color: '#fff', border: 'none', borderRadius: '12px',
-                                        fontWeight: 700, fontSize: '1.05rem', cursor: appPhase === 'starting' ? 'not-allowed' : 'pointer',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                                        opacity: appPhase === 'starting' ? 0.7 : 1,
-                                        transition: 'all 0.2s',
-                                        boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
-                                        letterSpacing: '0.01em'
-                                    }}
-                                >
-                                    {appPhase === 'starting' ? <><Loader2 size={18} className="spin" /> Preparing Interview...</> : <><Brain size={20} /> Start Simulation</>}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505', color: '#fff' }}>
+                <Loader2 size={32} className="spin" color="var(--ai)" />
             </div>
         );
     }
@@ -1983,6 +1680,7 @@ export default function TR1Round() {
 
     return (
         <div className="lc-root">
+            <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }`}</style>
             {showMalpracticePopup && !isFullscreenCheating && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(17,19,26,0.85)', zIndex: 100000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
                     <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(239,71,67,0.3)', padding: '2.5rem', borderRadius: '24px', maxWidth: '450px', textAlign: 'center', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
@@ -2097,8 +1795,16 @@ export default function TR1Round() {
                     {/* Profile hidden during interview as requested */}
 
                     {/* Timer */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,161,22,0.15)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(255,161,22,0.3)', color: '#ffa116', fontWeight: 600, fontSize: '0.8rem', marginRight: '8px' }}>
-                        <Clock size={13} /> {formatTime(interviewSeconds)}
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        background: timeLeftSeconds < 300 ? 'rgba(239,68,68,0.2)' : 'rgba(255,161,22,0.15)',
+                        padding: '4px 10px', borderRadius: '6px',
+                        border: `1px solid ${timeLeftSeconds < 300 ? 'rgba(239,68,68,0.5)' : 'rgba(255,161,22,0.3)'}`,
+                        color: timeLeftSeconds < 300 ? '#ef4444' : '#ffa116',
+                        fontWeight: 700, fontSize: '0.85rem', marginRight: '8px', fontFamily: 'monospace',
+                        animation: timeLeftSeconds < 60 ? 'pulse 1s infinite' : 'none'
+                    }}>
+                        <Clock size={13} /> {formatTime(timeLeftSeconds)}
                     </div>
 
                     {/* Whiteboard Toggle */}

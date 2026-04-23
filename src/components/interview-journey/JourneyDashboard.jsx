@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { Lock, Play, CheckCircle, Clock, FileText, ChevronRight, X, BrainCircuit, Users, Code, Trophy, RotateCcw, AlertTriangle } from 'lucide-react';
 import NavProfile from '../../NavProfile';
 import { toast } from 'sonner';
@@ -18,6 +18,30 @@ export default function JourneyDashboard() {
     const [showRetakeModal, setShowRetakeModal] = useState(false);
     const [showRetakeHRModal, setShowRetakeHRModal] = useState(false);
     const [isRetaking, setIsRetaking] = useState(false);
+
+    // TR1 Live Timer state
+    const [tr1TimeLeft, setTr1TimeLeft] = useState(null);
+
+    // Effect to tick countdown if TR1 is in progress
+    useEffect(() => {
+        if (!journey || !journey.tr1Details || journey.tr1Details.status !== 'in-progress' || !journey.tr1Details.expiresAt) {
+            setTr1TimeLeft(null);
+            return;
+        }
+        const interval = setInterval(() => {
+            const remaining = Math.max(0, Math.floor((journey.tr1Details.expiresAt - Date.now()) / 1000));
+            setTr1TimeLeft(remaining);
+            // Optionally, if reaches 0, we could auto-reload or let the setup component handle "expired" logic
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [journey]);
+
+    const formatCountdown = (totalSeconds) => {
+        if (totalSeconds === null) return '';
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
 
     useEffect(() => {
         const fetchJourney = async () => {
@@ -51,7 +75,13 @@ export default function JourneyDashboard() {
         } else if (round.type === 'HR') {
             navigate(`/interview-journey/${journeyId}/hirevue-setup`);
         } else if (round.type === 'Tech') {
-            toast.info("Tech Round coming soon!");
+            if (round.id === 'tech1') {
+                navigate(`/interview-journey/${journeyId}/tr1-setup`);
+            } else if (round.id === 'tech2') {
+                toast.info("Tech Round 2 is opening soon!");
+            } else {
+                toast.info("Tech Round coming soon!");
+            }
         }
     };
 
@@ -109,6 +139,36 @@ export default function JourneyDashboard() {
         } catch (err) {
             console.error(err);
             toast.error('Failed to reset HireVue round.');
+        } finally {
+            setIsRetaking(false);
+        }
+    };
+
+    const handleRetakeTR1 = async () => {
+        setIsRetaking(true);
+        try {
+            const jDoc = await getDoc(doc(db, 'interviewJourneys', journeyId));
+            const data = jDoc.data();
+            const updatedRounds = Array.isArray(data.rounds)
+                ? data.rounds.map(r => {
+                    if (r.id === 'tech1') return { ...r, status: 'pending', locked: false };
+                    if (r.id === 'tech2') return { ...r, locked: true, status: 'pending' }; // always re-lock tech2
+                    return r;
+                })
+                : data.rounds;
+
+            // deleteField() removes the entire tr1Details map completely (avoids stale sub-fields)
+            await updateDoc(doc(db, 'interviewJourneys', journeyId), {
+                tr1Details: deleteField(),
+                rounds: updatedRounds
+            });
+
+            setJourney(prev => ({ ...prev, tr1Details: null, rounds: updatedRounds }));
+            toast.success('TR1 data fully cleared — fresh start!');
+            navigate(`/interview-journey/${journeyId}/tr1-setup`);
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to reset Technical Round 1.');
         } finally {
             setIsRetaking(false);
         }
@@ -219,6 +279,11 @@ export default function JourneyDashboard() {
                             let isLocked = round.locked;
                             // Self-healing lock release: if tech round 1 is locked but HR score is passing, release lock
                             if (round.id === 'tech1' && isLocked && journey?.hrDetails?.compositeScore >= 65) {
+                                isLocked = false;
+                            }
+                            
+                            // Self-healing lock release: if tech round 2 is locked but TR1 score is passing, release lock
+                            if (round.id === 'tech2' && isLocked && journey?.tr1Details?.scoreReport?.overallScore >= 65) {
                                 isLocked = false;
                             }
 
@@ -357,31 +422,85 @@ export default function JourneyDashboard() {
                                                             </button>
                                                         </>
                                                     )}
+                                                    {round.id === 'tech1' && (
+                                                        <>
+                                                            {journey?.tr1Details?.scoreReport?.overallScore !== undefined && (
+                                                                <div style={{ padding: '8px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                                    Score: <span style={{ color: journey.tr1Details.scoreReport.overallScore >= 65 ? '#10b981' : '#f59e0b' }}>{Math.round(journey.tr1Details.scoreReport.overallScore)}/100</span>
+                                                                </div>
+                                                            )}
+                                                            <button 
+                                                                onClick={() => navigate(`/interview-journey/${journeyId}/tc1-result`)}
+                                                                style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', padding: '10px 16px', borderRadius: '12px', color: '#3b82f6', fontWeight: 600, cursor: 'pointer' }}
+                                                            >
+                                                                View Results
+                                                            </button>
+                                                            <button
+                                                                onClick={handleRetakeTR1}
+                                                                disabled={isRetaking}
+                                                                style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.08)', fontWeight: 600, padding: '10px 14px', borderRadius: '12px', cursor: isRetaking ? 'wait' : 'pointer', fontSize: '0.85rem' }}
+                                                            >
+                                                                <RotateCcw size={15} /> Retake
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                                    <button onClick={() => handleRoundAction(index, round)} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', background: '#3b82f6', border: 'none', fontWeight: 700, padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }} className="hover-btn primary">
-                                                        {round.type === 'OA' && journey?.oaDetails?.problemDetails?.length > 0
-                                                            ? <><RotateCcw size={16} /> Resume OA</>
-                                                            : round.type === 'HR' && journey?.hrDetails?.questions?.length > 0
-                                                                ? <><RotateCcw size={16} /> Resume HireVue</>
-                                                                : <>Enter Round <Play fill="currentColor" size={16} /></>}
-                                                    </button>
-                                                    {round.type === 'OA' && journey?.oaDetails?.problemDetails?.length > 0 && (
-                                                        <button
-                                                            onClick={() => setShowRetakeModal(true)}
-                                                            style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)', fontWeight: 600, padding: '10px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.85rem' }}
-                                                        >
-                                                            <RotateCcw size={15} /> Restart OA
-                                                        </button>
+                                                    {round.id === 'tech1' && journey?.tr1Details?.status === 'in-progress' && journey?.tr1Details?.expiresAt && tr1TimeLeft !== null && tr1TimeLeft > 0 && (
+                                                        <div style={{ 
+                                                            display: 'flex', alignItems: 'center', gap: '8px', 
+                                                            padding: '10px 16px', borderRadius: '12px', 
+                                                            background: tr1TimeLeft < 300 ? 'rgba(239,68,68,0.1)' : 'rgba(59,130,246,0.1)', 
+                                                            border: `1px solid ${tr1TimeLeft < 300 ? 'rgba(239,68,68,0.4)' : 'rgba(59,130,246,0.4)'}`,
+                                                            color: tr1TimeLeft < 300 ? '#ef4444' : '#3b82f6', 
+                                                            fontWeight: 700, fontFamily: 'monospace', fontSize: '1rem',
+                                                            animation: tr1TimeLeft < 60 ? 'pulse 1s infinite' : 'none'
+                                                        }}>
+                                                            <Clock size={16} /> {formatCountdown(tr1TimeLeft)} remaining
+                                                        </div>
                                                     )}
-                                                    {round.type === 'HR' && journey?.hrDetails?.questions?.length > 0 && (
-                                                        <button
-                                                            onClick={() => setShowRetakeHRModal(true)}
-                                                            style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)', fontWeight: 600, padding: '10px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.85rem' }}
-                                                        >
-                                                            <RotateCcw size={15} /> Restart HireVue
-                                                        </button>
+                                                    {round.id === 'tech1' && journey?.tr1Details?.status === 'expired' ? (
+                                                        <>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444', fontWeight: 600 }}>
+                                                                <Clock size={16} /> Time Expired
+                                                            </div>
+                                                            <button
+                                                                onClick={handleRetakeTR1}
+                                                                disabled={isRetaking}
+                                                                style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.08)', fontWeight: 600, padding: '10px 14px', borderRadius: '12px', cursor: isRetaking ? 'wait' : 'pointer', fontSize: '0.85rem' }}
+                                                            >
+                                                                <RotateCcw size={15} /> Restart Round
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <button onClick={() => handleRoundAction(index, round)} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', background: '#3b82f6', border: 'none', fontWeight: 700, padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }} className="hover-btn primary">
+                                                                {round.type === 'OA' && journey?.oaDetails?.problemDetails?.length > 0
+                                                                    ? <><RotateCcw size={16} /> Resume OA</>
+                                                                    : round.type === 'HR' && journey?.hrDetails?.questions?.length > 0
+                                                                        ? <><RotateCcw size={16} /> Resume HireVue</>
+                                                                        : round.id === 'tech1' && journey?.tr1Details?.status === 'in-progress' && tr1TimeLeft > 0
+                                                                            ? <><RotateCcw size={16} /> Resume Technical</>
+                                                                            : <>Enter Round <Play fill="currentColor" size={16} /></>}
+                                                            </button>
+                                                            {round.type === 'OA' && journey?.oaDetails?.problemDetails?.length > 0 && (
+                                                                <button
+                                                                    onClick={() => setShowRetakeModal(true)}
+                                                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)', fontWeight: 600, padding: '10px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                                >
+                                                                    <RotateCcw size={15} /> Restart OA
+                                                                </button>
+                                                            )}
+                                                            {round.type === 'HR' && journey?.hrDetails?.questions?.length > 0 && (
+                                                                <button
+                                                                    onClick={() => setShowRetakeHRModal(true)}
+                                                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)', fontWeight: 600, padding: '10px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                                >
+                                                                    <RotateCcw size={15} /> Restart HireVue
+                                                                </button>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                             )}

@@ -41,6 +41,9 @@ import OAResults from './components/interview-journey/rounds/OAResults';
 import HireVueSetup from './components/interview-journey/rounds/HireVueSetup';
 import HireVueRound from './components/interview-journey/rounds/HireVueRound';
 import HireVueResults from './components/interview-journey/rounds/HireVueResults';
+import TR1Setup from './components/interview-journey/rounds/TR1Setup';
+import TR1Round from './components/interview-journey/rounds/TR1Round';
+import TR1Results from './components/interview-journey/rounds/TR1Results';
 // Course Features
 import Courses from './Courses';
 import CourseDetail from './CourseDetail';
@@ -277,6 +280,9 @@ function App() {
             <Route path="/interview-journey/:journeyId/hirevue-setup" element={<HireVueSetup />} />
             <Route path="/interview-journey/:journeyId/hirevue-round" element={<HireVueRound />} />
             <Route path="/interview-journey/:journeyId/hirevue-results" element={<HireVueResults />} />            
+            <Route path="/interview-journey/:journeyId/tr1-setup" element={<TR1Setup />} />
+            <Route path="/interview-journey/:journeyId/tr1-round" element={<TR1Round />} />
+            <Route path="/interview-journey/:journeyId/tc1-result" element={<TR1Results />} />
             <Route path="/dsaquestion/:page" element={<ProblemList />} />
             <Route path="/solvingpage/:id" element={<Dashboard />} />
             <Route path="/aiinterview/:id?" element={<AIInterview />} />

@@ -108,12 +108,12 @@ export default function HireVueSetup() {
 
     const handleEnterInterview = async () => {
         stopHardware();
-        navigate(`/interview-journey/${journeyId}/hirevue-round`);
+        navigate(`/interview-journey/${journeyId}/hirevue-round`, { state: { fromSetup: true } });
     };
 
     const handleResumeInterview = async () => {
         stopHardware();
-        navigate(`/interview-journey/${journeyId}/hirevue-round`);
+        navigate(`/interview-journey/${journeyId}/hirevue-round`, { state: { fromSetup: true } });
     };
 
     if (loading) return (
