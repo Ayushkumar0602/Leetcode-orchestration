@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { executeCode } = require('./executor');
+const { verifyCppSolution } = require('./adminExecutor');
 const { generateCodeAndTests, extractProjectDetails, chatWithAgent } = require('./ai');
 const { loadDataset, getProblems, getProblemById, getMetadata, getTotalCounts, isDataLoaded } = require('./dataset');
 const { runScraperInDocker } = require('./scraper');
@@ -568,6 +569,16 @@ Return your response strictly as a JSON object, with NO markdown formatting, NO 
 app.get('/api/public/courses', async (req, res) => {
     try {
         const snapshot = await getDocs(query(collection(db, 'youtubecourses'), orderBy('createdAt', 'desc')));
+        
+        const materialsSnap = await getDocs(collection(db, 'course_materials'));
+        const materialCounts = {};
+        materialsSnap.docs.forEach(doc => {
+            const courseId = doc.data().courseId;
+            if (courseId) {
+                materialCounts[courseId] = (materialCounts[courseId] || 0) + 1;
+            }
+        });
+
         const courses = snapshot.docs.map(doc => {
             const data = doc.data();
             // slug should always be stored. Fallback is only for legacy data.
@@ -580,7 +591,8 @@ app.get('/api/public/courses', async (req, res) => {
                 title: data.title,
                 description: data.description,
                 thumbnailUrl: data.thumbnailUrl,
-                createdAt: data.createdAt
+                createdAt: data.createdAt,
+                videoCount: materialCounts[doc.id] || 0
             };
         });
         res.json({ courses });
@@ -1489,18 +1501,21 @@ app.post('/api/migrate/user-stats', async (req, res) => {
             const data = d.data();
             const docId = d.id;
 
-            // User stat docs have a userId field and doc ID pattern "uid_pid"
-            if (data.userId && docId.includes('_')) {
-                // Copy to new collection
+            // Problem CACHE docs (AI-generated) have these specific fields:
+            // code, wrapper, primaryTestCases, submitTestCases, problem, functions
+            const isProblemCache = data.code || data.wrapper || data.primaryTestCases || data.submitTestCases || data.functions;
+
+            if (isProblemCache) {
+                skipped++; // This is an AI-generated problem cache doc — leave it
+            } else {
+                // Everything else is a user stat doc — migrate it
                 const newRef = doc(db, "userProblemStats", docId);
-                await setDoc(newRef, data);
+                await setDoc(newRef, data, { merge: true });
                 migrated++;
 
                 // Delete from old collection
                 await deleteDoc(doc(db, "problems", docId));
                 deleted++;
-            } else {
-                skipped++; // This is a problem cache doc — leave it
             }
         }
 
@@ -1509,6 +1524,52 @@ app.post('/api/migrate/user-stats', async (req, res) => {
     } catch (err) {
         console.error("Migration failed:", err);
         res.status(500).json({ error: "Migration failed: " + err.message });
+    }
+});
+
+// --- Admin Utility: Batch C++ Test Case Verifier ---
+app.post('/api/admin/verify-problem', async (req, res) => {
+    try {
+        const { problemId, cppCode } = req.body;
+        if (!problemId || !cppCode) {
+            return res.status(400).json({ error: "problemId and cppCode are required." });
+        }
+
+        // Fetch problem cache to get wrapper and testcases
+        const docRef = doc(db, "problems", String(problemId));
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+            return res.status(404).json({ error: "Problem cache not found." });
+        }
+
+        const data = docSnap.data();
+        const wrapper = data.wrapper?.cpp || '';
+        
+        // Combine user code and wrapper.
+        // Assume wrapper has // Your code here or we simply append if not present.
+        // For C++, usually you can just place the wrapper below the generated class, 
+        // or the wrapper #includes the solution. We will simply concatenate for standard testing:
+        let mergedCode = cppCode + "\n\n" + wrapper;
+        if (wrapper.includes('// Your code here')) {
+             mergedCode = wrapper.replace('// Your code here', cppCode);
+        }
+
+        const allTestCases = [
+            ...(data.primaryTestCases || []),
+            ...(data.submitTestCases || [])
+        ];
+
+        if (allTestCases.length === 0) {
+           return res.status(400).json({ error: "No test cases found for this problem." });
+        }
+
+        const results = await verifyCppSolution(mergedCode, allTestCases);
+        
+        res.json(results);
+    } catch (err) {
+        console.error("Verification failed:", err);
+        res.status(500).json({ error: "Verification failed: " + err.message });
     }
 });
 

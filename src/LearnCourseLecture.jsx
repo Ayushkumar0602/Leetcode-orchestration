@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2, PenLine, Database, GitBranch } from 'lucide-react';
+import { CheckCircle, Lock, Play, Menu, X, ArrowLeft, Loader2, Youtube, Layers, PlayCircle, ChevronDown, ChevronUp, Code2, PenLine, Database, GitBranch, Pin } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useSEO } from './hooks/useSEO';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import NavProfile from './NavProfile';
 import VideoCodeEditor from './VideoCodeEditor';
 import LectureChatBot from './LectureChatBot';
@@ -17,7 +17,18 @@ import SystemDesignBoard from './components/SystemDesignBoard';
 import YouTube from 'react-youtube';
 import { useTelemetry } from './contexts/TelemetryContext';
 import { db } from './firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+
+function parseYTDuration(duration) {
+    if (!duration) return '0:00';
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    if (!match) return '0:00';
+    const h = parseInt(match[1]) || 0;
+    const m = parseInt(match[2]) || 0;
+    const s = parseInt(match[3]) || 0;
+    if(h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://leetcode-orchestration.onrender.com';
 
@@ -56,6 +67,7 @@ async function fetchYoutubePlaylistPage(url, pageToken = '') {
 
     let success = false;
     let data = null;
+    let usedKey = null;
     for (let i = 0; i < YOUTUBE_API_KEYS.length; i++) {
         try {
             const tokenParam = pageToken ? `&pageToken=${pageToken}` : '';
@@ -63,6 +75,7 @@ async function fetchYoutubePlaylistPage(url, pageToken = '') {
             data = await apiRes.json();
             if (apiRes.ok) {
                 success = true;
+                usedKey = YOUTUBE_API_KEYS[i];
                 break;
             }
         } catch (err) {}
@@ -74,6 +87,23 @@ async function fetchYoutubePlaylistPage(url, pageToken = '') {
     
     const validVideos = (data.items || []).filter(item => item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video');
     
+    if (validVideos.length > 0 && usedKey) {
+        const videoIds = validVideos.map(v => v.snippet.resourceId.videoId).join(',');
+        try {
+            const durRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds}&key=${usedKey}`);
+            const durData = await durRes.json();
+            if (durRes.ok) {
+                const durMap = {};
+                (durData.items || []).forEach(v => {
+                    durMap[v.id] = v.contentDetails.duration;
+                });
+                validVideos.forEach(v => {
+                    v.contentDetails = { duration: durMap[v.snippet.resourceId.videoId] };
+                });
+            }
+        } catch (err) { console.error('Failed to fetch durations', err); }
+    }
+    
     return {
         items: validVideos,
         nextPageToken: data.nextPageToken || null
@@ -84,6 +114,7 @@ export default function LearnCourseLecture() {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
+    const queryClient = useQueryClient();
     
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [isPlaylistVisible, setIsPlaylistVisible] = useState(true);
@@ -131,6 +162,39 @@ export default function LearnCourseLecture() {
     });
 
     const isEnrolled = course ? (enrolledIds.includes(course.id) || enrolledIds.includes(slug)) : false;
+
+    const { data: userProfile } = useQuery({
+        queryKey: ['userProfile', currentUser?.uid],
+        queryFn: async () => {
+            if(!currentUser?.uid) return null;
+            const snap = await getDoc(doc(db, 'userProfiles', currentUser.uid));
+            return snap.exists() ? snap.data() : {};
+        },
+        enabled: !!currentUser,
+    });
+
+    const isPinned = course ? (userProfile?.pinnedCourses?.includes(course.id) || userProfile?.pinnedCourses?.includes(slug)) : false;
+
+    const togglePin = async () => {
+        if (!currentUser || !course) return;
+        const ref = doc(db, 'userProfiles', currentUser.uid);
+        const op = isPinned ? arrayRemove(course.id) : arrayUnion(course.id);
+        if (isPinned && userProfile?.pinnedCourses?.includes(slug)) {
+             await setDoc(ref, { pinnedCourses: arrayRemove(slug) }, { merge: true });
+        }
+        await setDoc(ref, { pinnedCourses: op }, { merge: true });
+        queryClient.invalidateQueries({ queryKey: ['userProfile', currentUser.uid] });
+    };
+
+    const { data: courseProgress } = useQuery({
+        queryKey: ['course-progress', currentUser?.uid, course?.id],
+        queryFn: async () => {
+            if(!currentUser?.uid || !course?.id) return [];
+            const snap = await getDoc(doc(db, 'users', currentUser.uid, 'course_progress', course.id));
+            return snap.exists() ? snap.data().completedVideos || [] : [];
+        },
+        enabled: !!currentUser && !!course?.id,
+    });
 
     const hasFeature = (fId) => {
         if (!course) return false;
@@ -239,12 +303,22 @@ export default function LearnCourseLecture() {
                                 setCountdown(5);
                             }
                         }
+                        // Smart Completion Logic
+                        if (duration > 0 && (time / duration) >= 0.75 && course && currentUser && playingVideoId) {
+                            if (!courseProgress?.includes(playingVideoId)) {
+                                setDoc(doc(db, 'users', currentUser.uid, 'course_progress', course.id), {
+                                    completedVideos: arrayUnion(playingVideoId)
+                                }, { merge: true }).then(() => {
+                                    queryClient.invalidateQueries({ queryKey: ['course-progress', currentUser.uid, course.id] });
+                                });
+                            }
+                        }
                     }
                 } catch (e) {}
             }
         }, 5000);
         return () => clearInterval(interval);
-    }, [onVideoProgress, playlistVideos.length, currentVideoIndex]);
+    }, [onVideoProgress, playlistVideos.length, currentVideoIndex, course, currentUser, playingVideoId, courseProgress, queryClient]);
 
     // Countdown timer for Auto-Advance
     useEffect(() => {
@@ -402,6 +476,13 @@ export default function LearnCourseLecture() {
 
                 {/* Right Actions */}
                 <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '16px', zIndex: 10 }}>
+                    <button 
+                        onClick={togglePin}
+                        className="nav-link-btn" 
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isPinned ? '#a855f7' : '#999', transition: 'color 0.2s' }}
+                    >
+                        <Pin size={16} fill={isPinned ? "currentColor" : "none"} /> {isPinned ? 'Pinned' : 'Pin Course'}
+                    </button>
                     <button className="nav-link-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
                     <button className="nav-link-btn" onClick={() => navigate('/aiinterviewselect')}>AI Interview</button>
                     <button
@@ -896,13 +977,18 @@ export default function LearnCourseLecture() {
                                                 if (savedProg > 0 && savedDur > 0) {
                                                     const pct = Math.min(100, Math.max(0, (savedProg / savedDur) * 100));
                                                     return (
-                                                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.3)' }}>
+                                                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.3)', zIndex: 2 }}>
                                                             <div style={{ height: '100%', background: '#ef4444', width: `${pct}%`, transition: 'width 0.3s' }}></div>
                                                         </div>
                                                     );
                                                 }
                                                 return null;
                                             })()}
+                                            {item.contentDetails?.duration && (
+                                                <div style={{ position: 'absolute', bottom: '6px', right: '4px', background: 'rgba(0,0,0,0.85)', color: '#fff', fontSize: '0.7rem', padding: '2px 4px', borderRadius: '4px', fontWeight: 600, zIndex: 1 }}>
+                                                    {parseYTDuration(item.contentDetails.duration)}
+                                                </div>
+                                            )}
                                         </div>
                                         <div style={{ flex: 1, overflow: 'hidden' }}>
                                             <h4 style={{ 
@@ -910,6 +996,11 @@ export default function LearnCourseLecture() {
                                                 color: isPlaying ? '#3b82f6' : '#eee',
                                                 display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' 
                                             }}>
+                                                {(() => {
+                                                    const vidId = item.snippet.resourceId.videoId;
+                                                    const isCompleted = courseProgress?.includes(vidId);
+                                                    return isCompleted ? <CheckCircle size={15} color="#10b981" style={{ marginRight: '6px', verticalAlign: 'middle', display: 'inline-block', marginTop: '-2px' }} /> : null;
+                                                })()}
                                                 {item.snippet.title}
                                             </h4>
                                             <p style={{ margin: 0, fontSize: '0.8rem', color: '#888' }}>

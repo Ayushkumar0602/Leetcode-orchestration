@@ -113,7 +113,7 @@ export default function BooksPage() {
                     </div>
                     <h1 style={{ 
                         fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, margin: '0 0 16px 0', 
-                        background: 'linear-gradient(to right, #60a5fa, #a855f7)', WebkitBackgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                        background: 'linear-gradient(to right, #60a5fa, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                         letterSpacing: '-1.5px'
                     }}>
                         Master Technical Bar

@@ -4,7 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import { useAgent } from './contexts/AgentContext';
 import {
     Brain, Code2, Layers, TrendingUp,
-    Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube, BookOpen, Map
+    Award, Target, ArrowRight, User, ExternalLink, Menu, X, Play, Youtube, BookOpen, Map, Pin
 } from 'lucide-react';
 import ActivityCalendar from './ActivityCalendar';
 import NavProfile from './NavProfile';
@@ -554,6 +554,50 @@ export default function DashboardHome() {
 
                 {/* Dashboard Recommendations */}
                 <DashboardRecommendations userStats={userStats} interviews={validInterviews} />
+
+                {/* Pinned Courses Section */}
+                {profile?.pinnedCourses && profile.pinnedCourses.length > 0 && enrolledData?.enrolledCourses && (
+                    <div style={{ marginBottom: '3rem', animation: 'cardAppear 0.5s ease-out 0.52s both' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.3rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: '#a855f7' }}>
+                                <Pin size={20} color="#a855f7" fill="#a855f7" /> Pinned Courses
+                            </h2>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                            {enrolledData.enrolledCourses.filter(c => profile.pinnedCourses.includes(c.id) || profile.pinnedCourses.includes(c.slug)).map(course => (
+                                <div 
+                                    key={course.id}
+                                    onClick={() => navigate(`/learn/${course.slug}`)}
+                                    style={{
+                                        background: 'rgba(168,85,247,0.05)', border: '1px solid rgba(168,85,247,0.2)',
+                                        borderRadius: '16px', overflow: 'hidden', cursor: 'pointer', display: 'flex',
+                                        transition: 'all 0.2s', boxShadow: '0 8px 32px rgba(168,85,247,0.1)'
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.borderColor = 'rgba(168,85,247,0.5)';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.borderColor = 'rgba(168,85,247,0.2)';
+                                    }}
+                                >
+                                    {course.thumbnailUrl ? (
+                                        <div style={{ width: '100px', flexShrink: 0, background: `url(${course.thumbnailUrl}) center/cover` }} />
+                                    ) : (
+                                        <div style={{ width: '100px', flexShrink: 0, background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(59,130,246,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Youtube size={24} color="rgba(255,255,255,0.4)" />
+                                        </div>
+                                    )}
+                                    <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                        <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 5px 0', lineHeight: 1.3 }}>{course.title}</h3>
+                                        <span style={{ fontSize: '0.8rem', color: '#a855f7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}><Play size={12} fill="currentColor" /> Jump Back In</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Enrolled Courses Section */}
                 {enrolledData?.enrolledCourses && enrolledData.enrolledCourses.length > 0 && (

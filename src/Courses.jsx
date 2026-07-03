@@ -261,7 +261,14 @@ export default function Courses() {
                                         </div>
                                     )}
                                     <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 10px 0', lineHeight: 1.3 }}>{course.title}</h3>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, lineHeight: 1.3, flex: 1 }}>{course.title}</h3>
+                                            {course.videoCount !== undefined && (
+                                                <span style={{ background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, color: '#e2e8f0', marginLeft: '12px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Youtube size={12} color="#f87171" /> {course.videoCount} {course.videoCount === 1 ? 'Video' : 'Videos'}
+                                                </span>
+                                            )}
+                                        </div>
                                         <p style={{ color: 'var(--txt3)', fontSize: '0.9rem', margin: '0 0 20px 0', flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', whiteSpace: 'pre-wrap' }}>
                                             {course.description}
                                         </p>
